@@ -1,0 +1,7 @@
+diagramtype T() {
+	V_1;
+	V_2;
+	connect(V_1.out, V_2.in);
+}
+
+diagramtype V(Int in => Bool out) { }

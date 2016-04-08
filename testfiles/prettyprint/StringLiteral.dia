@@ -1,0 +1,6 @@
+diagramtype Main {
+  sb: StringBlock;
+  connect("hejsan \t \n \r \" \\  ", sb.in);
+}
+diagramtype StringBlock(in: String) {
+}

@@ -1,0 +1,27 @@
+import java.util.Collections;
+import java.util.Comparator;
+
+aspect Annotations {
+	inh boolean VarUse.isInAnnotation();
+	inh boolean TypeUse.isInAnnotation();
+	eq Annotation.getChild().isInAnnotation() = true;
+	eq Program.getChild().isInAnnotation() = false;
+
+	public void DiagramType.setAnnotations(Collection<Annotation> annotations) {
+		List<Annotation> list = new List<Annotation>();
+		for (Annotation a: annotations) {
+			list.add(a);
+		}
+		setAnnotationList(list);
+	}
+	
+	public String Annotation.toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getVarUse().toString()).append(" = (");
+		sb.append(getX()).append(", ");
+		sb.append(getY()).append(", ");
+		sb.append(getWidth()).append(", ");
+		sb.append(getHeight()).append(")");
+		return sb.toString();
+	}
+}

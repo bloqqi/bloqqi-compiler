@@ -1,0 +1,6 @@
+diagramtype Main(Int in) {
+  inline A a;
+}
+diagramtype A { 
+  Add_1;
+}

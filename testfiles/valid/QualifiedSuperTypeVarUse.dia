@@ -1,0 +1,11 @@
+diagramtype X1 {
+  T_1;
+}
+diagramtype X2 {
+  T_1;
+}
+diagramtype Y(in: Int) extends X1, X2 {
+  connect(X1::T_1.out, X2::T_1.in);
+}
+diagramtype T(in: Int => out: Int) {
+}

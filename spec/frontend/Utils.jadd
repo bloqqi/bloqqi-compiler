@@ -1,0 +1,246 @@
+import java.util.Collections;
+import java.util.Comparator;
+
+aspect ASTUtils {
+	inh DiagramType ASTNode.diagramType();
+	eq DiagramType.getChild().diagramType() = this;
+	eq Program.getChild().diagramType() = null;
+
+	public void ASTNode.flushAllAttributes() {
+		flushCache();
+		flushCollectionCache();
+		for (ASTNode child : astChildren()) {
+			if (child != null) {
+				child.flushAllAttributes();
+			} else {
+				throw new RuntimeException("A child of AST node is null [class: " + getClass() + ", toString: " + toString() +"]");
+			}
+		}
+	}
+
+	public boolean ASTNode.removeChild(ASTNode child) {
+		int i = getIndexOfChild(child);
+		if (i >= 0) {
+			removeChild(i);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public void ASTNode.copyColumnLineFrom(ASTNode other) {
+		setStart(other.getStartLine(), other.getStartColumn());
+		setEnd(other.getEndLine(), other.getEndColumn());
+	}
+}
+
+aspect UtilsMethods {
+	public final class Utils {
+		private Utils() { }
+	}
+	
+	@SafeVarargs
+	public static <T> Set<T> Utils.asSet(T... ts) {
+		return Utils.asSet(new HashSet<T>(), ts);
+	}
+		
+	@SafeVarargs
+	public static <T> Set<T> Utils.asSet(Set<T> emptySet, T... ts) {
+		for (T t: ts) {
+			if (t != null) {
+				emptySet.add(t);
+			}
+		}
+		return emptySet;
+	}
+
+	public static String Utils.readResource(String file) {
+		InputStream is = Utils.class.getResourceAsStream(file);
+		if (is == null) {
+			throw new RuntimeException("Resource " + file + " not found");
+		}
+		StringBuilder sb = new StringBuilder();
+		Scanner sc = new Scanner(is);
+		while (sc.hasNextLine()) {
+			sb.append(sc.nextLine()).append("\n");
+		}
+		return sb.toString();
+	}
+}
+
+aspect TopologicalSort {
+	public interface SuccessorFunction<E> {
+		Collection<E> successors(E element);
+	}
+	
+	public static <E> java.util.List<E> Utils.topologicalSort(
+			Collection<? extends E> collection,
+			SuccessorFunction<E> successorFunction,
+			Comparator<E> orderWhenTie) {
+		if (collection.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Graph<E> graph = new Graph<E>();
+		for (E e: collection) {
+			graph.createOrGetNode(e);
+			for (E succ: successorFunction.successors(e)) {
+				graph.addEdge(e, succ);
+			}
+		}
+		
+		ArrayList<E> list = new ArrayList<E>();
+		TreeSet<E> startNodes = new TreeSet<E>(orderWhenTie);
+
+		for (E e: collection) {
+			if (!graph.hasIncomingEdges(e)) {
+				startNodes.add(e);
+			}
+		}
+		
+		E start = startNodes.first();
+		while (start != null) {
+			startNodes.remove(start);
+			list.add(start);
+			for (E succ: graph.getSucc(start)) {
+				graph.removeEdge(start, succ);
+				if (!graph.hasIncomingEdges(succ)) {
+					startNodes.add(succ);
+				}
+			}
+			start = startNodes.size() > 0 ? startNodes.first() : null;
+		}
+		return list;
+	}
+	
+	public class Utils {
+		private static class GraphNode<E> implements Iterable<GraphNode<E>> {
+			private final E element;
+			private final Set<GraphNode<E>> succ = new HashSet<>();
+			private final Set<GraphNode<E>> pred = new HashSet<>();
+			GraphNode(E element) {
+				this.element = element;
+			}
+			public E getElement() {
+				return element;
+			}
+			public void addSucc(GraphNode succNode) {
+				succ.add(succNode);
+			}
+			public void addPred(GraphNode predNode) {
+				pred.add(predNode);
+			}
+			public void removeSucc(GraphNode succNode) {
+				succ.remove(succNode);
+			}
+			public void removePred(GraphNode predNode) {
+				pred.remove(predNode);
+			}
+			public Iterator<GraphNode<E>> iterator() {
+				return succ.iterator();
+			}
+			public boolean hasIncomingEdges() {
+				return !pred.isEmpty();
+			}
+		}
+		private static class Graph<E> {
+			private final Map<E, GraphNode<E>> map = new HashMap<>();
+			
+			public void addEdge(E e1, E e2) {
+				GraphNode<E> n1 = createOrGetNode(e1);
+				GraphNode<E> n2 = createOrGetNode(e2);
+				n1.addSucc(n2);
+				n2.addPred(n1);
+			}
+			public void removeEdge(E e1, E e2) {
+				GraphNode<E> n1 = createOrGetNode(e1);
+				GraphNode<E> n2 = createOrGetNode(e2);
+				n1.removeSucc(n2);
+				n2.removePred(n1);
+			}
+			public java.util.List<E> getSucc(E element) {
+				ArrayList<E> list = new ArrayList<>();
+				GraphNode<E> node = map.get(element);
+				if (node != null) {
+					for (GraphNode<E> succ: node) {
+						list.add(succ.getElement());
+					}
+				}
+				return list;
+			}
+			public GraphNode<E> createOrGetNode(E element) {
+				if (map.get(element) != null) {
+					return map.get(element);
+				} else {
+					GraphNode<E> n = new GraphNode<>(element);
+					map.put(element, n);
+					return n;
+				}
+			}
+			public boolean hasIncomingEdges(E element) {
+				return map.get(element).hasIncomingEdges();
+			}
+		}
+	}
+}
+
+aspect DataStructures {
+	public class MultiMap<K, V> {
+		private Map<K, LinkedList<V>> map = new HashMap<>();
+		
+		public void put(K key, V value) {
+			if (!map.containsKey(key)) {
+				map.put(key, new LinkedList<V>());
+			}
+			map.get(key).add(value);
+		}
+		
+		public java.util.List<V> get(K key) {
+			LinkedList<V> list = map.get(key);
+			if (list == null) list = new LinkedList<V>();
+			return list;
+		}
+		
+		public boolean containsKey(K key) {
+			return map.containsKey(key);
+		}
+		
+		public String toString() {
+			return map.toString();
+		}
+		
+		public Collection<LinkedList<V>> values() {
+			return map.values();
+		}
+		
+		public Set<K> keySet() {
+			return map.keySet();
+		}
+	}
+	
+	public class Pair<T1, T2> {
+		public final T1 first;
+		public final T2 second;
+		public Pair(T1 first, T2 second) {
+			if (first == null || second == null) {
+				throw new NullPointerException();
+			}
+			this.first = first;
+			this.second = second;
+		}
+		public boolean equals(Object other) {
+			if (other instanceof Pair) {
+				Pair<?, ?> pairOther = (Pair<?,?>) other;
+				return first.equals(pairOther.first) && second.equals(pairOther.second);
+			} else {
+				return false;
+			}
+		}
+		public int hashCode() {
+			return first.hashCode() + 31*second.hashCode();
+		}
+		public String toString() {
+			return "(" + first.toString() + ", " + second.toString() + ")";
+		}
+	}
+}

@@ -1,0 +1,6 @@
+function ifFunc(Int in1, Int in2 => Int out) {
+	if (in1 > in2) {
+		return;
+		out = in1;
+	}
+}

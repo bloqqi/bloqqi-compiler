@@ -1,0 +1,23 @@
+diagramtype M1() {
+    T block;
+}
+diagramtype M2() extends M1 {
+    redeclare S block;
+}
+
+recommendation M1 {
+    replaceable block;
+    replaceable block2;
+}
+recommendation M2 {
+    replaceable block;
+    replaceable block2;
+}
+
+diagramtype T() {
+}
+diagramtype S() extends T {
+}
+diagramtype U() extends T {
+}
+

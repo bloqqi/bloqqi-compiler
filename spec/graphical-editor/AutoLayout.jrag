@@ -1,0 +1,37 @@
+aspect AutoLayout {
+	public class AutoLayoutConfig {
+		public int height = 50;
+		public int width = 70;
+		
+		public int verticalPadding = 30;
+		public int horizontalPadding = 50;
+		public int offsetX = 20;
+		public int offsetY = 20;
+	}
+
+	syn int Component.autoLayoutX(AutoLayoutConfig c) 
+		= c.offsetX + (c.width + c.horizontalPadding) * (depth()-1);
+	syn int Component.autoLayoutY(AutoLayoutConfig c) 
+		= minY(c) + childrenHeight(c)/2 - c.height/2;
+
+	syn lazy int Component.minY(AutoLayoutConfig c) {
+		int minY = sinkPred() == null ? c.offsetY : sinkPred().minY(c);
+		for (Component sibling: sinkSiblings()) {
+			if (sibling == this) {
+				break;
+			}
+			minY += sibling.childrenHeight(c) + c.verticalPadding;
+		}
+		return minY;
+	}
+
+	syn lazy int Component.childrenHeight(AutoLayoutConfig c) {
+		int h = 0;
+		for (Component child: children()) {
+			h += child.childrenHeight(c);
+		}
+		h += (children().size() - 1) * c.verticalPadding;
+		return Math.max(h, c.height);
+	}
+	
+}

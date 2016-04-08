@@ -1,0 +1,12 @@
+external Print(in: Int);
+
+diagramtype Main {
+  block: Block;
+  print: Print;
+  connect(block.out, print.in);
+}
+
+diagramtype Block(=> out: Int) {
+  var state: Int;
+  connect(state, out);
+}

@@ -1,0 +1,7 @@
+diagramtype A extends B {
+	block: Block;
+}
+diagramtype B extends A {
+	redeclare block: super { };
+}
+diagramtype Block { }

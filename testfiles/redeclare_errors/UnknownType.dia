@@ -1,0 +1,9 @@
+diagramtype A() {
+	S block;
+}
+diagramtype B() extends A {
+	redeclare T block;
+}
+
+diagramtype S() {
+}

@@ -1,0 +1,22 @@
+diagramtype Controller(SP: Int, PV: Int => CV: Int) {
+  Sub_1: Sub;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Sub_1.out, CV);
+}
+diagramtype GainValue(Gain: Int, Val: Int => Out: Int) {
+  Mul_1: Mul;
+  connect(Gain, Mul_1.in1);
+  connect(Val, Mul_1.in2);
+  connect(Mul_1.out, Out);
+}
+diagramtype MyControllerWithGV(SP: Int, PV: Int, Gain: Int => CV: Int) {
+  Sub_1: Sub;
+  gv: GainValue;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Gain, gv.Gain);
+  connect(Sub_1.out, gv.Val);
+  connect(gv.Out, CV);
+}
+

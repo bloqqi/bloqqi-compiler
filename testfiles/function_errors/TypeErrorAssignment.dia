@@ -1,0 +1,3 @@
+function func(Int in => Bool out) {
+	in = out;
+}

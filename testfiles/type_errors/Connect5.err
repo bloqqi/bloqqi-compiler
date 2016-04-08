@@ -1,0 +1,5 @@
+Line 6, column 2: Incompatible types, T and Int
+Line 6, column 2: The source/target type of a connection should be a primitive type or a struct type
+Line 7, column 2: Incompatible types, Int and T
+Line 7, column 2: The source/target type of a connection should be a primitive type or a struct type
+Line 8, column 2: The source/target type of a connection should be a primitive type or a struct type

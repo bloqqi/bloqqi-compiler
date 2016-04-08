@@ -1,0 +1,3 @@
+function iffunc(Int in1, Int in2 => Int out) {
+	Int var1 = true;
+}

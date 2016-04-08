@@ -1,0 +1,160 @@
+import java.util.Iterator;
+
+/** 
+ * This module defines the execution order/dataflow order for components
+ * and it is based on connections between components and the declaration order 
+ * of the components. This module assumes a acyclic dataflow graph, and cyclic
+ * dataflow graphs are converted into acyclic dataflow graphs in the module Cycles.jrag. 
+ * This module defines the execution order in terms of all inherited components, 
+ * and not only locally defined components.
+ */
+
+aspect DFO {
+	syn int Component.dfo() = declDfo();
+
+	syn nta Component DiagramType.startComponent() 
+		= new Component(false, new TypeUse(""), new IdName("<root>"), false);
+
+	syn lazy PredSuccData DiagramType.predSucc() = breakCycles();
+	syn Set<Component> DiagramType.succP(Component c) = predSucc().succ.get(c);
+	syn Set<Component> DiagramType.predP(Component c) = predSucc().pred.get(c);
+	syn Component DiagramType.sccParent(Component c) = predSucc().parent.get(c);
+	
+	inh Component Component.sccParent();
+	eq DiagramType.getComponent(int i).sccParent() = sccParent(getComponent(i));
+	eq DiagramType.getLocalComponent().sccParent() = null;
+	eq Program.getChild().sccParent() = null;
+	
+	inh lazy Set<Component> Component.predP();
+	eq DiagramType.getComponent(int i).predP() {
+		Component c = getComponent(i);
+		if (predP(c).isEmpty()) {
+			Set<Component> set = new HashSet<Component>();
+			set.add(startComponent());
+			return set;
+		} else {
+			return predP(c);
+		}
+	}
+	eq DiagramType.startComponent().predP() = new HashSet<Component>();
+	eq DiagramType.getLocalComponent().predP() = new HashSet<Component>();
+	eq Program.getChild().predP() = new HashSet<Component>();
+	inh Set<Component> Component.succP();
+	eq DiagramType.getComponent(int i).succP() = succP(getComponent(i));
+	eq DiagramType.startComponent().succP() = roots();
+	eq Program.getChild().succP() = new HashSet<Component>();
+
+	syn boolean Expr.isComponent() = false;
+	eq VarUse.isComponent() = node() instanceof Component;
+	syn boolean Connection.isBroken() {
+		if (getSource().isComponent() && getTarget().isComponent()) {
+			Component source = (Component) getSource().node();
+			Component target = (Component) getTarget().node();
+			return !source.succP().contains(target);
+		} else {
+			return false;
+		}
+	}
+	
+	inh Set<Component> Component.roots();
+	eq DiagramType.getComponent().roots() = roots();
+	eq DiagramType.getLocalComponent().roots() = null;
+	eq Program.getChild().roots() = null;
+	syn lazy Set<Component> DiagramType.roots() {
+		Set<Component> set = new HashSet<Component>();
+		for (Component c: getComponents()) {
+			if (c.pred().isEmpty()) {
+				set.add(c);
+			}
+		}
+		return set;
+	}
+	
+	syn lazy Component Component.sinkPred() {
+		Component sinkPred = null;
+		for (Component p: predP()) {
+			if (sinkPred == null || sinkPred.compare(p))
+				sinkPred = p;
+		}
+		return sinkPred;
+	}
+
+	syn lazy boolean Component.compare(Component c2) {
+		if (sinkPred() == c2.sinkPred()) 
+			return index() < c2.index();
+		else if (this == c2.sinkPred()) 
+			return true;
+		else if (sinkPred() == c2)
+			return false;
+		else if (depth() == c2.depth()) 
+			return sinkPred().compare(c2.sinkPred());
+		else if (depth() < c2.depth()) 
+			return compare(c2.sinkPred());
+		else 
+			return sinkPred().compare(c2);
+	}
+
+	
+	syn lazy int Component.depth() 
+		= sinkPred() == null ? 0 : sinkPred().depth() + 1;
+	
+
+	Component implements Comparable<Component>;
+	public int Component.compareTo(Component other) {
+		return index() - other.index();
+	}
+
+	/*coll TreeSet<Component> Component.children() [new TreeSet<Component>()] with add root DiagramType;
+	Component contributes this
+		when sinkPred() != null
+		to Component.children() for sinkPred();
+	*/
+	
+	inh TreeSet<Component> Component.children();
+	eq DiagramType.getComponent(int i).children() {
+		Component parent = getComponent(i);
+		TreeSet<Component> set = new TreeSet<>();
+		for (Component c: getComponents()) {
+			if (parent == c.sinkPred()) {
+				set.add(c);
+			}
+		}
+		return set;
+	}
+	eq DiagramType.startComponent().children() {
+		Component parent = startComponent();
+		TreeSet<Component> set = new TreeSet<>();
+		for (Component c: getComponents()) {
+			if (parent == c.sinkPred()) {
+				set.add(c);
+			}
+		}
+		return set;
+	}
+	eq Program.getChild().children() = new TreeSet<>();
+	
+	
+	syn lazy TreeSet<Component> Component.sinkSiblings() {
+		if (sinkPred() == null) 
+			return new TreeSet<>();
+		else 
+			return sinkPred().children();
+	}
+	syn lazy int Component.maxDfo() {
+		if (children().isEmpty()) 
+			return declDfo();
+		else 
+			return children().last().maxDfo();
+	}
+	syn lazy int Component.declDfo() {
+		if (predP().isEmpty()) 
+			return 0;
+		int max = 0;
+		Component siblingBefore = sinkSiblings().lower(this);
+		if (siblingBefore != null) 
+			max = siblingBefore.maxDfo();
+		else 
+			max = sinkPred().declDfo();
+		return max + 1;
+	}
+}

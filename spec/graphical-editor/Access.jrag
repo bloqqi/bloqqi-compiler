@@ -1,0 +1,47 @@
+aspect Access {
+	// follow the design principle described in the refactor paper
+	
+	public abstract VarUse Anchor.access();
+	public VarUse ComponentParameter.access() {
+		if (belongsToInlinedComponent()) {
+			return accessInlinedComponent();
+		} else {
+			VarUse src;
+			if (component().isInherited()) {
+				TypeUse u = new TypeUse(component().declaredInDiagramType().name());
+				src = new TypedSimpleVarUse(u, component().name());
+			} else {
+				src = new SimpleVarUse(component().name());
+			}
+			src = new DotVarUse(src, getParameter().name());
+			return src;
+		}
+	}
+	public VarUse Parameter.access() {
+		return new SimpleVarUse(name());
+	}
+	public VarUse Variable.access() {
+		return new SimpleVarUse(name());
+	}
+	public VarUse WiringParameter.access() {
+		return new SimpleVarUse(name());
+	}
+	public VarUse Literal.access() {
+		return null;
+	}
+	
+	syn boolean Anchor.canAccess();
+	eq ComponentParameter.canAccess() = access() != null;
+	eq Parameter.canAccess() = true;
+	eq Variable.canAccess() = true;
+	eq WiringParameter.canAccess() = true;
+	eq Literal.canAccess() = false;
+	
+	syn String Node.accessString() {
+		if (isInherited()) {
+			return declaredInDiagramType().name() + DECLARED_IN_SEP + name();
+		} else {
+			return name();
+		}
+	}
+}

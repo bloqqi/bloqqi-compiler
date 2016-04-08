@@ -1,0 +1,460 @@
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)
+1+2 = 3
+1-2 = -1
+4/2 = 2
+5/0 = 0
+3*6 = 18
+-3 = -3
+true & true = true
+false & true = false
+false & false = false
+true | true = true
+false | true = true
+false | false = false
+true ^ true = false
+false ^ true = true
+false ^ false = false
+!true = false
+!false = true
+move true = true
+3 == 3 = true
+4 == 3 = false
+3 != 3 = false
+4 != 3 = true
+4 >= 3 = true
+3 >= 3 = true
+2 >= 3 = false
+4 > 3 = true
+3 > 3 = false
+2 > 3 = false
+4 <= 3 = false
+3 <= 3 = true
+2 <= 3 = true
+4 < 3 = false
+3 < 3 = false
+2 < 3 = true
+Mux(1, 2, 4, 6) = 2
+Mux(2, 2, 4, 6) = 4
+Mux(3, 2, 4, 6) = 6
+Mux(1337, 2, 4, 6) = 6
+SelBool(true, true, false) = true
+SelBool(false, true, false) = false
+SelInt(true, 1, 2) = 1
+SelInt(false, 1, 2) = 2
+Max(55, -55) = (55, 1)
+Max(-55, 55) = (55, 2)
+Min(55, -55) = (-55, 2)
+Min(-55, 55) = (-55, 1)

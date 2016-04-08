@@ -1,0 +1,22 @@
+diagramtype A() {
+  block: S;
+}
+diagramtype B(in: Int => out: Int) {
+  block: T;
+  connect(in, block.in);
+  connect(block.out, out);
+}
+diagramtype C(in: Int, in2: Int => out: Int, out2: Int) {
+  block: U;
+  connect(in, block.in);
+  connect(block.out, out);
+  connect(in2, block.in2);
+  connect(block.out2, out2);
+}
+diagramtype S() {
+}
+diagramtype T(in: Int => out: Int) {
+}
+diagramtype U(in: Int, in2: Int => out: Int, out2: Int) {
+}
+

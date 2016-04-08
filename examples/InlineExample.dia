@@ -1,0 +1,152 @@
+diagramtype Controller(Int SP, Int PV => Int CV) {
+  Sub sub;
+  connect(SP, sub.in1);
+  connect(PV, sub.in2);
+  connect(sub, CV);
+}
+annotation(
+  CV = (314, 14, 60, 28),
+  PV = (20, 44, 60, 28),
+  SP = (20, 14, 60, 28),
+  sub = (120, 20, 60, 28)
+)
+diagramtype FeedForward(Int In, Int Gain, Int FV => Int Out) {
+  Mul_1;
+  Add_1;
+  connect(In, Add_1.in1);
+  connect(Gain, Mul_1.in1);
+  connect(FV, Mul_1.in2);
+  connect(Mul_1, Add_1.in2);
+  connect(Add_1, Out);
+}
+wiring FeedForward[=>Int I, Int Gain, Int FV] {
+  intercept I with FeedForward.In, FeedForward;
+  connect(Gain, FeedForward.Gain);
+  connect(FV, FeedForward.FV);
+}
+diagramtype Gain(Int Val, Int Gain => Int Out) {
+  Mul_1;
+  connect(Gain, Mul_1.in1);
+  connect(Val, Mul_1.in2);
+  connect(Mul_1, Out);
+}
+annotation(
+  Gain = (13, 10, 60, 28),
+  Mul_1 = (131, 17, 60, 28),
+  Out = (312, 11, 60, 28),
+  Val = (13, 42, 60, 28)
+)
+wiring Gain[Int V, Int GF] {
+  intercept source V with Gain.Val, Gain;
+  connect(GF, Gain.Gain);
+}
+diagramtype Loop(Int SP, Int PV => Int CV) {
+  inline ControllerPart master;
+  connect(SP, master.SP);
+  connect(PV, master.PV);
+  connect(master, CV);
+}
+annotation(
+  CV = (282, 11, 60, 28),
+  PV = (10, 43, 60, 28),
+  SP = (10, 11, 60, 28)
+)
+diagramtype Filter(Int in => Int out) {
+  connect(in, out);
+}
+annotation(
+  in = (20, 20, 60, 28),
+  out = (100, 20, 60, 28)
+)
+wiring Filter[=>Int PV] {
+  intercept PV with Filter, Filter;
+}
+diagramtype ControllerPart(Int SP, Int PV => Int CV) {
+  Controller controller;
+  connect(SP, controller.SP);
+  connect(PV, controller.PV);
+  connect(controller, CV);
+}
+wiring ControllerPart[=>Int CV, Int PV] {
+  intercept CV with ControllerPart.SP, ControllerPart;
+  connect(PV, ControllerPart.PV);
+}
+diagramtype FixedOverride(Int in => Int out) {
+  connect(in, out);
+}
+annotation(
+  in = (20, 20, 60, 28),
+  out = (100, 20, 60, 28)
+)
+wiring FixedOverride[=>Int in] {
+  intercept in with FixedOverride, FixedOverride;
+}
+diagramtype TunableOverride(Int value) extends FixedOverride {
+}
+wiring TunableOverride[=>Int in, Int v] {
+  intercept in with TunableOverride.in, TunableOverride;
+  connect(v, TunableOverride.value);
+}
+diagramtype Sensor( => Int value) {
+}
+diagramtype OperatorValue( => Int value) {
+}
+diagramtype Actuator(Int value) {
+}
+annotation(
+  value = (12, 12, 60, 18)
+)
+diagramtype Tank {
+  Sensor temperature;
+  Actuator valveOpening;
+  OperatorValue operatorSP;
+  Sensor pressure;
+  OperatorValue operatorGF;
+  inline Loop (Int masterGF) {
+    inline ControllerPart[CV, Int slavePV] {
+      Filter[controller.PV] filter;
+    } slave;
+    FixedOverride[CV] override;
+    redeclare ControllerPart (Int controllerGF) {
+      Filter[controller.PV] filter;
+      redeclare Controller {
+        Gain[sub.out, Int GF] gain;
+      } controller;
+      connect(controllerGF, controller.GF);
+    } master;
+    connect(masterGF, master.controllerGF);
+  } loop;
+  connect(temperature, loop.PV);
+  connect(operatorSP, loop.SP);
+  connect(pressure, loop.slavePV);
+  connect(loop, valveOpening);
+  connect(operatorGF, loop.masterGF);
+}
+annotation(
+  loop$master$controller = (152, 23, 54, 44),
+  loop$master$filter = (92, 37, 38, 18),
+  loop$override = (305, 23, 54, 28),
+  loop$slave$controller = (229, 23, 54, 30),
+  loop$slave$filter = (152, 101, 54, 28),
+  operatorGF = (10, 69, 60, 28),
+  operatorSP = (10, 5, 60, 28),
+  pressure = (10, 101, 60, 28),
+  temperature = (10, 37, 60, 28),
+  valveOpening = (379, 23, 68, 28)
+)
+recommendation ControllerPart {
+  Filter[controller.PV] filter;
+  replaceable controller;
+}
+recommendation Loop {
+  inline ControllerPart[CV, Int slavePV] slave;
+  FixedOverride[CV] override;
+  TunableOverride[CV, Int overrideV] override;
+  slave before override;
+  replaceable master;
+}
+recommendation Controller {
+  FeedForward[CV, Int FFGain, Int FV] feedForward;
+  Gain[sub.out, Int GF] gain;
+}
+

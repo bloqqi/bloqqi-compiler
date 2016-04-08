@@ -1,0 +1,226 @@
+//
+// Standard functions
+//
+// All these functions are tested, see testfiles/code_generation/StandardLib.dia.
+// If you add one new function, add test case in the file above.
+//
+
+
+
+//
+// Arithmetic for Int
+//
+function Add(Int in1, Int in2 => Int out)
+{
+  out = in1 + in2;
+}
+
+function Sub(Int in1, Int in2 => Int out)
+{
+  out = in1 - in2;
+}
+
+function Div(Int in1, Int in2 => Int out)
+{
+  if (in2 != 0)
+  {
+    out = in1 / in2;
+  }
+  else
+  {
+    out = 0;
+  }
+}
+
+function Mul(Int in1, Int in2 => Int out)
+{
+  out = in1 * in2;
+}
+
+function Neg(Int in => Int out) 
+{
+  out = 0-in;
+}
+
+
+//
+// Arithmetic for Real (not tested yet)
+//
+
+function RAdd(Real in1, Real in2 => Real out)
+{
+  out = in1 + in2;
+}
+
+function RSub(Real in1, Real in2 => Real out)
+{
+  out = in1 - in2;
+}
+
+function RDiv(Real in1, Real in2 => Real out)
+{
+  if (in2 != 0.0)
+  {
+    out = in1 / in2;
+  }
+  else
+  {
+    out = 0.0;
+  }
+}
+
+function RMul(Real in1, Real in2 => Real out)
+{
+  out = in1 * in2;
+}
+
+function RNeg(Real in => Real out) 
+{
+  out = 0-in;
+}
+
+//
+// Boolean
+//
+function And(Bool in1, Bool in2 => Bool out)
+{
+  out = in1 && in2;
+}
+
+function Or(Bool in1, Bool in2 => Bool out)
+{
+  out = in1 || in2;
+}
+
+function Xor(Bool in1, Bool in2 => Bool out)
+{
+	if (in1 == in2) {
+		out = false;
+	}
+	else {
+		out = true;
+	}
+}
+
+function Not(Bool in => Bool out)
+{
+  if (in)
+  {
+    out = false;
+  }
+  else
+  {
+    out = true;
+  } 
+}
+
+function Move(Bool in1 => Bool out)
+{
+	out = in1;
+}
+
+
+
+//
+// Comparison
+//
+function Eq(Int in1, Int in2 => Bool out)
+{
+  out = in1 == in2;
+}
+
+function Ne(Int in1, Int in2 => Bool out)
+{
+  out = in1 != in2;
+}
+
+function Ge(Int in1, Int in2 => Bool out)
+{
+  out = in1 >= in2;
+}
+
+function Gt(Int in1, Int in2 => Bool out)
+{
+  out = in1 > in2;
+}
+
+function Le(Int in1, Int in2 => Bool out)
+{
+  out = in1 <= in2;
+}
+
+function Lt(Int in1, Int in2 => Bool out)
+{
+  out = in1 < in2;
+}
+
+
+//
+// Selectors
+//
+function Mux3(Int K, Int in1, Int in2, Int in3 => Int out)
+{
+  if (K == 1) {
+    out = in1;
+  } else {
+    if (K == 2) {
+      out = in2;
+    } else {
+      out = in3;
+    }
+  }
+}
+
+
+function SelBool(Bool sel, Bool in1, Bool in2 => Bool out)
+{
+  if (sel)
+  {
+    out = in1;
+  }
+  else
+  {
+    out = in2;
+  }
+}
+
+function SelInt(Bool sel, Int in1, Int in2 => Int out)
+{
+  if (sel)
+  {
+    out = in1;
+  }
+  else
+  {
+    out = in2;
+  }
+}
+
+function Max(Int in1, Int in2 => Int max, Int index)
+{
+  if (in1 >= in2)
+  {
+    max = in1;
+    index = 1;
+  }
+  else
+  {
+    max = in2;
+    index = 2;
+  }
+}
+
+function Min(Int in1, Int in2 => Int min, Int index)
+{
+  if (in1 <= in2)
+  {
+    min = in1;
+    index =1;
+  }
+  else
+  {
+    min = in2;
+    index =2;
+  }
+}
+

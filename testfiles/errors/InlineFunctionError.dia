@@ -1,0 +1,6 @@
+diagramtype Main() {
+    inline Add add;
+    inline Foo foo;
+}
+
+external Foo(Int in => Int out);

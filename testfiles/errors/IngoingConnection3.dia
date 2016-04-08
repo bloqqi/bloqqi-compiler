@@ -1,0 +1,11 @@
+diagramtype S() {
+    T_1;
+    T_2;
+    U_1;
+    connect(T_1, U_1.in1);
+    connect(T_2, U_1.in1);
+    connect(T_1, U_1.in2);
+    connect(T_2, U_1.in2);
+}
+diagramtype T(=> Int out) { }
+diagramtype U(Int in1, Int in2) { }

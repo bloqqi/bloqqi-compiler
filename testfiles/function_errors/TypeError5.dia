@@ -1,0 +1,3 @@
+function iffunc(Int in => Int out) {
+	out = in2 + 5;
+}

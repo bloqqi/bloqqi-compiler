@@ -1,0 +1,17 @@
+diagramtype TInt(Int in => Int out) {
+}
+diagramtype TBool(Bool in => Bool out) {
+}
+diagramtype B() {
+	TInt_1;
+	TInt_2;
+	connect(TInt_1, TInt_2);
+}
+diagramtype B1() extends B {
+	TInt_3;
+	intercept TInt_2 with TInt_3, TInt_3;
+}
+diagramtype D() extends B1 {
+	TBool_1;
+	intercept TInt_3 with TBool_1, TBool_1;
+}

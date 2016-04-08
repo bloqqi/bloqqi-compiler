@@ -1,0 +1,147 @@
+aspect DetectInterceptionConflicts {
+	syn Collection<InterceptionConflict> DiagramType.interceptionConflicts() {
+		Map<Anchor, InterceptionConflict> map = new HashMap<Anchor, InterceptionConflict>();
+		for (DiagramType dt: superTypesLinearized()) {
+			for (FlowDecl fd: dt.getFlowDecls()) {
+				if (fd instanceof Interception) {
+					Interception i = (Interception) fd;
+					Anchor anchor = i.getIntercepted().anchor();
+					
+					InterceptionConflict ic = map.get(anchor); 
+					if (ic == null) {
+						ic = new InterceptionConflict(anchor);
+						map.put(anchor, ic);
+					}
+					ic.addInterception(i);
+				}
+			}
+		}
+		
+		Collection<InterceptionConflict> col = map.values();
+		Iterator<InterceptionConflict> itr = col.iterator();
+		while (itr.hasNext()) {
+			InterceptionConflict ic = itr.next();
+			if (ic.interceptionSize() <= 1) {
+				itr.remove();
+			} else {
+				computeConflictingDiagramTypes(ic);
+				if (!ic.hasConflicts()) {
+					itr.remove();
+				}
+			}
+		}
+		
+		return col;
+	}
+	
+	private void DiagramType.computeConflictingDiagramTypes(InterceptionConflict ic) {
+		Map<DiagramType, LinkedHashSet<DiagramType>> linear 
+			= new HashMap<DiagramType, LinkedHashSet<DiagramType>>();
+		for (DiagramType dt: directSuperTypes()) {
+			LinkedHashSet<DiagramType> list = new LinkedHashSet<DiagramType>();
+			for (DiagramType superDt: dt.superTypesLinearized()) {
+				if (ic.hasConflictFor(superDt)) {
+					list.add(superDt);
+				}
+			}
+			if (!list.isEmpty()) {
+				linear.put(dt, list);
+			}
+		}
+		ArrayList<DiagramType> remove = new ArrayList<DiagramType>();	
+		for (Map.Entry<DiagramType, LinkedHashSet<DiagramType>> e: linear.entrySet()) {
+			boolean isSubSequenceOfAllOther = true;
+			for (LinkedHashSet<DiagramType> other: linear.values()) {
+				if (!isSubSequence(e.getValue(), other)) {
+					isSubSequenceOfAllOther = false;
+					break;
+				}
+			}
+			if (isSubSequenceOfAllOther) {
+				remove.add(e.getKey());
+			}
+		}
+		for (DiagramType dt: remove) {
+			linear.remove(dt);
+		}
+		if (linear.size() > 1) {
+			for (DiagramType dt: linear.keySet()) {
+				ic.addConflictingDiagramType(dt);
+			}
+		}
+	}
+	private boolean DiagramType.isSubSequence(LinkedHashSet<DiagramType> first, 
+			LinkedHashSet<DiagramType> second) {
+		boolean isSubSequence = true;
+		Iterator<DiagramType> itrFirst = first.iterator();
+		Iterator<DiagramType> itrSecond = second.iterator();
+		while (itrFirst.hasNext() && itrSecond.hasNext()) {
+			if (itrFirst.next() != itrSecond.next()) {
+				isSubSequence = false;
+				break;
+			}
+		}
+		if (itrFirst.hasNext()) {
+			isSubSequence = false;
+		}
+		return isSubSequence;
+	}
+	
+	public class InterceptionConflict {
+		private final Anchor anchor;
+		private ArrayList<Interception> interceptions;
+		private Set<DiagramType> conflictingDiagramTypes;
+
+		protected InterceptionConflict(Anchor anchor) {
+			this.anchor = anchor;
+			interceptions = new ArrayList<Interception>();
+			conflictingDiagramTypes = new TreeSet<DiagramType>(
+				new Comparator<DiagramType>() {
+					public int compare(DiagramType first, DiagramType second) {
+						return first.name().compareTo(second.name());
+					}
+				}
+			);
+		}
+		
+		protected void addInterception(Interception i) {
+			interceptions.add(i);
+		}
+		protected int interceptionSize() {
+			return interceptions.size();
+		}
+		
+		protected boolean hasConflictFor(DiagramType dt) {
+			for (Interception i: interceptions) {
+				if (i.diagramType() == dt) {
+					return true;
+				}
+			}
+			return false;
+		}
+		protected void addConflictingDiagramType(DiagramType dt) {
+			conflictingDiagramTypes.add(dt);;
+		}
+		protected boolean hasConflicts() {
+			return !conflictingDiagramTypes.isEmpty();
+		}
+		
+		public Anchor getAnchor() {
+			return anchor;
+		}
+
+		public Collection<DiagramType> getConflictingDiagramTypes() {
+			return conflictingDiagramTypes;
+		}
+		
+		public int hashCode() {
+			return anchor.hashCode();
+		}
+		public boolean equals(Object other) {
+			return anchor.equals(other);
+		}
+		public String toString() {
+			return anchor.toString() + "=" + conflictingDiagramTypes;
+		}
+	}
+}

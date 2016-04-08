@@ -1,0 +1,7 @@
+diagramtype Main( => out: Int, out2: Int) {
+  block$add: Add;
+}
+diagramtype Block( => out: Int) {
+  add: Add;
+}
+

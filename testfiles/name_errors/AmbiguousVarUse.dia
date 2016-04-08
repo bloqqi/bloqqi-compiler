@@ -1,0 +1,13 @@
+diagramtype X1() {
+	T_1;
+}
+diagramtype X2() {
+	T_1;
+}
+
+diagramtype Y(Int in) extends X1, X2 {
+	connect(T_1.out, T_1.in);
+}
+
+diagramtype T(Int in => Int out) {
+}

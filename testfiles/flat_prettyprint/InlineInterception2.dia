@@ -1,0 +1,18 @@
+diagramtype SuperMain(Int in => Int out) {
+  connect(in, out);
+}
+
+diagramtype Main extends SuperMain {
+  inline Block block;
+  intercept out with block, block;
+}
+
+diagramtype Block(Int in => Int out) {
+  Add add1;
+  Add add2;
+  connect(add1, add2.in1);
+  connect(in, add1.in1);
+  connect(in, add1.in2);
+  connect(add1, add2.in2);
+  connect(add2, out);
+}

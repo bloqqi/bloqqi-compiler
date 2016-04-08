@@ -1,0 +1,7 @@
+diagramtype Main(in: Int => out: Int) {
+  inline block: Block;
+}
+diagramtype Block(in: Int => out: Int) {
+  connect(in, out);
+}
+

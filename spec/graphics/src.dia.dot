@@ -1,0 +1,9 @@
+digraph G {
+rankdir = "LR"
+node [shape=box];
+T_1[label="T_1 (0)"];
+T_2[label="T_2 (0)"];
+T_3[label="T_3 (0)"];
+T_1 -> T_2[tailport=e,headport=w];
+T_1 -> T_3[tailport=e,headport=w];
+}

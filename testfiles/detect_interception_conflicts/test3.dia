@@ -1,0 +1,23 @@
+diagramtype A() {
+    T_1;
+    T_2;
+    connect(T_1, T_2);
+}
+diagramtype B() extends A {
+    T_3;
+    intercept T_2 with T_3, T_3;
+}
+diagramtype DPrime() extends A {
+    T_4;
+    intercept T_2 with T_4, T_4;
+}
+diagramtype D() extends DPrime {
+}
+diagramtype C() extends B, D {
+}
+diagramtype E() extends A {
+}
+diagramtype F() extends C, D, E {
+}
+
+diagramtype T(Int in => Int out) { }

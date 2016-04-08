@@ -1,0 +1,143 @@
+/**
+ * This module defines anchors and dataflow between anchors. An anchor is either 
+ * a parameter or a parameter in a component (called ComponentParameter). 
+ * A connection is between two anchors.
+ * 
+ * The dataflow between anchors is used, for example, to 
+ * identify anchors that have more than one incoming connection. 
+ * 
+ * The dataflow is defined between all anchors, both inherited and local. 
+ */
+
+aspect AnchorFlow {
+	public interface Anchor { 
+		DiagramType diagramType();
+		TypeDecl type();
+	}
+	Parameter implements Anchor;
+	ComponentParameter implements Anchor;
+	Variable implements Anchor;
+	Literal implements Anchor;
+
+	syn Anchor Expr.anchor() = null;
+	eq AbstractSimpleVarUse.anchor() = declAnchor();
+	eq DotVarUse.anchor() = declAnchor() != null ? declAnchor() : getVarUse().anchor();
+	eq Literal.anchor() = this;
+	
+	syn Anchor Expr.declAnchor() = null;
+	eq AbstractSimpleVarUse.declAnchor() = decl() instanceof Anchor ? (Anchor) decl() : null;
+	eq DotVarUse.declAnchor() = decl() instanceof Anchor ? (Anchor) decl() : null;
+	eq Literal.declAnchor() = this;
+	
+	coll Set<Connection> Anchor.outgoingConnections() [new HashSet<Connection>()] root DiagramType;
+	InheritedConnection contributes this
+		when getSource().anchor() != null
+			&& getTarget().anchor() != null
+		to Anchor.outgoingConnections() for getSource().anchor();
+	// Include nta connections() in collection attribute
+	DiagramType contributes nta connections() to Anchor.outgoingConnections();
+	
+	coll Set<Connection> Anchor.ingoingConnections() [new HashSet<Connection>()] root DiagramType;
+	InheritedConnection contributes this
+		when getSource().anchor() != null
+			&& getTarget().anchor() != null
+		to Anchor.ingoingConnections() for getTarget().anchor();
+	// Include nta connections() in collection attribute
+	DiagramType contributes nta connections() to Anchor.ingoingConnections();
+	
+	syn boolean Anchor.isInParameter();
+	eq ComponentParameter.isInParameter() = getParameter().isInParameter();
+	eq Parameter.isInParameter() = false;
+	eq InParameter.isInParameter() = true;
+	eq Variable.isInParameter() = false;
+	eq Literal.isInParameter() = false;
+	syn boolean Anchor.isOutParameter();
+	eq ComponentParameter.isOutParameter() = !isInParameter();
+	eq Parameter.isOutParameter() = !isInParameter();
+	eq InParameter.isOutParameter() = !isInParameter();
+	eq Variable.isOutParameter() = false;
+	eq Literal.isOutParameter() = false;
+	syn boolean Expr.isInParameter() = anchor() != null && anchor().isInParameter();
+	syn boolean Expr.isOutParameter() = anchor() != null && anchor().isOutParameter();
+
+
+	inh int ComponentParameter.index();
+	eq Component.getInParameter(int index).index() = index;
+	eq Component.getOutParameter(int index).index() = index;
+	
+	syn Node Anchor.node();
+	eq ComponentParameter.node() = component();
+	eq Parameter.node() = this;
+	eq Variable.node() = this;
+	eq Literal.node() = this;
+	
+	syn Set<Anchor> FlowDecl.connectedAnchors();
+	eq Connection.connectedAnchors() = Utils.asSet(getSource().anchor(), getTarget().anchor());
+	eq Interception.connectedAnchors()
+		= Utils.asSet(getIntercepted().anchor(), getTarget().anchor(), getSource().anchor());
+}
+
+/**
+ * A component has a type and the type defines the parameters 
+ * of the component. The graphical editor wants an object representing
+ * each parameter of the component, which is called ComponentParameter.
+ * A ComponentParameter refer to the corresponding Parameter in the type.
+ */
+aspect ComponentParameters {
+	syn lazy List<ComponentParameter> Component.getInParameterList() 
+		= type().createInComponentParameterList();
+
+	syn lazy List<ComponentParameter> Component.getOutParameterList() 
+		= type().createOutComponentParameterList();
+	
+
+	protected List<ComponentParameter> TypeDecl.createInComponentParameterList() {
+		return new List<>();
+	}
+	protected List<ComponentParameter> DiagramType.createInComponentParameterList() {
+		List<ComponentParameter> list = new List<>();
+		for (InParameter p: getInParameters()) {
+			list.add(new ComponentParameter(p));
+		}
+		return list;
+	}
+	protected List<ComponentParameter> ExternalFunction.createInComponentParameterList() {
+		List<ComponentParameter> list = new List<>();
+		for (InParameter p: getInParameters()) {
+			list.add(new ComponentParameter(p));
+		}
+		return list;
+	}
+	protected List<ComponentParameter> Function.createInComponentParameterList() {
+		List<ComponentParameter> list = new List<>();
+		for (InParameter p: getInParameters()) {
+			list.add(new ComponentParameter(p));
+		}
+		return list;
+	}
+	
+	protected List<ComponentParameter> TypeDecl.createOutComponentParameterList() {
+		return new List<>();
+	}
+	protected List<ComponentParameter> DiagramType.createOutComponentParameterList() {
+		List<ComponentParameter> list = new List<>();
+		for (OutParameter p: getOutParameters()) {
+			list.add(new ComponentParameter(p));
+		}
+		return list;
+	}
+	protected List<ComponentParameter> ExternalFunction.createOutComponentParameterList() {
+		List<ComponentParameter> list = new List<>();
+		if (hasOutParameter()) {
+			list.add(new ComponentParameter(getOutParameter()));
+		}
+		return list;
+	}
+	protected List<ComponentParameter> Function.createOutComponentParameterList() {
+		List<ComponentParameter> list = new List<>();
+		for (OutParameter p: getOutParameters()) {
+			list.add(new ComponentParameter(p));
+		}
+		return list;
+	}
+}

@@ -1,0 +1,25 @@
+external Print(in: Int);
+
+diagramtype Main() {
+  var out1: Int;
+  var out2: Int;
+  inline acc1: Acc;
+  inline acc2: Acc;
+  print1: Print;
+  print2: Print;
+  connect(1, acc1.in);
+  connect(acc1.out, out1);
+  connect(acc1.out, print1.in);
+  connect(2, acc2.in);
+  connect(acc2.out, out2);
+  connect(acc2.out, print2.in);
+}
+diagramtype Acc(in: Int => out: Int) {
+  var state: Int;
+  add: Add;
+  connect(in, add.in1);
+  connect(state, add.in2);
+  connect(add.out, out);
+  connect(add.out, state);
+}
+

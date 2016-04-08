@@ -1,0 +1,72 @@
+/** For debugging purposes */
+aspect PrintAST {
+	syn String ASTNode.printASTInfo() = "";
+	eq VarUse.printASTInfo() = decl() + ", " + type();
+	eq AbstractSimpleVarUse.printASTInfo() = getID() + ", " + decl() + ", " + type();
+	eq Component.printASTInfo() {
+		String s = name() + ", ";
+		s += diagramType().name() + ", ";
+		s += declaredInDiagramType().name() + ", ";
+		s += lastDiagramType().name();
+		return s;
+	}
+	eq ComponentParameter.printASTInfo() = "in=" + ingoingConnections() + ", out=" + outgoingConnections();
+	eq DotVarUse.printASTInfo() = toString() + ", " + decl();
+	eq Parameter.printASTInfo() = uses().toString();
+	eq DiagramType.printASTInfo() = name() + ", " + sortedRecommendations();
+	eq RecommendationComponent.printASTInfo() = interceptingAnchors() + ", " + conflictingRecommendations().toString();
+	eq TypeUse.printASTInfo() = toString() + ", " + decl();
+	 
+	public void ASTNode.printAST() {
+		printAST("", 0);
+	}
+	protected void ASTNode.printAST(String prefix, int i) {
+		i = printASTprintName(prefix, i);
+		for (ASTNode child: astChildren()) {
+			child.printAST("", i);
+		}
+	}
+	protected void Program.printAST(String prefix, int i) {
+		i = printASTprintName(prefix, i);
+		for (CompilationUnit cu: getCompilationUnits()) {
+			cu.printAST("", i);
+		}
+	}
+	protected int ASTNode.printASTprintName(String prefix, int i) {
+		String name = getClass().getSimpleName();
+		if (!name.equals("AST.Opt")) {
+			name = name.substring(name.indexOf('.')+1);
+			name = prefix.isEmpty() ? name : prefix + ":" + name;
+			String info = printASTInfo();
+			name += info.isEmpty() ? "" : "(" + info + ")";
+			System.out.println(getIndent(i) + name);
+			i++;
+		}
+		return i;
+	}
+	protected void DiagramType.printAST(String prefix, int i) {
+		super.printAST(prefix, i);
+		getInParameters().printAST("InParameters", i+1);
+		getOutParameters().printAST("OutParameters", i+1);
+		getComponents().printAST("Components", i+1);
+		getConnections().printAST("Connections", i+1);
+		recommendedElements().printAST("recommendedElements()", i+1);
+	}
+	protected void Component.printAST(String prefix, int i) {
+		super.printAST(prefix, i);
+		getInParameters().printAST("InParameters", i+1);
+		getOutParameters().printAST("OutParameters", i+1);
+	}
+	protected void WiredComponent.printAST(String prefix, int i) {
+		super.printAST(prefix, i);
+		flowDecls().printAST("flowDecls", i+1);
+	}
+	/* Help method for indenting */
+	public String ASTNode.getIndent(int t) {
+		StringBuilder sb = new StringBuilder(t);
+		for (int i = 0; i < t; i++) {
+			sb.append("    ");
+		}
+		return sb.toString();
+	}
+}

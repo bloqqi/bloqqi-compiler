@@ -1,0 +1,10 @@
+diagramtype A(Int in) {
+	S block;
+}
+diagramtype B() extends A {
+    redeclare T in;
+}
+diagramtype S() {
+}
+diagramtype T() extends S {
+}

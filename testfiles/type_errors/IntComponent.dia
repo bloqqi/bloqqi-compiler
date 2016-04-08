@@ -1,0 +1,5 @@
+diagramtype T() {
+	Int_1;
+	Int_2;
+	connect(Int_1, Int_2);
+}

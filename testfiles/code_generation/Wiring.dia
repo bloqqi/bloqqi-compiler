@@ -1,0 +1,25 @@
+external Print(in: Int);
+
+diagramtype Main {
+  subBlock: SubBlock;
+  print: Print;
+  connect(1, subBlock.in);
+  connect(subBlock.out, print.in);
+}
+
+diagramtype Block(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype SubBlock extends Block {
+  innerBlock: InnerBlock[out];
+}
+
+diagramtype InnerBlock(in: Int => out: Int) {
+  add: Add;
+  connect(in, add.in1);
+  connect(in, add.in2);
+  connect(add.out, out);
+}
+wiring InnerBlock[=>v: Int] {
+  intercept v with InnerBlock.in, InnerBlock.out;
+}

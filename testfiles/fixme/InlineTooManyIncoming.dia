@@ -1,0 +1,14 @@
+/*
+ * This program should print an error that block.in has too many incoming connections.
+ * This doesn't happen since the block is inlined.
+ */
+diagramtype Main(Int in) {
+    inline Block block;
+    connect(in, block.in);
+    connect(in, block.in);
+}
+
+diagramtype Block(Int in) {
+    Add_1;
+    connect(in, Add_1.in1);
+}

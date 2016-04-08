@@ -1,0 +1,25 @@
+diagramtype Main() {
+  block$addFirst: Add;
+  block$addLast: Add;
+  connect(block$addFirst.out, block$addLast.in1);
+}
+diagramtype SubMain() {
+  block$addFirst: Add;
+  block$addLast: Add;
+  block$addMiddle: Add;
+  connect(block$addFirst.out, block$addMiddle.in1);
+  connect(block$addMiddle.out, block$addLast.in1);
+}
+diagramtype Block() {
+  addFirst: Add;
+  addLast: Add;
+  connect(addFirst.out, addLast.in1);
+}
+diagramtype SubBlock() {
+  addFirst: Add;
+  addLast: Add;
+  addMiddle: Add;
+  connect(addFirst.out, addMiddle.in1);
+  connect(addMiddle.out, addLast.in1);
+}
+

@@ -1,0 +1,3 @@
+diagramtype Main(in: Int => out: Int) {
+	connect(1, out);
+}

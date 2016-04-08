@@ -1,0 +1,5 @@
+diagramtype Main() {
+    SubMain subMain;
+}
+diagramtype SubMain extends Main {
+}

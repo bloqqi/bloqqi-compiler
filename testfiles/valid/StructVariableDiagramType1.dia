@@ -1,0 +1,13 @@
+struct DT1 {
+  a: Int;
+  b: Bool;
+}
+diagramtype T1(p1: DT1, p2: Bool, p3: DT1) {
+}
+diagramtype T {
+  var v1: DT1;
+  T1comp: T1;
+  connect(v1, T1comp.p1);
+  connect(v1.b, T1comp.p2);
+  connect(v1.a, T1comp.p3.a);
+}

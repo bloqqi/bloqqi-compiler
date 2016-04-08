@@ -1,0 +1,10 @@
+diagramtype Main() {
+    inline Block block;    
+}
+
+diagramtype Block(=> Int out) {
+    Add add;
+    connect(add.out, out);
+}
+
+

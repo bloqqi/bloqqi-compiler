@@ -1,0 +1,59 @@
+aspect GenerateDOT {
+	public String DiagramType.generateDOT() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("digraph G {\n");
+		sb.append("rankdir = \"LR\"\n");
+		
+		if (getNumLocalInParameter() > 0) {
+			sb.append("{\n");
+			sb.append("node [shape=doubleoctagon]\n");
+			sb.append("rank = source\n");
+			for (InParameter in: getLocalInParameters()) {
+				sb.append(in.getID() + "\n");
+			}
+			sb.append("}\n");
+		}
+
+		if (getNumLocalOutParameter() > 0) {
+			sb.append("{\n");
+			sb.append("node [shape=doubleoctagon]\n");
+			sb.append("rank = sink\n");
+			for (OutParameter out: getLocalOutParameters()) {
+				sb.append(out.getID() + "\n");
+			}
+			sb.append("}\n");
+		}
+
+		sb.append("node [shape=box];\n");
+		for (Component c: getLocalComponents()) {
+			sb.append(c.name()).append("[label=\"");
+			sb.append(c.name() + " (" + c.dfo() + ")");
+			sb.append("\"];\n");
+		}
+		for (Connection c: connections()) {
+			if (!c.isBroken()) {
+				sb.append(c.getSource().firstName());
+				sb.append(" -> ");
+				sb.append(c.getTarget().firstName()).append("[tailport=e,headport=w];\n");
+			}
+		}
+		
+		for (Connection c: connections()) {
+			if (c.isBroken()) {
+				sb.append(c.getSource().firstName());
+				sb.append(" -> ");
+				sb.append(c.getTarget().firstName());
+				sb.append("[arrowType=inv,tailport=e,headport=w];\n");   // constraint=false
+			}
+		}
+		
+		sb.append("}");
+		return sb.toString();
+	}
+	
+	syn String Expr.firstName();
+	eq Literal.firstName() = toString();
+	eq AbstractSimpleVarUse.firstName() = getID();
+	eq DotVarUse.firstName() = getVarUse().firstName();
+
+}

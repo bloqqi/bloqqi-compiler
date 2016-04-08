@@ -1,0 +1,2 @@
+Line 8, column 7: Expected a source port, '=>out: Int' is a target port
+Line 8, column 18: Expected a target port, 'in: Int' is a source port

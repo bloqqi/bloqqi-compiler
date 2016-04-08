@@ -1,0 +1,10 @@
+diagramtype Main {
+  b1: Block;
+  b2: Block2;
+  connect("true", b1.in);
+  connect("false", b2.in);
+}
+diagramtype Block(in: Int) {
+}
+diagramtype Block2(in: Real) {
+}

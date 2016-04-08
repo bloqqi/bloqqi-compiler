@@ -1,0 +1,8 @@
+diagramtype Main {
+  b1: Block;
+  b2: Block;
+  connect(true, b1.in);
+  connect(true, b2.in);
+}
+diagramtype Block(in: Bool) {
+}

@@ -1,0 +1,7 @@
+diagramtype Z { }
+
+diagramtype T(Int in => Int out) {
+}
+wiring Z[=> Int v] {
+  intercept v with Z, Z;
+}

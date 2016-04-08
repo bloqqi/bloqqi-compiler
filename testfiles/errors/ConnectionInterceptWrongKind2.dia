@@ -1,0 +1,13 @@
+diagramtype A() {
+    T_1;
+    T_2;
+    connect(T_1, T_2);
+}
+
+diagramtype B() extends A {
+    T_3;
+    intercept T_2.in with T_3.out, T_3.out;
+}
+
+diagramtype T(Int in => Int out) {
+}

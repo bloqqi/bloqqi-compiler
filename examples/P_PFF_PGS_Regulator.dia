@@ -1,0 +1,158 @@
+diagramtype P(Int Gain, Int SP, Int PV => Int Out) {
+  Sub_1;
+  Mul_1;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Gain, Mul_1.in1);
+  connect(Sub_1, Mul_1.in2);
+  connect(Mul_1, Out);
+}
+annotation(
+  Out = (329, 6, 50, 25),
+  Sub_1 = (79, 35, 40, 30),
+  PV = (7, 56, 50, 25),
+  Gain = (7, 6, 50, 25),
+  Mul_1 = (147, 10, 40, 30),
+  SP = (7, 31, 50, 25)
+)
+diagramtype PFF(Int FFGain, Int FF) extends P {
+  Mul_2;
+  Add_1;
+  connect(FFGain, Mul_2.in1);
+  connect(FF, Mul_2.in2);
+  connect(Mul_2, Add_1.in2);
+  intercept Out with Add_1.in1, Add_1;
+}
+annotation(
+  P:PV = (7, 56, 50, 25),
+  Mul_2 = (147, 86, 40, 30),
+  P:Mul_1 = (147, 10, 40, 30),
+  Add_1 = (243, 10, 40, 30),
+  P:Sub_1 = (79, 35, 40, 30),
+  FFGain = (7, 82, 50, 25),
+  FF = (6, 108, 50, 25),
+  P:Out = (329, 6, 50, 25),
+  P:Gain = (7, 6, 50, 25),
+  P:SP = (7, 31, 50, 25)
+)
+diagramtype PGS(Int GS, Int Gain2, Int Gain3) extends P {
+  Mux3_1;
+  connect(GS, Mux3_1.k);
+  connect(Gain2, Mux3_1.in2);
+  connect(Gain3, Mux3_1.in3);
+  intercept Mul_1.in1 with Mux3_1.in1, Mux3_1;
+}
+annotation(
+  P:PV = (7, 137, 50, 25),
+  GS = (7, 10, 50, 25),
+  Mux3_1 = (85, 14, 40, 58),
+  P:Mul_1 = (147, 91, 40, 30),
+  Gain3 = (7, 83, 50, 25),
+  P:Sub_1 = (79, 116, 40, 30),
+  P:Out = (329, 87, 50, 25),
+  Gain2 = (7, 55, 50, 25),
+  P:Gain = (7, 30, 50, 25),
+  P:SP = (7, 112, 50, 25)
+)
+diagramtype PFFGS() extends PFF, PGS {
+}
+annotation(
+  PGS:Gain3 = (7, 83, 50, 25),
+  PFF:FFGain = (7, 181, 50, 25),
+  PGS:Gain2 = (7, 55, 50, 25),
+  PFF:Add_1 = (243, 109, 40, 30),
+  PFF:Mul_2 = (147, 185, 40, 30),
+  PGS:GS = (7, 10, 50, 25),
+  P:SP = (7, 130, 50, 25),
+  P:Gain = (7, 30, 50, 25),
+  PGS:Mux3_1 = (85, 14, 40, 58),
+  P:PV = (7, 155, 50, 25),
+  P:Mul_1 = (147, 109, 40, 30),
+  PFF:FF = (6, 207, 50, 25),
+  P:Sub_1 = (79, 134, 40, 30),
+  P:Out = (329, 105, 50, 25)
+)
+diagramtype PFFPar(Int Gain, Int SP, Int PV, Bool EnableFF, Int FFGain, Int FF => Int Out) {
+  Sub_1;
+  Mul_1;
+  Mul_2;
+  Add_1;
+  If_1;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Gain, Mul_1.in1);
+  connect(Sub_1, Mul_1.in2);
+  connect(Mul_1, Add_1.in1);
+  connect(Add_1, Out);
+  connect(FFGain, Mul_2.in1);
+  connect(FF, Mul_2.in2);
+  connect(EnableFF, If_1.en);
+  connect(Mul_2, If_1.in);
+  connect(If_1, Add_1.in2);
+}
+annotation(
+  Out = (329, 15, 50, 25),
+  Sub_1 = (79, 44, 40, 30),
+  PV = (7, 65, 50, 25),
+  Gain = (7, 15, 50, 25),
+  Mul_2 = (102, 120, 40, 30),
+  Mul_1 = (147, 19, 40, 30),
+  Add_1 = (243, 19, 40, 30),
+  EnableFF = (7, 90, 58, 25),
+  If_1 = (176, 94, 40, 30),
+  FFGain = (7, 116, 50, 25),
+  SP = (7, 40, 50, 25),
+  FF = (6, 142, 50, 25)
+)
+diagramtype PFFGSPar(Int GS, Int Gain, Int Gain2, Int Gain3, Int SP, Int PV, Bool EnableFF, Int FFGain, Int FF => Int Out) {
+  Sub_1;
+  Mul_1;
+  Mul_2;
+  Add_1;
+  If_1;
+  Mux3_1;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Sub_1, Mul_1.in2);
+  connect(Mul_1, Add_1.in1);
+  connect(Add_1, Out);
+  connect(FFGain, Mul_2.in1);
+  connect(FF, Mul_2.in2);
+  connect(EnableFF, If_1.en);
+  connect(Mul_2, If_1.in);
+  connect(If_1, Add_1.in2);
+  connect(Gain, Mux3_1.in1);
+  connect(GS, Mux3_1.k);
+  connect(Gain3, Mux3_1.in2);
+  connect(Gain2, Mux3_1.in3);
+  connect(Mux3_1, Mul_1.in1);
+}
+annotation(
+  Out = (329, 140, 50, 25),
+  Sub_1 = (79, 169, 40, 30),
+  Gain = (7, 56, 50, 25),
+  Gain3 = (10, 83, 90, 20),
+  If_1 = (176, 219, 40, 30),
+  SP = (7, 165, 50, 25),
+  Gain2 = (0, 108, 90, 20),
+  PV = (7, 190, 50, 25),
+  Mux3_1 = (136, 35, 53, 56),
+  GS = (10, 15, 90, 20),
+  Mul_2 = (102, 245, 40, 30),
+  Mul_1 = (147, 144, 40, 30),
+  EnableFF = (7, 215, 58, 25),
+  Add_1 = (243, 144, 40, 30),
+  FFGain = (7, 241, 50, 25),
+  FF = (6, 267, 50, 25)
+)
+diagramtype If(Bool en, Int in => Int out) {
+}
+diagramtype Mux3(Int k, Int in1, Int in2, Int in3 => Int out) {
+}
+
+//diagramtype Sub(Int in1, Int in2 => Int out) {
+//}
+//diagramtype Add(Int in1, Int in2 => Int out) {
+//}
+//diagramtype Mul(Int in1, Int in2 => Int out) {
+//}

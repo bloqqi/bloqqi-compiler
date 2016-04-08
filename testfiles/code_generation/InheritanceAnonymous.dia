@@ -1,0 +1,34 @@
+external Print(in: Int);
+
+diagramtype Main {
+  block: Block;
+  subBlock: Block {
+    redeclare a: A (in2: Int) {
+      var state: Int;
+      add1: Add;
+      add2: Add;
+      connect(in2, add1.in1);
+      connect(state, add1.in2);
+      connect(add1.out, add2.in2);
+      intercept out with add2.in1, add2.out;
+      connect(add2.out, state);
+    };
+    connect(in, a.in2);
+  };
+  print1: Print;
+  print2: Print;
+  connect(1, block.in);
+  connect(1, subBlock.in);
+  connect(block.out, print1.in);
+  connect(subBlock.out, print2.in);
+}
+
+diagramtype Block(in: Int => out: Int) {
+  a: A;
+  connect(in, a.in);
+  connect(a.out, out);
+}
+
+diagramtype A(in: Int => out: Int) {
+  connect(in, out);
+}

@@ -1,0 +1,257 @@
+aspect RecommendationSupport {
+	public Pair<DiagramType, WiredComponent> DiagramType.extractsubTypeAsWiredBlock(String diagramTypeName, String componentName) {
+		SubTypeWrapperCreator creator = new SubTypeWrapperCreator(this, diagramTypeName, componentName);
+		creator.create();
+		return new Pair<>(creator.getNewDiagramType(), creator.getNewWiredComponent());
+	}
+	
+	public class SubTypeWrapperCreator {
+		private final DiagramType subType;
+		private final String newDiagramTypeName;
+		private final String newWiredComponentName;
+		private final DiagramType newDiagramType;
+		private final WiredComponent newWiredComponent;
+
+		private final Map<FlowDecl, InParameter> toInPar;
+		private final Map<FlowDecl, OutParameter> toOutPar;
+		
+		public SubTypeWrapperCreator(DiagramType subType, String newDiagramTypeName, String newWiredComponentName) {
+			this.subType = subType;
+			this.newDiagramTypeName = newDiagramTypeName;
+			this.newWiredComponentName = newWiredComponentName;
+			
+
+			newDiagramType = new DiagramType();
+			newWiredComponent = new WiredComponent();
+			toInPar = new HashMap<>();
+			toOutPar = new HashMap<>();
+		}
+		
+		public void create() {
+			createDiagramTypeContent();
+			createWiring();
+			createWiredComponent();
+		}
+		
+		public DiagramType getNewDiagramType() {
+			return newDiagramType;
+		}
+
+		public WiredComponent getNewWiredComponent() {
+			return newWiredComponent;
+		}
+		
+		private void createDiagramTypeContent() {
+			newDiagramType.setID(newDiagramTypeName);
+
+			Map<Node, InParameter> sourceNodeToPar = new HashMap<>();
+			for (Connection c: subType.connections()) {
+				if (!c.isInherited()) {
+					Expr source;
+					VarUse target;
+					if (isCrossing(c.getSource())) {
+						source = createDiagramTypeInParameter(sourceNodeToPar, c);
+					} else {
+						source = removeTypedVarUse(c.getSource().treeCopy());
+					}
+					if (isCrossing(c.getTarget())) {
+						target = createDiagramTypeOutParameter(c);
+					} else {
+						target = removeTypedVarUse(c.getTarget().treeCopy());
+					}
+					newDiagramType.addFlowDecl(new Connection(source, target));
+				}
+			}
+			for (Component c: subType.getLocalComponents()) {
+				newDiagramType.addLocalComponent(c.treeCopy());
+			}
+		}
+
+		private void createWiring() {
+			Wiring w = new Wiring();
+			w.setTypeUse(new TypeUse(newDiagramTypeName));
+
+			// Keep track of handled source nodes. This to handle source nodes with
+			// more than one outgoing connection
+			Set<Node> sourceNodes = new HashSet<>();
+			
+			for (Connection c: subType.connections()) {
+				if (!c.isInherited()) {
+					InParameter inPar = toInPar.get(c.declaredFlowDecl());
+					OutParameter outPar = toOutPar.get(c.declaredFlowDecl());
+					
+					if (isCrossing(c.getSource())) {
+						TypeUse type = new TypeUse(c.getSource().type().name());
+						if (c.declaredFlowDecl() instanceof SourceInterception) {
+							createWiringSourceInterception(w, inPar, outPar, type);
+						} else if (c.declaredFlowDecl() instanceof Connection 
+								&& !sourceNodes.contains(c.getSource().node())) {
+							createWiringConnectionSource(w, inPar, type);
+							sourceNodes.add(c.getSource().node());
+						}
+					}
+					
+					if (isCrossing(c.getTarget())) {
+						TypeUse type = new TypeUse(c.getTarget().type().name());
+						if (c.declaredFlowDecl() instanceof ConnectionInterception) {
+							createWiringTargetInterception(w, inPar, outPar, type);
+						} else if (c.declaredFlowDecl() instanceof Connection) {
+							createWiringConnectionTarget(w, outPar, type);
+						}
+					}
+				}
+			}
+
+			newDiagramType.setLocalWiring(w);
+		}
+
+		private void createWiredComponent() {
+			newWiredComponent.setType(new TypeUse(newDiagramTypeName));
+			newWiredComponent.setName(new IdName(newWiredComponentName));
+
+			// Handle source nodes with several outgoing connections
+			Set<Node> sourceNodes = new HashSet<>();
+			
+			for (Connection c: subType.connections()) {
+				if (!c.isInherited()) {
+					InParameter inPar = toInPar.get(c.declaredFlowDecl());
+					OutParameter outPar = toOutPar.get(c.declaredFlowDecl());
+
+					if (isCrossing(c.getSource())) {
+						if (c.declaredFlowDecl() instanceof SourceInterception) {
+							Expr source = removeTypedVarUse(c.getSource().treeCopy());
+							newWiredComponent.addWiredComponentParameter(new WiredComponentParameterVarUse((VarUse) source));
+						} else if (c.declaredFlowDecl() instanceof Connection 
+								&& !sourceNodes.contains(c.getSource().node())) {
+							createWiredParameterForSourceConnection(c, inPar);
+							sourceNodes.add(c.getSource().node());
+						}
+					}
+					
+					if (isCrossing(c.getTarget())) {
+						if (c.declaredFlowDecl() instanceof ConnectionInterception) {
+							VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
+							newWiredComponent.addWiredComponentParameter(new WiredComponentParameterVarUse(target));
+						} else if (c.declaredFlowDecl() instanceof Connection) {
+							createWiredParameterForTargetConnection(c, outPar);
+						}
+					}
+				}
+			}
+		}
+		
+		private boolean isCrossing(Expr e) {
+			return e.node().isInherited() || e.node().isParameter();
+		}
+		
+		private <E extends Expr> E removeTypedVarUse(E e) {
+			if (e instanceof DotVarUse) {
+				DotVarUse dot = (DotVarUse) e;
+				if (dot.getVarUse() instanceof TypedSimpleVarUse) {
+					TypedSimpleVarUse typed = (TypedSimpleVarUse) dot.getVarUse();
+					dot.setVarUse(new SimpleVarUse(typed.getID()));
+				} else {
+					removeTypedVarUse(((DotVarUse) e).getVarUse());
+				}
+			}
+			return e;
+		}
+
+		private String fixName(String name) {
+			name = name.replace(".", "");
+			if (name.indexOf("::") > 0) {
+				name = name.substring(name.indexOf("::")+2);
+			}
+			return name;
+		}
+
+		//
+		// Help methods for creating diagram type
+		//
+		private VarUse createDiagramTypeOutParameter(Connection c) {
+			String name = fixName(c.getTarget().toString());
+			OutParameter out = new OutParameter(new TypeUse(c.getTarget().type().name()), name);
+			newDiagramType.addLocalOutParameter(out);
+			toOutPar.put(c.declaredFlowDecl(), out);
+			return new SimpleVarUse(name);
+		}
+		private Expr createDiagramTypeInParameter(Map<Node, InParameter> sourceNodeToPar, Connection c) {
+			String name = fixName(c.getSource().toString());
+			InParameter in;
+			if (!sourceNodeToPar.containsKey(c.getSource().node())) {
+				in = new InParameter(new TypeUse(c.getSource().type().name()), name);
+				newDiagramType.addLocalInParameter(in);
+				sourceNodeToPar.put(c.getSource().node(), in);
+			} else {
+				in = sourceNodeToPar.get(c.getSource().node());
+			}
+			toInPar.put(c.declaredFlowDecl(), in);
+			return new SimpleVarUse(name);
+		}
+		
+		//
+		// Help methods for creating wiring
+		//
+		private void createWiringTargetInterception(Wiring w, InParameter inPar, OutParameter outPar, TypeUse type) {
+			WiringOutParameter wiringOut = new WiringOutParameter(type, outPar.name());
+			w.addWiringParameter(wiringOut);
+			ConnectionInterception newInterception = new ConnectionInterception(
+					new SimpleVarUse(outPar.name()),
+					new DotVarUse(new SimpleVarUse(newDiagramTypeName), inPar.name()),
+					new DotVarUse(new SimpleVarUse(newDiagramTypeName), outPar.name()));
+			w.addFlowDecl(newInterception);
+		}
+		private void createWiringConnectionTarget(Wiring w, OutParameter outPar, TypeUse type) {
+			String name = outPar == null ? "null" : outPar.name();
+			WiringOutParameter wiringOut = new WiringOutParameter(type, name);
+			w.addWiringParameter(wiringOut);
+			Connection newConn = new Connection(
+					new DotVarUse(new SimpleVarUse(newDiagramTypeName), name),
+					new SimpleVarUse(name));
+			w.addFlowDecl(newConn);
+		}
+		private void createWiringConnectionSource(Wiring w, InParameter inPar, TypeUse type) {
+			String name = inPar == null ? "null" : inPar.name();
+			WiringInParameter wiringIn = new WiringInParameter(type, name);
+			w.addWiringParameter(wiringIn);
+			Connection newConn = new Connection(
+					new SimpleVarUse(name),
+					new DotVarUse(new SimpleVarUse(newDiagramTypeName), name));
+			w.addFlowDecl(newConn);
+		}
+		private void createWiringSourceInterception(Wiring w, InParameter inPar, OutParameter outPar, TypeUse type) {
+			WiringInParameter wiringIn = new WiringInParameter(type, inPar.name());
+			w.addWiringParameter(wiringIn);
+			SourceInterception newInterception = new SourceInterception(
+					new SimpleVarUse(inPar.name()),
+					new DotVarUse(new SimpleVarUse(newDiagramTypeName), inPar.name()),
+					new DotVarUse(new SimpleVarUse(newDiagramTypeName), outPar.name()));
+			w.addFlowDecl(newInterception);
+		}
+
+		
+		//
+		// Help methods for creating wired component
+		//
+		private void createWiredParameterForSourceConnection(Connection c, InParameter inPar) {
+			WiredComponentParameter wiredPar;
+			if (c.getSource().node().isParameter() && !c.getSource().node().isInherited()) {
+				wiredPar = new WiredComponentParameterInParameter(inPar.treeCopy());
+			} else {
+				VarUse source = (VarUse) removeTypedVarUse(c.getSource().treeCopy());
+				wiredPar = new WiredComponentParameterVarUse(source);
+			}
+			newWiredComponent.addWiredComponentParameter(wiredPar);
+		}
+		private void createWiredParameterForTargetConnection(Connection c, OutParameter outPar) {
+			WiredComponentParameter wiredPar;
+			if (c.getTarget().node().isParameter() && !c.getTarget().node().isInherited()) {
+				wiredPar = new WiredComponentParameterOutParameter(outPar.treeCopy());
+			} else {
+				VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
+				wiredPar = new WiredComponentParameterVarUse(target);
+			}
+			newWiredComponent.addWiredComponentParameter(wiredPar);
+		}
+	}
+}

@@ -1,0 +1,8 @@
+diagramtype X(Int in => Int out) {
+}
+wiring X[=>Int a, Int b] {
+    connect(a, X.in);
+    connect(X.out, b);
+    intercept source a with X.in, X.out;
+    intercept b with X.in, X.out;
+}

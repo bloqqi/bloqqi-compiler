@@ -1,0 +1,1 @@
+Line 10, column 3: Cannot redeclare 'block', 'A3$block' is not a subtype of 'A2$block'

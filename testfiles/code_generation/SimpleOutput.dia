@@ -1,0 +1,23 @@
+external Print(in: Int);
+external PrintStrInt(String str, Int n);
+external PrintStrBool(String str, Bool b);
+
+diagramtype Main() {
+	block: Block;
+	print: Print;
+	print2: PrintStrInt;
+	print3: PrintStrBool;
+	
+	connect(1, block.in);
+	connect(block.out, print.in);
+	
+	connect("1 = ", print2.str);
+	connect(1, print2.n);
+	
+	connect("true = ", print3.str);
+	connect(true, print3.b);
+	
+}
+diagramtype Block(in: Int => out: Int) {
+	connect(in, out);
+}

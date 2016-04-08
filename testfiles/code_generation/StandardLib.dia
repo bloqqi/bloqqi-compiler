@@ -1,0 +1,460 @@
+external Print(in: Int);
+external PrintBool(in: Bool);
+external PrintStrInt(str: String, in: Int);
+external PrintStrIntInt(str: String, in1: Int, in2: Int);
+external PrintStrBool(str: String, in: Bool);
+
+diagramtype Main() {
+    TestArithmetic_1;
+	TestBoolean_1;
+	TestComparison_1;
+	TestSelectors_1;
+}
+
+diagramtype TestArithmetic {
+	TestAdd_1;
+	TestSub_1;
+	TestDiv_1;
+	TestMul_1;
+	TestNeg_1;
+}
+
+diagramtype TestBoolean {
+	TestAnd_1;
+	TestOr_1;
+	TestXor_1;
+	TestNot_1;
+	TestMove_1;
+}
+
+diagramtype TestComparison {
+	TestEq_1;
+	TestNe_1;
+	TestGe_1;
+	TestGt_1;
+	TestLe_1;
+	TestLt_1;
+}
+
+diagramtype TestSelectors {
+	TestMux_1;
+	TestSelBool_1;
+	TestSelInt_1;
+	TestMax_1;
+	TestMin_1;
+}
+
+//
+// Arithmetic
+//
+diagramtype TestAdd {
+    Add_1;
+    p: PrintStrInt;
+
+    connect(1, Add_1.in1);
+    connect(2, Add_1.in2);
+    connect("1+2 = ", p.str);
+    connect(Add_1, p.in);
+}
+
+diagramtype TestSub {
+    Sub_1;
+    p: PrintStrInt;
+
+    connect(1, Sub_1.in1);
+    connect(2, Sub_1.in2);
+    connect("1-2 = ", p.str);
+    connect(Sub_1, p.in);
+}
+
+
+diagramtype TestDiv {
+	Div_1;
+	p1: PrintStrInt;
+    
+	Div_2;
+	p2: PrintStrInt;
+
+    connect(4, Div_1.in1);
+    connect(2, Div_1.in2);
+    connect("4/2 = ", p1.str);
+    connect(Div_1, p1.in);
+
+	connect(5, Div_2.in1);
+	connect(0, Div_2.in2);
+	connect("5/0 = ", p2.str);
+	connect(Div_2, p2.in);
+}
+
+diagramtype TestMul {
+    Mul_1;
+    p: PrintStrInt;
+
+    connect(3, Mul_1.in1);
+    connect(6, Mul_1.in2);
+    connect("3*6 = ", p.str);
+    connect(Mul_1, p.in);
+}
+
+diagramtype TestNeg {
+    Neg_1;
+    p: PrintStrInt;
+
+    connect(3, Neg_1.in);
+    connect("-3 = ", p.str);
+    connect(Neg_1, p.in);
+}
+
+
+//
+// Boolean
+//
+diagramtype TestAnd {
+	And_1;
+	And_2;
+	And_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+
+	connect(true, And_1.in1);
+	connect(true, And_1.in2);
+	connect("true & true = ", p1.str);
+	connect(And_1, p1.in);
+	
+	connect(false, And_2.in1);
+	connect(true, And_2.in2);
+	connect("false & true = ", p2.str);
+	connect(And_2, p2.in);
+
+	connect(false, And_3.in1);
+	connect(false, And_3.in2);
+	connect("false & false = ", p3.str);
+	connect(And_3, p3.in);
+}
+
+diagramtype TestOr {
+	Or_1;
+	Or_2;
+	Or_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+
+	connect(true, Or_1.in1);
+	connect(true, Or_1.in2);
+	connect("true | true = ", p1.str);
+	connect(Or_1, p1.in);
+	
+	connect(false, Or_2.in1);
+	connect(true, Or_2.in2);
+	connect("false | true = ", p2.str);
+	connect(Or_2, p2.in);
+
+	connect(false, Or_3.in1);
+	connect(false, Or_3.in2);
+	connect("false | false = ", p3.str);
+	connect(Or_3, p3.in);
+}
+
+diagramtype TestXor {
+	Xor_1;
+	Xor_2;
+	Xor_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+
+	connect(true, Xor_1.in1);
+	connect(true, Xor_1.in2);
+	connect("true ^ true = ", p1.str);
+	connect(Xor_1, p1.in);
+	
+	connect(false, Xor_2.in1);
+	connect(true, Xor_2.in2);
+	connect("false ^ true = ", p2.str);
+	connect(Xor_2, p2.in);
+
+	connect(false, Xor_3.in1);
+	connect(false, Xor_3.in2);
+	connect("false ^ false = ", p3.str);
+	connect(Xor_3, p3.in);
+}
+
+diagramtype TestNot {
+    Not_1;
+    Not_2;
+    p1: PrintStrBool;
+    p2: PrintStrBool;
+
+    connect(true, Not_1);
+    connect("!true = ", p1.str);
+    connect(Not_1, p1.in);
+
+    connect(false, Not_2);
+    connect("!false = ", p2.str);
+    connect(Not_2, p2.in);
+}
+
+
+diagramtype TestMove {
+    Move_1;
+    p: PrintStrBool;
+
+    connect(true, Move_1);
+    connect("move true = ", p.str);
+    connect(Move_1, p.in);
+}
+
+
+//
+// Comparison
+//
+diagramtype TestEq {
+	Eq_1;
+	Eq_2;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	
+	connect(3, Eq_1.in1);
+	connect(3, Eq_1.in2);
+	connect("3 == 3 = ", p1.str);
+	connect(Eq_1, p1.in);
+	
+	connect(4, Eq_2.in1);
+	connect(3, Eq_2.in2);
+	connect("4 == 3 = ", p2.str);
+	connect(Eq_2, p2.in);
+}
+
+diagramtype TestNe {
+	Ne_1;
+	Ne_2;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	
+	connect(3, Ne_1.in1);
+	connect(3, Ne_1.in2);
+	connect("3 != 3 = ", p1.str);
+	connect(Ne_1, p1.in);
+	
+	connect(4, Ne_2.in1);
+	connect(3, Ne_2.in2);
+	connect("4 != 3 = ", p2.str);
+	connect(Ne_2, p2.in);
+}
+
+diagramtype TestGe {
+	Ge_1;
+	Ge_2;
+	Ge_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+	
+	connect(4, Ge_1.in1);
+	connect(3, Ge_1.in2);
+	connect("4 >= 3 = ", p1.str);
+	connect(Ge_1, p1.in);
+
+	connect(3, Ge_2.in1);
+	connect(3, Ge_2.in2);
+	connect("3 >= 3 = ", p2.str);
+	connect(Ge_2, p2.in);
+	
+	connect(2, Ge_3.in1);
+	connect(3, Ge_3.in2);
+	connect("2 >= 3 = ", p3.str);
+	connect(Ge_3, p3.in);
+}
+
+diagramtype TestGt {
+	Gt_1;
+	Gt_2;
+	Gt_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+	
+	connect(4, Gt_1.in1);
+	connect(3, Gt_1.in2);
+	connect("4 > 3 = ", p1.str);
+	connect(Gt_1, p1.in);
+
+	connect(3, Gt_2.in1);
+	connect(3, Gt_2.in2);
+	connect("3 > 3 = ", p2.str);
+	connect(Gt_2, p2.in);
+	
+	connect(2, Gt_3.in1);
+	connect(3, Gt_3.in2);
+	connect("2 > 3 = ", p3.str);
+	connect(Gt_3, p3.in);
+}
+
+diagramtype TestLe {
+	Le_1;
+	Le_2;
+	Le_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+	
+	connect(4, Le_1.in1);
+	connect(3, Le_1.in2);
+	connect("4 <= 3 = ", p1.str);
+	connect(Le_1, p1.in);
+
+	connect(3, Le_2.in1);
+	connect(3, Le_2.in2);
+	connect("3 <= 3 = ", p2.str);
+	connect(Le_2, p2.in);
+	
+	connect(2, Le_3.in1);
+	connect(3, Le_3.in2);
+	connect("2 <= 3 = ", p3.str);
+	connect(Le_3, p3.in);
+}
+
+diagramtype TestLt {
+	Lt_1;
+	Lt_2;
+	Lt_3;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	p3: PrintStrBool;
+	
+	connect(4, Lt_1.in1);
+	connect(3, Lt_1.in2);
+	connect("4 < 3 = ", p1.str);
+	connect(Lt_1, p1.in);
+
+	connect(3, Lt_2.in1);
+	connect(3, Lt_2.in2);
+	connect("3 < 3 = ", p2.str);
+	connect(Lt_2, p2.in);
+	
+	connect(2, Lt_3.in1);
+	connect(3, Lt_3.in2);
+	connect("2 < 3 = ", p3.str);
+	connect(Lt_3, p3.in);
+}
+
+
+//
+// Selectors
+//
+diagramtype TestMux {
+	Mux3_1;
+	Mux3_2;
+	Mux3_3;
+	Mux3_4;
+	p1: PrintStrInt;
+	p2: PrintStrInt;
+	p3: PrintStrInt;
+	p4: PrintStrInt;
+	
+	connect(1, Mux3_1.K);
+	connect(2, Mux3_1.in1);
+	connect(4, Mux3_1.in2);
+	connect(6, Mux3_1.in3);
+	connect("Mux(1, 2, 4, 6) = ", p1.str);
+	connect(Mux3_1, p1.in);
+
+	connect(2, Mux3_2.K);
+	connect(2, Mux3_2.in1);
+	connect(4, Mux3_2.in2);
+	connect(6, Mux3_2.in3);
+	connect("Mux(2, 2, 4, 6) = ", p2.str);
+	connect(Mux3_2, p2.in);
+	
+	connect(3, Mux3_3.K);
+	connect(2, Mux3_3.in1);
+	connect(4, Mux3_3.in2);
+	connect(6, Mux3_3.in3);
+	connect("Mux(3, 2, 4, 6) = ", p3.str);
+	connect(Mux3_3, p3.in);
+	
+	connect(1337, Mux3_4.K);
+	connect(2, Mux3_4.in1);
+	connect(4, Mux3_4.in2);
+	connect(6, Mux3_4.in3);
+	connect("Mux(1337, 2, 4, 6) = ", p4.str);
+	connect(Mux3_4, p4.in);
+}
+
+diagramtype TestSelBool {
+	SelBool_1;
+	SelBool_2;
+	p1: PrintStrBool;
+	p2: PrintStrBool;
+	
+	connect(true, SelBool_1.sel);
+	connect(true, SelBool_1.in1);
+	connect(false, SelBool_1.in2);
+	connect("SelBool(true, true, false) = ", p1.str);
+	connect(SelBool_1, p1.in);
+
+	connect(false, SelBool_2.sel);
+	connect(true, SelBool_2.in1);
+	connect(false, SelBool_2.in2);
+	connect("SelBool(false, true, false) = ", p2.str);
+	connect(SelBool_2, p2.in);
+}
+
+diagramtype TestSelInt {
+	SelInt_1;
+	SelInt_2;
+	p1: PrintStrInt;
+	p2: PrintStrInt;
+	
+	connect(true, SelInt_1.sel);
+	connect(1, SelInt_1.in1);
+	connect(2, SelInt_1.in2);
+	connect("SelInt(true, 1, 2) = ", p1.str);
+	connect(SelInt_1, p1.in);
+	
+	connect(false, SelInt_2.sel);
+	connect(1, SelInt_2.in1);
+	connect(2, SelInt_2.in2);
+	connect("SelInt(false, 1, 2) = ", p2.str);
+	connect(SelInt_2, p2.in);
+}
+
+diagramtype TestMax {
+	Max_1;
+	Max_2;
+	p1: PrintStrIntInt;
+	p2: PrintStrIntInt;
+	
+	connect(55, Max_1.in1);
+	connect(-55, Max_1.in2);
+	connect("Max(55, -55) = ", p1.str);
+	connect(Max_1.max, p1.in1);
+	connect(Max_1.index, p1.in2);
+
+	connect(-55, Max_2.in1);
+	connect(55, Max_2.in2);
+	connect("Max(-55, 55) = ", p2.str);
+	connect(Max_2.max, p2.in1);
+	connect(Max_2.index, p2.in2);
+}
+
+diagramtype TestMin {
+	Min_1;
+	Min_2;
+	p1: PrintStrIntInt;
+	p2: PrintStrIntInt;
+	
+	connect(55, Min_1.in1);
+	connect(-55, Min_1.in2);
+	connect("Min(55, -55) = ", p1.str);
+	connect(Min_1.min, p1.in1);
+	connect(Min_1.index, p1.in2);
+
+	connect(-55, Min_2.in1);
+	connect(55, Min_2.in2);
+	connect("Min(-55, 55) = ", p2.str);
+	connect(Min_2.min, p2.in1);
+	connect(Min_2.index, p2.in2);
+}

@@ -1,0 +1,29 @@
+diagramtype A(Int in, Int in2 => Int out, Int out2) {
+    connect(in, out);
+    connect(in2, out2);
+}
+
+recommendation A {
+    T[out] t1;
+    T[out] t2;
+    T[out] t3;
+
+    T[out2] t4;
+    T[out2] t5;
+}
+recommendation A {
+    // Cycle!
+    t1 before t2;
+    t2 before t3;
+    t3 before t1;
+
+    // No cycle
+    t4 before t5;
+}
+
+diagramtype T(Int in => Int out) {
+}
+wiring T[=> Int in] {
+    intercept in with T, T;
+}
+

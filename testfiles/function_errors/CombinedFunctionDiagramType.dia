@@ -1,0 +1,6 @@
+function F(Bool in) {
+}
+diagramtype T() {
+	F_1;
+	connect(3, F_1);
+}

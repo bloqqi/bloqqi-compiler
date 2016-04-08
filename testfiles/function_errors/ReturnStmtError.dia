@@ -1,0 +1,3 @@
+function ifFunc(Int in1, Int in2 => Int out) {
+	return;
+}

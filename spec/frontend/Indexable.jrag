@@ -1,0 +1,27 @@
+aspect Indexable {
+	public interface Indexable {
+		int index();
+	}
+	Component implements Indexable;
+
+	public class NameMap<V extends Indexable> extends HashMap<String, V> {
+		public void add(KeyValue<String,V> p) {
+			V old = get(p.key);
+			if (old == null || old.index() > p.value.index())
+				put(p.key, p.value);
+		}
+	}
+	public class KeyValue<K,V> {
+		public K key;
+		public V value;
+		public KeyValue(K key, V value) {
+			this.key = key;
+			this.value = value;
+		}
+	}
+	
+	inh lazy int Component.index();
+	eq DiagramType.getLocalComponent(int index).index() = index;
+	eq DiagramType.getComponent(int index).index() = index;
+	eq Program.getChild().index() = -1;
+}

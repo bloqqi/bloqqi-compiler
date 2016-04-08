@@ -1,0 +1,17 @@
+diagramtype S(Int SIn => Int SOut) {
+	Add SAdd;
+	T (Int in => Int out) {
+		Add add;
+		connect(in, add.in1);		// ok
+		connect(add, out);			// ok
+		connect(TIn, TAdd.in1);		// ok
+		connect(TAdd, TOut);		// ok
+		connect(SIn, SAdd);			// not ok
+		connect(SAdd, SOut);		// not ok
+		connect(t.out, t.in);		// not ok
+	} t;
+}
+
+diagramtype T (Int TIn => Int TOut) {
+	Add TAdd;
+}

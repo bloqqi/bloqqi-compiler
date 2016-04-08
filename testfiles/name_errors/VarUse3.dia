@@ -1,0 +1,6 @@
+diagramtype T() {
+	V_1;
+	connect(V_1.out, V_3.in);
+}
+
+diagramtype V(Int in => Int out) { }

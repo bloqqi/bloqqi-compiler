@@ -1,0 +1,11 @@
+diagramtype X(Xin: Int => Xout: Int) {
+}
+wiring X[a: Int, =>b: Int] {
+  connect(a, X.Xin);
+  connect(X.Xout, b);
+}
+diagramtype Y(Yin: Int => Yout: Int) extends X {
+}
+diagramtype A {
+  y: Y[Ain: Int, =>Aout: Int];
+}

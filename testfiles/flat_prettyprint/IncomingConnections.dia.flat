@@ -1,0 +1,9 @@
+diagramtype A(in: Int => out: Int) {
+}
+diagramtype B(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype C(in: Int => out: Int) {
+  connect(in, out);
+}
+

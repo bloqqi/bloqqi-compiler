@@ -1,0 +1,163 @@
+<project name="BloqqiCompiler" default="build" basedir=".">
+	<property name="srcdir" value="${basedir}/src" />
+	<property name="resourcedir" value="${srcdir}/resource" />
+	<property name="gendir" value="${srcdir}/generated" />
+	<property name="bindir" value="${basedir}/ant-bin" />
+	<property name="docdir" value="${basedir}/doc" />
+
+
+	<!-- "package" is the directory where generated files will be stored -->
+	<property name="package" value="org.bloqqi.compiler.ast"/>
+	<loadresource property="package.path">
+		<propertyresource name="package"/>
+			<filterchain>
+				<tokenfilter>
+					<filetokenizer/>
+					<replacestring from="." to="/"/>
+				</tokenfilter>
+			</filterchain>
+	</loadresource>
+	
+	<!-- "tools" is the directory where generators and libraries are located. -->
+	<property name="tools" value="tools"/>
+
+	<property name="jarfile" value="bloqqi-compiler.jar" />
+	<property name="junitjar" value="${tools}/junit-4.11-SNAPSHOT.jar" />
+
+	<!-- "jastadd" is an ant task class in jastadd2.jar -->
+	<taskdef name="jastadd" classname="org.jastadd.JastAddTask" classpath="${tools}/jastadd2.jar"/>
+
+	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
+	<taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="${tools}/JFlex.jar"/>
+	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
+	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${tools}/beaver.jar"/>
+
+	<!-- compile sources -->
+	<target name="build" depends="gen">
+		<mkdir dir="${bindir}" />
+		<javac
+			debug="true"
+			nowarn="true"
+			srcdir="${basedir}"
+			destdir="${bindir}"
+			includes="**/*.java"
+			classpath=".:${tools}/beaver-rt.jar:${junitjar}"
+			fork="true"
+			includeAntRuntime="false"
+			memoryMaximumSize="128M"
+			target="8"
+			source="8"
+			/>
+		<copy todir="${bindir}/">
+			<fileset dir="${resourcedir}"/>
+		</copy>
+	</target>
+
+	<!-- generate compiler source files -->
+	<target name="gen" depends="scanner,parser">
+		<!-- create AST node types and weave aspect modules -->
+		<echo message = "Running JastAdd"/>
+		<jastadd package="${package}" rewrite="true" beaver="true" visitcheck="false"
+				lazyMaps="true" outdir="${gendir}" cache="all" lineColumnNumbers="true">
+			<fileset dir=".">
+				<include name="spec/grammar/*.ast"/>
+				<include name="spec/frontend/*.ast"/>
+				<include name="spec/frontend/*.jadd"/>
+				<include name="spec/frontend/*.jrag"/>
+				<include name="spec/backend/*.ast"/>
+				<include name="spec/backend/*.jadd"/>
+				<include name="spec/backend/*.jrag"/>
+				<include name="spec/graphical-editor/*.ast"/>
+				<include name="spec/graphical-editor/*.jrag"/>
+				<include name="spec/graphical-editor/*.jadd"/>
+				<include name="spec/extensions/jastadd/*.ast"/>
+				<include name="spec/extensions/jastadd/*.jrag"/>
+				<include name="spec/extensions/jastadd/*.jadd"/>
+			</fileset>
+		</jastadd>
+	</target>
+
+	<target name="scanner">
+		<jflex file="spec/scanner/bloqqi.flex" outdir="${gendir}/${package.path}" InputStreamCtor="false" nobak="yes"/>
+	</target>
+
+	<target name="parser" depends="scanner">
+		<concat destfile="${gendir}/${package.path}/BloqqiParser.all" binary="true" force="false">
+			<!-- we use filelist because the order is important -->
+			<filelist dir="spec/parser/">
+				<file name="Preamble.parser"/>
+				<file name="BloqqiBase.parser"/>
+				<file name="Function.parser"/>
+			</filelist>
+		</concat>
+
+		<!-- generate the parser phase 1, translating .parser to .beaver -->
+		<java classpath="${tools}/JastAddParser.jar:${tools}/beaver-rt.jar" classname="Main" fork="true">
+			<arg line="--no-beaver-symbol ${gendir}/${package.path}/BloqqiParser.all ${gendir}/${package.path}/BloqqiParser.beaver"/>
+		</java>
+		<!-- generate the parser phase 2, translating .beaver to .java -->
+		<beaver file="${gendir}/${package.path}/BloqqiParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
+	</target>
+
+	<!-- remove generated source files and .class files -->
+	<target name="clean" depends="clean-extensions">
+		<delete dir="${gendir}" />
+		<mkdir dir="${gendir}" />
+		<delete dir="${bindir}" />
+		<delete file="${jarfile}" />
+		<delete>
+			<fileset dir="." includes="**/*.class"/>
+			<fileset dir="testfiles/code_generation/" includes="*.c *.executable *.out"/>
+		</delete>
+	</target>
+
+	<target name="clean-extensions">
+		<delete>
+			<fileset dir="spec/extensions/jastadd/" includes="*.ast *.jrag *.jadd" />
+		</delete>
+	</target>
+
+	
+	<target name="test" depends="build">
+		<junit>
+			<classpath>
+				<pathelement path="${bindir}:${junitjar}:${tools}/beaver-rt.jar" />
+			</classpath>
+			<formatter type="brief" usefile="false" />
+
+			<batchtest>
+				<fileset dir="src/java">
+					<include name="org/bloqqi/tests/*.java" />
+					<include name="org/bloqqi/tests/codegen/*.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="jar" depends="build">
+		<jar destfile="${jarfile}">
+			<fileset dir="${bindir}" includes="**/*.class,resource/" excludes="org/bloqqi/tests/*" />
+			<fileset dir="${srcdir}/java" includes="**/*.java" excludes="org/bloqqi/tests/*" />
+			<fileset dir="${resourcedir}" includes="**" />
+			<fileset dir="${gendir}" includes="**/*.java" />
+			<zipfileset includes="**/*.class" src="${tools}/beaver-rt.jar"/>
+			<manifest>
+				<attribute name="Main-Class" value="org.bloqqi.compiler.Compiler" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="doc" depends="build" description="generate documentation">
+		<mkdir dir="${docdir}"/>
+		<javadoc
+				classpath="${gendir}:${tools}/beaver.jar"
+				destdir="${docdir}"
+				docletpath="${tools}/RagDoll.jar"
+				doclet="ragdoll.RagDollDoclet"
+				sourcepath="${gendir}">
+			<arg value="-linksource"/>
+			<arg value="-ragroot"/>
+			<arg value="."/>
+		</javadoc>
+	</target>
+</project>

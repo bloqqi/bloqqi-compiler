@@ -1,0 +1,4 @@
+diagramtype A {
+}
+diagramtype B extends A {
+}

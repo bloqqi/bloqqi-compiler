@@ -1,0 +1,4 @@
+Line 11, column 13: The declaration of Add_2 was not found
+Line 11, column 20: The declaration of out2 was not found
+Line 12, column 13: The declaration of Add_1.out2 was not found
+Line 12, column 25: The declaration of out3 was not found

@@ -1,0 +1,19 @@
+diagramtype A(Int in => Int out) {
+    T_1;
+    connect(in, T_1);
+    connect(T_1, out);
+}
+
+recommendation A {
+    T[out] t1;
+    T[out] t2;
+    T[out] t3;
+    T[T_1] t4;
+    T[T_1] t5;
+}
+
+diagramtype T(Int in => Int out) {
+}
+wiring T[=> Int in] {
+    intercept in with T, T;
+}

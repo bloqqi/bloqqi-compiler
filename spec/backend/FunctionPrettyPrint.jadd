@@ -1,0 +1,170 @@
+aspect FunctionPrettyPrint {
+
+	inh int Stmt.indentLevel();
+	
+	eq Block.getStmt().indentLevel() {
+		return indentLevel() + 1;
+	}
+	
+	eq Function.getBlock().indentLevel() = 0;
+	
+	syn int FExpr.precedence() = 0;
+	eq OrFExpr.precedence() = 7;
+	eq AndFExpr.precedence() = 6;
+	eq EqFExpr.precedence() = 5;
+	eq NEqFExpr.precedence() = 5;
+	eq GEFExpr.precedence() = 4;
+	eq GTFExpr.precedence()  = 4;
+	eq LEFExpr.precedence() = 4;
+	eq LTFExpr.precedence() = 4;
+	eq AddFExpr.precedence() = 3;
+	eq SubFExpr.precedence() = 3;
+	eq MulFExpr.precedence() = 2;
+	eq DivFExpr.precedence() = 2;
+	eq MinusFExpr.precedence() = 1;
+	eq NotFExpr.precedence() = 1;
+
+	public void Function.prettyPrint(StringBuilder sb) {
+		sb.append("function " + getID() + "(");
+		for (int i = 0; i < getNumInParameter(); i++) {
+			sb.append(getInParameter(i));
+			if (i < getNumInParameter()-1) {
+				sb.append(", ");
+			}
+		}
+		if (getNumOutParameter() > 0){
+			sb.append(" => ");
+			for (int i = 0; i < getNumOutParameter(); i++) {
+				sb.append(getOutParameter(i));
+				if (i < getNumOutParameter()-1) {
+					sb.append(", ");
+				}
+			}
+		}
+		sb.append(") {\n");
+		getBlock().prettyPrint(sb);
+		sb.append("}\n");		
+	}
+	
+	public void Block.prettyPrint(StringBuilder sb) {
+		for (Stmt s: getStmts()) {
+			for (int i = 0; i < s.indentLevel(); i++) {
+				sb.append("\t");
+			}
+			s.prettyPrint(sb);
+		}
+	}
+	public void Stmt.prettyPrint(StringBuilder sb) {	
+	}
+	public void DeclStmt.prettyPrint(StringBuilder sb) {
+		sb.append(getID() + ": " + getTypeUse());
+		if (hasFExpr()) {
+			sb.append(" = " + getFExpr());
+		}
+		sb.append(";\n");
+	}
+	public void AssignStmt.prettyPrint(StringBuilder sb) {
+		sb.append(getLeft() + " = " + getRight() + ";\n");
+	}
+	public void WhileStmt.prettyPrint(StringBuilder sb) {
+		sb.append("while (" + getFExpr() + ") {\n");
+		getBlock().prettyPrint(sb);
+		for (int i = 0; i < indentLevel(); i++) {
+			sb.append("\t");
+		}
+		sb.append("}\n");
+	}
+	public void IfStmt.prettyPrint(StringBuilder sb) {
+		sb.append("if (" + getFExpr() + ") {\n");
+		getBlock().prettyPrint(sb);
+		for (int i = 0; i < indentLevel(); i++) {
+			sb.append("\t");
+		}
+		sb.append("}\n");
+		if (hasElse())
+		{
+			for (int i = 0; i < indentLevel(); i++) {
+				sb.append("\t");
+			}
+			sb.append("else {\n");
+			getElse().prettyPrint(sb);
+			for (int i = 0; i < indentLevel(); i++) {
+				sb.append("\t");
+			}
+			sb.append("}\n");			
+		}
+	}
+	
+	public void ReturnStmt.prettyPrint(StringBuilder sb) {
+		sb.append("return;\n");
+	}
+	
+	public String BinFExpr.getOpString() { return "";	}
+	public String AddFExpr.getOpString() { return "+";	}
+	public String SubFExpr.getOpString() { return "-";	}
+	public String MulFExpr.getOpString() { return "*";	}
+	public String DivFExpr.getOpString() { return "/";	}
+	public String GEFExpr.getOpString() { return ">=";	}
+	public String LTFExpr.getOpString() { return "<";	}
+	public String GTFExpr.getOpString() { return ">";	}
+	public String EqFExpr.getOpString() { return "==";	}
+	public String LEFExpr.getOpString() { return "<=";	}
+	public String NEqFExpr.getOpString() { return "!=";	}
+	public String OrFExpr.getOpString() { return "||";	}
+	public String AndFExpr.getOpString() { return "&&";	}
+	public String UnaryFExpr.getOpString() { return "";	}
+	public String NotFExpr.getOpString() { return "!"; }
+	public String MinusFExpr.getOpString() { return "-"; }
+	
+	public String BinFExpr.toString() {
+		StringBuilder sb = new StringBuilder();
+		if (precedence() < getLeft().precedence()) {
+			sb.append("(");
+		}
+		sb.append(getLeft().toString());
+		if (precedence() < getLeft().precedence()) {
+			sb.append(")");
+		}
+		sb.append(" " + getOpString() + " ");
+		if (precedence() <= getRight().precedence()) {
+			sb.append("(");
+		}
+		sb.append(getRight().toString());
+		if (precedence() <= getRight().precedence()) {
+			sb.append(")");
+		}
+		return sb.toString();		
+	}
+	
+	public String UnaryFExpr.toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getOpString());
+		if (precedence() <= getFExpr().precedence()) {
+			sb.append("(");
+		}
+		sb.append(getFExpr().toString());
+		if (precedence() <= getFExpr().precedence()) {
+			sb.append(")");
+		}
+		return sb.toString();
+	}
+		
+	public String IdFExpr.toString() {
+		return getID();	
+	}
+	public String IntLiteralFExpr.toString() {
+		return getNum();	
+	}
+	public String RealLiteralFExpr.toString() {
+		return getFloat();	
+	}
+	public String BoolLiteralFExpr.toString() {
+		if (getValue()) {
+			return "true";
+		}
+		else {
+			return "false";
+		}
+	}
+}
+

@@ -1,0 +1,4 @@
+function iffunc(Int in1, Bool in2 => Bool out) {
+	out = in1 == in2;
+	out = in1 != in2;	
+}

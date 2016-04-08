@@ -1,0 +1,18 @@
+diagramtype A() {
+  block$add: Add;
+  block2: Block;
+}
+diagramtype B() {
+  block$add: Add;
+  block$add2: Add;
+  block2$add: Add;
+  block2$add2: Add;
+}
+diagramtype Block() {
+  add: Add;
+}
+diagramtype SubBlock() {
+  add: Add;
+  add2: Add;
+}
+

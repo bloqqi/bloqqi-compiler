@@ -1,0 +1,3 @@
+external f(in: Int);
+external g(in1: Int, in2: Int => out: Int);
+external h( => out: Int);

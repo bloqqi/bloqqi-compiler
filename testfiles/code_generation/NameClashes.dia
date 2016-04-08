@@ -1,0 +1,32 @@
+diagramtype Main {
+	NameClash1_1;
+	NameClash2_1;
+	NameClash3_1;
+	NameClash4_1;
+}
+diagramtype NameClash1 {
+	Add: Add;
+	connect(1, Add.in1);
+	connect(2, Add.in2);
+}
+
+diagramtype NameClash2 {
+	int: Add;
+	connect(1, int.in1);
+	connect(2, int.in2);
+}
+
+diagramtype int(int: Int => out: Int) {
+	connect(int, out);
+}
+diagramtype NameClash3(=> out: Int) {
+	int: int;
+	connect(1, int.int);
+	connect(int.out, out);
+}
+
+diagramtype NameClash4() {
+	var int: Int;
+	connect(1, int);
+}
+

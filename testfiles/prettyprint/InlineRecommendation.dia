@@ -1,0 +1,16 @@
+diagramtype Main(in: Int => out: Int) {
+  connect(in, out);
+}
+recommendation Main {
+  inline block: Block[out];
+  inline block2: Block[out];
+  block before block2;
+}
+diagramtype Block(in: Int => out: Int) {
+  add: Add;
+  connect(in, add.in1);
+  connect(add.out, out);
+}
+wiring Block[=>x: Int] {
+  intercept x with Block.in, Block.out;
+}

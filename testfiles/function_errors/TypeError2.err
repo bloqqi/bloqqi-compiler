@@ -1,0 +1,2 @@
+Line 2, column 8: 1003: Real is expected, but in1 is Bool
+Line 2, column 8: 1004: Real is expected, but false is Bool

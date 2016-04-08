@@ -1,0 +1,28 @@
+diagramtype A {
+  block: B;
+}
+diagramtype A2 extends A {
+  redeclare block: super {
+    Add_1;
+  };
+}
+diagramtype A3 extends A2 {
+  redeclare block: super {
+    Add_2;
+  };
+}
+diagramtype A4( => out: Int) extends A3 {
+  redeclare block: super (in1: Int, in2: Int, in3: Int => out: Int) {
+    connect(in1, Add_1.in1);
+    connect(in2, Add_1.in2);
+    connect(Add_1.out, Add_2.in1);
+    connect(in3, Add_2.in2);
+    connect(Add_2.out, out);
+  };
+  connect(1, block.in1);
+  connect(2, block.in2);
+  connect(3, block.in3);
+  connect(block.out, out);
+}
+diagramtype B {
+}

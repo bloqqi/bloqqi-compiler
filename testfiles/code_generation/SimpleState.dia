@@ -1,0 +1,11 @@
+external Print(in: Int);
+
+diagramtype Main {
+	var state: Int;
+	add: Add;
+	print: Print;
+	connect(state, add.in1);
+	connect(1, add.in2);
+	connect(add.out, state);
+	connect(add.out, print.in);
+}

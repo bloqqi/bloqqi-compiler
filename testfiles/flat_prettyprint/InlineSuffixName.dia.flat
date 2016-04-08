@@ -1,0 +1,7 @@
+diagramtype Main(in: Int) {
+  a$Add_1: Add;
+}
+diagramtype A() {
+  Add_1: Add;
+}
+

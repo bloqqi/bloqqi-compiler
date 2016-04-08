@@ -1,0 +1,5 @@
+diagramtype A() {
+	B b;
+	B b;
+}
+diagramtype B() {}

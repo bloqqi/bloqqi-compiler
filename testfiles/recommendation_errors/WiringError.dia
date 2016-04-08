@@ -1,0 +1,15 @@
+diagramtype Main(Int in => Int out) {
+    connect(in, out);
+}
+recommendation Main {
+    Block[out] block;
+    Block[out] block2;
+    block before block2;
+}
+
+diagramtype Block(Int in => Int out) {
+}
+wiring Block[=> Int in] {
+    // block misspelled (should be Block)
+    intercept in with block.in, block.out;
+}

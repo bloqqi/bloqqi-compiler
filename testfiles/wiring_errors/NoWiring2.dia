@@ -1,0 +1,4 @@
+diagramtype Y() {
+    X[Int in, =>Int out, in] x;
+    connect(in, out);
+}

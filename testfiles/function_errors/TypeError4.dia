@@ -1,0 +1,3 @@
+function iffunc(Int in => Int out) {
+	out = (true || false) + 5;
+}

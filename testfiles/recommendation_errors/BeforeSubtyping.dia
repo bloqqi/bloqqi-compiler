@@ -1,0 +1,22 @@
+diagramtype A(Int in => Int out) {
+    connect(in, out);
+}
+recommendation A {
+    T[out] t1;
+    T[out] t2;
+}
+
+diagramtype B extends A {
+}
+recommendation B extends super;
+recommendation B {
+    t1 before t2;
+}
+
+
+diagramtype T(Int in => Int out) {
+}
+wiring T[=> Int in] {
+    intercept in with T, T;
+}
+

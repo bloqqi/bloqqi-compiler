@@ -1,0 +1,19 @@
+  diagramtype Main {
+    var out1 : Int;
+    var out2 : Int;
+    acc1: Acc;
+    acc2: Acc;
+    connect(1, acc1.in);
+    connect(acc1.out, out1);
+    connect(2, acc2.in);
+    connect(acc2.out, out2);
+  }
+  
+  diagramtype Acc(in: Int => out: Int) {
+    var localVar: Int;
+    Add_1;
+    connect(in, Add_1.in1);
+    connect(localVar, Add_1.in2);
+    connect(Add_1.out, out);
+    connect(Add_1.out, localVar);
+  }

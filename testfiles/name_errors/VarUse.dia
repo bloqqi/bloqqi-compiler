@@ -1,0 +1,6 @@
+diagramtype T() {
+	S_1;
+	S_2;
+	connect(S_1, S_2.in1);
+}
+diagramtype S(Int in => Int out) {}

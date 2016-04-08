@@ -1,0 +1,3 @@
+diagramtype B(b: Int) {
+  var b: Bool;
+}

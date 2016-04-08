@@ -1,0 +1,22 @@
+diagramtype A(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype B1(in: Int => out: Int) {
+  Target: Target;
+  Source: Source;
+  connect(in, Source.in);
+  connect(Source.out, Target.in);
+  connect(Target.out, out);
+}
+diagramtype B2(in: Int => out: Int) {
+  Source: Source;
+  Target: Target;
+  connect(Target.out, out);
+  connect(in, Source.in);
+  connect(Source.out, Target.in);
+}
+diagramtype Target(in: Int => out: Int) {
+}
+diagramtype Source(in: Int => out: Int) {
+}
+

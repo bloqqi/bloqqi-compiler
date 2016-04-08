@@ -1,0 +1,471 @@
+import java.util.Set;
+import java.util.SortedSet;
+
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+aspect RecommendationConfiguration {
+	public SpecializeDiagramType DiagramType.specialize() {
+		return new SpecializeDiagramType(this);
+	}
+	
+	public class SpecializeDiagramType {
+		private final DiagramType diagramType;
+		private final SortedSet<ConfComponentGroup> groups;
+		private final SortedSet<ConfReplaceable> replaceables;
+
+		public SpecializeDiagramType(DiagramType diagramType) {
+			SortedSet<ConfComponentGroup> groupsTmp = new TreeSet<>();
+			for (RecommendationGroup rg: diagramType.getRecommendationGroups()) {
+				groupsTmp.add(new ConfComponentGroup(rg));
+			}
+			SortedSet<ConfReplaceable> replaceablesTmp = new TreeSet<>();
+			for (RecommendationReplaceable rr: diagramType.recommendedReplaceables()) {
+				replaceablesTmp.add(new ConfReplaceable(rr));
+			}
+			this.diagramType = diagramType;
+			this.groups = Collections.unmodifiableSortedSet(groupsTmp);
+			this.replaceables = Collections.unmodifiableSortedSet(replaceablesTmp);
+		}
+
+		public SortedSet<ConfComponentGroup> getGroups() {
+			return groups;
+		}
+		
+		public SortedSet<ConfReplaceable> getReplaceables() {
+			return replaceables;
+		}
+		
+		public Component newAnonymousComponent(String componentName) {
+			Component component = new Component();
+			component.setInline(false);
+			component.setName(new IdName(componentName));
+			component.setHasSimpleName(false);
+			if (containsChanges()) {
+				component.setType(new AnonymousType(newAnonymousDiagramType()));
+			} else {
+				component.setType(new TypeUse(diagramType.name()));
+			}
+			return component;
+		}
+
+		public DiagramType newDiagramType(String newName) {
+			DiagramType newDt = new DiagramType();
+			newDt.setID(newName);
+			newDt.addSuperType(new TypeUse(diagramType.name()));
+			addComponents(newDt);
+			return newDt;
+		}
+
+		protected AnonymousDiagramType newAnonymousDiagramType() {
+			AnonymousDiagramType newAdt = new AnonymousDiagramType();
+			newAdt.setID("<anonymous>");
+			newAdt.addSuperType(new TypeUse(diagramType.name()));
+			addComponents(newAdt);
+			return newAdt;
+		}
+		
+		private void addComponents(DiagramType newDt) {
+			for (ConfComponentGroup group: computeSortedGroups()) {
+				if (group.isSelected()) {
+					newDt.addLocalComponent(group.newComponent());
+				}
+			}
+			for (ConfReplaceable r: replaceables) {
+				if (r.isRedeclared()) {
+					newDt.addLocalComponent(r.newAnonymousRedeclare());
+				}
+			}
+		}
+		
+		protected boolean containsChanges() {
+			for (ConfComponentGroup group: groups) {
+				if (group.isSelected()) {
+					return true;
+				}
+			}
+			for (ConfReplaceable repl: replaceables) {
+				if (repl.isRedeclared()) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private Collection<ConfComponentGroup> computeSortedGroups() {
+			final Map<RecommendationGroup, ConfComponentGroup> map
+				= new HashMap<RecommendationGroup, ConfComponentGroup>();
+			for (ConfComponentGroup g: groups) {
+				map.put(g.getRecommendationGroup(), g);
+			}
+			
+			SuccessorFunction<ConfComponentGroup> succFunc; 
+			succFunc = new SuccessorFunction<ConfComponentGroup>() {
+				public Collection<ConfComponentGroup> successors(ConfComponentGroup g) {
+					Set<ConfComponentGroup> set = new HashSet<ConfComponentGroup>();
+					for (RecommendationGroup rg: g.getRecommendationGroup().groupsAfter()) {
+						set.add(map.get(rg));
+					}
+					return set;
+				}
+			};
+			
+			Comparator<ConfComponentGroup> tieOrdering;
+			tieOrdering = new Comparator<ConfComponentGroup>() {
+				public int compare(ConfComponentGroup g1, ConfComponentGroup g2) {
+					return g1.getName().compareTo(g2.getName());
+				}
+			};
+			
+			return Utils.topologicalSort(groups, succFunc, tieOrdering);
+		}
+		
+		public SortedSet<String> getNewInParameters() {
+			return getNewInParameters("");
+		}
+		protected SortedSet<String> getNewInParameters(String path) {
+			SortedSet<String> set = new TreeSet<>();
+			String prefixPath = path.isEmpty() ? "" : path + ".";
+			for (ConfComponentGroup g: groups) {
+				set.addAll(g.getNewInParameters(prefixPath + g.getName()));
+			}
+			for (ConfReplaceable repl: replaceables) {
+				set.addAll(repl.getNewInParameters(prefixPath + repl.getName()));
+			}
+			return set;
+		}
+	
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Diagramtype: " + diagramType.name() + "\n");
+			sb.append("Recommended components:\n");
+			for (ConfComponentGroup group: groups) {
+				sb.append("- " + group.toString() + "\n");
+			}
+			sb.append("Replaceables:\n");
+			for (ConfReplaceable r: replaceables) {
+				sb.append("- " + r.toString() + "\n");
+			}
+			return sb.toString();
+		}
+	}
+	
+	public class ConfComponentGroup implements Comparable<ConfComponentGroup> {
+		private final RecommendationGroup group;
+		private final SortedSet<ConfComponent> components;
+		private final DiagramType defaultType;
+		
+		private boolean isSelected;
+		private ConfComponent selectedComp;
+		
+		public ConfComponentGroup(RecommendationGroup group) {
+			this.group = group;
+			defaultType = (DiagramType) group.superType().componentType();
+
+			SortedSet<ConfComponent> tmpSet = new TreeSet<ConfComponent>();
+			for (RecommendationComponent subRc: group.recommendedComponents()) {
+				for (DiagramType subType: subRc.componentType().namedSubTypes()) {
+					boolean isDefault = subType == defaultType;
+					ConfComponent cc = new ConfComponent(this, subRc, subType, isDefault);
+					tmpSet.add(cc);
+					if (isDefault) {
+						selectedComp = cc;
+					}
+				}
+			}
+			components = Collections.unmodifiableSortedSet(tmpSet);
+			isSelected = false;
+		}
+
+		public RecommendationGroup getRecommendationGroup() {
+			return group;
+		}
+
+		public String getName() {
+			return group.name();
+		}
+
+		public SortedSet<ConfComponent> getRecommendations() {
+			return components;
+		}
+		public boolean isSelected() {
+			return isSelected;
+		}
+		public DiagramType getDefaultType() {
+			return defaultType;
+		}
+		public ConfComponent getSelectedComponent() {
+			return selectedComp;
+		}
+		
+		public void setSelected(boolean isSelected) {
+			this.isSelected = isSelected;
+		}
+		public void setSelectedComponent(ConfComponent selectedComp) {
+			this.selectedComp = selectedComp;
+		}
+		
+		public SortedSet<String> getNewInParameters(String path) {
+			if (isSelected()) {
+				return getSelectedComponent().getNewInParameters(path);
+			} else {
+				return Collections.emptySortedSet();
+			}
+		}
+		
+		public int compareTo(ConfComponentGroup other) {
+			return getName().compareTo(other.getName());
+		}
+
+		protected Component newComponent() {
+			return isSelected() ? selectedComp.newComponent() : null;
+		}
+	
+		public String toString() {
+			String selectedStr = isSelected() ? selectedComp.toString() : "N/A";
+			return selectedStr + " selected of " + components;
+		}
+	}
+	
+	public class ConfComponent implements Comparable<ConfComponent> {
+		private final ConfComponentGroup confGroup;
+		private final RecommendationComponent rc;
+		private final DiagramType type;
+		private final boolean isDefault;
+		
+		private SpecializeDiagramType specDt;
+		
+		public ConfComponent(ConfComponentGroup confGroup, RecommendationComponent rc, DiagramType type, boolean isDefault) {
+			this.confGroup = confGroup;
+			this.rc = rc;
+			this.type = type;
+			this.isDefault = isDefault;
+		}
+		
+		public ConfComponentGroup getGroup() {
+			return confGroup;
+		}
+		
+		public DiagramType getType() {
+			return type;
+		}
+		
+		public boolean isDefault() {
+			return isDefault;
+		}
+		
+		public SpecializeDiagramType specializeType() {
+			if (specDt == null) {
+				specDt = type.specialize();
+			}
+			return specDt;
+		}
+		
+		protected boolean containsChanges() {
+			return specDt != null ? specDt.containsChanges() : false;
+		}
+		
+		public SortedSet<String> getNewInParameters(String path) {
+			// Compute all input parameters that are -not- connected by the wiring
+			Set<String> localParNames = new HashSet<>();
+			for (InParameter in: type.getInParameters()) {
+				localParNames.add(in.name());
+			}
+			if (rc.getComponent().hasWiring()) {
+				for (InParameter in: rc.getComponent().wiring().connectedInParameters()) {
+					localParNames.remove(in.name());
+				}
+			}
+
+			SortedSet<String> newInPars = new TreeSet<>();
+			// Add all local input parameters that are not connected by the wiring
+			for (String inParName: localParNames) {
+				newInPars.add(path + "." + inParName);
+			}
+			
+			// Add parameters belonging to nested types
+			if (containsChanges()) {
+				newInPars.addAll(specDt.getNewInParameters(path));
+			}
+			
+			// Add parameters added in wiring, e.g, "inPar" in "block: Type[inPar: Int]",
+			// but these parameters belong to the enclosing type.
+			// Only add inner/nested parameters, and not parameters on the outermost level,
+			// since parameters on the outermost level already are exposed as parameters.
+			if (path.lastIndexOf(".") > 0) {
+				for (InParameter in: rc.getComponent().inParameters()) {
+					String parentPath = path.substring(0, path.lastIndexOf("."));
+					String s = parentPath + "." + in.name();
+					newInPars.add(s);
+				}
+			}
+			
+			return newInPars;
+		}
+		
+		protected Type newType() {
+			if (containsChanges()) {
+				return new AnonymousType(specDt.newAnonymousDiagramType());
+			} else {
+				return new TypeUse(type.name());
+			}
+		}
+		
+		protected Component newComponent() {
+			if (rc.getComponent() instanceof WiredComponent) {
+				WiredComponent wiredComponent = (WiredComponent) rc.getComponent();
+				return new WiredComponent(
+						wiredComponent.getInline(),
+						newType(),
+						wiredComponent.getName().treeCopy(),
+						false,
+						wiredComponent.getWiredComponentParameterList().treeCopy());
+			} else {
+				return new Component(
+						rc.getComponent().getInline(),
+						newType(),
+						rc.getComponent().getName().treeCopy(),
+						false);
+			}
+		}
+	
+		public int compareTo(ConfComponent other) {
+			return type.name().compareTo(other.type.name());
+		}
+		
+		public String toString() {
+			String isDefaultStr = isDefault ? " (default)" : "";
+			return type.name() + isDefaultStr;
+		}
+	}
+	
+	public class ConfReplaceable implements Comparable<ConfReplaceable> {
+		private final RecommendationReplaceable replaceable; 
+		private final SortedSet<ConfReplaceableAlternative> alternatives;
+		
+		private final DiagramType defaultType;
+		private ConfReplaceableAlternative selectedAlternative;
+		
+		public ConfReplaceable(RecommendationReplaceable replaceable) {
+			this.replaceable = replaceable;
+			SortedSet<ConfReplaceableAlternative> tmpSet;
+			tmpSet = new TreeSet<>(new Comparator<ConfReplaceableAlternative>() {
+				public int compare(ConfReplaceableAlternative a1, ConfReplaceableAlternative a2) {
+					return a1.getType().name().compareTo(a2.getType().name());
+				}
+			});
+			for (DiagramType subType: replaceable.componentType().namedSubTypes()) {
+				boolean isDefault = subType == replaceable.componentType();
+				ConfReplaceableAlternative alt = new ConfReplaceableAlternative(this, subType, isDefault);
+				if (isDefault) {
+					selectedAlternative = alt;
+				}
+				tmpSet.add(alt);
+			}
+			defaultType = selectedAlternative.getType();
+			alternatives = Collections.unmodifiableSortedSet(tmpSet);
+		}
+		
+		public String getName() {
+			return replaceable.name();
+		}
+		
+		public boolean isRedeclared() {
+			return !selectedAlternative.isDefault() || selectedAlternative.containsChanges();
+		}
+		
+		public SortedSet<ConfReplaceableAlternative> getAlternatives() {
+			return alternatives;
+		}
+		
+		public void setSelectedAlternative(ConfReplaceableAlternative selectedAlternative) {
+			this.selectedAlternative = selectedAlternative;
+		}
+		
+		public ConfReplaceableAlternative getSelectedAlternative() {
+			return selectedAlternative;
+		}
+		
+		public int compareTo(ConfReplaceable other) {
+			return replaceable.name().compareTo(other.replaceable.name());
+		}
+		
+		public SortedSet<String> getNewInParameters(String path) {
+			return selectedAlternative.getNewInParameters(path, defaultType);
+		}
+		
+		public String toString() {
+			return replaceable.componentType().name();
+		}
+		
+		protected Component newAnonymousRedeclare() {
+			return new RedeclareComponent(
+				false,
+				selectedAlternative.newType(),
+				new IdName(replaceable.name()),
+				false);
+		}
+	}
+	
+	public class ConfReplaceableAlternative {
+		private final ConfReplaceable confReplaceable;
+		private final DiagramType type;
+		private final boolean isDefault;
+		
+		private SpecializeDiagramType specDt;
+		
+		public ConfReplaceableAlternative(ConfReplaceable confReplaceable, DiagramType type, boolean isDefault) {
+			this.confReplaceable = confReplaceable;
+			this.type = type;
+			this.isDefault = isDefault;
+			this.specDt = null;
+		}
+		
+		public ConfReplaceable getConfReplaceable() {
+			return confReplaceable;
+		}
+		
+		public DiagramType getType() {
+			return type;
+		}
+		
+		public boolean isDefault() {
+			return isDefault;
+		}
+		
+		public SpecializeDiagramType specializeType() {
+			if (specDt == null) {
+				specDt = type.specialize();
+			}
+			return specDt;
+		}
+		
+		protected boolean containsChanges() {
+			return specDt != null ? specDt.containsChanges() : false;
+		}
+		
+		public SortedSet<String> getNewInParameters(String path, DiagramType defaultType) {
+			SortedSet<String> set = new TreeSet<>();
+			for (InParameter in: getType().addedInParameters(defaultType)) {
+				set.add(path + "." + in.name());
+			}
+			if (containsChanges()) {
+				set.addAll(specDt.getNewInParameters(path));
+			}
+			return set;
+		}
+		
+		protected Type newType() {
+			if (containsChanges()) {
+				return new AnonymousType(specDt.newAnonymousDiagramType());
+			} else {
+				return new TypeUse(type.name());
+			}
+		}		
+		
+		public String toString() {
+			String isDefaultStr = isDefault ? " (default)" : "";
+			return type.name() + isDefaultStr;
+		}
+	}
+}

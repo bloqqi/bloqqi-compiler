@@ -1,0 +1,15 @@
+diagramtype Main {
+  block: Block;
+}
+diagramtype SubMain(in: Int => out: Int) extends Main {
+  redeclare block: Block (in: Int => out: Int) {
+    Add_1;
+    connect(in, Add_1.in1);
+    connect(in, Add_1.in2);
+    connect(Add_1.out, out);
+  };
+  connect(in, block.in);
+  connect(block.out, out);
+}
+diagramtype Block {
+}

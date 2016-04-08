@@ -1,0 +1,17 @@
+diagramtype A() {
+  T_1: T;
+  T_2: T;
+}
+diagramtype B() {
+  T_1: T;
+  T_2: T;
+  connect(T_1.out, T_2.in);
+}
+diagramtype C() {
+  T_1: T;
+  T_2: T;
+  connect(T_1.out, T_2.in);
+}
+diagramtype T(in: Int => out: Int) {
+}
+

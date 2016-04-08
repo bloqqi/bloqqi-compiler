@@ -1,0 +1,17 @@
+diagramtype X1(in1: Int) {
+  T_1: T;
+}
+diagramtype X2(in2: Int) {
+  T_1: T;
+}
+diagramtype Y(in1: Int, in2: Int) {
+  X1$T_1: T;
+  X2$T_1: T;
+  Y$T_1: T;
+  connect(X1$T_1.out, X2$T_1.in);
+  connect(in1, X1$T_1.in);
+  connect(in2, Y$T_1.in);
+}
+diagramtype T(in: Int, in2: Int => out: Int) {
+}
+

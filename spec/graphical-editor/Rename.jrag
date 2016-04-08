@@ -1,0 +1,106 @@
+aspect Rename {
+	public boolean UserDefType.changeName(String newName) {
+		if (lookupType(newName) != null) {
+			return false;
+		}
+		for (TypeUse use: uses()) {
+			use.changeName(newName);
+		}
+		setID(newName);
+		program().flushAllAttributes();
+		return true;
+	}
+	
+	inh Component TypeUse.component();
+	eq Component.getType().component() = this;
+	eq Program.getChild().component() = null;
+	inh Wiring TypeUse.wiring();
+	eq Wiring.getTypeUse().wiring() = this;
+	eq Program.getChild().wiring() = null;
+	public void TypeUse.changeName(String newName) {
+		if (component() != null) {
+			component().updateTypeName(newName);
+		}
+		if (wiring() != null) {
+			wiring().component().changeName(newName, false);
+		}
+		setID(newName);
+	}
+	public void Component.updateTypeName(String newName) {
+		if (getHasSimpleName()) {
+			String name = getName().toString();
+			String index = name.substring(name.lastIndexOf('_')+1);
+			String newFullName = newName + "_" + index;
+			if (getName() instanceof IdName) {
+				((IdName)getName()).setID(newFullName);
+			}
+			for (VarUse use: uses()) {
+				use.changeName(newFullName);
+			}
+		}
+	}
+	
+	public boolean Component.changeName(String newName) {
+		return changeName(newName, true);
+	}
+	protected boolean Component.changeName(String newName, boolean flush) {
+		if (lookup(newName) != null) {
+			return false;
+		}
+		for (VarUse use: uses()) {
+			use.changeName(newName);
+		}
+		setName(new IdName(newName));
+		setHasSimpleName(false);
+		if (flush) {
+			program().flushAllAttributes();
+		}
+		return true;
+	}
+	
+	public boolean Parameter.changeName(String newName) {
+		if (lookup(newName) != null) {
+			return false;
+		}
+		for (VarUse use: uses()) {
+			use.changeName(newName);
+		}
+		setID(newName);
+		program().flushAllAttributes();
+		return true;
+	}
+	public abstract void VarUse.changeName(String newName);
+	public void AbstractSimpleVarUse.changeName(String newName) {
+		setID(newName);
+	}
+	public void TypedSimpleVarUse.changeName(String newName) {
+		setID(newName);
+	}
+	public void DotVarUse.changeName(String newName) {
+		setID(newName);
+	}
+}
+
+aspect NameUses {
+	coll Set<TypeUse> TypeDecl.uses() [new HashSet<TypeUse>()] with add;
+	TypeUse contributes this
+		when decl() != null
+		to TypeDecl.uses() for decl();
+
+	coll Set<VarUse> VarDecl.uses() [new HashSet<VarUse>()] with add;
+	VarUse contributes this
+		when decl() != null
+		to VarDecl.uses() for decl();
+	VarUse contributes this
+		when decl() instanceof ComponentParameter
+		to VarDecl.uses() for decl().declaredParameter();
+
+	syn Parameter VarDecl.declaredParameter();
+	eq ComponentParameter.declaredParameter() = getParameter().declaredParameter();
+	eq Parameter.declaredParameter() = this;
+	eq InheritedInParameter.declaredParameter() = getDeclaredInParameter();
+	eq InheritedOutParameter.declaredParameter() = getDeclaredOutParameter();
+	eq Variable.declaredParameter() = null;
+	eq Component.declaredParameter() = null;
+	eq StructField.declaredParameter() = null;
+}

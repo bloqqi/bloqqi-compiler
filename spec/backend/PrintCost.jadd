@@ -1,0 +1,39 @@
+aspect PrintCost {
+	public String CompilationUnit.printCost() {
+		StringBuilder sb = new StringBuilder();
+		for (Declaration d : getDeclarations()) {
+			d.printCost(sb);
+		}
+		return sb.toString();
+	}
+
+	public void Declaration.printCost(StringBuilder sb) {}
+	public void DiagramType.printCost(StringBuilder sb) {
+		int parameters = getNumLocalInParameter() + getNumLocalOutParameter();
+		sb.append(name() + ":\n");
+		sb.append("- Local:\n");
+		sb.append("  - parameters: " + parameters + "\n");
+		sb.append("  - blocks: " + getNumLocalComponent() + "\n");
+		int conn = 0;
+		int intercept = 0;
+		for (FlowDecl fd: getFlowDecls()) {
+			if (fd instanceof Connection) conn++;
+			if (fd instanceof Interception) intercept++;
+		}
+		sb.append("  - connections: " + conn + "\n");
+		sb.append("  - intercept: " + intercept + "\n");
+		sb.append("- Total:\n");
+		sb.append("  - parameters: " + (getNumInParameter() + getNumOutParameter()) + "\n");
+		sb.append("  - block: " + getNumComponent() + "\n");
+		sb.append("  - connections: " + getNumConnection() + "\n");
+		int codeCost = parameters + getNumLocalComponent() + conn + intercept;
+		sb.append("- code cost: " + codeCost + "\n");
+		
+		int runtimeCost = 0;
+		runtimeCost += getNumComponent();
+		runtimeCost += getNumConnection();
+		runtimeCost += getNumInParameter();
+		runtimeCost += getNumOutParameter();
+		sb.append("- runtime cost: " + runtimeCost + "\n");
+	}
+}

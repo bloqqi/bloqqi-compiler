@@ -1,0 +1,8 @@
+diagramtype Main(Int in => Int out) {
+    inline Block block;    
+}
+
+diagramtype Block(Int in => Int out) {
+    connect(in, out);
+}
+

@@ -1,0 +1,26 @@
+diagramtype Controller(SP: Int, PV: Int => CV: Int) {
+  Sub_1: Sub;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Sub_1.out, CV);
+}
+diagramtype FeedForward(In: Int, Gain: Int, FV: Int => Out: Int) {
+  Mul_1: Mul;
+  Add_1: Add;
+  connect(In, Add_1.in1);
+  connect(Gain, Mul_1.in1);
+  connect(FV, Mul_1.in2);
+  connect(Mul_1.out, Add_1.in2);
+  connect(Add_1.out, Out);
+}
+diagramtype MyControllerWithFF(SP: Int, PV: Int, Gain: Int, FV: Int => CV: Int) {
+  Sub_1: Sub;
+  FF: FeedForward;
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Gain, FF.Gain);
+  connect(FV, FF.FV);
+  connect(Sub_1.out, FF.In);
+  connect(FF.Out, CV);
+}
+

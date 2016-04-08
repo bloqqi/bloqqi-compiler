@@ -1,0 +1,9 @@
+function B(Int in => Bool out) {
+}
+function I(Int in) {
+}
+diagramtype T() {
+	B_1;
+	I_1;
+	connect(B_1, I_1);
+}

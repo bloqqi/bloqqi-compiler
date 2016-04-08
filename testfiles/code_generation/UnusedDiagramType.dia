@@ -1,0 +1,6 @@
+diagramtype Main {
+}
+
+diagramtype StateDiagram {
+  var state: Int;
+}

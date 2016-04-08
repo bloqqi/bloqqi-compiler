@@ -1,0 +1,1 @@
+Line 5, column 1: Multiple declaration in type 'B': 'c' is declared in 'A' and 'B', 'b' is declared in 'A' and 'B'

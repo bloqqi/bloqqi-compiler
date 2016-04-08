@@ -1,0 +1,16 @@
+diagramtype Main {
+	inline Block block;
+}
+diagramtype SubMain extends Main {
+	redeclare SubBlock block;
+}
+
+diagramtype Block() {
+	Add addFirst;
+	Add addLast;
+	connect(addFirst.out, addLast.in1);
+}
+diagramtype SubBlock extends Block {
+	Add addMiddle;
+	intercept addLast.in1 with addMiddle.in1, addMiddle.out;
+}

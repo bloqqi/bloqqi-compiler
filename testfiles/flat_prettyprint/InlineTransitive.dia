@@ -1,0 +1,23 @@
+diagramtype Main(Int in => Int out) {
+    inline Block block;    
+    connect(in, block.in);
+    connect(block, out);
+}
+
+diagramtype Block(Int in => Int out) {
+    Add add;
+    inline InnerBlock innerBlock;
+    connect(in, innerBlock.in);
+    connect(innerBlock.out, out);
+    connect(in, add.in1);
+    connect(in, add.in2);
+}
+
+diagramtype InnerBlock(Int in => Int out) {
+    Add add;
+    connect(in, add.in1);
+    connect(in, add.in2);
+    connect(add, out);
+}
+
+

@@ -1,0 +1,26 @@
+diagramtype Main(Int in => Int out) {
+    T t;
+    connect(in, t);
+    connect(t, out);
+}
+
+diagramtype ASubMain extends Main {
+    redeclare S t;
+}
+diagramtype ASubSubMain extends ASubMain {
+    T t2;
+    intercept t with t2, t2;
+}
+
+diagramtype BSubMain extends Main {
+    redeclare S t;
+    T t2;
+    intercept t with t2, t2;
+}
+
+
+diagramtype T(Int in => Int out) {
+}
+diagramtype S extends T { 
+}
+

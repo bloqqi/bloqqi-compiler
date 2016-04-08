@@ -1,0 +1,29 @@
+package org.bloqqi.tests;
+
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Collection;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.bloqqi.compiler.ast.Program;
+import org.bloqqi.tests.testsuite.DynamicTestSuite;
+
+@RunWith(Parameterized.class)
+public class FlatPrettyPrintTests extends DynamicTestSuite {
+	private final static String DIRECTORY_PATH = "flat_prettyprint/";
+	
+	public FlatPrettyPrintTests(String filename) { super(filename); }
+	@Test public void test() { 
+		Program p = parseValidProgramFile(DIRECTORY_PATH + filename + ".dia");
+		String expected = readTestFile(DIRECTORY_PATH + filename + ".dia.flat");
+		String flattenedPP = p.getCompilationUnit(0).flattenedPrettyPrint().trim();
+		assertEquals(expected.trim(), flattenedPP);
+		
+		parseValidProgram(flattenedPP);
+	}
+	@Parameters(name = "{0}") public static Collection<Object[]> getFiles() { return getFiles(DIRECTORY_PATH); }
+}

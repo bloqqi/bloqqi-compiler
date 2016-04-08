@@ -1,0 +1,349 @@
+/**
+ * Lookup for types
+ */
+aspect LookupTypes {
+	syn lazy TypeDecl TypeUse.decl() = lookupType(getID());
+	inh TypeDecl TypeUse.lookupType(String name);
+	inh TypeDecl TypeDecl.lookupType(String name);
+	
+	eq Program.getChild().lookupType(String name) = lookupType(name);
+	syn TypeDecl Program.lookupType(String name) {
+		TypeDecl typeDecl = lookupPredefinedTypes(name);
+		if (typeDecl != null) return typeDecl;
+		typeDecl = lookupStandardLibrary(name);
+		if (typeDecl != null) return typeDecl;
+		for (CompilationUnit cu: getCompilationUnits()) {
+			typeDecl = cu.localLookupType(name);
+			if (typeDecl != null) return typeDecl;
+		}
+		return null;
+	}
+	syn boolean Program.isTypeDeclared(String name) 
+		= lookupType(name) != null;
+	
+	syn TypeDecl CompilationUnit.localLookupType(String name) {
+		for (TypeDecl td: typeDecls()) {
+			if (td.name().equals(name)) {
+				return td;
+			}
+		}
+		return null;
+	}
+	
+	syn TypeDecl Program.lookupStandardLibrary(String name) {
+		if (hasStandardLibrary()) {
+			return getStandardLibrary().localLookupType(name);	
+		}
+		return null;
+	}
+
+	syn TypeDecl Program.lookupPredefinedTypes(String name) {
+		for (TypeDecl td: predefinedTypeDecls()) {
+			if (td.name().equals(name)) {
+				return td;
+			}
+		}
+		return null;
+	}
+}
+
+aspect LookupVariables {
+	/**
+	 * Lookup for VarUses
+	 * 
+	 * Simplification:
+	 *   If Sub has only one output parameter and Neg has only one input parameter, then 
+	 *   connect(Sub_1, Neg) is interpreted as connect(Sub_1.out, Neg.in)
+	 *   For more details, see rewrite below (SimpleVarUse -> DotVarUse).
+	 */
+	public interface VarDecl { 
+		String name();
+	}
+	Component implements VarDecl;
+	ComponentParameter implements VarDecl;
+	Parameter implements VarDecl;
+	StructField implements VarDecl;
+	Variable implements VarDecl;
+	
+	syn VarDecl VarUse.decl();
+	eq AbstractSimpleVarUse.decl() = lookup(getID());
+	eq TypedSimpleVarUse.decl() = lookup(getTypeUse().getID(), getID());
+	eq DotVarUse.decl()
+		= getVarUse().decl() == null 
+		? null 
+		: getVarUse().decl().findMember(getID());
+
+	inh VarDecl VarUse.lookup(String name);
+	inh VarDecl VarDecl.lookup(String name);
+	eq Program.getChild().lookup(String name) = null;
+
+	// Local declarations
+	eq DiagramType.getLocalComponent().lookup(String name) = lookup(name);
+	eq DiagramType.getFlowDecl().lookup(String name) = lookup(name);
+	eq DiagramType.getLocalInParameter().lookup(String name) = lookup(name);
+	eq DiagramType.getLocalOutParameter().lookup(String name) = lookup(name);
+	eq DiagramType.getLocalVariable().lookup(String name) = lookup(name);
+	// All (inherited) declarations
+	eq DiagramType.getConnection().lookup(String name) = inheritedLookup(name);
+	eq DiagramType.getAnnotation().lookup(String name) = inheritedLookup(name);
+	eq ExternalFunction.getChild().lookup(String name) = localParameterLookup(name);
+	eq Struct.getStructField().lookup(String name) = lookupField(name);
+
+	/**
+	 * Lookup with a type
+	 * 
+	 * A subtype can inherit two components from two different supertypes
+	 * with the same name. To distinguish between these two components in the
+	 * subtype, the name of the component can be prefixed with the supertype
+	 * name. For example,
+	 *   Connect(A:c, ...)
+	 * Where the component c is defined in type A and A is a supertype.
+	 */
+	inh VarDecl VarUse.lookup(String type, String name);
+	eq Program.getChild().lookup(String type, String name) = null;
+	eq DiagramType.getFlowDecl().lookup(String type, String name) {
+		TypeDecl td = lookupType(type);
+		if (td == null) return null;
+		return td.localLookup(name);
+	}
+	eq DiagramType.getConnection().lookup(String type, String name) 
+		= inheritedLookup(type, name);
+	eq DiagramType.getAnnotation().lookup(String type, String name) 
+		= inheritedLookup(type, name);
+
+	syn VarDecl TypeDecl.localLookup(String name) = null;
+	eq DiagramType.localLookup(String name) {
+		VarDecl decl = localParameterLookup(name);
+		if (decl == null) decl = localComponentLookup(name);
+		return decl;
+	}
+	
+	/** 
+	 * Search for a name declaration, if multiply declarations exists,
+	 * the most local declaration is returned.
+	 */
+	syn VarDecl TypeDecl.lookup(String name) = null;
+	eq DiagramType.lookup(String name) {
+		ArrayList<VarDecl> list = lookupAsList(name);
+		return !list.isEmpty() ? list.get(list.size()-1) : null;
+	}
+	syn lazy ArrayList<VarDecl> DiagramType.lookupAsList(String name) {
+		ArrayList<VarDecl> list = new ArrayList<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			VarDecl decl = superType.localParameterLookup(name);
+			if (decl != null) list.add(decl);
+			decl = superType.localVariableLookup(name);
+			if (decl != null) list.add(decl);
+			decl = superType.localComponentLookup(name);
+			if (decl != null) list.add(decl);
+		}
+		return list;
+	}
+
+	/** 
+	 * Search for a name in the NTAs representing all parameters, variables
+	 * and components (both inherited and local). If multiply declarations exists, 
+	 * then return the most local declaration.
+	 */
+	syn VarDecl DiagramType.inheritedLookup(String name) 
+		= inheritedLookup("", name);
+	syn VarDecl DiagramType.inheritedLookup(String type, String name) {
+		ArrayList<VarDecl> list = inheritedLookupAsList(type, name);
+		return !list.isEmpty() ? list.get(list.size()-1) : null;
+	}	
+	syn ArrayList<VarDecl> DiagramType.inheritedLookupAsList(String type, String name) {
+		ArrayList<VarDecl> list = new ArrayList<>();
+		for (InParameter ip: getInParameters()) {
+			if (ip.name().equals(name)) {
+				list.add(ip);
+			}
+		}
+		for (OutParameter op: getOutParameters()) {
+			if (op.name().equals(name)) {
+				list.add(op);
+			}
+		}
+		for (InheritedVariable v: getVariables()) {
+			if (v.name().equals(name)) {
+				list.add(v);
+			}
+		} 
+		for (InheritedComponent c: getComponents()) {
+			String dtName = c.getDeclaredComponent().diagramType().name();
+			if (c.name().equals(name) && (type.isEmpty() || dtName.equals(type))) {
+				list.add(c);
+			}
+		}
+		return list;
+	}
+	
+
+	syn VarDecl VarDecl.findMember(String name);	
+	eq Component.findMember(String name) {
+		for (ComponentParameter in: getInParameters()) {
+			if (in.name().equals(name)) {
+				return in;
+			}
+		}
+		for (ComponentParameter out: getOutParameters()) {
+			if (out.name().equals(name)) {
+				return out;
+			}
+		}
+		return null;
+	}
+	eq ComponentParameter.findMember(String name) = type().lookupField(name);
+	eq Parameter.findMember(String name) = type().lookupField(name);
+	eq Variable.findMember(String name) = type().lookupField(name);
+	eq StructField.findMember(String name) = type().lookupField(name);
+	
+	syn VarDecl TypeDecl.lookupField(String name) = null;
+	eq Struct.lookupField(String name) {
+		for (StructField f: getStructFields()) {
+			if (f.name().equals(name)) {
+				return f;
+			}
+		}
+		return null;
+	}
+	
+	syn Parameter DiagramType.localParameterLookup(String name) {
+		for (InParameter p: getLocalInParameters()) {
+			if (p.name().equals(name)) {
+				return p;
+			}
+		}
+		for (OutParameter p: getLocalOutParameters()) {
+			if (p.name().equals(name)) {
+				return p;
+			}
+		}
+		for (Component c: getLocalComponents()) {
+			for (InParameter p: c.inParameters()) {
+				if (p.name().equals(name)) {
+					return p;
+				}
+			}
+			for (OutParameter p: c.outParameters()) {
+				if (p.name().equals(name)) {
+					return p;
+				}
+			}
+		}
+		return null;
+	}
+	syn Parameter ExternalFunction.localParameterLookup(String name) {
+		for (InParameter p: getInParameters()) {
+			if (p.name().equals(name)) {
+				return p;
+			}
+		}
+		if (getOutParameter().name().equals(name)) {
+			return getOutParameter();
+		}
+		return null;
+	}
+	syn Variable DiagramType.localVariableLookup(String name) {
+		for (Variable v: getLocalVariables()) {
+			if (v.name().equals(name)) {
+				return v;
+			}
+		}
+		return null;
+	}
+	// Use a collection attribute when searching for components to speed
+	// up the search. All components names are collected in a map (String->Component).
+	// The map is then used to search for a component name in O(1) time.
+	syn Component DiagramType.localComponentLookup(String name) 
+		= componentMap().get(name);
+	coll NameMap<Component> DiagramType.componentMap() 
+		[new NameMap<Component>()] with add root DiagramType;
+	Component contributes new KeyValue(name(), this)
+		to DiagramType.componentMap() for diagramType();
+}	
+
+aspect Names {
+	syn String TypeDecl.name();
+	eq UserDefType.name() = getID();
+	eq AnonymousDiagramType.name() = anonymousFullName().replace(".", INLINE_SEP);
+	eq IntType.name() = "Int";
+	eq RealType.name() = "Real";
+	eq BoolType.name() = "Bool";
+	eq StringType.name() = "String";
+	eq UnknownType.name() = "<Unknown>";
+
+	syn String Parameter.name() = getID();
+	syn String Variable.name() = getID();
+	syn String Component.name() = getName().name();
+	syn String ComponentParameter.name() = getParameter().name();
+	syn String StructField.name() = getID();
+	syn String Literal.name() = "<unknown name>";
+	
+	syn String Name.name();
+	eq IdName.name() = getID();
+
+	syn String Type.name();
+	eq TypeUse.name() = toString();
+	eq AnonymousType.name() = "<anonymous>";
+
+	inh String AnonymousDiagramType.anonymousFullName();
+	inh String Component.anonymousFullName();
+	eq Program.getChild().anonymousFullName() = "";
+	eq DiagramType.getChild().anonymousFullName() = name();
+	eq AnonymousDiagramType.getChild().anonymousFullName() = anonymousFullName();
+	eq Component.getType().anonymousFullName()
+		= anonymousFullName() + "." + name();
+
+	inh String AnonymousDiagramType.enclosingComponentName();
+	eq Component.getType().enclosingComponentName() = name();
+	eq Program.getChild().enclosingComponentName() = "";
+}
+
+aspect RewriteSimplifiedForm {
+	// Rewrite the simplified form connect(a, b) to connect(a.p, b.p) 
+	// if the type of a has only one output parameter called p and 
+	// if the type of b has only one input parameter called p.
+	// Both a and b are objects of the class ParseSimpleVarUse.
+	rewrite ParseSimpleVarUse {
+		to VarUse {
+			if (isTopLevel() && isOnSimplifiedForm()) {
+				Component c = (Component) decl();
+				ComponentParameter p;
+				if (isSource()) {
+					p = c.getOutParameter(0);
+				} else {
+					p = c.getInParameter(0);
+				}
+				return new DotVarUse(newSimpleVarUse(), p.name());
+			} else {
+				return newSimpleVarUse();
+			}
+		}
+	}
+	public VarUse ParseSimpleVarUse.newSimpleVarUse() {
+		VarUse u = new SimpleVarUse(getID());
+		u.copyColumnLineFrom(this);
+		return u;
+	}
+	public VarUse ParseTypedSimpleVarUse.newSimpleVarUse() {
+		VarUse u = new TypedSimpleVarUse(getTypeUse().treeCopyNoTransform(), getID());
+		u.copyColumnLineFrom(this);
+		return u;
+	}
+
+
+	inh boolean Expr.isTopLevel();
+	eq Expr.getChild().isTopLevel() = false;
+	eq FlowDecl.getChild().isTopLevel() = true;
+	eq Program.getChild().isTopLevel() = true;
+
+	syn boolean VarUse.isOnSimplifiedForm() = false;
+	eq AbstractSimpleVarUse.isOnSimplifiedForm() {
+		if (decl() instanceof Component) {
+			Component c = (Component) decl();
+			return isSource() && c.getNumOutParameter() == 1
+				|| isTarget() && c.getNumInParameter() == 1;
+		}
+		return false;
+	}
+}

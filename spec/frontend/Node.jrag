@@ -1,0 +1,102 @@
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collection;
+
+/**
+ * This module defines nodes and dataflow between nodes. A node is either a 
+ * parameter, variable or component. A node corresponds to  a graphical block 
+ * in the graphical editor. 
+ */
+
+aspect Node {
+	public interface Node {
+		String name();
+		DiagramType diagramType();
+		boolean isInParameter();
+		boolean isOutParameter();
+		boolean hasIncomingLiterals();
+	}
+	
+	Parameter implements Node;
+	WiringParameter implements Node;
+	Variable implements Node;
+	Component implements Node;
+	Literal implements Node;
+	
+	syn boolean Node.isParameter();
+	eq Parameter.isParameter() = true;
+	eq WiringParameter.isParameter() = true;
+	eq Variable.isParameter() = false;
+	eq Component.isParameter() = false;
+	eq Literal.isParameter() = false;
+	
+
+	syn boolean Component.isInParameter() = false;
+	syn boolean Component.isOutParameter() = false;
+	
+	syn boolean Node.isComponent();
+	eq Parameter.isComponent() = false;
+	eq WiringParameter.isComponent() = false;
+	eq Variable.isComponent() = false;
+	eq Component.isComponent() = true;
+	eq Literal.isComponent() = false;
+	
+	syn boolean Anchor.hasIncomingLiterals() {
+		for (Connection c: ingoingConnections()) {
+			if (c.getSource().isLiteral()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	syn boolean Component.hasIncomingLiterals() {
+		for (ComponentParameter in: getInParameterList()) {
+			if (in.hasIncomingLiterals()) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+aspect NodeFlow {
+	inh Component ComponentParameter.component();
+	eq Component.getChild().component() = this;
+	
+	syn lazy Node Expr.node() = null;
+	eq AbstractSimpleVarUse.node() 
+		= decl() instanceof Node ? (Node) decl() : null; 
+	eq DotVarUse.node() = getVarUse().node();
+	
+	syn Set<Node> FlowDecl.connectedNodes();
+	eq Connection.connectedNodes() = Utils.asSet(getSource().node(), getTarget().node());
+	eq Interception.connectedNodes()
+		= Utils.asSet(getIntercepted().node(), getTarget().node(), getSource().node());
+
+	// Edges
+	coll Set<Node> Node.edges() [new HashSet<Node>()] root DiagramType;
+	Connection contributes getTarget().node()
+		when getTarget().node() != null && getSource().node() != null
+		to Node.edges() for getSource().node();	
+	
+	// Collect incoming connections. 
+	// Ignore connections that are connected to a parameter to this diagram type.
+	coll Set<Component> Component.pred() [new HashSet<Component>()] root DiagramType;
+	Connection contributes (Component) getSource().node()
+		when getSource().node() instanceof Component
+			&& getTarget().node() instanceof Component
+		to Component.pred() for (Component) getTarget().node();
+	// Include nta connections() in collection attribute
+	DiagramType contributes nta connections() to Component.pred();
+
+	// Collect incoming connections. 
+	// Ignore connections that are connected to a parameter to this diagram type.
+	coll Set<Component> Component.succ() [new HashSet<Component>()] root DiagramType;
+	Connection contributes (Component) getTarget().node()
+		when getSource().node() instanceof Component
+			&& getTarget().node() instanceof Component
+		to Component.succ() for (Component) getSource().node();
+	// Include nta connections() in collection attribute
+	DiagramType contributes nta connections() to Component.succ();
+}

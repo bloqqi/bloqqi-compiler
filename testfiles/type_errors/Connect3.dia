@@ -1,0 +1,11 @@
+diagramtype T() {
+	V_1;
+	V_2;
+	connect(V_1, V_2);
+}
+
+diagramtype V(S in => Bool out) { }
+
+struct S {
+	Int i;
+}

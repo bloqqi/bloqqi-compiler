@@ -1,0 +1,20 @@
+aspect SemanticFeedback {
+	syn Component Component.cycleLowerBound() = sccParent();
+
+	inh Component Component.cycleUpperBound();
+	eq DiagramType.getComponent(int i).cycleUpperBound() {
+		Component component = getComponent(i);
+		
+		Component leftMostChild = null;
+		for  (Component c: getComponents()) {
+			if (c.sccParent() == component 
+					&& (leftMostChild == null || leftMostChild.index() > c.index())) {
+				leftMostChild = c;
+			}
+		}
+		
+		return leftMostChild;
+	}
+	eq DiagramType.getLocalComponent().cycleUpperBound() = null;
+	eq Program.getChild().cycleUpperBound() = null;
+}

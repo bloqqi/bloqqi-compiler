@@ -1,0 +1,7 @@
+diagramtype Main(Bool in) {
+    inline Block block;
+    connect(in, block);
+}
+diagramtype Block(Int in) {
+    Add_1;
+}

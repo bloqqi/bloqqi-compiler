@@ -1,0 +1,185 @@
+aspect FunctionNameAnalysis {
+	syn boolean TypeDecl.isFunction() = false;
+	eq Function.isFunction() = true;
+	 
+	public interface FunctionVarDecl {
+		boolean isOutParameter();
+	}
+	DeclStmt implements FunctionVarDecl;
+	Parameter implements FunctionVarDecl;
+	
+	syn boolean DeclStmt.isOutParameter() = false;
+
+	syn FunctionVarDecl IdFExpr.decl() = lookupId(getID());
+	
+	inh FunctionVarDecl IdFExpr.lookupId(String id);
+	
+	eq Function.getBlock().lookupId(String id) {
+		for (InParameter ip : getInParameters()) {
+			if (ip.name().equals(id)) {
+				return ip;
+			}
+		}
+		for (OutParameter op : getOutParameters()) {
+			if (op.name().equals(id)) {
+				return op;
+			}
+		}
+		return null;
+	}
+	
+	inh FunctionVarDecl Block.lookupId(String id);
+	
+	eq Block.getStmt(int index).lookupId(String id) {
+		for (int i = 0; i < index; i++) {
+			FunctionVarDecl d = getStmt(i).localLookupId(id);
+			if (d != null) {
+				return d;
+			}		
+		}
+		return lookupId(id);
+	}
+	
+	inh FunctionVarDecl DeclStmt.lookupId(String id);
+	
+	syn FunctionVarDecl Stmt.localLookupId(String id) = null;
+	
+	eq DeclStmt.localLookupId(String id) {
+		if (getID().equals(id)) {
+			return this;
+		}
+		return null;
+	}
+	
+	syn boolean DeclStmt.isMultipleDeclared() = lookupId(getID()) != null;
+	
+}
+
+aspect FunctionTypeAnalysis {
+
+	syn TypeDecl FunctionVarDecl.fType();
+	eq DeclStmt.fType() = getTypeUse().type();
+	eq Parameter.fType() = getTypeUse().type();
+	syn TypeDecl FExpr.fType();
+	eq IdFExpr.fType() = decl() != null ? decl().fType() : program().unknownType();
+	
+	eq IntLiteralFExpr.fType() = program().intType();
+	eq RealLiteralFExpr.fType() = program().realType();
+	eq IntBinFExpr.fType() {
+		if (getLeft().fType() == program().realType() || 
+		    getRight().fType() == program().realType()) {
+			return program().realType();
+		}
+		else {
+			return 	program().intType();
+		}
+	}
+
+	eq BoolLiteralFExpr.fType() = program().boolType();
+	eq BoolBinFExpr.fType() = program().boolType();
+	eq NotFExpr.fType() = program().boolType();
+	eq MinusFExpr.fType() = getFExpr().fType();
+
+	syn TypeDecl FExpr.fExpectedType() = fType();
+	eq AddFExpr.fExpectedType() = program().realType(); 
+    eq SubFExpr.fExpectedType() = program().realType();
+    eq MulFExpr.fExpectedType() = program().realType();
+    eq DivFExpr.fExpectedType() = program().realType();
+    eq GEFExpr.fExpectedType() = program().realType();
+    eq GTFExpr.fExpectedType() = program().realType();
+    eq LEFExpr.fExpectedType() = program().realType();
+    eq LTFExpr.fExpectedType() = program().realType();
+    eq EqFExpr.fExpectedType() = program().unknownType();
+    eq NEqFExpr.fExpectedType() = program().unknownType();
+    eq AndFExpr.fExpectedType() = program().boolType();
+    eq OrFExpr.fExpectedType() = program().boolType();
+    eq MinusFExpr.fExpectedType() = program().realType();
+	
+	syn boolean BinFExpr.isCompatibleLeftType() = getLeft().fType().compatibleWith(fExpectedType());
+	eq EqFExpr.isCompatibleLeftType() = true;
+	eq NEqFExpr.isCompatibleLeftType() = true;
+	syn boolean BinFExpr.isCompatibleOperands() = true;
+	eq EqFExpr.isCompatibleOperands() =  getLeft().fType().compatibleWith(getRight().fType());
+	eq NEqFExpr.isCompatibleOperands() =  getLeft().fType().compatibleWith(getRight().fType());
+	
+	syn boolean BinFExpr.isCompatibleRightType() = getRight().fType().compatibleWith(fExpectedType());
+	eq EqFExpr.isCompatibleRightType() = true;
+	eq NEqFExpr.isCompatibleRightType() = true;
+	
+	syn boolean UnaryFExpr.isCompatibleOperand() = true;
+	eq MinusFExpr.isCompatibleOperand() = getFExpr().fType().compatibleWith(fExpectedType());
+		   
+	syn boolean Stmt.isCompatibleType() = true;
+	
+	eq AssignStmt.isCompatibleType() = getLeft().fType().compatibleWith(getRight().fType());
+	
+	eq IfStmt.isCompatibleType() = getFExpr().fType().compatibleWith(program().boolType());
+	
+	eq WhileStmt.isCompatibleType() = getFExpr().fType().compatibleWith(program().boolType());
+	
+	eq DeclStmt.isCompatibleType() = hasFExpr()? getFExpr().fType().compatibleWith(fType()) : true;
+}
+
+aspect StatementAnalys {
+	inh boolean ReturnStmt.isReturnInAllowedContext();
+	eq Function.getBlock().isReturnInAllowedContext() = false;
+	eq IfStmt.getBlock().isReturnInAllowedContext() = true;
+	eq IfStmt.getElse().isReturnInAllowedContext() = true;
+	eq WhileStmt.getBlock().isReturnInAllowedContext() = true;
+	
+	inh boolean ReturnStmt.existStmtsAfterReturn();
+	eq Block.getStmt(int index).existStmtsAfterReturn() {
+		return (getNumStmt() > index+1);
+	}
+}
+
+aspect FunctionErrors {
+
+	IdFExpr contributes error("1001: The declaration of " + toString() + " was not found")
+		when decl() == null
+		to CompilationUnit.errors();
+	
+	DeclStmt contributes error("1002: " + getID() + " is already declared")
+		when isMultipleDeclared()
+		to CompilationUnit.errors();
+
+	BinFExpr contributes error("1003: " + fExpectedType().toString() + " is expected, but " + getLeft() + " is " + getLeft().fType().toString() )
+		when !(isCompatibleLeftType())
+		to CompilationUnit.errors();
+		
+	BinFExpr contributes error("1004: " + fExpectedType().toString() + " is expected, but " + getRight() + " is " + getRight().fType().toString() )
+		when !(isCompatibleRightType())
+		to CompilationUnit.errors();
+		
+	IfStmt contributes error("1005: Boolean condition expected, but is " + getFExpr().fType().toString() )
+		when  !(isCompatibleType())
+		to CompilationUnit.errors();
+		
+	WhileStmt contributes error("1006: Boolean condition expected, but is " + getFExpr().fType().toString() )
+		when  !(isCompatibleType())
+		to CompilationUnit.errors();
+		
+	AssignStmt contributes error("1007: Incorrect type, expected type is " + getLeft().fType().toString() + " but actual type is " + getRight().fType().toString() )
+		when  !(isCompatibleType())
+		to CompilationUnit.errors();
+		
+	ReturnStmt contributes error("1008: Incorrect placement of return statement.")
+		when !(isReturnInAllowedContext())
+		to CompilationUnit.errors();
+	
+	ReturnStmt contributes error("1009: Statements not allowed after return.")
+		when existStmtsAfterReturn()
+		to CompilationUnit.errors();
+		
+	DeclStmt contributes error("1010: Incorrect type, expected type is " + getTypeUse() + " but is " + getFExpr().fType().toString() )
+		when !(isCompatibleType())
+		to CompilationUnit.errors();
+		
+	BinFExpr contributes error("1011: Incompatible types on operands, " + getLeft().fType().toString() + " and " + getRight().fType().toString())
+		when !(isCompatibleOperands())
+		to CompilationUnit.errors();
+	
+	UnaryFExpr contributes error("1012: Incompatible type on operand, " + getFExpr().fType().toString())
+		when !(isCompatibleOperand())
+		to CompilationUnit.errors();
+}

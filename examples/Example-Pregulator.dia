@@ -1,0 +1,40 @@
+diagramtype P(Real SP, Real PV => Real Out){
+  variable Real Gain;
+  
+  Sub_1;
+  Mul_1;
+  
+  connect(SP, Sub_1.in1);
+  connect(PV, Sub_1.in2);
+  connect(Gain, Mul_1.in1);
+  connect(Sub_1, Mul_1.in2);
+  connect(Mul_1, Out);
+}
+
+diagramtype GS() extends P {
+  variable Int GainSelector;
+  variable Real Gain2;
+  variable Real Gain3;
+  
+  Mux_1;
+  
+  source_intercept Gain with Mux_1.in0, Mux_1;
+  connect(GainSelector, Mux_1.K);
+  connect(Gain2, Mux_1.in1);
+  connect(Gain3, Mux_1.in2);
+}
+
+diagramtype FF(Real FF) extends P {
+  variable Real FFGain;
+  
+  Mul_2;
+  Add_1;
+  
+  intercept Out with Add_1.in1, Add_1;
+  connect(FF, Mul_2.in1);
+  connect(FFGain, Mul_2.in2);
+  connect(Mul_2, Add_1.in2);
+}
+
+diagramtype PGSFF() extends GS, FF {
+}

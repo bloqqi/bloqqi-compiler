@@ -1,0 +1,19 @@
+diagramtype Main(in: Int) {
+  s: S (in2: Int => out: Int) {
+    t: T (in: Int, in2: Int => out: Int) {
+      Add_1;
+      connect(in, Add_1.in1);
+      connect(in2, Add_1.in2);
+      connect(Add_1.out, out);
+    };
+    connect(in, t.in);
+    connect(in2, t.in2);
+    connect(t.out, out);
+  };
+  connect(in, s.in);
+  connect(in, s.in2);
+}
+diagramtype S(in: Int) {
+}
+diagramtype T {
+}

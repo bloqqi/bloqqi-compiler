@@ -1,0 +1,17 @@
+diagramtype Main() {
+	S S;
+	S_2;
+	S_3;
+	connect(1, S);
+	connect(S, S_2);
+	connect(S.out, S_3);
+}
+
+diagramtype S(Int in => Int out) {
+	T T;
+	connect(T, out);
+}
+
+diagramtype T(=>Int out) {
+	connect(1, out);
+}

@@ -1,0 +1,2 @@
+Line 4, column 5: Incompatible types, Bool and Int
+Line 5, column 5: Incompatible types, Int and Bool

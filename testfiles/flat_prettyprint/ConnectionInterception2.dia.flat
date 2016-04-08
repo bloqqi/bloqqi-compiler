@@ -1,0 +1,11 @@
+diagramtype A(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype B(in: Int => out: Int) {
+  T_1: T;
+  connect(in, T_1.in);
+  connect(T_1.out, out);
+}
+diagramtype T(in: Int => out: Int) {
+}
+

@@ -1,0 +1,145 @@
+diagramtype Controller(Int SP, Int PV => Int CV) {
+  Sub sub;
+  connect(SP, sub.in1);
+  connect(PV, sub.in2);
+  connect(sub, CV);
+}
+annotation(
+  sub = (120, 20, 60, 28),
+  PV = (20, 44, 60, 28),
+  CV = (314, 14, 60, 28),
+  SP = (20, 14, 60, 28)
+)
+diagramtype FeedForward(Int In, Int Gain, Int FV => Int Out) {
+  Mul_1;
+  Add_1;
+  connect(In, Add_1.in1);
+  connect(Gain, Mul_1.in1);
+  connect(FV, Mul_1.in2);
+  connect(Mul_1, Add_1.in2);
+  connect(Add_1, Out);
+}
+annotation(
+  Out = (282, 50, 60, 28),
+  In = (102, 12, 60, 28),
+  Gain = (12, 20, 60, 28),
+  Mul_1 = (102, 70, 60, 30),
+  Add_1 = (192, 56, 60, 30),
+  FV = (12, 78, 60, 28)
+)
+wiring FeedForward[=>Int I, Int Gain, Int FV] {
+  intercept I with FeedForward.In, FeedForward;
+  connect(Gain, FeedForward.Gain);
+  connect(FV, FeedForward.FV);
+}
+diagramtype Gain(Int Val, Int Gain => Int Out) {
+  Mul_1;
+  connect(Gain, Mul_1.in1);
+  connect(Val, Mul_1.in2);
+  connect(Mul_1, Out);
+}
+annotation(
+  Out = (312, 11, 60, 28),
+  Gain = (13, 10, 60, 28),
+  Mul_1 = (131, 17, 60, 28),
+  Val = (13, 42, 60, 28)
+)
+wiring Gain[Int V, Int GF] {
+  intercept source V with Gain.Val, Gain;
+  connect(GF, Gain.Gain);
+}
+diagramtype GainSub() extends Gain {
+}
+annotation(
+  Gain:Out = (192, 12, 60, 28),
+  Gain:Mul_1 = (102, 18, 60, 30),
+  Gain:Gain = (12, 12, 60, 28),
+  Gain:Val = (12, 70, 60, 28)
+)
+diagramtype Loop(Int SP, Int PV => Int CV) {
+  Controller master;
+  connect(SP, master.SP);
+  connect(PV, master.PV);
+  connect(master, CV);
+}
+annotation(
+  PV = (10, 43, 60, 28),
+  CV = (282, 11, 60, 28),
+  SP = (10, 11, 60, 28),
+  master = (148, 17, 60, 28)
+)
+diagramtype Filter(Int in => Int out) {
+  connect(in, out);
+}
+annotation(
+  in = (20, 20, 60, 28),
+  out = (100, 20, 60, 28)
+)
+wiring Filter[=>Int PV] {
+  intercept PV with Filter, Filter;
+}
+diagramtype Slave(Int CV, Int PV => Int out) {
+  connect(CV, out);
+}
+wiring Slave[=>Int CV, Int PV] {
+  intercept CV with Slave.CV, Slave;
+  connect(PV, Slave.PV);
+}
+diagramtype Override(Int in => Int out) {
+  connect(in, out);
+}
+annotation(
+  in = (20, 20, 60, 28),
+  out = (100, 20, 60, 28)
+)
+wiring Override[=>Int in] {
+  intercept in with Override, Override;
+}
+recommendation Loop {
+  Slave[CV, Int slavePV] slave;
+  Override[CV] override;
+  slave before override;
+}
+recommendation Loop {
+  replaceable master;
+}
+recommendation Controller {
+  FeedForward[CV, Int FFGain, Int FV] feedForward;
+  Gain[sub.out, Int GF] gain;
+}
+annotation(
+  Loop:PV = (14, 39, 50, 28),
+  slave = (192, 60, 40, 28),
+  slavePV = (14, 68, 50, 28),
+  Loop:SP = (14, 11, 50, 28),
+  Loop:master = (91, 17, 60, 28),
+  override = (274, 60, 52, 28),
+  Loop:CV = (360, 54, 60, 28)
+)
+diagramtype Sensor( => Int value) {
+}
+annotation(
+  value = (100, 20, 60, 28)
+)
+diagramtype OperatorValue( => Int value) {
+}
+diagramtype Actuator(Int value) {
+}
+annotation(
+  value = (20, 20, 60, 28)
+)
+diagramtype Tank() {
+  Sensor temperature;
+  Sensor pressure;
+  Actuator valveOpening;
+  OperatorValue operatorSP;
+  OperatorValue operatorGF;
+}
+annotation(
+  operatorSP = (27, 13, 71, 28),
+  pressure = (27, 109, 71, 28),
+  valveOpening = (349, 42, 80, 28),
+  operatorGF = (27, 77, 71, 28),
+  temperature = (27, 46, 71, 28)
+)
+

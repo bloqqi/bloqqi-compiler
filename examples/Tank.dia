@@ -1,0 +1,35 @@
+diagramtype Tank(Int setLevel, Int tolerance => StatusData status) {
+	Valve v41; 		// Upper valve
+	Valve v45;		// Lower valve
+	Sub_1; Sub_2;
+	Neg_1;
+	GTZ_1; GTZ_2;
+	StatusMonitor_1;
+
+	connect(setLevel, Sub_1.in1);
+	connect(StatusMonitor_1.status.level, Sub_1.in2);
+	connect(StatusMonitor_1.status, status);
+
+	// Upper valve
+	connect(Sub_1, Sub_2.in1);
+	connect(tolerance, Sub_2.in2);
+	connect(Sub_2, GTZ_1);
+	connect(GTZ_1, v41);  
+
+	// Lower valve
+	connect(Sub_1, Neg_1);
+	connect(Neg_1, GTZ_2);
+	connect(GTZ_2, v45);
+}
+
+
+struct StatusData {
+	Int level;
+	Int temperature;
+}
+
+diagramtype Valve(Bool open) { }
+diagramtype StatusMonitor(=> StatusData status) { }
+
+diagramtype GTZ(Int in1 => Bool res) { }
+

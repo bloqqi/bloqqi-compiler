@@ -1,0 +1,1 @@
+Line 2, column 5: Multiple declaration in type 'Main$block': 'in' is declared in 'Block' and 'Main$block', 'out' is declared in 'Block' and 'Main$block'

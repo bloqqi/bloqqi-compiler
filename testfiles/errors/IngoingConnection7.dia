@@ -1,0 +1,7 @@
+diagramtype A(Int in => Int out) {
+	Add_1;
+	connect(in, Add_1.in1);
+	connect(1, Add_1.in1);
+	connect(in, out);
+	connect(1, out);
+}

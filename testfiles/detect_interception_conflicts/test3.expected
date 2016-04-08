@@ -1,0 +1,8 @@
+A = []
+B = []
+DPrime = []
+D = []
+C = [ComponentParameter(in: Int)=[B, D]]
+E = []
+F = [ComponentParameter(in: Int)=[C, D]]
+T = []

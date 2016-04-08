@@ -1,0 +1,29 @@
+diagramtype Main(in: Int => out: Int) {
+  t: T;
+  connect(in, t.in);
+  connect(t.out, out);
+}
+diagramtype ASubMain(in: Int => out: Int) {
+  t: S;
+  connect(in, t.in);
+  connect(t.out, out);
+}
+diagramtype ASubSubMain(in: Int => out: Int) {
+  t: S;
+  t2: T;
+  connect(t.out, out);
+  connect(in, t2.in);
+  connect(t2.out, t.in);
+}
+diagramtype BSubMain(in: Int => out: Int) {
+  t: S;
+  t2: T;
+  connect(t.out, out);
+  connect(in, t2.in);
+  connect(t2.out, t.in);
+}
+diagramtype T(in: Int => out: Int) {
+}
+diagramtype S(in: Int => out: Int) {
+}
+

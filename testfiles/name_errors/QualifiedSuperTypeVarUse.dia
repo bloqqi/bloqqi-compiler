@@ -1,0 +1,15 @@
+diagramtype X() {
+	T_1;
+}
+
+diagramtype X2() {
+	T_1;
+}
+
+diagramtype Y() extends X {
+	T_2;
+	connect(X::T_1, X2::T_1);
+}
+
+diagramtype T(Int in => Int out) {
+}

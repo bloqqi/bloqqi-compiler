@@ -1,0 +1,62 @@
+/**
+ * This aspect is used to collect compile-time errors that are not interested
+ * during editing. One example is missing incoming data on a port, 
+ * then this should not be reported in the editor, since during 
+ * editing, the normal case is that there are missing incoming connections. 
+ * However, when generating code, the data flow should be checked.
+ */
+aspect CodeGenerationErrors {
+	coll Set<ErrorMessage> Program.codeGenerationErrors()
+		[new TreeSet<ErrorMessage>()]
+		root Program;
+	
+	coll Set<ErrorMessage> CompilationUnit.codeGenerationErrors()
+		[new TreeSet<ErrorMessage>()]
+		root CompilationUnit;
+}
+
+aspect DataFlowErrors {
+	DiagramType contributes error(missingIncomingConnections())
+		when !missingIncomingConnections().isEmpty()
+		to CompilationUnit.codeGenerationErrors();
+		
+	syn String DiagramType.missingIncomingConnections() {
+		ArrayList<String> missingConnections = new ArrayList<>();
+		for (Component c: components()) {
+			for (ComponentParameter cp: c.getInParameterList()) {
+				int n = cp.ingoingConnections().size(); // + cp.ingoingLiterals().size();
+				if (n == 0) {
+					missingConnections.add(c.name() + "." + cp.name());
+				}
+			}
+		}
+		for (OutParameter out: outParameters()) {
+			int n = out.ingoingConnections().size(); // + out.ingoingLiterals().size();
+			if (n == 0) {
+				missingConnections.add(out.name());
+			}
+		}
+		if (!missingConnections.isEmpty()) {
+			return "In type " + name() 
+				+ ", the following have no incoming connection " 
+				+ String.join(", ", missingConnections);
+		} else {
+			return "";
+		}
+	} 
+}
+
+aspect CheckMain {
+	syn DiagramType Program.mainDiagramType() {
+		TypeDecl td = lookupType("Main");
+		return td != null && td.isDiagramType() ? (DiagramType) td : null;
+	}
+
+	Program contributes error("A diagram type Main is missing")
+		when mainDiagramType() == null
+		to Program.codeGenerationErrors();
+
+	DiagramType contributes error("The diagram type Main cannot have parameters")
+		when name().equals("Main") && numberOfParameters() > 0
+		to Program.codeGenerationErrors();
+}

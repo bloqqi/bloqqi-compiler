@@ -1,0 +1,191 @@
+import java.util.ArrayList;
+
+aspect TypeAnalysis {
+	syn lazy java.util.List<TypeDecl> CompilationUnit.typeDecls() {
+		ArrayList<TypeDecl> list = new ArrayList<TypeDecl>();
+		for (Declaration d: getDeclarations()) {
+			if (d instanceof TypeDecl) {
+				list.add((TypeDecl) d);
+			}
+		}
+		return list;
+	}
+	
+	syn lazy TypeDecl Program.intType() = lookupPredefinedTypes("Int");
+	syn lazy TypeDecl Program.boolType() = lookupPredefinedTypes("Bool");
+	syn lazy TypeDecl Program.realType() = lookupPredefinedTypes("Real");
+	syn lazy TypeDecl Program.stringType() = lookupPredefinedTypes("String");
+	syn nta TypeDecl Program.unknownType() = new UnknownType();
+	
+	syn boolean TypeDecl.isUnknown() = false;
+	eq UnknownType.isUnknown() = true;
+	syn boolean TypeDecl.isKnown() = !isUnknown();
+	syn boolean TypeDecl.isPrimitiveType() = false;
+	eq PrimitiveType.isPrimitiveType() = true;
+	syn boolean TypeDecl.isStructType() = false;
+	eq Struct.isStructType() = true;
+	syn boolean TypeDecl.isDiagramType() = false;
+	eq DiagramType.isDiagramType() = true;
+	syn boolean TypeDecl.isExternalFunction() = false;
+	eq ExternalFunction.isExternalFunction() = true;
+	
+	syn boolean TypeDecl.isInteger() = false;
+	eq IntType.isInteger() = true;
+	syn boolean TypeDecl.isReal() = false;
+	eq RealType.isReal() = true;
+	syn boolean TypeDecl.isString() = false;
+	eq StringType.isString() = true;
+	
+
+	syn lazy TypeDecl VarDecl.type();
+	eq Component.type() = getType().type();
+	eq InheritedComponent.type()
+		= getDeclaredComponent().type();
+	eq ComponentParameter.type() = getParameter().type();
+	eq Parameter.type() = getTypeUse().type();
+	eq Variable.type() = getTypeUse().type();
+	eq StructField.type() = getTypeUse().type();
+
+	syn TypeDecl Type.type();
+	eq TypeUse.type()
+		= decl() != null ? decl() : program().unknownType();
+	eq AnonymousType.type() = getAnonymousDiagramType();
+
+	syn lazy TypeDecl Expr.type();
+	eq VarUse.type() = decl() != null ? decl().type() : program().unknownType();
+	eq IntLiteral.type() = program().intType();
+	eq BoolLiteral.type() = program().boolType();
+	eq RealLiteral.type() = program().realType();
+	eq StringLiteral.type() = program().stringType();
+	
+	syn boolean Connection.isTypeCompatible()
+		= getSource().type().compatibleWith(getTarget().type());
+	syn TypeDecl Connection.type()
+		= isTypeCompatible() ? getSource().type() : program().unknownType();
+	
+	syn boolean TypeDecl.compatibleWith(TypeDecl t) = isSubTypeOf(t) || (this == t);
+	
+	syn boolean TypeDecl.isCircular() = false;
+	syn boolean Struct.isCircular() circular[true] {
+		for (StructField fs: getStructFields()) {
+			if (fs.type().isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	eq DiagramType.isCircular() = reachable().contains(this);
+	
+	syn Set<TypeDecl> TypeDecl.reachable()
+		circular[new HashSet<TypeDecl>()];
+	eq TypeDecl.reachable() = new HashSet<TypeDecl>();
+	eq DiagramType.reachable() {
+		Set<TypeDecl> set = new HashSet<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Component c: superType.getLocalComponents()) {
+				if (c.type().isDiagramType()) {
+					set.add(c.type());
+					set.addAll(c.type().reachable());
+				}
+			}
+		}
+		return set;
+	}
+	
+	syn boolean Component.isCircular() 
+		= type().reachable().contains(diagramType());
+	
+	
+	syn boolean Component.hasAnonymousDiagramType()
+		= getType().hasAnonymousDiagramType();
+	eq InheritedComponent.hasAnonymousDiagramType()
+		= getDeclaredComponent().hasAnonymousDiagramType();
+	syn boolean Type.hasAnonymousDiagramType() = false;
+	eq AnonymousType.hasAnonymousDiagramType() = true;
+	syn AnonymousDiagramType Component.anonymousDiagramType()
+		= getType().anonymousDiagramType();
+	eq InheritedComponent.anonymousDiagramType()
+		= getDeclaredComponent().anonymousDiagramType();
+	syn AnonymousDiagramType Type.anonymousDiagramType() = null;
+	eq AnonymousType.anonymousDiagramType() = getAnonymousDiagramType();
+
+
+	inh boolean VarUse.isSource();
+	eq Connection.getSource().isSource() = true;
+	eq Interception.getSource().isSource() = true;
+	eq SourceInterception.getIntercepted().isSource() = true;
+	eq Program.getChild().isSource() = false;
+	inh boolean VarUse.isTarget();
+	eq Connection.getTarget().isTarget() = true;
+	eq ConnectionInterception.getIntercepted().isTarget() = true;
+	eq Interception.getTarget().isTarget() = true;
+	eq Program.getChild().isTarget() = false;
+
+	syn boolean Anchor.isSource();
+	eq ComponentParameter.isSource() = getParameter().isOutParameter();
+	eq Parameter.isSource() = false;
+	eq InParameter.isSource() = true;
+	eq Variable.isSource() = true;
+	eq Literal.isSource() = true;
+	syn boolean Anchor.isTarget();
+	eq ComponentParameter.isTarget() = !isSource();
+	eq Parameter.isTarget() = !isSource();
+	eq InParameter.isTarget() = !isSource();
+	eq Variable.isTarget() = true;
+	eq Literal.isTarget() = false;
+	
+	
+	syn boolean Expr.isLiteral() = false;
+	eq Literal.isLiteral() = true;
+
+	syn int DiagramType.numberOfParameters()
+		= inParameters().getNumChild() + outParameters().getNumChild();
+	syn boolean DiagramType.hasSameNbrOfParsAs(DiagramType other)
+		= numberOfParameters() == other.numberOfParameters();
+		
+	syn boolean TypeDecl.isAnonymousType() = false;
+	eq AnonymousDiagramType.isAnonymousType() = true;
+	
+	coll Set<DiagramType> Program.allDiagramTypes()
+		[new LinkedHashSet<>()] root Program;
+	DiagramType contributes this
+		to Program.allDiagramTypes();
+
+
+	inh Component DiagramType.enclosingComponent();
+	inh Component Component.enclosingComponent();
+	eq Component.getType().enclosingComponent() = this;
+	eq Program.getChild().enclosingComponent() = null;
+}
+
+aspect IsSubTypeOf {
+	syn boolean TypeDecl.isSubTypeOf(TypeDecl td) = false;
+	eq RealType.isSubTypeOf(TypeDecl td) = td.isSuperTypeOfRealType(this);
+	eq IntType.isSubTypeOf(TypeDecl td) = td.isSuperTypeOfIntType(this);
+	eq BoolType.isSubTypeOf(TypeDecl td) = td.isSuperTypeOfBoolType(this);
+	eq StringType.isSubTypeOf(TypeDecl td) = td.isSuperTypeOfStringType(this);
+	eq DiagramType.isSubTypeOf(TypeDecl td) = td.isSuperTypeOfDiagramType(this);
+	eq UnknownType.isSubTypeOf(TypeDecl td) = true;
+
+	syn boolean TypeDecl.isSuperTypeOfRealType(RealType rt) = false;
+	eq RealType.isSuperTypeOfRealType(RealType rt) = true;
+	eq UnknownType.isSuperTypeOfRealType(RealType rt) = true;
+
+	syn boolean TypeDecl.isSuperTypeOfIntType(IntType it) = false;
+	eq IntType.isSuperTypeOfIntType(IntType it) = true;
+	eq RealType.isSuperTypeOfIntType(IntType it) = true;
+	eq UnknownType.isSuperTypeOfIntType(IntType it) = true;
+
+	syn boolean TypeDecl.isSuperTypeOfBoolType(BoolType bt) = false;
+	eq BoolType.isSuperTypeOfBoolType(BoolType bt) = true;
+	eq UnknownType.isSuperTypeOfBoolType(BoolType bt) = true;
+
+	syn boolean TypeDecl.isSuperTypeOfStringType(StringType st) = false;
+	eq StringType.isSuperTypeOfStringType(StringType st) = true;
+	eq UnknownType.isSuperTypeOfStringType(StringType st) = true;
+	
+	syn boolean TypeDecl.isSuperTypeOfDiagramType(DiagramType dt) = false;
+	eq DiagramType.isSuperTypeOfDiagramType(DiagramType dt) 
+		= dt.superTypesLinearized().contains(this);
+	eq UnknownType.isSuperTypeOfDiagramType(DiagramType dt) = true;
+}

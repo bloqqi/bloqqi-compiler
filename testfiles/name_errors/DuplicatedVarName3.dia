@@ -1,0 +1,4 @@
+diagramtype A(Int b) {
+	B b;
+}
+diagramtype B() {}

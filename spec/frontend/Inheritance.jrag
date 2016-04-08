@@ -1,0 +1,653 @@
+import java.util.LinkedHashSet;
+import java.util.ListIterator;
+import java.util.LinkedHashMap;
+import java.util.Arrays;
+
+aspect SuperAndSubTypes {
+	syn lazy LinkedHashSet<DiagramType> DiagramType.directSuperTypes() {
+		LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
+		for (TypeUse t: getSuperTypes()) {
+			if (t.type().isDiagramType()) {
+				linkedSet.add((DiagramType) t.type());
+			}
+		}
+		return linkedSet;
+	}
+	// We need to handle super in redeclare, for example,
+	//   redeclare block: super { ... };
+	eq AnonymousDiagramType.directSuperTypes() {
+		if (hasImplicitSuperType()) {
+			LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
+			Component redeclaredComp = enclosingComponent().redeclaredComponent();
+			if (redeclaredComp != null && redeclaredComp.type().isDiagramType()) {
+				linkedSet.add((DiagramType) enclosingComponent().redeclaredComponent().type());
+			}
+			return linkedSet;
+		} else {
+			return super.directSuperTypes();
+		}
+	}
+	inh boolean AnonymousDiagramType.hasImplicitSuperType();
+	eq AnonymousTypeImplicitSuper.getChild().hasImplicitSuperType() = true;
+	eq Program.getChild().hasImplicitSuperType() = false;
+
+	syn lazy LinkedHashSet<DiagramType> TypeDecl.superTypesLinearized() 
+		= new LinkedHashSet<DiagramType>();
+	eq DiagramType.superTypesLinearized() {
+		LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
+		if (!isInheritanceCircular()) {
+			for (DiagramType superType: directSuperTypes()) {
+				linkedSet.addAll(superType.superTypesLinearized());
+			}
+		}
+		linkedSet.add(this);
+		return linkedSet;
+	}
+	
+	syn lazy LinkedHashSet<DiagramType> DiagramType.superTypesLinearizedReversed() {
+		LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
+		DiagramType[] superTypes = superTypesLinearized().toArray(new DiagramType[0]);
+		for (int i = superTypes.length-1; i >= 0; i--) {
+			linkedSet.add(superTypes[i]);
+		}
+		return linkedSet;
+	}
+
+	syn boolean TypeDecl.isInheritanceCircular() circular[true] = false;
+	eq DiagramType.isInheritanceCircular() {
+		for (DiagramType superType: directSuperTypes()) {
+			if (superType.isInheritanceCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
+	coll Collection<DiagramType> TypeDecl.namedSubTypes()
+		[new HashSet<DiagramType>()]
+		with add;
+	DiagramType contributes this
+		when !isAnonymousType()
+		to TypeDecl.namedSubTypes()
+		for each superTypesLinearized();
+}
+
+aspect Inheritance {
+	/** Includes parameters, variables, components and connections from super classes */
+	syn List<InheritedInParameter> DiagramType.getInParameterList() {
+		List<InheritedInParameter> list = new List<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (InParameter ip: superType.getLocalInParameters()) {
+				list.add(ip.createInheritedInParameter());
+			}
+			// Wiring components may add parameters
+			for (Component c: superType.getLocalComponents()) {
+				for (InParameter ip: c.inParameters()) {
+					list.add(ip.createInheritedInParameter());
+				}
+			}
+		}
+		return list;
+	}
+	syn List<InheritedInParameter> DiagramType.inParameters() = getInParameterList();
+	
+	syn List<InheritedOutParameter> DiagramType.getOutParameterList() {
+		List<InheritedOutParameter> list = new List<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (OutParameter op: superType.getLocalOutParameters()) {
+				list.add(op.createInheritedOutParameter());
+			}
+			// Wiring components may add parameters
+			for (Component c: superType.getLocalComponents()) {
+				for (OutParameter op: c.outParameters()) {
+					list.add(op.createInheritedOutParameter());
+				}
+			}
+		}
+		return list;
+	}
+	syn List<InheritedOutParameter> DiagramType.outParameters() = getOutParameterList();
+	
+	syn List<InheritedVariable> DiagramType.variables() = getVariableList();
+	syn List<InheritedVariable> DiagramType.getVariableList() {
+		List<InheritedVariable> list = new List<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Variable v: superType.getLocalVariables()) {
+				list.add(v.createInheritedVariable());
+			}
+		}
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Component comp: superType.getLocalComponents()) {
+				if (isMostSpecificComponent(comp) && comp.shouldBeInlined()) {
+					list.addAll(comp.createInlinedVariables());
+				}
+			}
+		}
+		return list;
+	}
+
+	syn List<InheritedComponent> DiagramType.components() = getComponentList();
+	syn List<InheritedComponent> DiagramType.getComponentList() {
+		List<InheritedComponent> list = new List<>();
+		Map<Component, InheritedComponent> map = new HashMap<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Component c: superType.getLocalComponents()) {
+				// Only the most specific component is added (due to redeclare),
+				// that is, only components that are not redeclared further are added
+				if (isMostSpecificComponent(c)) {
+					list.addAll(c.createInheritedComponents());
+				}
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Returns all connections taking into account inheritance and interception.
+	 * The resulting connections are fully qualified: connect(a, b) => connect(T1:a, T2:b)
+	 *   where a is declared in type T1 and b is declared in T2.
+	 */
+	syn List<InheritedConnection> DiagramType.connections() = getConnectionList();
+	syn List<InheritedConnection> DiagramType.getConnectionList() {
+		List<InheritedConnection> list = new List<>();
+		
+		// Add connections
+		for (DiagramType superType: superTypesLinearized()) {
+			for (FlowDecl fd: superType.getFlowDecls()) {
+				if (fd instanceof Connection) {
+					list.add(((Connection) fd).createInheritedConnection(this));
+				}
+			}
+			// Wired components may add connections
+			for (Component c: superType.getLocalComponents()) {
+				for (FlowDecl fd: c.flowDecls()) {
+					if (fd instanceof Connection) {
+						list.add(((Connection) fd).createInheritedConnection(this));
+					}
+				}
+			}
+		}
+		
+		// Add interceptions
+		for (DiagramType superType: superTypesLinearized()) {
+			for (FlowDecl fd: superType.getFlowDecls()) {
+				fd.doInterception(this, list);
+			}
+			// Wired components may add interceptions
+			for (Component c: superType.getLocalComponents()) {
+				if (isMostSpecificComponent(c)) {
+					for (FlowDecl fd: c.flowDecls()) {
+						fd.doInterception(this, list);
+					}
+				}
+			}
+		}
+		
+		// Add inlining
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Component comp: superType.getLocalComponents()) {
+				if (isMostSpecificComponent(comp) && comp.shouldBeInlined()) {
+					addInlinedConnections(list, comp);
+				}
+			}
+		}
+
+		return list;
+	}
+	
+	public void DiagramType.addInlinedConnections(List<InheritedConnection> list, Component comp) {
+		DiagramType dt = (DiagramType) comp.type();
+		String fullCompName = comp.diagramType().name() + DECLARED_IN_SEP + comp.name() + ".";
+		
+		// Add connections from the type of the component
+		ArrayList<InheritedConnection> newConnections = new ArrayList<>();
+		for (InheritedConnection c: dt.connections()) {
+			newConnections.add(
+				new InlinedConnection(
+					c.getSource().copyWithInlinedName(comp.name()),
+					(VarUse) c.getTarget().copyWithInlinedName(comp.name()),
+					c.getDeclaredFlowDecl(),
+					comp)
+			);
+		}
+		
+		// Store input and output parameters in maps for fast access
+		Map<String, InParameter> inParameters = new HashMap<>();
+		for (InheritedInParameter in: dt.getInParameters()) {
+			String name = comp.name() + INLINE_SEP + in.name();
+			inParameters.put(name, in.getDeclaredInParameter());
+		}
+		Map<String, OutParameter> outParameters = new HashMap<>();
+		for (InheritedOutParameter out: dt.getOutParameters()) {
+			String name = comp.name() + INLINE_SEP + out.name();
+			outParameters.put(name, out.getDeclaredOutParameter());
+		}
+		
+		// Replace connections to the input ports on the component
+		Map<Parameter, InheritedConnection> toInParameter = new LinkedHashMap<>();
+		MultiMap<Parameter, InheritedConnection> fromInParameter = new MultiMap<>();
+		for (InheritedConnection c: newConnections) {
+			InParameter inParameter = inParameters.get(c.getSource().toString());
+			if (inParameter != null) {
+				fromInParameter.put(inParameter, c);
+			}
+		}
+		for (InheritedConnection c: list) {
+			if (c.getTarget().toString().startsWith(fullCompName)) {
+				String parameterName = c.getTarget().toString().substring(fullCompName.length());
+				if (parameterName.indexOf(".") > 0) {
+					parameterName = parameterName.substring(0, parameterName.indexOf("."));
+				}
+				String fullParameterName = comp.name() + INLINE_SEP + parameterName;
+				Parameter p = inParameters.get(fullParameterName);
+				if (p != null) {
+					toInParameter.put(p, c);
+				}
+			}
+		}
+		for (Map.Entry<Parameter, InheritedConnection> e: toInParameter.entrySet()) {
+			for (InheritedConnection fromParConn: fromInParameter.get(e.getKey())) {
+				InlinedConnection ic = new InlinedConnection(
+					e.getValue().getSource().treeCopy(),
+					fromParConn.getTarget().treeCopy(),
+					e.getValue().getDeclaredFlowDecl(),
+					comp);
+				newConnections.add(ic);
+			}
+		}
+		for (InheritedConnection conn: toInParameter.values()) {
+			list.removeChild(conn);
+		}
+		for (Collection<InheritedConnection> col: fromInParameter.values()) {
+			for (InheritedConnection conn: col) {
+				newConnections.remove(conn);
+			}
+		}
+		
+		// Replace connections from the output ports on the component
+		Map<Parameter, InheritedConnection> toOutParameter = new LinkedHashMap<>();
+		MultiMap<Parameter, InheritedConnection> fromOutParameter = new MultiMap<>();
+		for (InheritedConnection c: newConnections) {
+			OutParameter outParameter = outParameters.get(c.getTarget().toString());
+			if (outParameter != null) {
+				toOutParameter.put(outParameter, c);
+			}
+			
+		}
+		for (InheritedConnection c: list) {
+			if (c.getSource().toString().startsWith(fullCompName)) {
+				String parameterName = c.getSource().toString().substring(fullCompName.length());
+				if (parameterName.indexOf(".") > 0) {
+					parameterName = parameterName.substring(0, parameterName.indexOf("."));
+				}
+				String fullParameterName = comp.name() + INLINE_SEP + parameterName;
+				Parameter p = outParameters.get(fullParameterName);
+				if (p != null) {
+					fromOutParameter.put(p, c);
+				}
+			}
+		}
+		for (Map.Entry<Parameter, InheritedConnection> e: toOutParameter.entrySet()) {
+			for (InheritedConnection fromParConn: fromOutParameter.get(e.getKey())) {
+				InlinedConnection ic = new InlinedConnection(
+					e.getValue().getSource().treeCopy(),
+					fromParConn.getTarget().treeCopy(),
+					fromParConn.getDeclaredFlowDecl(),
+					comp);
+				newConnections.add(ic);
+			}
+		}
+		for (InheritedConnection conn: toOutParameter.values()) {
+			newConnections.remove(conn);
+		}
+		for (Collection<InheritedConnection> col: fromOutParameter.values()) {
+			for (InheritedConnection conn: col) {
+				list.removeChild(conn);
+			}
+		}
+
+		// Add all new connections
+		list.addAll(newConnections);
+	}
+	
+	syn java.util.List<Literal> DiagramType.literals() {
+		ArrayList<Literal> list = new ArrayList<>();
+		for (Connection c: connections()) {
+			if (c.getSource().isLiteral()) {
+				list.add((Literal) c.getSource());
+			}
+		}
+		return list;
+	}
+	
+	public Expr Expr.copyWithInlinedName(String name) {
+		Expr e = treeCopy();
+		e.addInlinedComponentName(name);
+		return e;
+	}
+	public void ASTNode.addInlinedComponentName(String name) {
+		for (ASTNode child: astChildren()) {
+			child.addInlinedComponentName(name);
+		}
+	}
+	public void SimpleVarUse.addInlinedComponentName(String name) {
+		setID(name + INLINE_SEP + getID());
+	}
+	
+	public void FlowDecl.doInterception(DiagramType contextDt, List<InheritedConnection> list) {
+	}
+	public void ConnectionInterception.doInterception(DiagramType contextDt, List<InheritedConnection> list) {
+		VarUse intercepted = getIntercepted().copyFullQualification(contextDt);
+		VarUse source = getSource().copyFullQualification(contextDt);
+		VarUse target = getTarget().copyFullQualification(contextDt);
+		
+		for (Connection c: list) {
+			if (c.getTarget().toString().equals(intercepted.toString())) {
+				list.removeChild(c);
+				InterceptConnection c1 = new InterceptConnection(
+					c.getSource().treeCopy(),
+					target,
+					this,
+					true);
+				InterceptConnection c2 = new InterceptConnection(
+					source,
+					c.getTarget().treeCopy(),
+					this,
+					false);
+				list.add(c1);
+				list.add(c2);
+				break;
+			}
+		}
+	}
+	
+	public void SourceInterception.doInterception(DiagramType contextDt, List<InheritedConnection> list) {
+		VarUse intercepted = getIntercepted().copyFullQualification(contextDt);
+		VarUse source = getSource().copyFullQualification(contextDt);
+		VarUse target = getTarget().copyFullQualification(contextDt);
+
+		ArrayList<Connection> removeList = new ArrayList<>();
+		ArrayList<InheritedConnection> addList = new ArrayList<>();
+		addList.add(new InterceptConnection(intercepted.treeCopy(), target.treeCopy(), this, true));
+		for (Connection c: list) {
+			// Consider that diagramtype T has a source interception on port P and
+			// S is a subtype of T. Then if S adds a connection from P,
+			// then this connection is -not- intercepted. This because S is assumed
+			// to know about the source interception in T, since it is a subtype.
+			// Thus, connections are only intercepted that are defined in types that
+			// are not subtypes of T. See test cases for illustration.
+			if (c.getSource().toString().equals(intercepted.toString())
+					&& (!c.declaredInDiagramType().isSubTypeOf(diagramType())
+						|| c.declaredInDiagramType() == diagramType())) {
+				removeList.add(c);
+				InterceptConnection ic = new InterceptConnection(
+					source.treeCopy(),
+					c.getTarget().treeCopy(),
+					this,
+					false);
+				addList.add(ic);
+			}
+		}
+		for (Connection c: removeList) {
+			list.removeChild(c);
+		}
+		for (InheritedConnection c: addList) {
+			list.add(c);
+		}
+	}
+	
+	syn DiagramType Node.declaredInDiagramType();
+	eq Component.declaredInDiagramType() = diagramType();
+	eq InheritedComponent.declaredInDiagramType() = getDeclaredComponent().diagramType();
+	eq Parameter.declaredInDiagramType() = diagramType();
+	eq WiringParameter.declaredInDiagramType() = null;
+	eq InheritedInParameter.declaredInDiagramType() = getDeclaredInParameter().diagramType();
+	eq InheritedOutParameter.declaredInDiagramType() = getDeclaredOutParameter().diagramType();
+	eq Variable.declaredInDiagramType() = diagramType();
+	eq InheritedVariable.declaredInDiagramType() = getDeclaredVariable().diagramType();
+	eq Literal.declaredInDiagramType() = enclosingConnection().declaredInDiagramType();
+	syn DiagramType Connection.declaredInDiagramType() = diagramType();
+	eq InheritedConnection.declaredInDiagramType() = getDeclaredFlowDecl().diagramType();
+	
+	inh Connection Literal.enclosingConnection();
+	eq Connection.getSource().enclosingConnection() = this;
+	
+	syn boolean Node.isInherited();
+	eq Component.isInherited() = declaredInDiagramType() != diagramType();
+	eq InlinedComponent.isInherited() = false;
+	eq Parameter.isInherited() = declaredInDiagramType() != diagramType();
+	eq WiringParameter.isInherited() = false;
+	eq Variable.isInherited() = declaredInDiagramType() != diagramType();
+	eq Literal.isInherited() = enclosingConnection().isInherited();
+	syn boolean Connection.isInherited() = declaredInDiagramType() != diagramType();
+	eq InlinedConnection.isInherited() = false;
+
+	syn FlowDecl Connection.declaredFlowDecl() = this;
+	eq InheritedConnection.declaredFlowDecl() = getDeclaredFlowDecl();
+	
+	syn Component Component.declaredComponent() = this;
+	eq InheritedComponent.declaredComponent() = getDeclaredComponent();
+
+	syn boolean Connection.isIntercept() = false;
+	eq InterceptConnection.isIntercept() = true;
+	
+	syn boolean Node.isNameAmbiguous();
+	eq Component.isNameAmbiguous() = isNameAmbiguous(name());
+	eq Parameter.isNameAmbiguous() = false;
+	eq WiringParameter.isNameAmbiguous() = false;
+	eq Variable.isNameAmbiguous() = false;
+	eq Literal.isNameAmbiguous() = false;
+	inh boolean Component.isNameAmbiguous(String name);
+}
+
+aspect Factories {
+	public InheritedConnection Connection.createInheritedConnection(DiagramType contextDt) {
+		return new InheritedConnection(
+				getSource().copyFullQualification(contextDt),
+				(VarUse) getTarget().copyFullQualification(contextDt),
+				this);
+	}
+	public InheritedInParameter InParameter.createInheritedInParameter() {
+		return new InheritedInParameter(getTypeUse().treeCopy(), getID(), this);
+	}
+	public InheritedOutParameter OutParameter.createInheritedOutParameter() {
+		return new InheritedOutParameter(getTypeUse().treeCopy(), getID(), this);
+	}
+	public InheritedVariable Variable.createInheritedVariable() {
+		return new InheritedVariable(getTypeUse().treeCopy(), getID(), this);
+	}
+	public Collection<InheritedVariable> Component.createInlinedVariables() {
+		ArrayList<InheritedVariable> list = new ArrayList<>();
+		if (shouldBeInlined()) {
+			DiagramType dt = (DiagramType) type();
+			for (InheritedVariable inhVar: dt.variables()) {
+				InheritedVariable iv = new InheritedVariable(
+					inhVar.getTypeUse().treeCopy(),
+					name() + "$" + inhVar.getID(),
+					inhVar.getDeclaredVariable());
+				list.add(iv);
+			}
+		}
+		return list;
+	}
+	public Collection<InheritedComponent> Component.createInheritedComponents() {
+		ArrayList<InheritedComponent> list = new ArrayList<>();
+		if (shouldBeInlined()) {
+			DiagramType dt = (DiagramType) type();
+			for (InheritedComponent inhComp: dt.components()) {
+				ArrayList<Component> inlinedComps = new ArrayList<>();
+				inlinedComps.add(this);
+				inlinedComps.addAll(inhComp.inlinedComponents());
+				InheritedComponent ic = new InlinedComponent(
+					false,
+					inhComp.getType().treeCopy(),
+					new InlinedName(new IdName(name()), new IdName(inhComp.name())),
+					false,
+					inhComp.getDeclaredComponent(),
+					inlinedComps,
+					inhComp.lastDiagramType());
+				list.add(ic);
+			}
+		} else {
+			InheritedComponent ic = new InheritedComponent(
+				getInline(),
+				getType().treeCopy(),
+				getName().treeCopy(),
+				false,
+				this);
+			list.add(ic);
+		}
+		return list;
+	}
+
+	/**
+	 * Copy expressions in dataflow statements and add type qualification,
+	 * that is, adds in which diagram type the component is declared in.
+	 * For example, connect(t1, t2) => connect(A:t1, B:t2), 
+	 * if t1 is declared in block A and t2 is declared in B.
+	 * If a component has been redeclared, then the diagram type that contains
+	 * the most specific component is used (ie., the "latest" redeclare). 
+	 */
+	public Expr Expr.copyFullQualification(DiagramType contextDt) {
+		return treeCopy();
+	}
+	public abstract VarUse VarUse.copyFullQualification(DiagramType contextDt);
+	public VarUse AbstractSimpleVarUse.copyFullQualification(DiagramType contextDt) {
+		if (!isAmbiguous() && node() instanceof Component) {
+			// Map component to the most specific component (due to redeclare)
+			Component component = contextDt.mostSpecificComponent((Component) node());
+			TypeUse typeUse = new TypeUse(component.diagramType().name());
+			return new TypedSimpleVarUse(typeUse, getID());
+		} else {
+			return treeCopy();
+		}
+	}
+	public VarUse TypedSimpleVarUse.copyFullQualification(DiagramType contextDt) {
+		return treeCopy();
+	}
+	public VarUse DotVarUse.copyFullQualification(DiagramType contextDt) {
+		return new DotVarUse(getVarUse().copyFullQualification(contextDt), getID());
+	}
+}
+
+aspect InheritanceErrors {
+	DiagramType contributes error("Circular inheritance in diagram type " + name())
+		when isInheritanceCircular()
+		to CompilationUnit.errors();
+
+	Interception contributes error("Incompatible types in interception, " + getIntercepted().type()
+			+ " and " + getTarget().type())
+		when !getIntercepted().type().compatibleWith(getTarget().type())
+		to CompilationUnit.errors();
+	Interception contributes error("Incompatible types in interception, " + getIntercepted().type()
+			+ " and " + getSource().type())
+		when !getIntercepted().type().compatibleWith(getSource().type())
+		to CompilationUnit.errors();
+
+	Interception contributes error("The source/target type of an interception should be a primitive type or a struct type")
+		when (getTarget().type().isKnown()
+				&& !getTarget().type().isPrimitiveType()
+				&& !getTarget().type().isStructType())
+			|| (getSource().type().isKnown()
+				&& !getSource().type().isPrimitiveType()
+				&& !getSource().type().isStructType())
+		to CompilationUnit.errors();
+
+	Interception contributes error(getIntercepted() + " is already intercepted in this type")
+		when isAlreadyIntercepted()
+		to CompilationUnit.errors();
+	
+	DiagramType contributes error(checkDuplicatedNames())
+		when !checkDuplicatedNames().isEmpty()
+		to CompilationUnit.errors();
+		
+	SimpleVarUse contributes error("The access " + toString() + " is ambiguous, please qualify with supertype if possible")
+		when isAmbiguous()
+		to CompilationUnit.errors();
+		
+	DiagramType contributes error("The type " + name() + " extends a type that is not a diagram type")
+		when !superTypesReferToDiagramTypes()
+		to CompilationUnit.errors();
+}
+
+aspect InheritanceErrorsHelperAttributes {
+	syn boolean DiagramType.superTypesReferToDiagramTypes() {
+		for (TypeUse t: getSuperTypes()) {
+			if (t.type().isKnown() && !t.type().isDiagramType()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	syn boolean Interception.isAlreadyIntercepted() 
+		= isAlreadyIntercepted(getIntercepted().toString());
+	inh boolean Interception.isAlreadyIntercepted(String intercepted);
+	eq DiagramType.getFlowDecl(int index).isAlreadyIntercepted(String intercepted) {
+		FlowDecl target = getFlowDecl(index);
+		for (int i = 0; i < index; i++) {
+			FlowDecl fd = getFlowDecl(i);
+			if (fd != target && fd.isIntercepting(intercepted)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	eq Program.getChild().isAlreadyIntercepted(String intercepted) = false;
+	syn boolean FlowDecl.isIntercepting(String intercept) = false;
+	eq Interception.isIntercepting(String intercept) = getIntercepted().toString().equals(intercept);
+
+	syn lazy String DiagramType.checkDuplicatedNames() {
+		StringBuilder sb = new StringBuilder();
+		HashMap<String, Node> map = new HashMap<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Component c: superType.getLocalComponents()) {
+				map.put(c.name(), c);
+			}
+		}
+		for (DiagramType superType: superTypesLinearized()) {
+			for (InParameter ip: superType.getLocalInParameters()) {
+				checkDuplicatedName(sb, map, ip);
+			}
+			for (OutParameter op: superType.getLocalOutParameters()) {
+				checkDuplicatedName(sb, map, op);
+			}
+			for (Variable v: superType.getLocalVariables()) {
+				checkDuplicatedName(sb, map, v);
+			}
+		}
+		return sb.toString();
+	}
+	private void DiagramType.checkDuplicatedName(StringBuilder sb, Map<String, Node> map, Node node) {
+		Node oldValue = map.put(node.name(), node);
+		if (oldValue != null) {
+			if (sb.length() == 0) {
+				sb.append("Multiple declaration in type '" + name() + "': ");
+			} else {
+				sb.append(", ");
+			}
+			sb.append("'" + node.name() + "' is declared ");
+			if (oldValue.diagramType() == node.diagramType()) {
+				sb.append("two times in '" + oldValue.diagramType().name() + "'");
+			} else {
+				sb.append("in '" + oldValue.diagramType().name() + "' and '" + node.diagramType().name() + "'");
+			}
+		}
+	}
+
+	syn boolean AbstractSimpleVarUse.isAmbiguous() 
+		= isNameAmbiguous(getID()) && node() != null && node().diagramType() != diagramType();
+	eq TypedSimpleVarUse.isAmbiguous() = false;
+	inh boolean AbstractSimpleVarUse.isNameAmbiguous(String name);
+	eq Program.getChild().isNameAmbiguous(String name) = false;
+	eq DiagramType.getChild().isNameAmbiguous(String name) {
+		int n = 0;
+		for (VarDecl vd: lookupAsList(name)) {
+			if (!vd.isRedeclare()) {
+				n++;
+			}
+		}
+		return n > 1;
+	}
+}

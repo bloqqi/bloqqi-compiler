@@ -1,0 +1,23 @@
+diagramtype Main(Int in, Int in2 => Int out, Int out2) {
+    connect(in, out);
+    connect(in2, out2);
+}
+
+recommendation Main {
+    T[out] block;
+    S[out, out2] block;
+}
+
+diagramtype T(Int in => Int out) extends S {
+}
+wiring T[=>Int out] {
+    intercept out with T.in, T.out;
+}
+diagramtype T2() extends T { }
+
+diagramtype S(Int in2 => Int out2) extends T {
+}
+wiring S[=>Int out1, =>Int out2] {
+    intercept out1 with S.in, S.out;
+    intercept out2 with S.in2, S.out2;
+}

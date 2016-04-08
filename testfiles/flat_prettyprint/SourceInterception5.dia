@@ -1,0 +1,20 @@
+diagramtype A(Int in => Int out) {
+  connect(in, out);
+}
+diagramtype B1() extends A {
+  Target Target;
+  Source Source;
+  intercept source in with Source, Source;
+  intercept out with Target, Target;
+}
+diagramtype B2() extends A {
+  Source Source;
+  Target Target;
+  intercept out with Target, Target;
+  intercept source in with Source, Source;
+}
+diagramtype Target(Int in => Int out) {
+}
+diagramtype Source(Int in => Int out) {
+}
+

@@ -1,0 +1,17 @@
+struct S {
+    Int z;
+}
+
+recommendation S {
+    D[z] block;
+    replaceable block;
+}
+recommendation Z {
+    D[z] block;
+}
+
+diagramtype D(Int in => Int out) {
+}
+wiring D[=> Int inPort] {
+    intercept inPort with D.in, D.out;
+}

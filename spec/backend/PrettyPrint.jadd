@@ -1,0 +1,338 @@
+aspect PrettyPrint {
+	inh int ASTNode.indentLevel();
+	eq Program.getChild().indentLevel() = 0;
+	eq DiagramType.getChild().indentLevel() = indentLevel()+1;
+
+	syn String ASTNode.indent() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < indentLevel(); i++) {
+			sb.append("  ");
+		}
+		return sb.toString();
+	}
+
+	public String CompilationUnit.prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		for (Declaration d: getDeclarations()) {
+			d.prettyPrint(sb);
+		}
+		return sb.toString();
+	}
+
+	public void Declaration.prettyPrint(StringBuilder sb) {}
+	public String Declaration.prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		prettyPrint(sb);
+		return sb.toString();
+	}
+	public void DiagramType.prettyPrint(StringBuilder sb) {
+		sb.append(indent() + "diagramtype " + getID());
+	
+		prettyPrintParameters(sb);
+
+		if (getNumSuperType() > 0) {
+			sb.append(" extends ");
+			sb.append(getSuperTypeList().toString(", "));
+		}
+
+		sb.append(" ");
+		prettyPrintBody(sb);
+		sb.append("\n");
+
+		if (getNumAnnotation() > 0) {
+			sb.append("annotation(\n");
+			sb.append("  ");
+			sb.append(getAnnotations().toString(",\n  "));
+			sb.append("\n)\n");
+		}
+
+		if (hasLocalWiring()) {
+			getLocalWiring().prettyPrint(sb);
+		}
+	}
+	public void DiagramType.prettyPrintParameters(StringBuilder sb) {
+		if (getNumLocalInParameter() + getNumLocalOutParameter() > 0) {
+			sb.append("(");
+			sb.append(getLocalInParameterList().toString(", "));
+			if (getNumLocalOutParameter() > 0) {
+				sb.append(" => ");
+				sb.append(getLocalOutParameterList().toString(", "));
+			}
+			sb.append(")");
+		}
+	}
+	public void DiagramType.prettyPrintBody(StringBuilder sb) {
+		sb.append("{\n");
+		for (Variable v : getLocalVariables()) {
+			sb.append(v.indent() + v.prettyPrint() + ";\n");
+		} 
+		for (Component c : getLocalComponents()) {
+			sb.append(c.indent() + c.prettyPrint() + ";\n");
+		}
+		for (FlowDecl fd : getFlowDecls()) {
+			sb.append(fd.indent() + fd.prettyPrint() + ";\n");
+		}
+		sb.append(indent() + "}");
+	}
+	public void AnonymousDiagramType.prettyPrint(StringBuilder sb) {
+		prettyPrintParameters(sb);
+		if (getNumLocalInParameter() + getNumLocalOutParameter() > 0) {
+			sb.append(" ");
+		}
+		prettyPrintBody(sb);
+	}
+	
+	public void Recommendation.prettyPrint(StringBuilder sb) {
+		sb.append("recommendation " + getDeclaredForType() + " {\n");
+		for (RecommendationElement re: getRecommendationElements()) {
+			sb.append("  " + re.prettyPrint() + ";\n");
+		}
+		sb.append("}\n");
+	}
+	public abstract String RecommendationElement.prettyPrint();
+	public String RecommendationComponent.prettyPrint() {
+		return getComponent().prettyPrint();
+	}
+	public String RecommendationBefore.prettyPrint() {
+		return getBeforeVarUse() + " before " + getAfterVarUse();
+	}
+	public String RecommendationReplaceable.prettyPrint() {
+		return "replaceable " + getSimpleVarUse();
+	}
+	public void RecommendationExtendsSuper.prettyPrint(StringBuilder sb) {
+		sb.append("recommendation " + getDeclaredForType() + " extends super;\n");
+	}
+	
+	
+	public void ExternalFunction.prettyPrint(StringBuilder sb) {
+		sb.append("external " + getID() + "(");
+		sb.append(getInParameterList().toString(", "));
+		if (hasOutParameter()) {
+			sb.append(" => ");
+			sb.append(getOutParameter());
+		}
+		sb.append(");\n");
+	}
+
+	public abstract String Type.prettyPrint();
+	public String TypeUse.prettyPrint() {
+		return getID();
+	}
+	public String AnonymousType.prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		TypeUse t = getAnonymousDiagramType().getSuperType(0);
+		sb.append(t.toString()).append(" ");
+		getAnonymousDiagramType().prettyPrint(sb);
+		return sb.toString();
+	}
+	public String AnonymousTypeImplicitSuper.prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("super ");
+		getAnonymousDiagramType().prettyPrint(sb);
+		return sb.toString();
+	}
+
+	public String Variable.prettyPrint() {
+		return "var " + getID() + ": " + getTypeUse();
+	}
+	
+	public String Component.prettyPrint() {
+		String inline = getInline() ? "inline " : "";
+		if (getHasSimpleName() && !hasAnonymousDiagramType()) {
+			return inline + getName().prettyPrint();
+		} else {
+			return inline + getName().prettyPrint() + ": " + prettyPrintType();
+		}
+	}
+	public String RedeclareComponent.prettyPrint() {
+		return "redeclare " + super.prettyPrint();
+	}
+	public String Component.prettyPrintType() {
+		return getType().prettyPrint();
+	}
+	public String WiredComponent.prettyPrintType() {
+		String pars = getWiredComponentParameters().toString(", ");
+		String typeUse;
+		String anonType;
+		if (hasAnonymousDiagramType()) {
+			typeUse = anonymousDiagramType().getSuperType(0).toString();
+			StringBuilder sb = new StringBuilder();
+			sb.append(" ");
+			anonymousDiagramType().prettyPrint(sb);
+			anonType = sb.toString();
+		} else {
+			typeUse = getType().toString();
+			anonType = "";
+		}
+		return typeUse + "[" + pars + "]" + anonType;
+	}
+
+	public String WiredComponentParameterVarUse.toString() {
+		return getVarUse().toString();
+	}
+	public String WiredComponentParameterInParameter.toString() {
+		return getInParameter().toString();
+	}
+	public String WiredComponentParameterOutParameter.toString() {
+		return "=>" + getOutParameter().toString();
+	}
+
+	public abstract String FlowDecl.prettyPrint();
+	public String Connection.prettyPrint() {
+		return "connect(" + getSource().prettyPrint() + ", " + getTarget().prettyPrint() + ")";
+	}
+	public String ConnectionInterception.prettyPrint() {
+		String s = "intercept " + getIntercepted().prettyPrint() + " with ";
+		s += getTarget().prettyPrint() + ", " + getSource().prettyPrint();
+		return s;
+	}
+	public String SourceInterception.prettyPrint() {
+		String s = "intercept source " + getIntercepted().prettyPrint() + " with ";
+		s += getTarget().prettyPrint() + ", " + getSource().prettyPrint();
+		return s;
+	}
+	
+	public void Wiring.prettyPrint(StringBuilder sb) {
+		sb.append("wiring " + getTypeUse() + "[");
+		sb.append(getWiringParameters().toString(", "));
+		sb.append("] {\n");
+		for (FlowDecl fd: getFlowDecls()) {
+			sb.append("  " + fd.prettyPrint() + ";\n");
+		}
+		sb.append("}\n");
+	}
+	public String WiringParameter.toString() {
+		return getID() + ": " + getTypeUse().toString();
+	}
+	public String WiringOutParameter.toString() {
+		return "=>" + super.toString();
+	}
+
+	public void Struct.prettyPrint(StringBuilder sb) {
+		sb.append("struct " + getID() + " {\n");
+		for (StructField f : getStructFields()) {
+			sb.append("  " + f + ";\n");
+		}
+		sb.append("}\n");
+	}
+
+	public abstract String Name.prettyPrint();
+	public String IdName.prettyPrint() {
+		return getID();
+	}
+	public String InlinedName.prettyPrint() {
+		return getOuter().prettyPrint() + INLINE_SEP + getInner().name();
+	}	
+
+	public abstract String Expr.prettyPrint();
+	public String Literal.prettyPrint() {
+		return toString();
+	}
+	public String AbstractSimpleVarUse.prettyPrint() {
+		if (!isAmbiguous()
+				&& node() instanceof Component
+				&& node().diagramType() != diagramType()
+				&& !node().diagramType().isAnonymousType()) {
+			return node().diagramType().name() + DECLARED_IN_SEP + toString();
+		} else {
+			return toString();
+		}
+	}
+	public String TypedSimpleVarUse.prettyPrint() {
+		return toString();
+	}
+	public String DotVarUse.prettyPrint() {
+		/* Do not pretty print on simplified form.
+		 * The simplified form should be removed in later versions.
+		 */
+		//if (isTopLevel() && getVarUse().isOnSimplifiedForm()) {
+		//	return getVarUse().prettyPrint();
+		//} else {
+		//	return getVarUse().prettyPrint() + "." + getID();
+		//}
+		return getVarUse().prettyPrint() + "." + getID();
+	}
+
+	/**
+	 * toString implementation
+	 *
+	 * NOTE: do not use attributes here, since it can be useful to
+	 *       print objects that are not inserted into an AST yet.
+	 */
+	public String List.toString(String separator) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < getNumChild(); i++) {
+			sb.append(getChild(i));
+			if (i < getNumChild()-1) {
+				sb.append(separator);
+			}
+		}
+		return sb.toString();
+	}
+	public String List.toString() {
+		return toString(", ");
+	}
+
+	public String Connection.toString() {
+		return getClass().getSimpleName() + "(" + getSource().toString() + ", " + getTarget().toString() + ")";
+	}
+
+	public String ASTNode.toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
+	}
+
+	public String IntLiteral.toString() {
+		return String.valueOf(getValue());
+	}
+	public String BoolLiteral.toString() {
+		return String.valueOf(getValue());
+	}
+	public String RealLiteral.toString() {
+		return String.valueOf(getValue());
+	}
+	public String StringLiteral.toString() {
+		String s = getValue();
+		s = s.replace("\t", "\\t");
+		s = s.replace("\n", "\\n");
+		s = s.replace("\r", "\\r");
+		s = s.replace("\"", "\\\"");
+		return "\"" + s + "\"";
+	}
+
+	public String AbstractSimpleVarUse.toString() {
+		return getID();
+	}
+	public String TypedSimpleVarUse.toString() {
+		return getTypeUse() + DECLARED_IN_SEP + getID();
+	}
+	public String DotVarUse.toString() {
+		return getVarUse() + "." + getID();
+	}
+	
+	public String ComponentParameter.toString() {
+		return "ComponentParameter(" + getParameter() + ")";
+	}
+	
+	public String StructField.toString() {
+		return getID() + ": " + getTypeUse();
+	}
+	
+	public String IdName.toString() {
+		return getID();
+	}
+	public String InlinedName.toString() {
+		return getOuter().toString() + INLINE_SEP + getInner().toString();
+	}
+
+	public String Parameter.toString() {
+		return getID() + ": " + getTypeUse();
+	}
+
+	public String TypeUse.toString() {
+		return getID(); 
+	}
+
+	public String DiagramType.toString() { return getID(); }
+	public String Struct.toString() { return getID(); }
+	public String PrimitiveType.toString() { return name(); }
+}

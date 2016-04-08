@@ -1,0 +1,25 @@
+diagramtype Main(in: Int => out: Int) {
+  connect(in, out);
+}
+recommendation Main {
+  block: Block[out];
+  block: SubBlock[out, in];
+  anotherBlock: AnotherBlock[out];
+  block before anotherBlock;
+}
+diagramtype Block(in: Int => out: Int) {
+}
+wiring Block[=>in: Int] {
+  intercept in with Block.in, Block.out;
+}
+diagramtype SubBlock(in2: Int) extends Block {
+}
+wiring SubBlock[=>in: Int, in2: Int] {
+  intercept in with SubBlock.in, SubBlock.out;
+  connect(in2, SubBlock.in2);
+}
+diagramtype AnotherBlock(in: Int => out: Int) {
+}
+wiring AnotherBlock[=>in: Int] {
+  intercept in with AnotherBlock.in, AnotherBlock.out;
+}

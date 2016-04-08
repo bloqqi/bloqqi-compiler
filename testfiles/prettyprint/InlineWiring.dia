@@ -1,0 +1,9 @@
+diagramtype Main {
+  inline block: Block[in: Int, =>out: Int];
+}
+diagramtype Block(in: Int => out: Int) {
+}
+wiring Block[a: Int, =>b: Int] {
+  connect(a, Block.in);
+  connect(Block.out, b);
+}

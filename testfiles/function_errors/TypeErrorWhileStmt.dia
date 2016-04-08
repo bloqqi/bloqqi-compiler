@@ -1,0 +1,4 @@
+function F(Int in => Int out) {
+	while (in) {
+	}
+}

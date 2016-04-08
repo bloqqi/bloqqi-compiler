@@ -1,0 +1,4 @@
+function F(Int in) {
+}
+diagramtype T(F in) {
+}

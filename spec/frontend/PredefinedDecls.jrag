@@ -1,0 +1,10 @@
+aspect PredefinedDecls {
+	syn nta List<TypeDecl> Program.predefinedTypeDecls() {
+		List<TypeDecl> l = new List<>();
+		l.add(new IntType());
+		l.add(new RealType());
+		l.add(new BoolType());
+		l.add(new StringType());
+		return l;
+	}
+}

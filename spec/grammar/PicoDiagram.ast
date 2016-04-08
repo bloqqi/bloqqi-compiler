@@ -1,0 +1,111 @@
+Program ::= CompilationUnit* [StandardLibrary:CompilationUnit];  
+CompilationUnit ::= <PackageName> ImportDecl* Declaration*;
+ImportDecl ::= <PackageName> TypeUse;
+
+/** Declarations */
+abstract Declaration;
+abstract TypeDecl : Declaration;
+abstract UserDefType : TypeDecl ::= <ID>;
+DiagramType : UserDefType ::= 
+	LocalInParameter:InParameter* LocalOutParameter:OutParameter* SuperType:TypeUse* 
+	LocalVariable:Variable* LocalComponent:Component* FlowDecl* Annotation*
+	[LocalWiring:Wiring]
+	/InParameter:InheritedInParameter*/ /OutParameter:InheritedOutParameter*/ /Variable:InheritedVariable*/
+	/Component:InheritedComponent*/ /Connection:InheritedConnection*/
+	/RecommendationGroup*/
+	;
+AnonymousDiagramType : DiagramType;
+ExternalFunction : UserDefType ::= InParameter* [OutParameter];
+Struct : UserDefType ::= StructField*;
+StructField ::= TypeUse <ID>;
+abstract PrimitiveType : TypeDecl;
+IntType : PrimitiveType;
+RealType : PrimitiveType;
+BoolType : PrimitiveType;
+StringType : PrimitiveType;
+UnknownType : TypeDecl;
+
+/** Types */
+abstract Type;
+TypeUse: Type ::= <ID>;
+AnonymousType : Type ::= AnonymousDiagramType;
+AnonymousTypeImplicitSuper : AnonymousType;
+
+/** Parameters */
+abstract Parameter ::= TypeUse <ID>;
+InParameter : Parameter;
+InheritedInParameter : InParameter ::= <DeclaredInParameter:InParameter>;
+OutParameter : Parameter;
+InheritedOutParameter : OutParameter ::= <DeclaredOutParameter:OutParameter>;
+
+/** Components */
+Component ::=
+	<Inline:boolean>
+	Type
+	Name
+	<HasSimpleName:boolean>  // true for names like Add_1
+	/InParameter:ComponentParameter*/ 
+	/OutParameter:ComponentParameter*/;
+RedeclareComponent : Component;
+WiredComponent : Component ::= WiredComponentParameter*;
+abstract WiredComponentParameter;
+WiredComponentParameterVarUse : WiredComponentParameter ::= VarUse;
+WiredComponentParameterInParameter : WiredComponentParameter ::= InParameter;
+WiredComponentParameterOutParameter : WiredComponentParameter ::= OutParameter;
+InheritedComponent : Component ::= <DeclaredComponent:Component>;
+InlinedComponent : InheritedComponent ::=
+	<InlinedComponents:java.util.List<Component>>
+	<LastDiagramType:DiagramType>;
+
+abstract Name;
+IdName : Name ::= <ID>;
+InlinedName : Name ::= Outer:Name Inner:Name;
+ComponentParameter ::= <Parameter:Parameter>;
+
+/** Variables */
+Variable ::= TypeUse <ID>;
+InheritedVariable : Variable ::= <DeclaredVariable:Variable>;
+
+/** Flow declarations */
+abstract FlowDecl;
+Connection : FlowDecl ::= Source:Expr Target:VarUse;
+InheritedConnection : Connection ::= <DeclaredFlowDecl:FlowDecl>;
+InlinedConnection : InheritedConnection ::= <InlinedComponent:Component>;
+InterceptConnection : InheritedConnection ::= <IsFirstConnection:Boolean>;
+abstract Interception : FlowDecl ::= Intercepted:VarUse Target:VarUse Source:VarUse;
+ConnectionInterception : Interception;
+SourceInterception : Interception;
+
+/** Expressions */
+abstract Expr;
+abstract Literal : Expr;
+IntLiteral : Literal ::= <Value:int>;
+RealLiteral : Literal ::= <Value:float>;
+BoolLiteral : Literal ::= <Value:boolean>;
+StringLiteral : Literal ::= <Value>;
+abstract VarUse : Expr;
+abstract AbstractSimpleVarUse : VarUse ::= <ID>;
+ParseSimpleVarUse : AbstractSimpleVarUse;
+ParseTypedSimpleVarUse : ParseSimpleVarUse ::= TypeUse <ID>;
+SimpleVarUse : AbstractSimpleVarUse;
+TypedSimpleVarUse : SimpleVarUse ::= TypeUse <ID>;
+DotVarUse : VarUse ::= VarUse <ID>;
+
+/** Wirings */
+Wiring ::= TypeUse WiringParameter* FlowDecl*;
+abstract WiringParameter ::= TypeUse <ID>;
+WiringInParameter : WiringParameter;
+WiringOutParameter : WiringParameter;
+
+/** Recommmendations */
+Recommendation : Declaration ::= DeclaredForType:TypeUse RecommendationElement*;
+abstract RecommendationElement;
+RecommendationComponent : RecommendationElement ::= Component;
+RecommendationBefore : RecommendationElement ::= BeforeVarUse:SimpleVarUse AfterVarUse:SimpleVarUse;
+RecommendationReplaceable : RecommendationElement ::= SimpleVarUse;
+RecommendationExtendsSuper : Declaration ::= DeclaredForType:TypeUse;
+RecommendationGroup ::= <Name>;
+
+/** Annotations */
+Annotation ::= VarUse <X:int> <Y:int> <Width:int> <Height:int>;
+

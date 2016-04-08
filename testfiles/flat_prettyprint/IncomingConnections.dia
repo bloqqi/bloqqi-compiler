@@ -1,0 +1,8 @@
+diagramtype A(Int in => Int out) {
+}
+diagramtype B() extends A {
+    connect(in, out);
+}
+diagramtype C() extends A {
+    connect(in, out);
+}

@@ -1,0 +1,38 @@
+diagramtype Main() {
+	Tank t;
+	Print p;
+	connect(180, t.setLevel);
+	connect(5, t.tolerance);
+	connect(t.level, p);
+}
+
+diagramtype Tank(Int setLevel, Int tolerance => Int level) {
+	UpperValve v41; 	// Upper valve
+	LowerValve v45;		// Lower valve
+	Sub_1; Sub_2;
+	Neg_1;
+	GTZ_1; GTZ_2;
+	StatusMonitor_1;
+
+	connect(setLevel, Sub_1.in1);
+	connect(StatusMonitor_1, Sub_1.in2);
+	connect(StatusMonitor_1, level);
+
+	// Upper valve
+	connect(Sub_1, Sub_2.in1);
+	connect(tolerance, Sub_2.in2);
+	connect(Sub_2, GTZ_1);
+	connect(GTZ_1, v41);  
+
+	// Lower valve
+	connect(Sub_1, Neg_1);
+	connect(Neg_1, GTZ_2);
+	connect(GTZ_2, v45);
+}
+
+// External Function declarations 
+external UpperValve(Bool open);
+external LowerValve(Bool open);
+external StatusMonitor(=> Int level);
+external GTZ(Int in1 => Bool res);
+external Print(Int in);

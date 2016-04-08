@@ -1,0 +1,85 @@
+aspect FlatName {
+	syn String Node.flatName();
+	eq Component.flatName() {
+		if (isNameAmbiguous()) {
+			return declaredInDiagramType().name() + "$" + getName().flatName();
+		} else {
+			return name();
+		}
+	}
+	eq Parameter.flatName() = name();
+	eq WiringParameter.flatName() = name();
+	eq Variable.flatName() = name();
+	eq Literal.flatName() = toString();
+
+	syn String Name.flatName();
+	eq IdName.flatName() = name();
+}
+
+aspect FlattenedPrettyPrint {
+	public String CompilationUnit.flattenedPrettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		for (Declaration d : getDeclarations()) {
+			d.flattenedPrettyPrint(sb);
+		}
+		return sb.toString();
+	}
+
+	public void Declaration.flattenedPrettyPrint(StringBuilder sb) {}
+	public void DiagramType.flattenedPrettyPrint(StringBuilder sb) {
+		sb.append("diagramtype " + getID() + "(");
+
+		sb.append(inParameters().toString(", "));
+		if (outParameters().getNumChild() > 0) {
+			sb.append(" => ");
+			sb.append(outParameters().toString(", "));
+		}
+
+		sb.append(") {\n");
+		for (Component c: components()) {
+			sb.append("  " + c.flattenedPrettyPrint() + ";\n");
+		}
+		for (Connection c: connections()) {
+			sb.append("  " + c.flattenedPrettyPrint() + ";\n");
+		}
+		sb.append("}\n");
+	}
+	public void Function.flattenedPrettyPrint(StringBuilder sb) {
+		prettyPrint(sb);
+	}
+
+	public String Component.flattenedPrettyPrint() {
+		if (isNameAmbiguous()) {
+			String inline = getInline() ? "inline " : "";
+			return inline + flatName() + ": " + getType().prettyPrint();
+		} else {
+			return prettyPrint();
+		}
+	}
+	public String Connection.flattenedPrettyPrint() {
+		return "connect(" + getSource().flattenedPrettyPrint() + ", " + getTarget().flattenedPrettyPrint() + ")";
+	}
+
+	public abstract String Expr.flattenedPrettyPrint();
+	public String Literal.flattenedPrettyPrint() {
+		return prettyPrint();
+	}
+	public String AbstractSimpleVarUse.flattenedPrettyPrint() {
+		if (node() != null) {
+			return node().flatName();
+		} else {
+			return "<null>";
+		}
+	}
+	public String DotVarUse.flattenedPrettyPrint() {
+		/* Do not pretty print on simplified form.
+		 * The simplified form should be removed in later versions.
+		 */
+		// if (isTopLevel() && getVarUse().isOnSimplifiedForm()) {
+		//	return getVarUse().flattenedPrettyPrint();
+		//} else {
+		//	return getVarUse().flattenedPrettyPrint() + "." + getID();
+		//}
+		return getVarUse().flattenedPrettyPrint() + "." + getID();
+	}
+}

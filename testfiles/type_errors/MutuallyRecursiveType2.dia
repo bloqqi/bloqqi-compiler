@@ -1,0 +1,6 @@
+diagramtype T() {
+	U u;
+}
+diagramtype U() {
+	T t;
+}

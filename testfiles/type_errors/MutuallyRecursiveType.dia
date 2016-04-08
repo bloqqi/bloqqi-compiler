@@ -1,0 +1,6 @@
+struct S {
+	T t;
+}
+struct T {
+	S s;
+}

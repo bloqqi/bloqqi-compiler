@@ -1,0 +1,5 @@
+function F(Int in => Int out) {
+	if (in + 5) {
+	
+	}
+}

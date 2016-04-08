@@ -1,0 +1,5 @@
+Line 10, column 2: Incompatible types in interception, T and Int
+Line 10, column 2: The source/target type of an interception should be a primitive type or a struct type
+Line 14, column 2: Incompatible types in interception, T and Int
+Line 14, column 2: The source/target type of an interception should be a primitive type or a struct type
+Line 18, column 2: The source/target type of an interception should be a primitive type or a struct type

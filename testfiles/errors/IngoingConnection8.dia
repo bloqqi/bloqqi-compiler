@@ -1,0 +1,17 @@
+diagramtype Main {
+	b1: InBlock;
+	
+	b2: OutBlock;
+	b3: InBlock;
+	
+	connect(true, b1.in);
+	connect(false, b1.in);
+	
+	connect(b2.out, b3.in);
+	connect(true, b3.in);
+}
+
+diagramtype InBlock(in: Bool) {
+}
+diagramtype OutBlock(=> out: Bool) {
+}

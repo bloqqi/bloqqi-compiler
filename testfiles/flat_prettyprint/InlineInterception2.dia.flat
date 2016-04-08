@@ -1,0 +1,22 @@
+diagramtype SuperMain(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype Main(in: Int => out: Int) {
+  block$add1: Add;
+  block$add2: Add;
+  connect(block$add1.out, block$add2.in1);
+  connect(block$add1.out, block$add2.in2);
+  connect(in, block$add1.in1);
+  connect(in, block$add1.in2);
+  connect(block$add2.out, out);
+}
+diagramtype Block(in: Int => out: Int) {
+  add1: Add;
+  add2: Add;
+  connect(add1.out, add2.in1);
+  connect(in, add1.in1);
+  connect(in, add1.in2);
+  connect(add1.out, add2.in2);
+  connect(add2.out, out);
+}
+

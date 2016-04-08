@@ -1,0 +1,2 @@
+diagramtype T(in1: Int, in2: Int => out: Bool) {
+}

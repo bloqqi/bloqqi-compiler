@@ -1,0 +1,7 @@
+diagramtype Main(in: Int) {
+  block$add: Add;
+}
+diagramtype Block(in: Int) {
+  add: Add;
+}
+

@@ -1,0 +1,13 @@
+diagramtype Main(in: Int, in2: Int => out: Int, out2: Int) {
+  block$add: Add;
+  connect(in, block$add.in1);
+  connect(block$add.out, out);
+  connect(in2, out2);
+}
+diagramtype Block(in: Int, in2: Int => out: Int, out2: Int) {
+  add: Add;
+  connect(in, add.in1);
+  connect(add.out, out);
+  connect(in2, out2);
+}
+

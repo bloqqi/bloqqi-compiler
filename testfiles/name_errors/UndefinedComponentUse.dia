@@ -1,0 +1,7 @@
+diagramtype DT() {
+	connect(S, S);
+}
+
+struct S {
+
+}

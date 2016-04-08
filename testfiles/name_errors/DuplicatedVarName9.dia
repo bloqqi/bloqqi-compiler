@@ -1,0 +1,7 @@
+diagramtype A() {
+  var b: Bool;
+  var c: Bool;
+}
+diagramtype B(c: Bool) extends A {
+  var b: Bool;
+}

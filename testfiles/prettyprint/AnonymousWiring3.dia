@@ -1,0 +1,10 @@
+diagramtype X(in: Int => out: Int) {
+}
+wiring X[a: Int, =>b: Int] {
+  connect(a, X.in);
+  connect(X.out, b);
+}
+diagramtype Y {
+  x: X[in: Int, =>out: Int] (in2: Int => out2: Int) {
+  };
+}

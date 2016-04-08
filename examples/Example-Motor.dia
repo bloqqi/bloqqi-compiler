@@ -1,0 +1,54 @@
+diagramtype Uni() { 
+    variable Bool FB0;
+    variable Bool FB1;
+    variable Bool Out0;
+    variable Bool Out1;
+}
+
+diagramtype MotorUniBasic(Bool AutoCmd0, Bool AutoCmd1 => Bool ObjErr ) extends Uni {
+
+	Move_1;
+	And_1;
+	Xor_1;
+	Xor_2;
+	Or_1;
+	
+	connect(AutoCmd0, Move_1.in1);
+	connect(Move_1.out, Out0);
+	connect(AutoCmd0, And_1.in1);
+	connect(AutoCmd1, And_1.in2);
+	connect(And_1.out, Out1);
+	connect(And_1.out, Xor_1.in1);
+	connect(FB1, Xor_1.in2);
+	connect(Move_1.out, Xor_2.in1);
+	connect(FB0, Xor_2.in2);
+	connect(Xor_1.out, Or_1.in2);
+	connect(Xor_2.out, Or_1.in1);
+	connect(Or_1.out, ObjErr);
+}
+
+diagramtype Agitation(Bool Agitate,
+                      Bool AutoCmd0, Bool AutoCmd1, Bool FB0, Bool FB1 
+                   => Bool AgitError, Bool Out0, Bool Out1 ) {
+
+	variable Real TankLevel;
+	variable Real AgitLevel; 
+	Ge_1;
+	And_1;
+	Not_1;
+	MotorUniBasic MotorUniBasic;
+		
+	connect(TankLevel, Ge_1.in1);
+	connect(AgitLevel, Ge_1.in2);
+	connect(Agitate, And_1.in1);
+	connect(Ge_1, And_1.in2);
+	connect(And_1, MotorUniBasic.AutoCmd1);
+	connect(FB0, MotorUniBasic.FB0);
+	connect(FB1, MotorUniBasic.FB1);
+	connect(MotorUniBasic.ObjErr, AgitError);
+	connect(MotorUniBasic.Out0, Out0);
+	connect(MotorUniBasic.Out1, Out1);
+	connect(And_1,Not_1.in);
+	connect(Not_1, MotorUniBasic.AutoCmd0);
+
+}

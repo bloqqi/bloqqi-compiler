@@ -1,0 +1,3 @@
+function iffunc(Bool in1, Bool in2 => Int out) {
+	out = in1 + false;
+}

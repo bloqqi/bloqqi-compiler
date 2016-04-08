@@ -1,0 +1,9 @@
+diagramtype X(Int in => Int out) {
+}
+wiring X[Int x, =>Int y] {
+    connect(x, X.in);
+    connect(X.out, y);
+}
+diagramtype Y() {
+    X[=>Int out, Int in] x;
+}

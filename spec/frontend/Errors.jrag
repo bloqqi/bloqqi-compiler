@@ -1,0 +1,201 @@
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.LinkedList;
+
+aspect Errors {
+	coll Set<ErrorMessage> CompilationUnit.errors()
+		[new TreeSet<ErrorMessage>()]
+		root CompilationUnit;
+}
+
+aspect NameErrors {
+	TypeUse contributes error("Type not found: " + getID())
+		when decl() == null && !isInAnnotation()
+		to CompilationUnit.errors();
+		
+	VarUse contributes error("The declaration of " + toString() + " was not found")
+		when decl() == null && !isInAnnotation()
+		to CompilationUnit.errors();
+
+	TypeDecl contributes error("Multiple declaration of type " + name())
+		when !isAnonymousType() && lookupType(name()) != this
+		to CompilationUnit.errors();
+	StructField contributes error("Multiple declaration of name " + getID()) 
+		when lookup(getID()) != this
+		to CompilationUnit.errors();
+
+	TypedSimpleVarUse contributes error("The type " + getTypeUse() + " is not a supertype of " + diagramType().name())
+		when !diagramType().isSubTypeOf(getTypeUse().type()) && !isInAnnotation()
+		to CompilationUnit.errors();
+
+	Component contributes error("A component is already locally declared as " + name())
+		when isAlreadyLocallyDeclared()
+		to CompilationUnit.errors();
+}
+
+aspect TypeErrors {
+	TypeDecl contributes error("The type " + name() + " is circular")
+		when isCircular()
+		to CompilationUnit.errors();
+
+	Connection contributes error("Incompatible types, " + getSource().type()
+			+ " and " + getTarget().type())
+		when !isTypeCompatible()
+		to CompilationUnit.errors();
+	
+	Component contributes error("Only diagram types and functions are allowed as components")
+		when type().isKnown() 
+			&& (type().isPrimitiveType() || type().isStructType())
+		to CompilationUnit.errors();
+
+	Parameter contributes error("Parameter " + getID() + ", only primitive and struct types are allowed as parameter types for diagram types")
+		when type().isKnown()
+			&& inDiagramType() && !type().isPrimitiveType() && !type().isStructType() 
+		to CompilationUnit.errors();
+	Parameter contributes error("Parameter " + getID() + ", only primitive types are allowed as parameter types for functions")
+		when type().isKnown()
+			&& inExternalFunction() && !type().isPrimitiveType()
+		to CompilationUnit.errors();
+		
+	StructField contributes error("Only primitive types and struct types are allowed as the type of a struct field")
+		when type().isKnown()
+			&& !type().isPrimitiveType() && !type().isStructType() 
+		to CompilationUnit.errors();
+
+	Connection contributes error("The source/target type of a connection should be a primitive type or a struct type")
+		when hasTypeKindErrors()
+		to CompilationUnit.errors();
+	
+	syn boolean Connection.hasTypeKindErrors() =
+			(getSource().type().isKnown()
+				&& !getSource().type().isPrimitiveType()
+				&& !getSource().type().isStructType())
+			|| (getTarget().type().isKnown()
+				&& !getTarget().type().isPrimitiveType()
+				&& !getTarget().type().isStructType());
+}
+
+aspect ConnectionErrors {
+	DiagramType contributes error(tooManyIncomingConnections())
+		when !tooManyIncomingConnections().isEmpty()
+		to CompilationUnit.errors();
+
+	VarUse contributes error("Expected a source port, '" + toString() + "' is a target port")
+		when unexpectedTargetPort()
+		to CompilationUnit.errors();
+
+	VarUse contributes error("Expected a target port, '" + toString() + "' is a source port")
+		when unexpectedSourcePort()
+		to CompilationUnit.errors();
+
+	syn boolean Expr.unexpectedTargetPort() = false;
+	eq VarUse.unexpectedTargetPort()
+		= isSource() && declAnchor() != null && !declAnchor().isSource();
+	syn boolean Expr.unexpectedSourcePort() = false;
+	eq VarUse.unexpectedSourcePort()
+		= isTarget() && declAnchor() != null && !declAnchor().isTarget();
+	syn boolean Expr.unexpectedPort() = unexpectedSourcePort() || unexpectedTargetPort();
+
+	syn boolean Connection.hasErrors() =
+		hasTypeKindErrors() ||
+		!isTypeCompatible() ||
+		getSource().unexpectedPort() ||
+		getTarget().unexpectedPort();
+}
+
+aspect HelperAttributes {
+	inh Program ASTNode.program();
+	eq Program.getChild().program() = this;
+
+	inh CompilationUnit ASTNode.compUnit();
+	eq CompilationUnit.getChild().compUnit() = this;
+	eq Program.getChild().compUnit() = null;
+
+	inh boolean Component.isAlreadyLocallyDeclared();
+	eq DiagramType.getLocalComponent(int i).isAlreadyLocallyDeclared()
+		= localComponentLookup(getLocalComponent(i).name()) != getLocalComponent(i);
+	eq DiagramType.getComponent().isAlreadyLocallyDeclared() = false;
+	eq Program.getChild().isAlreadyLocallyDeclared() = false;
+	
+	/** Temporary hack, since collection attributes do not traverse NTAs */ 
+	syn lazy String DiagramType.tooManyIncomingConnections() {
+		ArrayList<String> list = new ArrayList<>();
+		for (OutParameter out: getOutParameters()) {
+			int n = out.ingoingConnections().size();
+			if (n > 1) {
+				list.add("Parameter '" + out.name() + "' has more than one incoming connection");
+			}
+		}
+		for (Component c: getComponents()) {
+			for (ComponentParameter cp: c.getInParameters()) {
+				int n = cp.ingoingConnections().size();
+				if (n > 1) {
+					String s;
+					s  = "Parameter '" + cp.name() + "' in component '" + c.name() + "' ";
+					s += "has more than one incoming connection";
+					list.add(s);
+				}
+			}
+		}
+		return String.join(", ", list);
+	}
+
+	inh boolean Parameter.inExternalFunction();
+	eq Program.getChild().inExternalFunction() = false;
+	eq ExternalFunction.getChild().inExternalFunction() = true;
+	inh boolean Parameter.inDiagramType();
+	eq Program.getChild().inDiagramType() = true;
+	eq ExternalFunction.getChild().inDiagramType() = false;
+}
+
+aspect ErrorMessage {
+	public class ErrorMessage implements Comparable<ErrorMessage> {
+		private final ASTNode node;
+		private final int line;
+		private final int col;
+		private final String message;
+		
+		public ErrorMessage(ASTNode node, String message) {
+			this.node = node;
+			this.line = node.getStartLine();
+			this.col = node.getStartColumn();
+			this.message = message;
+		}
+		
+		public ASTNode getNode() {
+			return node;
+		}
+		public int getLine() { 
+			return line;
+		}
+		public int getCol() { 
+			return col; 
+		}
+		public String getMessage() { 
+			return message; 
+		}
+		
+		public String toString() {
+			return "Line " + line + ", column " + col + ": " + message;	
+		}
+
+		@Override
+		public int compareTo(ErrorMessage err) {
+			int n = line - err.line;
+			if (n != 0) {
+				return n;
+			}
+			
+			n = col-err.col;
+			if (n != 0) {
+				return n;
+			}
+			
+			return message.compareTo(err.message);
+		}
+	}
+	
+	protected ErrorMessage ASTNode.error(String message) {
+		return new ErrorMessage(this, message);
+	}
+}

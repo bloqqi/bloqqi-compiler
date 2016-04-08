@@ -1,0 +1,7 @@
+A = []
+B = []
+D = []
+C = [ComponentParameter(in: Int)=[B, D]]
+E = []
+F = []
+T = []

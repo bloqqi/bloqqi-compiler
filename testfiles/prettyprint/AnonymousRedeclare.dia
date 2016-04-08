@@ -1,0 +1,14 @@
+diagramtype Main {
+  block: Block (in: Int => out: Int) {
+    redeclare innerBlock: SubInnerBlock;
+    connect(in, innerBlock.in);
+    connect(innerBlock.out, out);
+  };
+}
+diagramtype Block {
+  innerBlock: InnerBlock;
+}
+diagramtype InnerBlock {
+}
+diagramtype SubInnerBlock(in: Int => out: Int) extends InnerBlock {
+}

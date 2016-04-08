@@ -1,0 +1,6 @@
+diagramtype X(Bool in => Bool out) {
+}
+wiring X[Int a, =>Int b] {
+    connect(a, X.in);
+    connect(X.out, b);
+}

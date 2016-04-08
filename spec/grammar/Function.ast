@@ -1,0 +1,34 @@
+Function : UserDefType ::= InParameter* OutParameter* Block;
+
+abstract Stmt;
+AssignStmt : Stmt ::= Left:IdFExpr Right:FExpr;
+Block : Stmt ::= Stmt*;
+DeclStmt : Stmt ::= TypeUse <ID> [FExpr];
+IfStmt : Stmt ::= FExpr Block [Else:Block];
+WhileStmt : Stmt ::= FExpr Block;
+ReturnStmt : Stmt;
+
+abstract FExpr;
+IdFExpr : FExpr ::= <ID>;
+abstract UnaryFExpr : FExpr ::= FExpr;
+NotFExpr : UnaryFExpr ::= FExpr;
+MinusFExpr : UnaryFExpr ::= FExpr;
+IntLiteralFExpr : FExpr ::= <Num>;
+BoolLiteralFExpr : FExpr ::= <Value:boolean>;
+RealLiteralFExpr : FExpr ::= <Float>;
+abstract BinFExpr : FExpr ::= Left:FExpr Right:FExpr;
+BoolBinFExpr : BinFExpr;
+IntBinFExpr : BinFExpr;
+AddFExpr : IntBinFExpr;
+SubFExpr : IntBinFExpr;
+MulFExpr : IntBinFExpr;
+DivFExpr : IntBinFExpr;
+GEFExpr	 : BoolBinFExpr;
+GTFExpr  : BoolBinFExpr;
+LEFExpr  : BoolBinFExpr;
+LTFExpr  : BoolBinFExpr;
+EqFExpr  : BoolBinFExpr;
+NEqFExpr : BoolBinFExpr;
+AndFExpr : BoolBinFExpr;
+OrFExpr  : BoolBinFExpr;
+

@@ -1,0 +1,12 @@
+diagramtype X(Int Xin => Int Xout) {
+}
+wiring X[Int a, =>Int b] {
+    connect(a, X.Xin);
+    connect(X.Xout, b);
+}
+
+diagramtype Y() {
+    Sub_1;
+    Sub_2;
+    X[Sub_1, Sub_2.in1] x;
+}

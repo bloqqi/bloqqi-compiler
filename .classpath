@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/generated">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry including="**" kind="src" path="src/resource"/>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="lib" path="tools/beaver.jar"/>
+	<classpathentry kind="lib" path="tools/junit-4.11-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

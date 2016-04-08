@@ -1,0 +1,15 @@
+diagramtype A {
+  inline Block block;
+  Block block2;
+}
+diagramtype B extends A {
+  redeclare SubBlock block;
+  inline redeclare SubBlock block2;
+}
+
+diagramtype Block {
+  Add add;
+}
+diagramtype SubBlock extends Block {
+  Add add2;
+}

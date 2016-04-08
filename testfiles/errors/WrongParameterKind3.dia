@@ -1,0 +1,10 @@
+diagramtype T() {
+	V_1;
+	V_2;
+	connect(V_1.in.n, V_2.in.n);
+}
+
+diagramtype V(S in => S out) { }
+struct S {
+	Int n;
+}

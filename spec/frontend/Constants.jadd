@@ -1,0 +1,4 @@
+aspect Constants {
+	public final static String ASTNode.INLINE_SEP = "$";
+	public final static String ASTNode.DECLARED_IN_SEP = "::";
+}

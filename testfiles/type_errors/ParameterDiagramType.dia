@@ -1,0 +1,6 @@
+struct S {
+	Int n;
+}
+diagramtype DT() { }
+
+diagramtype T(S s, Int n, Bool b, DT dt) { }

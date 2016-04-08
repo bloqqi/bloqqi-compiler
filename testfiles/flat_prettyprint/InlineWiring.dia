@@ -1,0 +1,13 @@
+diagramtype Main() {
+    inline Block[Int int, =>Int out] block;
+}
+
+diagramtype Block(Int in => Int out) {
+    Add add;
+    connect(in, add.in1);
+    connect(add, out);
+}
+wiring Block[a: Int, =>b: Int] {
+    connect(a, Block.in);
+    connect(Block.out, b);
+}

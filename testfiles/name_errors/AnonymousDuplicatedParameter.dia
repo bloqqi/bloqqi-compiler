@@ -1,0 +1,7 @@
+diagramtype Main() {
+    Block (Int in => Int out) {
+    } block;
+}
+
+diagramtype Block(Int in => Int out) {
+}

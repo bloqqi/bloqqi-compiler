@@ -1,0 +1,9 @@
+diagramtype Main(in: Int) {
+  block$add: Add;
+}
+diagramtype Block(in: Int) {
+  add: Add;
+  connect(in, add.in1);
+  connect(in, add.in2);
+}
+

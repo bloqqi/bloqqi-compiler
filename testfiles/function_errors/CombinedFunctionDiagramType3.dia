@@ -1,0 +1,8 @@
+function F(Int in => Int out) {
+}
+diagramtype T() {
+	F_1;
+	F_2;
+	connect(1, F_1.in2);
+	connect(F_1.out2, F_2);
+}

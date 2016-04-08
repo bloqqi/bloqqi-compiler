@@ -1,0 +1,6 @@
+diagramtype Main {
+	_block: Block;
+}
+
+diagramtype Block {
+}

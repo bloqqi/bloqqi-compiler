@@ -1,0 +1,6 @@
+struct S {
+	Int n;
+}
+diagramtype DT() { }
+
+external F(Int n, Bool b, S s, DT dt);

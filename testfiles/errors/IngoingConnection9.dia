@@ -1,0 +1,17 @@
+diagramtype Main {
+	b1: InBlock;
+	
+	b2: OutBlock;
+	b3: InBlock;
+	
+	connect("a", b1.in);
+	connect("b", b1.in);
+	
+	connect(b2.out, b3.in);
+	connect("c", b3.in);
+}
+
+diagramtype InBlock(in: String) {
+}
+diagramtype OutBlock(=> out: String) {
+}

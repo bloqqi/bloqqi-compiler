@@ -1,0 +1,140 @@
+aspect GenerateCFunction {
+	public String TypeUse.fcCode() { return type().fcCode(); }
+	public String TypeDecl.fcCode() { return ""; }
+	public String IntType.fcCode() { return "int"; }
+	public String BoolType.fcCode() { return "bool"; }
+	public String RealType.fcCode() { return "float"; }
+	
+	public void Function.generateC(StringBuilder sb) {
+		String functionStruct = getID() + "_RES";
+		if(getNumOutParameter() > 0) {
+			sb.append("typedef struct {\n");
+			for (int i = 0; i < getNumOutParameter(); i++) {
+				sb.append("\t" + getOutParameter(i).getTypeUse().fcCode() + " " + getOutParameter(i).getID() + ";\n");
+			}
+			sb.append("} " + functionStruct + ";\n");	
+			sb.append(functionStruct);
+		}
+		else{
+			sb.append("void");
+		}
+		sb.append(" " + getID() + "(");
+		
+		for (int i = 0; i < getNumInParameter(); i++) {
+			sb.append(getInParameter(i).getTypeUse().fcCode() + " " + getInParameter(i).getID());
+			if (i < getNumInParameter()-1) {
+				sb.append(", ");
+			}
+		}
+		sb.append("){\n");
+		
+		if(getNumOutParameter() > 0) {
+			sb.append("\t" + functionStruct + " _p;\n");
+		}
+		
+		getBlock().generateC(sb);
+		
+		if(getNumOutParameter() > 0) {
+			sb.append("\t" + "return" + " _p;");
+		}
+		
+		sb.append("\n}\n");
+	
+	}
+	
+	public void Block.generateC(StringBuilder sb) {
+		for (Stmt s: getStmts()) {
+			for (int i = 0; i < s.indentLevel(); i++) {
+				sb.append("\t");
+			}
+			s.generateC(sb);
+		}
+	}public void Stmt.generateC(StringBuilder sb) {	
+	}
+	public void DeclStmt.generateC(StringBuilder sb) {
+		sb.append(getTypeUse().fcCode() + " " + getID());
+		if (hasFExpr()) {
+			sb.append(" = " + getFExpr().generateC());
+		}
+		sb.append(";\n");
+	}
+	public void AssignStmt.generateC(StringBuilder sb) {
+		sb.append(getLeft().generateC() + " = " + getRight().generateC() + ";\n");
+	}
+	public void WhileStmt.generateC(StringBuilder sb) {
+		sb.append("while (" + getFExpr().generateC() + ") {\n");
+		getBlock().generateC(sb);
+		for (int i = 0; i < indentLevel(); i++) {
+			sb.append("\t");
+		}	
+		sb.append("}\n");
+	}
+	public void IfStmt.generateC(StringBuilder sb) {
+		sb.append("if (" + getFExpr().generateC() + ") {\n");
+		getBlock().generateC(sb);
+		for (int i = 0; i < indentLevel(); i++) {
+			sb.append("\t");
+		}	
+		sb.append("}\n");
+		if (hasElse())
+		{
+			for (int i = 0; i < indentLevel(); i++) {
+				sb.append("\t");
+			}	
+			sb.append("else {\n");
+			getElse().generateC(sb);
+			for (int i = 0; i < indentLevel(); i++) {
+				sb.append("\t");
+			}	
+			sb.append("}\n");			
+		}
+	}
+	public void ReturnStmt.generateC(StringBuilder sb) {
+		sb.append("return _p;\n");
+	}
+	
+	public String FExpr.generateC() {
+		return toString();
+	}
+		
+	public String BinFExpr.generateC() {
+		StringBuilder sb = new StringBuilder();
+		if (precedence() < getLeft().precedence()) {
+			sb.append("(");
+		}
+		sb.append(getLeft().generateC());
+		if (precedence() < getLeft().precedence()) {
+			sb.append(")");
+		}
+		sb.append(" " + getOpString() + " ");
+		if (precedence() <= getRight().precedence()) {
+			sb.append("(");
+		}
+		sb.append(getRight().generateC());
+		if (precedence() <= getRight().precedence()) {
+			sb.append(")");
+		}
+		return sb.toString();		
+	}
+	
+	public String UnaryFExpr.generateC() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getOpString());
+		if (precedence() <= getFExpr().precedence()) {
+			sb.append("(");
+		}
+		sb.append(getFExpr().toString());
+		if (precedence() <= getFExpr().precedence()) {
+			sb.append(")");
+		}
+		return sb.toString();
+	}
+	
+	
+	public String IdFExpr.generateC() {
+		if (decl().isOutParameter()) {
+			return "_p." + getID();
+		}
+		return getID();
+	}
+}

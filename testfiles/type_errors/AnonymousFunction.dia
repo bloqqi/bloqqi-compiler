@@ -1,0 +1,8 @@
+diagramtype T() {
+    Add {
+        S {
+        } s;
+    } add;
+}
+struct S {
+}

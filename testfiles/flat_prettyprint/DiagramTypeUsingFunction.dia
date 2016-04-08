@@ -1,0 +1,23 @@
+function Sum(n: Int => out: Int) {
+	i: Int;
+	i = 1;
+	while (i < n) {
+		out = out + i;
+		i = i + 1;
+	}
+}
+diagramtype Print(in: Int) {
+}
+diagramtype T() {
+  Add_1;
+  Add_2;
+  Sum_1;
+  Print_1;
+  connect(1, Add_1.in1);
+  connect(2, Add_1.in2);
+  connect(Add_1, Add_2.in1);
+  connect(3, Add_2.in2);
+  connect(Add_2, Sum_1);
+  connect(Sum_1, Print_1);
+}
+

@@ -1,0 +1,2 @@
+Line 9, column 7: Incompatible types. Required: Int, found: Bool
+Line 9, column 14: Incompatible types. Required: Bool, found: Int

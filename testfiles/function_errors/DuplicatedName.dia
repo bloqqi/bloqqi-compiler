@@ -1,0 +1,4 @@
+function ifFunc(Int in1, Int in2 => Int out) {
+	Int i;
+	Int i;
+}

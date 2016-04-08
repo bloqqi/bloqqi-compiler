@@ -1,0 +1,15 @@
+diagramtype Main(Int in => Int out) {
+    connect(in, out);
+}
+diagramtype SubMain extends Main {
+    inline Block[out] block; 
+}
+
+diagramtype Block(Int in => Int out) {
+    Add add;
+    connect(in, add.in1);
+    connect(add, out);
+}
+wiring Block[=>Int x] {
+    intercept x with Block.in, Block.out;
+}

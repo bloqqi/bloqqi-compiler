@@ -1,0 +1,246 @@
+aspect Wiring {
+	syn ArrayList<InParameter> Component.inParameters() 
+		= new ArrayList<InParameter>(); 
+	eq WiredComponent.inParameters() {
+		ArrayList<InParameter> list = new ArrayList<>();
+		for (WiredComponentParameter p: getWiredComponentParameters()) {
+			if (p instanceof WiredComponentParameterInParameter) {
+				list.add(((WiredComponentParameterInParameter) p).getInParameter());
+			}
+		}
+		return list;
+	}
+	syn ArrayList<OutParameter> Component.outParameters() 
+		= new ArrayList<>();
+	eq WiredComponent.outParameters() {
+		ArrayList<OutParameter> list = new ArrayList<>();
+		for (WiredComponentParameter p: getWiredComponentParameters()) {
+			if (p instanceof WiredComponentParameterOutParameter) {
+				list.add(((WiredComponentParameterOutParameter) p).getOutParameter());
+			}
+		}
+		return list;
+	}
+	
+	syn nta List<FlowDecl> Component.flowDecls() = new List<>();
+	eq WiredComponent.flowDecls() {
+		List<FlowDecl> list = new List<>();
+		if (type().hasWiring() && nbrOfParsMatch()) {
+			for (FlowDecl fd: type().wiring().apply(this)) {
+				list.add(fd);
+			}
+		}
+		return list;
+	}
+	
+	syn boolean TypeDecl.hasWiring() = false;
+	eq DiagramType.hasWiring() = wiring() != null;
+	syn boolean Component.hasWiring() = false;
+	eq WiredComponent.hasWiring() = type().hasWiring();
+	
+	syn Wiring Component.wiring() = null;
+	eq WiredComponent.wiring() = type().wiring();
+	syn lazy Wiring TypeDecl.wiring() = null;
+	eq DiagramType.wiring() {
+		if (hasLocalWiring()) {
+			return getLocalWiring();
+		}
+		ArrayList<DiagramType> list = new ArrayList<>();
+		for (DiagramType dt: superTypesLinearizedReversed()) {
+			if (dt != this && dt.hasLocalWiring()) {
+				list.add(dt);
+			}
+		}
+		if (!list.isEmpty()) {
+			Iterator<DiagramType> itr = list.iterator();
+			DiagramType mostSpecific = itr.next();
+			while (itr.hasNext()) {
+				DiagramType dt = itr.next();
+				if (dt.isSubTypeOf(mostSpecific)) {
+					mostSpecific = dt;
+				} else if (!mostSpecific.isSubTypeOf(dt)) {
+					// TODO Report ambiguous wiring
+					return null;
+				}
+			}
+			return mostSpecific.getLocalWiring();
+		}
+		
+		return null;
+	}
+
+	syn boolean WiredComponent.nbrOfParsMatch() {
+		if (type().hasWiring()) {
+			return getNumWiredComponentParameter() == type().wiring().getNumWiringParameter();
+		} else {
+			return false;
+		}
+	}
+	
+	syn WiringParameter WiredComponentParameter.wiringParameter() {
+		if (wiredComponent().nbrOfParsMatch()) {
+			return wiredComponent().type().wiring().getWiringParameter(parameterIndex());
+		} else {
+			return null;
+		}
+	}
+	
+	inh WiredComponent WiredComponentParameter.wiredComponent();
+	eq WiredComponent.getChild().wiredComponent() = this;
+	
+	inh int WiredComponentParameter.parameterIndex();
+	eq WiredComponent.getWiredComponentParameter(int index).parameterIndex() = index;
+	inh int WiringParameter.parameterIndex();
+	eq Wiring.getWiringParameter(int index).parameterIndex() = index;
+	
+	eq WiringParameter.node() = this;
+	
+	syn Set<InheritedInParameter> Wiring.connectedInParameters() {
+		Set<InheritedInParameter> set = new HashSet<>();
+		for (FlowDecl fd: getFlowDecls()) {
+			for (Anchor anchor: fd.connectedAnchors()) {
+				if (anchor.node().isComponent() && anchor.isInParameter()) {
+					ComponentParameter cp = (ComponentParameter) anchor;
+					set.add((InheritedInParameter) cp.getParameter());
+				}
+			}
+		}
+		return set;
+	}
+}
+
+aspect NameAnalysis {
+	syn nta Component Wiring.component()
+		= new Component(false, new TypeUse(diagramType().name()), new IdName(getTypeUse().getID()), false);
+	
+	WiringParameter implements VarDecl;
+	syn String WiringParameter.name() = getID();
+	eq Wiring.getChild().lookup(String name) {
+		for (WiringParameter p: getWiringParameters()) {
+			if (p.name().equals(name)) {
+				return p;
+			}
+		}
+		if (component().name().equals(name)) {
+			return component();
+		}
+		return null;
+	}
+	eq WiringParameter.type() = getTypeUse().type();
+	eq WiringParameter.findMember(String name) = type().lookupField(name);
+	eq WiringParameter.declaredParameter() = null;
+}
+
+aspect TypeAnalysis {
+	syn TypeDecl WiredComponentParameter.type();
+	eq WiredComponentParameterVarUse.type() = getVarUse().type();
+	eq WiredComponentParameterInParameter.type() = getInParameter().type();
+	eq WiredComponentParameterOutParameter.type() = getOutParameter().type();
+	
+	WiringParameter implements Anchor;
+	eq WiringInParameter.isSource() = true;
+	eq WiringInParameter.isTarget() = false;
+	eq WiringInParameter.isInParameter() = true;
+	eq WiringInParameter.isOutParameter() = false;
+	eq WiringOutParameter.isSource() = false;
+	eq WiringOutParameter.isTarget() = true;
+	eq WiringOutParameter.isInParameter() = false;
+	eq WiringOutParameter.isOutParameter() = true;
+	
+	inh TypeDecl WiredComponentParameter.expectedType();
+	eq WiredComponent.getWiredComponentParameter(int index).expectedType() {
+		WiringParameter par = getWiredComponentParameter(index).wiringParameter();
+		return par != null ? par.type() : program().unknownType();
+	}
+	
+	syn boolean WiredComponentParameter.isSource();
+	eq WiredComponentParameterVarUse.isSource() 
+		= getVarUse().declAnchor() != null 
+		? getVarUse().declAnchor().isSource()
+		: false;
+	eq WiredComponentParameterInParameter.isSource() = true;
+	eq WiredComponentParameterOutParameter.isSource() = false;
+	
+	
+	// Used for simplification form rewrite
+	eq WiredComponentParameterVarUse.getVarUse().isSource()
+		= wiringParameter() != null ? wiringParameter().isSource() : false;
+	eq WiredComponentParameterVarUse.getVarUse().isTarget()
+		= wiringParameter() != null ? !wiringParameter().isSource() : false;
+}
+
+aspect ApplyWiring {
+	public Collection<FlowDecl> Wiring.apply(WiredComponent c) {
+		ArrayList<FlowDecl> list = new ArrayList<>();
+		for (FlowDecl fd: getFlowDecls()) {
+			list.add((FlowDecl) fd.copyAndApply(c));
+		}
+		return list;
+	}
+	
+	public ASTNode ASTNode.copyAndApply(WiredComponent c) {
+		ASTNode res = (ASTNode)copy();
+		for(int i = 0; i < getNumChild(); i++) {
+			ASTNode node = getChild(i);
+			if(node != null) node = node.copyAndApply(c);
+			res.setChild(node, i);
+		}
+		return res;
+	}
+	public ASTNode SimpleVarUse.copyAndApply(WiredComponent c) {
+		if (decl() != null) {
+			return decl().getAppliedVarUse(c);
+		} else {
+			return new SimpleVarUse(c.name());
+		}
+	}
+
+	public VarUse VarDecl.getAppliedVarUse(WiredComponent c) {
+		return new SimpleVarUse(name());
+	}
+	public VarUse Component.getAppliedVarUse(WiredComponent c) {
+		return new SimpleVarUse(c.name());
+	}
+	public VarUse WiringParameter.getAppliedVarUse(WiredComponent c) {
+		return c.getWiredComponentParameter(parameterIndex()).getAppliedVarUse();
+	}
+	public abstract VarUse WiredComponentParameter.getAppliedVarUse();
+	public VarUse WiredComponentParameterVarUse.getAppliedVarUse() {
+		return getVarUse().treeCopy();
+	}
+	public VarUse WiredComponentParameterInParameter.getAppliedVarUse() {
+		return new SimpleVarUse(getInParameter().name());
+	}
+	public VarUse WiredComponentParameterOutParameter.getAppliedVarUse() {
+		return new SimpleVarUse(getOutParameter().name());
+	}
+}
+
+aspect Errors {
+	WiredComponent contributes error("The type " + type().name() + " has no applicable wiring")
+		when type().isKnown() && !type().hasWiring()
+		to CompilationUnit.errors();
+
+	WiredComponent contributes error("The number of wiring parameters does not match")
+		when type().hasWiring() && !nbrOfParsMatch()
+		to CompilationUnit.errors();
+		
+	WiredComponentParameter contributes error("Incompatible types. Required: " + expectedType().name() + ", found: " + type().name())
+		when !type().compatibleWith(expectedType())
+		to CompilationUnit.errors();
+		
+	WiredComponentParameter contributes error("Expected a source port, '" + toString() + "' is a target port")
+		when wiringParameter() != null
+			&& wiringParameter().isSource() && !isSource()
+		to CompilationUnit.errors();
+
+	WiredComponentParameter contributes error("Expected a target port, '" + toString() + "' is a source port")
+		when wiringParameter() != null
+			&& !wiringParameter().isSource() && isSource()
+		to CompilationUnit.errors();
+
+	Wiring contributes error("Type in wiring ('" + getTypeUse().getID()
+			+ "') does not correspond to diagram type name ('" + diagramType().name() + "')")
+		when !getTypeUse().getID().equals(diagramType().name())
+		to CompilationUnit.errors();
+}

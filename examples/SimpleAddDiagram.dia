@@ -1,0 +1,18 @@
+@Application
+diagramtype Main() {
+	var var1 : Int;
+	var var2 : Int;
+	var result : Int;
+	DiagramAdd_1 : DiagramAdd;
+	connect(var1, DiagramAdd_1.in1);
+	connect(var2, DiagramAdd_1.in2);
+	connect(DiagramAdd_1, result);
+}
+
+diagramtype DiagramAdd(Int in1, Int in2 => Int out) {
+	Add_1;
+	connect(in1, Add_1.in1);
+	connect(in2, Add_1.in2);
+	connect(Add_1, out);
+}
+

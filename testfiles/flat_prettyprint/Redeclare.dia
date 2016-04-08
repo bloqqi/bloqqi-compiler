@@ -1,0 +1,20 @@
+diagramtype A() {
+    S block;   
+}
+diagramtype B(Int in => Int out) extends A {
+    redeclare T block;
+    connect(in, block);
+    connect(block, out);
+}
+diagramtype C(Int in2 => Int out2) extends B {
+    redeclare U block;
+    connect(in2, block.in2);
+    connect(block.out2, out2);
+}
+
+diagramtype S() {
+}
+diagramtype T(Int in => Int out) extends S {
+}
+diagramtype U(Int in2 => Int out2) extends T {
+}

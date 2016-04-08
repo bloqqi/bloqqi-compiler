@@ -1,0 +1,10 @@
+diagramtype X(Xin: Int => Xout: Int) {
+}
+diagramtype Y() {
+  Sub_1: Sub;
+  Sub_2: Sub;
+  x: X;
+  connect(Sub_1.out, x.Xin);
+  connect(x.Xout, Sub_2.in1);
+}
+

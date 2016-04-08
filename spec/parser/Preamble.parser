@@ -1,0 +1,5 @@
+%header {:
+	package org.bloqqi.compiler.ast;
+:};
+
+%goal goal;

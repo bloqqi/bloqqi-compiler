@@ -1,0 +1,9 @@
+diagramtype T {
+  var b1: Bool;
+  var r1: Real;
+  var i1: Int;
+  Add_1;
+  connect(i1, Add_1.in1);
+  connect(1, Add_1.in2);
+  connect(Add_1.out, i1);
+}

@@ -1,0 +1,69 @@
+aspect Inline {
+	syn boolean Component.shouldBeInlined()
+		= getInline() && canBeInlined();
+	eq RedeclareComponent.shouldBeInlined() {
+		boolean inline = getInline();
+		if (redeclaredComponent() != null) {
+			inline = inline || redeclaredComponent().shouldBeInlined();
+		}
+		return inline && canBeInlined();
+	}
+	syn boolean Component.canBeInlined()
+		= !isCircular() && type().containsComponents() && type().isDiagramType();
+
+	syn boolean Node.isInlined();
+	eq Parameter.isInlined() = false;
+	eq WiringParameter.isInlined() = false;
+	eq Variable.isInlined() = false;
+	eq Component.isInlined() = false;
+	eq Literal.isInlined() = false;
+	eq InlinedComponent.isInlined() = true;
+
+	syn Component Node.inlinedComponent();
+	eq Parameter.inlinedComponent() = null;
+	eq WiringParameter.inlinedComponent() = null;
+	eq Variable.inlinedComponent() = null;
+	eq Component.inlinedComponent() = null;
+	eq Literal.inlinedComponent() = null;
+	eq InlinedComponent.inlinedComponent()
+		= getInlinedComponents().get(0);
+	syn java.util.List<Component> Component.inlinedComponents()
+		= Collections.emptyList();
+	eq InlinedComponent.inlinedComponents() = getInlinedComponents();
+
+	syn DiagramType Component.lastDiagramType() = diagramType();
+	eq InlinedComponent.lastDiagramType() = getLastDiagramType();
+	
+	syn boolean DiagramType.isEnclosedBy(DiagramType dt)
+		= dt == this || isEnclosedByInh(dt);
+	inh boolean DiagramType.isEnclosedByInh(DiagramType dt);
+	eq DiagramType.getChild().isEnclosedByInh(DiagramType dt)
+		= dt == this || isEnclosedByInh(dt);
+	eq Program.getChild().isEnclosedByInh(DiagramType dt) = false;
+	
+	syn boolean Component.isEnclosedBy(Component c)
+		= c == this || isEnclosedByInh(c);
+	inh boolean Component.isEnclosedByInh(Component c);
+	eq Component.getType().isEnclosedByInh(Component c)
+		= c == this || isEnclosedByInh(c);
+	eq Program.getChild().isEnclosedByInh(Component c) = false;
+
+	syn boolean TypeDecl.containsComponents() = false;
+	eq DiagramType.containsComponents() = components().getNumChild() > 0;
+
+	syn boolean Connection.isInlined() = false;
+	eq InlinedConnection.isInlined() = true;
+	
+	inh boolean Anchor.belongsToInlinedComponent();
+	eq InlinedComponent.getChild().belongsToInlinedComponent() = true;
+	eq Program.getChild().belongsToInlinedComponent() = false;
+	
+	eq InlinedName.flatName() = getOuter().flatName() + INLINE_SEP + getInner().flatName();
+	eq InlinedName.name() = getOuter().name() + INLINE_SEP + getInner().name();
+}
+
+aspect InlineErrors {
+	Component contributes error("Only components of diagram types can be inlined")
+		when getInline() && !type().isUnknown() && !type().isDiagramType()
+		to CompilationUnit.errors();
+}

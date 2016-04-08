@@ -1,0 +1,39 @@
+aspect Observable {
+	public interface ASTObservable {
+		void addObserver(ASTObserver o);
+		void deleteObserver(ASTObserver o);
+		void notifyObservers();
+		void notifyObservers(Object o);
+	}
+	public interface ASTObserver {
+		void update(ASTObservable o, Object arg);
+	}
+	
+	ASTNode implements ASTObservable;
+	Anchor implements ASTObservable;
+	
+	private ArrayList<ASTObserver> ASTNode.observers = null;
+	public void ASTNode.addObserver(ASTObserver o) {
+		if (observers == null) {
+			observers = new ArrayList<ASTObserver>();
+		}
+		if (!observers.contains(o)) {
+			observers.add(o);
+		}
+	}
+	public void ASTNode.deleteObserver(ASTObserver o) {
+		if (observers != null) {
+			observers.remove(o);
+		}
+	}
+	public void ASTNode.notifyObservers() {
+		notifyObservers(null);
+	}
+	public void ASTNode.notifyObservers(Object value) {
+		if (observers != null) {
+			for (ASTObserver observer: observers) {
+				observer.update(this, value);
+			}
+		}
+	}
+}

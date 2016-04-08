@@ -1,0 +1,8 @@
+Line 9, column 11: The declaration of SIn was not found
+Line 9, column 16: The declaration of SAdd was not found
+Line 10, column 11: The declaration of SAdd was not found
+Line 10, column 17: The declaration of SOut was not found
+Line 11, column 11: The declaration of t was not found
+Line 11, column 11: The declaration of t.out was not found
+Line 11, column 18: The declaration of t was not found
+Line 11, column 18: The declaration of t.in was not found

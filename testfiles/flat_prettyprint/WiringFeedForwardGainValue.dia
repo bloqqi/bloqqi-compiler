@@ -1,0 +1,38 @@
+diagramtype Controller(Int SP, Int PV => Int CV) {
+    Sub_1;
+    connect(SP, Sub_1.in1);
+    connect(PV, Sub_1.in2);
+    connect(Sub_1.out, CV);
+}
+
+diagramtype FeedForward(Int In, Int Gain, Int FV => Int Out) {
+    Mul_1;
+    Add_1;
+    connect(In, Add_1.in1); 
+    connect(Gain, Mul_1.in1);
+    connect(FV, Mul_1.in2); 
+    connect(Mul_1.out, Add_1.in2);
+    connect(Add_1.out, Out);
+} 
+wiring FeedForward[=>Int I, Int Gain, Int FV] {
+    intercept I with FeedForward.In, FeedForward.Out;
+    connect(Gain, FeedForward.Gain);
+    connect(FV, FeedForward.FV);
+}
+
+diagramtype GainValue(Int Gain, Int Val => Int Out) {
+    Mul_1;
+    connect(Gain, Mul_1.in1);
+    connect(Val, Mul_1.in2);
+    connect(Mul_1.out, Out);
+}
+wiring GainValue[Int V, Int Gain] {
+    intercept source V with GainValue.Val, GainValue.Out;
+    connect(Gain, GainValue.Gain);
+}
+
+diagramtype MyControllerWithFFAndGV() extends Controller {
+    GainValue[Sub_1.out, Int Gain] gv;
+    FeedForward[CV, Int FFGain, Int FV] FF;
+}
+

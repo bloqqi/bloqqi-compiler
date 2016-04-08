@@ -1,0 +1,88 @@
+aspect Redeclare {
+	syn boolean VarDecl.isRedeclare() = false;
+	eq RedeclareComponent.isRedeclare() = true;
+	
+	syn VarDecl RedeclareComponent.redeclaredDecl() {
+		for (DiagramType superDt: diagramType().superTypesLinearizedReversed()) {
+			if (superDt != diagramType()) {
+				VarDecl vd = superDt.localLookup(name());
+				if (vd != null) return vd;
+			}
+		}
+		return null;
+	}
+	syn Component Component.redeclaredComponent() = null;
+	eq RedeclareComponent.redeclaredComponent()
+		= redeclaredDecl() instanceof Component ? (Component) redeclaredDecl() : null;
+
+	syn boolean Component.isLocallyRedeclared() = false;
+	eq RedeclareComponent.isLocallyRedeclared() = true;
+	eq InheritedComponent.isLocallyRedeclared() = !isInherited() && declaredComponent().isRedeclare();
+	eq InlinedComponent.isLocallyRedeclared() = false;
+}
+
+/**
+ * Maps component declarations to their most specific component
+ * due to redeclare in a diagram type.
+ *
+ * For example,
+ *   diagramtype A() {
+ *     T t;
+ *   }
+ *   diagramtype B extends A {
+ *     redeclare S t;
+ *   }
+ * In diagram type B, the most specific component for
+ * both "T t" and "redeclare S t" is "redeclare S t".
+ * Here, S is a subtype of T.
+ */
+aspect MostSpecificComponent {
+	syn lazy Map<Component, Component> DiagramType.mostSpecificComponentMap() {
+		Map<Component, Component> map = new HashMap<>();
+		
+		// Add components that are redeclared
+		for (DiagramType dt: superTypesLinearizedReversed()) {
+			for (Component c: dt.getLocalComponents()) {
+				if (c.isRedeclare() && !map.containsKey(c)) {
+					RedeclareComponent mostSpecific = (RedeclareComponent) c;
+					Component component = mostSpecific;
+					while (component != null) {
+						map.put(component, mostSpecific);
+						component = component.redeclaredComponent();
+					}
+				}
+			}
+		}
+
+		// Add components that are -not- redeclared
+		for (DiagramType dt: superTypesLinearizedReversed()) {
+			for (Component c: dt.getLocalComponents()) {
+				if (!map.containsKey(c)) {
+					map.put(c, c);
+				}
+			}
+		}
+		
+		return map;
+	}
+	syn Component DiagramType.mostSpecificComponent(Component component)
+		= mostSpecificComponentMap().get(component);
+	
+	syn boolean DiagramType.isMostSpecificComponent(Component component)
+		= mostSpecificComponent(component) == component;
+}
+
+aspect Errors {
+	RedeclareComponent contributes error("Cannot redeclare '" + name() + "', name not found")
+		when redeclaredDecl() == null
+		to CompilationUnit.errors();
+	
+	RedeclareComponent contributes error("Cannot redeclare '" + name() + "', not a component")
+		when redeclaredDecl() != null && !(redeclaredDecl() instanceof Component)
+		to CompilationUnit.errors();
+	
+	RedeclareComponent contributes error("Cannot redeclare '" + name() + "', '" + type().name()
+			+ "' is not a subtype of '" + redeclaredComponent().type().name() + "'")
+		when redeclaredComponent() != null && !type().isSubTypeOf(redeclaredComponent().type())
+		to CompilationUnit.errors();
+}
