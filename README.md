@@ -1,16 +1,19 @@
 # The Bloqqi compiler
 
-To test and run the Bloqqi compiler:
+Clone the repository and test the Bloqqi compiler:
 
     $ git clone git@bitbucket.org:bloqqi/bloqqi-compiler.git
     $ cd bloqqi-compiler/
     $ ant test
     <All tests should pass>
+
+Run the Bloqqi compiler on the example program TwoCounters:
+
     $ ant jar
     $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia
     Program OK
 
-Generate C code and execute the program TwoCounters:
+Execute the program TwoCounters by generating C code:
 
     $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia --c --o=TwoCounters.c
     $ gcc -std=c99 TwoCounters.c examples/PrintFunction.c -o TwoCounters
