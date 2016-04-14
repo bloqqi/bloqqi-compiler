@@ -261,7 +261,56 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
+
+	@Test
+	public void twoIngoingConnections() {
+		String str =
+			"diagramtype A(in: Int => out: Int) {" +
+			"  block: Block;" +
+			"  connect(in, block.in);" +
+			"}" +
+			"diagramtype B extends A {" +
+			"  block2: Block2;" +
+			"  connect(block.out, block2.in1);" +
+			"  connect(block.out, block2.in2);" +
+			"  connect(block2.out, out);" +
+			"}" +
+			"diagramtype Block(in: Int => out: Int) {" +
+			"}" +
+			"diagramtype Block2(in1: Int, in2: Int => out: Int) {" +
+			"}";
+		Program program = parseValidProgram(str);
+
+		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
+		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
+
+		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+
+		program.getCompilationUnit(0).addDeclaration(p.first);
+		createAndAddSubtypeWith(dtA, p.second);
+		program.flushAllAttributes();
+		
+		String expectedDiagramType =
+			"diagramtype BWrapper(blockout: Int => out: Int) {\n" +
+			"  block2: Block2;\n" +
+			"  connect(blockout, block2.in1);\n" +
+			"  connect(blockout, block2.in2);\n" +
+			"  connect(block2.out, out);\n" +
+			"}\n" +
+			"wiring BWrapper[blockout: Int, =>out: Int] {\n" +
+			"  connect(blockout, BWrapper.blockout);\n" +
+			"  connect(BWrapper.out, out);\n" +
+			"}\n";
+
+		assertEquals(expectedDiagramType, p.first.prettyPrint());
+		
+		String expectedComponent = "bWrapper: BWrapper[block.out, out]";
+		assertEquals(expectedComponent, p.second.prettyPrint());
+
+		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
+	}
 	
+	/*
 	@Test
 	public void twoOutgoingConnections() {
 		String str =
@@ -299,8 +348,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
-	
-	/*
+	*/
+
 	@Test
 	public void twoOutgoingConnections2() {
 		String str =
@@ -349,7 +398,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
-	*/
+	
 	
 	@Test
 	public void tankValve2() {
