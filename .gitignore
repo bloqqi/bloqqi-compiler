@@ -8,6 +8,7 @@ a.out
 /.settings
 /*.dia
 /*.c
+/*.h
 /bin/
 /ant-bin/
 /test.c
