@@ -7,10 +7,10 @@ To test and run the Bloqqi compiler:
     $ ant test
     <All tests should pass>
     $ ant jar
-    $ java -jar bloqqi-compiler.jar examples/NestedState.dia
+    $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia
     Program OK
 
-Generate C code for Bloqqi program:
+Generate C code:
 
     $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia --c --o=TwoCounters.c
     $ gcc -std=c99 TwoCounters.c examples/PrintFunction.c -o TwoCounters
