@@ -36,6 +36,9 @@ public class Compiler {
 	protected Collection<String> filenames;
 	protected Collection<String> types;
 	
+	// Enabble DrAST debugging
+	public static Object DrAST_root_node;
+
 	protected <OptionType extends Option<?>> OptionType addOption(OptionType option) {
 		options.add(option);
 		return option;
@@ -54,6 +57,7 @@ public class Compiler {
 		} else {
 			program = parseTypes();
 		}
+		DrAST_root_node = program;
 
 		printProgramInformation(program);
 	}
