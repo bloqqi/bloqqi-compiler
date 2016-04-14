@@ -1,4 +1,0 @@
-This directory should be used for extensions to the Bloqqi compiler.
-An extension copies its JastAdd source files to this directory. 
-
-Only copy files here, don't place files here otherwise.
