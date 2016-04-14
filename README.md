@@ -9,3 +9,14 @@ To test and run the Bloqqi compiler:
     $ ant jar
     $ java -jar bloqqi-compiler.jar examples/NestedState.dia
     Program OK
+
+Generate C code for Bloqqi program:
+
+    $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia --c --o=TwoCounters.c
+    $ gcc -std=c99 TwoCounters.c examples/PrintFunction.c -o TwoCounters
+    $ ./TwoCounters
+    1
+    2
+    2
+    4
+    ...
