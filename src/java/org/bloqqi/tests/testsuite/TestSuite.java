@@ -23,6 +23,7 @@ import org.bloqqi.compiler.ast.*;
 
 abstract public class TestSuite {
 	protected static final String TEST_FILES_PATH = "testfiles/";
+	protected static final int DEFAULT_EXECUTION_TIMEOUT = 1500; // In ms
 
 	protected DiagramType parseValidDiagramType(String s) {
 		Program p = parseValidProgram(s);
@@ -208,7 +209,7 @@ abstract public class TestSuite {
 	}
 	
 	protected static String execute(java.util.List<String> cmd) throws IOException, InterruptedException {
-		return execute(cmd, 1000);
+		return execute(cmd, DEFAULT_EXECUTION_TIMEOUT);
 	}
 	protected static String execute(java.util.List<String> cmd, int timeoutMillis) throws IOException, InterruptedException {
 		ProcessBuilder pb = new ProcessBuilder(cmd);
