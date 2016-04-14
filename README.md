@@ -10,7 +10,7 @@ To test and run the Bloqqi compiler:
     $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia
     Program OK
 
-Generate C code:
+Generate C code and execute the program TwoCounters:
 
     $ java -jar bloqqi-compiler.jar examples/TwoCounters.dia --c --o=TwoCounters.c
     $ gcc -std=c99 TwoCounters.c examples/PrintFunction.c -o TwoCounters
@@ -20,3 +20,5 @@ Generate C code:
     2
     4
     ...
+
+The file `example/PrintFunction.c` contains C functions for printing different kinds of values.
