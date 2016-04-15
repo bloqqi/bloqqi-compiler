@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.bloqqi.compiler.ast.*;
 import org.bloqqi.tests.testsuite.TestSuite;
 
-public class InheritanceTests extends TestSuite{
+public class InheritanceTests extends TestSuite {
 	@Test
 	public void singleInheritance() {
 		String s =

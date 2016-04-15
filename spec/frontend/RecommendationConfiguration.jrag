@@ -1,39 +1,45 @@
 import java.util.Set;
 import java.util.SortedSet;
-
-import java.util.SortedSet;
+import java.util.SortedMap;
 import java.util.TreeSet;
+import java.util.TreeMap;
 
 aspect RecommendationConfiguration {
 	public SpecializeDiagramType DiagramType.specialize() {
 		return new SpecializeDiagramType(this);
 	}
 	
+	public SpecializeDiagramType DiagramType.specialize(DiagramType subType) {
+		SpecializeDiagramType spec = new SpecializeDiagramType(this);
+		spec.match(subType);
+		return spec;
+	}
+	
 	public class SpecializeDiagramType {
 		private final DiagramType diagramType;
-		private final SortedSet<ConfComponentGroup> groups;
-		private final SortedSet<ConfReplaceable> replaceables;
+		private final SortedMap<String, ConfComponentGroup> groups;
+		private final SortedMap<String, ConfReplaceable> replaceables;
 
 		public SpecializeDiagramType(DiagramType diagramType) {
-			SortedSet<ConfComponentGroup> groupsTmp = new TreeSet<>();
+			SortedMap<String, ConfComponentGroup> groupsTmp = new TreeMap<>();
 			for (RecommendationGroup rg: diagramType.getRecommendationGroups()) {
-				groupsTmp.add(new ConfComponentGroup(rg));
+				groupsTmp.put(rg.name(), new ConfComponentGroup(rg));
 			}
-			SortedSet<ConfReplaceable> replaceablesTmp = new TreeSet<>();
+			SortedMap<String, ConfReplaceable> replaceablesTmp = new TreeMap<>();
 			for (RecommendationReplaceable rr: diagramType.recommendedReplaceables()) {
-				replaceablesTmp.add(new ConfReplaceable(rr));
+				replaceablesTmp.put(rr.name(), new ConfReplaceable(rr));
 			}
 			this.diagramType = diagramType;
-			this.groups = Collections.unmodifiableSortedSet(groupsTmp);
-			this.replaceables = Collections.unmodifiableSortedSet(replaceablesTmp);
+			this.groups = Collections.unmodifiableSortedMap(groupsTmp);
+			this.replaceables = Collections.unmodifiableSortedMap(replaceablesTmp);
 		}
 
 		public SortedSet<ConfComponentGroup> getGroups() {
-			return groups;
+			return Collections.unmodifiableSortedSet(new TreeSet(groups.values()));
 		}
 		
 		public SortedSet<ConfReplaceable> getReplaceables() {
-			return replaceables;
+			return Collections.unmodifiableSortedSet(new TreeSet(replaceables.values()));
 		}
 		
 		public Component newAnonymousComponent(String componentName) {
@@ -66,12 +72,12 @@ aspect RecommendationConfiguration {
 		}
 		
 		private void addComponents(DiagramType newDt) {
-			for (ConfComponentGroup group: computeSortedGroups()) {
+			for (ConfComponentGroup group: computeSortedGroups(groups.values())) {
 				if (group.isSelected()) {
 					newDt.addLocalComponent(group.newComponent());
 				}
 			}
-			for (ConfReplaceable r: replaceables) {
+			for (ConfReplaceable r: replaceables.values()) {
 				if (r.isRedeclared()) {
 					newDt.addLocalComponent(r.newAnonymousRedeclare());
 				}
@@ -79,12 +85,12 @@ aspect RecommendationConfiguration {
 		}
 		
 		protected boolean containsChanges() {
-			for (ConfComponentGroup group: groups) {
+			for (ConfComponentGroup group: groups.values()) {
 				if (group.isSelected()) {
 					return true;
 				}
 			}
-			for (ConfReplaceable repl: replaceables) {
+			for (ConfReplaceable repl: replaceables.values()) {
 				if (repl.isRedeclared()) {
 					return true;
 				}
@@ -92,17 +98,17 @@ aspect RecommendationConfiguration {
 			return false;
 		}
 
-		private Collection<ConfComponentGroup> computeSortedGroups() {
-			final Map<RecommendationGroup, ConfComponentGroup> map
-				= new HashMap<RecommendationGroup, ConfComponentGroup>();
-			for (ConfComponentGroup g: groups) {
+		private Collection<ConfComponentGroup> computeSortedGroups(
+				Collection<ConfComponentGroup> coll) {
+			Map<RecommendationGroup, ConfComponentGroup> map = new HashMap<>();
+			for (ConfComponentGroup g: coll) {
 				map.put(g.getRecommendationGroup(), g);
 			}
 			
 			SuccessorFunction<ConfComponentGroup> succFunc; 
 			succFunc = new SuccessorFunction<ConfComponentGroup>() {
 				public Collection<ConfComponentGroup> successors(ConfComponentGroup g) {
-					Set<ConfComponentGroup> set = new HashSet<ConfComponentGroup>();
+					Set<ConfComponentGroup> set = new HashSet<>();
 					for (RecommendationGroup rg: g.getRecommendationGroup().groupsAfter()) {
 						set.add(map.get(rg));
 					}
@@ -117,7 +123,28 @@ aspect RecommendationConfiguration {
 				}
 			};
 			
-			return Utils.topologicalSort(groups, succFunc, tieOrdering);
+			return Utils.topologicalSort(coll, succFunc, tieOrdering);
+		}
+		
+		public void match(DiagramType dt) {
+			for (Component c: dt.getLocalComponents()) {
+				String typeName;
+				if (c.type().isAnonymousType()) {
+					typeName = c.type().directSuperTypes().iterator().next().name();
+				} else {
+					typeName = c.type().name();
+				}
+				
+				ConfComponentGroup g = groups.get(c.name());
+				if (g != null && !c.isLocallyRedeclared()) {
+					g.match(c.type(), typeName);
+				} else {
+					ConfReplaceable r = replaceables.get(c.name());
+					if (r != null && c.isLocallyRedeclared()) {
+						r.match(c.type(), typeName);
+					}
+				}
+			}
 		}
 		
 		public SortedSet<String> getNewInParameters() {
@@ -126,10 +153,10 @@ aspect RecommendationConfiguration {
 		protected SortedSet<String> getNewInParameters(String path) {
 			SortedSet<String> set = new TreeSet<>();
 			String prefixPath = path.isEmpty() ? "" : path + ".";
-			for (ConfComponentGroup g: groups) {
+			for (ConfComponentGroup g: groups.values()) {
 				set.addAll(g.getNewInParameters(prefixPath + g.getName()));
 			}
-			for (ConfReplaceable repl: replaceables) {
+			for (ConfReplaceable repl: replaceables.values()) {
 				set.addAll(repl.getNewInParameters(prefixPath + repl.getName()));
 			}
 			return set;
@@ -139,11 +166,11 @@ aspect RecommendationConfiguration {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Diagramtype: " + diagramType.name() + "\n");
 			sb.append("Recommended components:\n");
-			for (ConfComponentGroup group: groups) {
+			for (ConfComponentGroup group: groups.values()) {
 				sb.append("- " + group.toString() + "\n");
 			}
 			sb.append("Replaceables:\n");
-			for (ConfReplaceable r: replaceables) {
+			for (ConfReplaceable r: replaceables.values()) {
 				sb.append("- " + r.toString() + "\n");
 			}
 			return sb.toString();
@@ -152,7 +179,7 @@ aspect RecommendationConfiguration {
 	
 	public class ConfComponentGroup implements Comparable<ConfComponentGroup> {
 		private final RecommendationGroup group;
-		private final SortedSet<ConfComponent> components;
+		private final SortedMap<String, ConfComponent> components;
 		private final DiagramType defaultType;
 		
 		private boolean isSelected;
@@ -162,18 +189,18 @@ aspect RecommendationConfiguration {
 			this.group = group;
 			defaultType = (DiagramType) group.superType().componentType();
 
-			SortedSet<ConfComponent> tmpSet = new TreeSet<ConfComponent>();
+			SortedMap<String, ConfComponent> tmpMap = new TreeMap<String, ConfComponent>();
 			for (RecommendationComponent subRc: group.recommendedComponents()) {
 				for (DiagramType subType: subRc.componentType().namedSubTypes()) {
 					boolean isDefault = subType == defaultType;
 					ConfComponent cc = new ConfComponent(this, subRc, subType, isDefault);
-					tmpSet.add(cc);
+					tmpMap.put(subType.name(), cc);
 					if (isDefault) {
 						selectedComp = cc;
 					}
 				}
 			}
-			components = Collections.unmodifiableSortedSet(tmpSet);
+			components = Collections.unmodifiableSortedMap(tmpMap);
 			isSelected = false;
 		}
 
@@ -186,7 +213,7 @@ aspect RecommendationConfiguration {
 		}
 
 		public SortedSet<ConfComponent> getRecommendations() {
-			return components;
+			return Collections.unmodifiableSortedSet(new TreeSet(components.values()));
 		}
 		public boolean isSelected() {
 			return isSelected;
@@ -203,6 +230,14 @@ aspect RecommendationConfiguration {
 		}
 		public void setSelectedComponent(ConfComponent selectedComp) {
 			this.selectedComp = selectedComp;
+		}
+		
+		public void match(TypeDecl type, String typeName) {
+			ConfComponent c = components.get(typeName);
+			if (c != null) {
+				setSelectedComponent(c);
+			}
+			setSelected(true);
 		}
 		
 		public SortedSet<String> getNewInParameters(String path) {
@@ -223,7 +258,7 @@ aspect RecommendationConfiguration {
 	
 		public String toString() {
 			String selectedStr = isSelected() ? selectedComp.toString() : "N/A";
-			return selectedStr + " selected of " + components;
+			return selectedStr + " selected of " + components.values();
 		}
 	}
 	
@@ -235,7 +270,8 @@ aspect RecommendationConfiguration {
 		
 		private SpecializeDiagramType specDt;
 		
-		public ConfComponent(ConfComponentGroup confGroup, RecommendationComponent rc, DiagramType type, boolean isDefault) {
+		public ConfComponent(ConfComponentGroup confGroup, RecommendationComponent rc,
+				DiagramType type, boolean isDefault) {
 			this.confGroup = confGroup;
 			this.rc = rc;
 			this.type = type;
@@ -341,29 +377,24 @@ aspect RecommendationConfiguration {
 	
 	public class ConfReplaceable implements Comparable<ConfReplaceable> {
 		private final RecommendationReplaceable replaceable; 
-		private final SortedSet<ConfReplaceableAlternative> alternatives;
+		private final SortedMap<String, ConfReplaceableAlternative> alternatives;
 		
 		private final DiagramType defaultType;
 		private ConfReplaceableAlternative selectedAlternative;
 		
 		public ConfReplaceable(RecommendationReplaceable replaceable) {
 			this.replaceable = replaceable;
-			SortedSet<ConfReplaceableAlternative> tmpSet;
-			tmpSet = new TreeSet<>(new Comparator<ConfReplaceableAlternative>() {
-				public int compare(ConfReplaceableAlternative a1, ConfReplaceableAlternative a2) {
-					return a1.getType().name().compareTo(a2.getType().name());
-				}
-			});
+			SortedMap<String, ConfReplaceableAlternative> tmpMap = new TreeMap<>();
 			for (DiagramType subType: replaceable.componentType().namedSubTypes()) {
 				boolean isDefault = subType == replaceable.componentType();
 				ConfReplaceableAlternative alt = new ConfReplaceableAlternative(this, subType, isDefault);
 				if (isDefault) {
 					selectedAlternative = alt;
 				}
-				tmpSet.add(alt);
+				tmpMap.put(subType.name(), alt);
 			}
 			defaultType = selectedAlternative.getType();
-			alternatives = Collections.unmodifiableSortedSet(tmpSet);
+			alternatives = Collections.unmodifiableSortedMap(tmpMap);
 		}
 		
 		public String getName() {
@@ -375,7 +406,7 @@ aspect RecommendationConfiguration {
 		}
 		
 		public SortedSet<ConfReplaceableAlternative> getAlternatives() {
-			return alternatives;
+			return Collections.unmodifiableSortedSet(new TreeSet(alternatives.values()));
 		}
 		
 		public void setSelectedAlternative(ConfReplaceableAlternative selectedAlternative) {
@@ -386,16 +417,15 @@ aspect RecommendationConfiguration {
 			return selectedAlternative;
 		}
 		
-		public int compareTo(ConfReplaceable other) {
-			return replaceable.name().compareTo(other.replaceable.name());
+		public void match(TypeDecl type, String typeName) {
+			ConfReplaceableAlternative alt = alternatives.get(typeName);
+			if (alt != null) {
+				setSelectedAlternative(alt);
+			}
 		}
 		
 		public SortedSet<String> getNewInParameters(String path) {
 			return selectedAlternative.getNewInParameters(path, defaultType);
-		}
-		
-		public String toString() {
-			return replaceable.componentType().name();
 		}
 		
 		protected Component newAnonymousRedeclare() {
@@ -405,16 +435,25 @@ aspect RecommendationConfiguration {
 				new IdName(replaceable.name()),
 				false);
 		}
+
+		public int compareTo(ConfReplaceable other) {
+			return replaceable.name().compareTo(other.replaceable.name());
+		}
+
+		public String toString() {
+			return replaceable.componentType().name();
+		}
 	}
 	
-	public class ConfReplaceableAlternative {
+	public class ConfReplaceableAlternative implements Comparable<ConfReplaceableAlternative> {
 		private final ConfReplaceable confReplaceable;
 		private final DiagramType type;
 		private final boolean isDefault;
 		
 		private SpecializeDiagramType specDt;
 		
-		public ConfReplaceableAlternative(ConfReplaceable confReplaceable, DiagramType type, boolean isDefault) {
+		public ConfReplaceableAlternative(ConfReplaceable confReplaceable,
+				DiagramType type, boolean isDefault) {
 			this.confReplaceable = confReplaceable;
 			this.type = type;
 			this.isDefault = isDefault;
@@ -462,6 +501,10 @@ aspect RecommendationConfiguration {
 				return new TypeUse(type.name());
 			}
 		}		
+		
+		public int compareTo(ConfReplaceableAlternative other) {
+			return type.name().compareTo(other.type.name());
+		}
 		
 		public String toString() {
 			String isDefaultStr = isDefault ? " (default)" : "";

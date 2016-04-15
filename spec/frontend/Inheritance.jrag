@@ -4,7 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.Arrays;
 
 aspect SuperAndSubTypes {
-	syn lazy LinkedHashSet<DiagramType> DiagramType.directSuperTypes() {
+	syn lazy LinkedHashSet<DiagramType> TypeDecl.directSuperTypes()
+		= new LinkedHashSet<>();
+	eq DiagramType.directSuperTypes() {
 		LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
 		for (TypeUse t: getSuperTypes()) {
 			if (t.type().isDiagramType()) {
