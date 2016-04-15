@@ -128,20 +128,24 @@ aspect RecommendationConfiguration {
 		
 		public void match(DiagramType dt) {
 			for (Component c: dt.getLocalComponents()) {
-				String typeName;
-				if (c.type().isAnonymousType()) {
-					typeName = c.type().directSuperTypes().iterator().next().name();
-				} else {
-					typeName = c.type().name();
-				}
+				if (c.type().isDiagramType()) {
+					DiagramType cType = (DiagramType) c.type();
+
+					String typeName;
+					if (cType.isAnonymousType()) {
+						typeName = cType.directSuperTypes().iterator().next().name();
+					} else {
+						typeName = cType.name();
+					}
 				
-				ConfComponentGroup g = groups.get(c.name());
-				if (g != null && !c.isLocallyRedeclared()) {
-					g.match(c.type(), typeName);
-				} else {
-					ConfReplaceable r = replaceables.get(c.name());
-					if (r != null && c.isLocallyRedeclared()) {
-						r.match(c.type(), typeName);
+					ConfComponentGroup g = groups.get(c.name());
+					if (g != null && !c.isLocallyRedeclared()) {
+						g.match(cType, typeName);
+					} else {
+						ConfReplaceable r = replaceables.get(c.name());
+						if (r != null && c.isLocallyRedeclared()) {
+							r.match(cType, typeName);
+						}
 					}
 				}
 			}
@@ -232,10 +236,13 @@ aspect RecommendationConfiguration {
 			this.selectedComp = selectedComp;
 		}
 		
-		public void match(TypeDecl type, String typeName) {
+		public void match(DiagramType dt, String typeName) {
 			ConfComponent c = components.get(typeName);
 			if (c != null) {
 				setSelectedComponent(c);
+				if (dt.isAnonymousType()) {
+					c.specializeType(dt);
+				}
 			}
 			setSelected(true);
 		}
@@ -291,12 +298,19 @@ aspect RecommendationConfiguration {
 		}
 		
 		public SpecializeDiagramType specializeType() {
+			return specializeType(null);
+		}
+		public SpecializeDiagramType specializeType(DiagramType dt) {
 			if (specDt == null) {
-				specDt = type.specialize();
+				if (dt != null) {
+					specDt = type.specialize(dt);
+				} else {
+					specDt = type.specialize();
+				}
 			}
 			return specDt;
 		}
-		
+
 		protected boolean containsChanges() {
 			return specDt != null ? specDt.containsChanges() : false;
 		}
@@ -417,10 +431,13 @@ aspect RecommendationConfiguration {
 			return selectedAlternative;
 		}
 		
-		public void match(TypeDecl type, String typeName) {
+		public void match(DiagramType dt, String typeName) {
 			ConfReplaceableAlternative alt = alternatives.get(typeName);
 			if (alt != null) {
 				setSelectedAlternative(alt);
+				if (dt.isAnonymousType()) {
+					alt.specializeType(dt);
+				}
 			}
 		}
 		
@@ -473,8 +490,15 @@ aspect RecommendationConfiguration {
 		}
 		
 		public SpecializeDiagramType specializeType() {
+			return specializeType(null);
+		}
+		public SpecializeDiagramType specializeType(DiagramType dt) {
 			if (specDt == null) {
-				specDt = type.specialize();
+				if (dt != null) {
+					specDt = type.specialize(dt);
+				} else {
+					specDt = type.specialize();
+				}
 			}
 			return specDt;
 		}
