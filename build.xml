@@ -93,7 +93,9 @@
 
 		<!-- generate the parser phase 1, translating .parser to .beaver -->
 		<java classpath="${tools}/JastAddParser.jar:${tools}/beaver-rt.jar" classname="Main" fork="true">
-			<arg line="--no-beaver-symbol ${gendir}/${package.path}/BloqqiParser.all ${gendir}/${package.path}/BloqqiParser.beaver"/>
+			<arg value="--no-beaver-symbol" />
+			<arg value="${gendir}/${package.path}/BloqqiParser.all" />
+			<arg value="${gendir}/${package.path}/BloqqiParser.beaver" />
 		</java>
 		<!-- generate the parser phase 2, translating .beaver to .java -->
 		<beaver file="${gendir}/${package.path}/BloqqiParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
