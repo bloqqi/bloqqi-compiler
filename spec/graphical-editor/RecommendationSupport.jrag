@@ -14,6 +14,7 @@ aspect RecommendationSupport {
 
 		private final Map<FlowDecl, InParameter> toInPar;
 		private final Map<FlowDecl, OutParameter> toOutPar;
+		private final Set<Node> interceptionSourceNodes;
 		
 		public SubTypeWrapperCreator(DiagramType subType, String newDiagramTypeName, String newWiredComponentName) {
 			this.subType = subType;
@@ -25,6 +26,17 @@ aspect RecommendationSupport {
 			newWiredComponent = new WiredComponent();
 			toInPar = new HashMap<>();
 			toOutPar = new HashMap<>();
+			
+			// Keep track of all local source nodes affected by target interception
+			Set<Node> tmpSet = new HashSet<>();
+			for (Connection c: subType.connections()) {
+				if (!c.isInherited()
+						&& isCrossing(c.getSource())
+						&& c.declaredFlowDecl() instanceof ConnectionInterception) {
+					tmpSet.add(c.getSource().node());
+				}
+			}
+			interceptionSourceNodes = Collections.unmodifiableSet(tmpSet);
 		}
 		
 		public void create() {
@@ -74,6 +86,7 @@ aspect RecommendationSupport {
 			// Keep track of handled source nodes. This to handle source nodes with
 			// more than one outgoing connection
 			Set<Node> sourceNodes = new HashSet<>();
+			sourceNodes.addAll(interceptionSourceNodes);
 			
 			for (Connection c: subType.connections()) {
 				if (!c.isInherited()) {
@@ -84,7 +97,7 @@ aspect RecommendationSupport {
 						TypeUse type = new TypeUse(c.getSource().type().name());
 						if (c.declaredFlowDecl() instanceof SourceInterception) {
 							createWiringSourceInterception(w, inPar, outPar, type);
-						} else if (c.declaredFlowDecl() instanceof Connection 
+						} else if (c.declaredFlowDecl() instanceof Connection
 								&& !sourceNodes.contains(c.getSource().node())) {
 							createWiringConnectionSource(w, inPar, type);
 							sourceNodes.add(c.getSource().node());
@@ -111,6 +124,7 @@ aspect RecommendationSupport {
 
 			// Handle source nodes with several outgoing connections
 			Set<Node> sourceNodes = new HashSet<>();
+			sourceNodes.addAll(interceptionSourceNodes);
 			
 			for (Connection c: subType.connections()) {
 				if (!c.isInherited()) {
@@ -120,7 +134,8 @@ aspect RecommendationSupport {
 					if (isCrossing(c.getSource())) {
 						if (c.declaredFlowDecl() instanceof SourceInterception) {
 							Expr source = removeTypedVarUse(c.getSource().treeCopy());
-							newWiredComponent.addWiredComponentParameter(new WiredComponentParameterVarUse((VarUse) source));
+							newWiredComponent.addWiredComponentParameter(
+								new WiredComponentParameterVarUse((VarUse) source));
 						} else if (c.declaredFlowDecl() instanceof Connection 
 								&& !sourceNodes.contains(c.getSource().node())) {
 							createWiredParameterForSourceConnection(c, inPar);
@@ -131,7 +146,8 @@ aspect RecommendationSupport {
 					if (isCrossing(c.getTarget())) {
 						if (c.declaredFlowDecl() instanceof ConnectionInterception) {
 							VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
-							newWiredComponent.addWiredComponentParameter(new WiredComponentParameterVarUse(target));
+							newWiredComponent.addWiredComponentParameter(
+								new WiredComponentParameterVarUse(target));
 						} else if (c.declaredFlowDecl() instanceof Connection) {
 							createWiredParameterForTargetConnection(c, outPar);
 						}

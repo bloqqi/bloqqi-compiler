@@ -310,7 +310,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
 	
-	/*
+	
 	@Test
 	public void twoOutgoingConnections() {
 		String str =
@@ -348,7 +348,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
-	*/
+	
 
 	@Test
 	public void twoOutgoingConnections2() {
@@ -386,14 +386,13 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"  connect(blockout, block2.in1);\n" +
 			"  connect(block2.out, out);\n" +
 			"}\n" +
-			"wiring BWrapper[blockout: Int, =>out: Int] {\n" +
-			"  connect(blockout, BWrapper.blockout);\n" +
+			"wiring BWrapper[=>out: Int] {\n" +
 			"  intercept out with BWrapper.blockout, BWrapper.out;\n" +
 			"}\n";
 
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[block.out, out]";
+		String expectedComponent = "bWrapper: BWrapper[out]";
 		assertEquals(expectedComponent, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
