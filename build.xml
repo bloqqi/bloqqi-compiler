@@ -4,7 +4,11 @@
 	<property name="gendir" value="${srcdir}/generated" />
 	<property name="bindir" value="${basedir}/ant-bin" />
 	<property name="docdir" value="${basedir}/doc" />
+	<property name="tools" value="${basedir}/tools"/>
+	<property name="test-reports.dir" location="report-tests"/>
 
+	<property name="jarfile" value="bloqqi-compiler.jar" />
+	<property name="junitjar" value="${tools}/junit-4.11-SNAPSHOT.jar" />
 
 	<!-- "package" is the directory where generated files will be stored -->
 	<property name="package" value="org.bloqqi.compiler.ast"/>
@@ -18,18 +22,9 @@
 			</filterchain>
 	</loadresource>
 	
-	<!-- "tools" is the directory where generators and libraries are located. -->
-	<property name="tools" value="tools"/>
-
-	<property name="jarfile" value="bloqqi-compiler.jar" />
-	<property name="junitjar" value="${tools}/junit-4.11-SNAPSHOT.jar" />
-
-	<!-- "jastadd" is an ant task class in jastadd2.jar -->
+	<!-- Define Ant tasks -->
 	<taskdef name="jastadd" classname="org.jastadd.JastAddTask" classpath="${tools}/jastadd2.jar"/>
-
-	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
 	<taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="${tools}/JFlex.jar"/>
-	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
 	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${tools}/beaver.jar"/>
 
 	<!-- compile sources -->
@@ -121,18 +116,21 @@
 
 	
 	<target name="test" depends="build">
+		<mkdir dir="${test-reports.dir}"/>
 		<junit>
 			<classpath>
 				<pathelement path="${bindir}:${junitjar}:${tools}/beaver-rt.jar" />
 			</classpath>
 			<formatter type="brief" usefile="false" />
 
-			<batchtest>
+			<batchtest todir="${test-reports.dir}">
 				<fileset dir="src/java">
 					<include name="org/bloqqi/tests/*.java" />
 					<include name="org/bloqqi/tests/codegen/*.java" />
 				</fileset>
 			</batchtest>
+
+			<formatter type="xml" />
 		</junit>
 	</target>
 
