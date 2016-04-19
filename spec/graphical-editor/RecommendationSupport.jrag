@@ -1,3 +1,71 @@
+aspect IsParameterExposed {
+	/**
+	 * Check if inner parameter (possible nested) is exposed as an outer parameter
+	 */
+	syn Parameter DiagramType.isInnerParameterExposed(String path) {
+		VarDecl vdPar = lookupInnerVarDecl(path);
+		if (!path.contains(".")) {
+			return vdPar != null && vdPar instanceof Parameter
+					? (Parameter) vdPar
+					: null;
+		}
+		
+		String pathComponents = path.substring(0, path.lastIndexOf("."));
+		VarDecl vdInnerComp = lookupInnerVarDecl(pathComponents);
+		
+		if (!(vdPar instanceof Parameter) || !(vdInnerComp instanceof Component)) {
+			return null;
+		}
+		
+		Parameter par = (Parameter) vdPar;
+		Component innerComp = (Component) vdInnerComp;
+		if (!innerComp.isEnclosedBy(this)) {
+			return null;
+		}
+		
+		return isInnerParameterExposed(innerComp, par);
+	}
+	
+	/**
+	 * Helper attributes
+	 */
+	syn Parameter DiagramType.isInnerParameterExposed(Component comp, Parameter par) {
+		if (this == par.diagramType()) {
+			return par;
+		}
+		
+		InheritedComponent flatComp
+			= (InheritedComponent) comp.diagramType().inheritedLookup(comp.name());
+		ComponentParameter cp = flatComp.findComponentParameter(par);
+		if (comp == null || cp == null) {
+			return null;
+		}
+		if (par.isInParameter() && !cp.ingoingConnections().isEmpty()) {
+			Connection conn = cp.ingoingConnections().iterator().next();
+			if (conn.getSource().node().isInParameter()) {
+				Parameter p = (Parameter) conn.getSource().node();
+				return isInnerParameterExposed(comp.enclosingComponent(), p.declaredParameter());
+			}
+		} else if (!par.isInParameter() && !cp.outgoingConnections().isEmpty()){
+			Connection conn = cp.outgoingConnections().iterator().next();
+			if (conn.getTarget().node().isOutParameter()) {
+				Parameter p = (Parameter) conn.getTarget().node();
+				return isInnerParameterExposed(comp.enclosingComponent(), p.declaredParameter());
+			}
+		}
+		return null;
+	}
+
+	syn ComponentParameter Component.findComponentParameter(Parameter p) {
+		VarDecl vd = findMember(p.name());
+		if (vd instanceof ComponentParameter) {
+			return (ComponentParameter) vd;
+		} else {
+			return null;
+		}
+	}
+}
+
 aspect RecommendationSupport {
 	public Pair<DiagramType, WiredComponent> DiagramType.extractsubTypeAsWiredBlock(String diagramTypeName, String componentName) {
 		SubTypeWrapperCreator creator = new SubTypeWrapperCreator(this, diagramTypeName, componentName);

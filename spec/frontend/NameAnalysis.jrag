@@ -347,3 +347,19 @@ aspect RewriteSimplifiedForm {
 		return false;
 	}
 }
+
+aspect NameUtils {
+	syn VarDecl DiagramType.lookupInnerVarDecl(String path) {
+		String[] names = path.split("\\.", 2);
+		if (names.length == 1) {
+			return lookup(names[0]);
+		} else if (names.length > 1) {
+			VarDecl vd = lookup(names[0]);
+			if (vd != null && vd.type().isDiagramType()) {
+				DiagramType innerDt = (DiagramType) vd.type();
+				return innerDt.lookupInnerVarDecl(names[1]);
+			}
+		}
+		return null;
+	}
+}

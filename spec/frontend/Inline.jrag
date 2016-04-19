@@ -36,7 +36,9 @@ aspect Inline {
 	
 	syn boolean DiagramType.isEnclosedBy(DiagramType dt)
 		= dt == this || isEnclosedByInh(dt);
+	syn boolean Component.isEnclosedBy(DiagramType dt) = isEnclosedByInh(dt);
 	inh boolean DiagramType.isEnclosedByInh(DiagramType dt);
+	inh boolean Component.isEnclosedByInh(DiagramType dt);
 	eq DiagramType.getChild().isEnclosedByInh(DiagramType dt)
 		= dt == this || isEnclosedByInh(dt);
 	eq Program.getChild().isEnclosedByInh(DiagramType dt) = false;
