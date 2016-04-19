@@ -1,3 +1,5 @@
+import java.io.InputStreamReader;
+
 aspect PredefinedDecls {
 	syn nta List<TypeDecl> Program.predefinedTypeDecls() {
 		List<TypeDecl> l = new List<>();
@@ -6,5 +8,15 @@ aspect PredefinedDecls {
 		l.add(new BoolType());
 		l.add(new StringType());
 		return l;
+	}
+}
+
+aspect StandardLibrary {
+	public static CompilationUnit Program.loadStandardLibrary() throws Exception {
+		InputStream is = Program.class.getResourceAsStream("/bloqqi/StandardFunctions.dia");
+		BloqqiScanner scanner = new BloqqiScanner(new InputStreamReader(is));
+		BloqqiParser parser = new BloqqiParser();
+		CompilationUnit stdLib = (CompilationUnit) parser.parse(scanner);
+		return stdLib;
 	}
 }

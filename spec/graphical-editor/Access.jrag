@@ -1,4 +1,4 @@
-aspect Access {
+aspect SimpleAccess {
 	// follow the design principle described in the refactor paper
 	
 	public abstract VarUse Anchor.access();
@@ -43,5 +43,160 @@ aspect Access {
 		} else {
 			return name();
 		}
+	}
+}
+
+
+aspect AccessInlinedComponents {
+	protected VarUse ComponentParameter.accessInlinedComponent() {
+		if (!belongsToInlinedComponent()) {
+			return null;
+		}
+			
+		String innerName = component().name();
+		innerName = innerName.substring(innerName.indexOf(ASTNode.INLINE_SEP)+1);
+			
+		DiagramType inlinedDt = (DiagramType) component().inlinedComponent().type();
+		VarDecl varDecl = inlinedDt.inheritedLookup(innerName).findMember(name());
+		if (!(varDecl instanceof ComponentParameter)) {
+			return null;
+		}
+		ComponentParameter cp = (ComponentParameter) varDecl;
+
+		Node node = null;
+		if (isOutParameter()) {
+			Set<Connection> connections = cp.outgoingConnections();
+			if (connections.size() != 1) {
+				return null;
+			}
+			node = connections.iterator().next().getTarget().node();
+			if (!node.isOutParameter()) {
+				return null;
+			}
+		} else {
+			Set<Connection> connections = cp.ingoingConnections();
+			if (connections.size() != 1) {
+				return null;
+			}
+			node = connections.iterator().next().getSource().node();
+			if (!node.isInParameter()) {
+				return null;
+			}
+		}
+		
+		VarUse src = new SimpleVarUse(component().inlinedComponent().name());
+		return new DotVarUse(src, node.name());
+	}
+}
+
+aspect CanModifyToAccess {
+	syn Boolean Anchor.canModifyToAccess();
+	eq Parameter.canModifyToAccess() = false;
+	eq Variable.canModifyToAccess() = false;
+	eq WiringParameter.canModifyToAccess() = false;
+	eq Literal.canModifyToAccess() = false;
+	eq ComponentParameter.canModifyToAccess() {
+		if (!belongsToInlinedComponent()) {
+			return false;
+		}
+		
+		// Inlined components declared in supertype cannot be accessed
+		if (diagramType() != component().inlinedComponent().declaredInDiagramType()) {
+			return false;
+		}
+		
+		// For in parameters, check that there are no incoming connections
+		if (isInParameter()) {
+			Component componentLastDiagram = null;
+			for (Component c: component().lastDiagramType().components()) {
+				if (c.name().equals(component().declaredComponent().name())) {
+					componentLastDiagram = c;
+					break;
+				}
+			}
+			ComponentParameter cpLastDiagram = componentLastDiagram.getInParameter(index());
+			if (!cpLastDiagram.ingoingConnections().isEmpty()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+	
+	syn Boolean Anchor.hasAnonymousTypesTransitively();
+	eq Parameter.hasAnonymousTypesTransitively() = false;
+	eq Variable.hasAnonymousTypesTransitively() = false;
+	eq WiringParameter.hasAnonymousTypesTransitively() = false;
+	eq Literal.hasAnonymousTypesTransitively() = false;
+	eq ComponentParameter.hasAnonymousTypesTransitively() {
+		DiagramType inlinedAdt = component().inlinedComponent().anonymousDiagramType();
+		return component().lastDiagramType().isEnclosedBy(inlinedAdt);
+	}
+
+	public Pair<Component, VarUse> Anchor.modifyToAccess() {
+		return null;
+	}
+	public Pair<Component, VarUse> ComponentParameter.modifyToAccess() {
+		return modifyToAccess(this);
+	}
+	
+	protected static Pair<Component, VarUse> ASTNode.modifyToAccess(ComponentParameter cp) {
+		if (!cp.canModifyToAccess()) {
+			return null;
+		}
+		
+		DiagramType dt = cp.diagramType();
+		int index = dt.getLocalComponentList().getIndexOfChild(cp.component().inlinedComponent());
+		
+		// Step 1, add anonymous types
+		if (!cp.hasAnonymousTypesTransitively()) {
+			Component newComp = cp.addAnonymousTypesToInlinedComponent();
+			if (newComp != null) {
+				Parameter declaredParameter = cp.declaredParameter();
+				String componentName = cp.component().name();
+
+				// We will now add the new component and clear all caches
+				dt.getLocalComponentList().setChild(newComp, index);
+				dt.program().flushAllAttributes();
+				cp = null;
+				
+				// Since all caches were cleared, we need to find the new computed
+				// component parameter again
+				VarDecl varDecl = dt.inheritedLookup(componentName);
+				if (varDecl != null) {
+					cp = (ComponentParameter) varDecl.findMember(declaredParameter.name());
+				}
+				if (cp == null) {
+					throw new RuntimeException("something went wrong here");
+				}
+			}
+		}
+		
+		// Step 2, add parameters and connections
+		Pair<Component, VarUse> p = addConnectionsParameters(
+				cp.component().inlinedComponent(),
+				cp.component().lastDiagramType().enclosingComponent(),
+				cp);
+		dt.getLocalComponentList().setChild(p.first, index);
+		dt.program().flushAllAttributes();
+		
+		return p;
+	}
+}
+
+aspect AddAnonymousTypesInline {
+	public Component Anchor.addAnonymousTypesToInlinedComponent() {
+		return null;
+	}
+	public Component ComponentParameter.addAnonymousTypesToInlinedComponent() {
+		return component().addAnonymousTypesToInlinedComponent();
+	}
+
+	public Component Component.addAnonymousTypesToInlinedComponent() {
+		return null;
+	}
+
+	public Component InlinedComponent.addAnonymousTypesToInlinedComponent() {
+		return addAnonymousTypesForNestedComponents(getInlinedComponents());
 	}
 }
