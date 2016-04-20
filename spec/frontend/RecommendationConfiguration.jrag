@@ -84,7 +84,7 @@ aspect RecommendationConfiguration {
 			}
 		}
 		
-		protected boolean containsChanges() {
+		public boolean containsChanges() {
 			for (ConfComponentGroup group: groups.values()) {
 				if (group.isSelected()) {
 					return true;
@@ -311,7 +311,7 @@ aspect RecommendationConfiguration {
 			return specDt;
 		}
 
-		protected boolean containsChanges() {
+		public boolean containsChanges() {
 			return specDt != null ? specDt.containsChanges() : false;
 		}
 		
@@ -503,7 +503,7 @@ aspect RecommendationConfiguration {
 			return specDt;
 		}
 		
-		protected boolean containsChanges() {
+		public boolean containsChanges() {
 			return specDt != null ? specDt.containsChanges() : false;
 		}
 		
