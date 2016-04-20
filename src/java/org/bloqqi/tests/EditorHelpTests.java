@@ -1511,4 +1511,57 @@ public class EditorHelpTests extends TestSuite {
 		assertNull(anonDt.isInnerParameterExposed("b.z.in"));
 		assertNull(anonDt.isInnerParameterExposed("in.b"));
 	}
+	
+	/**
+	 * Test inlined blocks together with isParameterExposed
+	 */
+	@Test
+	public void isParameterExposedTo3() {
+		String str =
+			"diagramtype Main {" +
+			"  a: A {" +
+			"    inline b: B {" +
+			"      c: C (in: Int, in2: Int) {" +
+			"      };" +
+			"    };" +
+			"  };" +
+			"}" +
+			"diagramtype A {" +
+			"}" +
+			"diagramtype B {" +
+			"}" +
+			"diagramtype C {" +
+			"}";
+
+		Program program = parseValidProgram(str);
+		
+		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in");
+		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
+		program.flushAllAttributes();
+		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
+
+		String expected =
+		"diagramtype Main {\n" +
+		"  a: A (bin: Int) {\n" +
+		"    inline b: B (cin: Int) {\n" +
+		"      c: C (in: Int, in2: Int) {\n" +
+		"      };\n" +
+		"      connect(cin, c.in);\n" +
+		"    };\n" +
+		"    connect(bin, b.cin);\n" +
+		"  };\n" +
+		"  connect(5, a.bin);\n" +
+		"}\n";
+		assertEquals(expected, dtMain.prettyPrint());
+		
+		DiagramType anonDt = p.first.anonymousDiagramType();
+		Parameter binPar = (Parameter) anonDt.lookupInnerVarDecl("bin");
+		assertSame(binPar, anonDt.isInnerParameterExposed("b.cin"));
+		assertSame(binPar, anonDt.isInnerParameterExposed("b.c.in"));
+		assertSame(binPar, anonDt.isInnerParameterExposed("bin"));
+
+		assertNull(anonDt.isInnerParameterExposed("b.c.in2"));
+		assertNull(anonDt.isInnerParameterExposed("b.c2.in"));
+	}
 }

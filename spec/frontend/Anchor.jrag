@@ -30,7 +30,7 @@ aspect AnchorFlow {
 	eq Literal.declAnchor() = this;
 	
 	coll Set<Connection> Anchor.outgoingConnections() [new HashSet<Connection>()] root DiagramType;
-	InheritedConnection contributes this
+	Connection contributes this
 		when getSource().anchor() != null
 			&& getTarget().anchor() != null
 		to Anchor.outgoingConnections() for getSource().anchor();
@@ -38,7 +38,7 @@ aspect AnchorFlow {
 	DiagramType contributes nta connections() to Anchor.outgoingConnections();
 	
 	coll Set<Connection> Anchor.ingoingConnections() [new HashSet<Connection>()] root DiagramType;
-	InheritedConnection contributes this
+	Connection contributes this
 		when getSource().anchor() != null
 			&& getTarget().anchor() != null
 		to Anchor.ingoingConnections() for getTarget().anchor();

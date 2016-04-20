@@ -34,12 +34,11 @@ aspect IsParameterExposed {
 			return par;
 		}
 		
-		InheritedComponent flatComp
-			= (InheritedComponent) comp.diagramType().inheritedLookup(comp.name());
-		ComponentParameter cp = flatComp.findComponentParameter(par);
-		if (comp == null || cp == null) {
+		ComponentParameter cp = comp.findComponentParameter(par);
+		if (cp == null) {
 			return null;
 		}
+		
 		if (par.isInParameter() && !cp.ingoingConnections().isEmpty()) {
 			Connection conn = cp.ingoingConnections().iterator().next();
 			if (conn.getSource().node().isInParameter()) {
@@ -53,6 +52,7 @@ aspect IsParameterExposed {
 				return isInnerParameterExposed(comp.enclosingComponent(), p.declaredParameter());
 			}
 		}
+		
 		return null;
 	}
 
