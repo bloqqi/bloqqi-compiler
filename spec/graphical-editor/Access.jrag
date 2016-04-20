@@ -176,7 +176,8 @@ aspect CanModifyToAccess {
 		Pair<Component, VarUse> p = addConnectionsParameters(
 				cp.component().inlinedComponent(),
 				cp.component().lastDiagramType().enclosingComponent(),
-				cp);
+				cp,
+				null);
 		dt.getLocalComponentList().setChild(p.first, index);
 		dt.program().flushAllAttributes();
 		

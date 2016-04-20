@@ -59,16 +59,19 @@ aspect EditingOperations {
 
 
 aspect AddParametersAndConnections {
-	public Pair<Component, VarUse> DiagramType.addConnectionsParameters(String path) {
-		return addConnectionsParameters(path, false);
+	public Pair<Component, VarUse> DiagramType.addConnectionsParameters(
+			String path, String parameterName) {
+		return addConnectionsParameters(path, false, parameterName);
 	}
 	
-	public VarUse DiagramType.addConnectionsParametersToDiagramType(String path) {
-		Pair<Component, VarUse> p = addConnectionsParameters(path, true);
+	public VarUse DiagramType.addConnectionsParametersToDiagramType(
+			String path, String parameterName) {
+		Pair<Component, VarUse> p = addConnectionsParameters(path, true, parameterName);
 		return p.second;
 	}
 	
-	public Pair<Component, VarUse> DiagramType.addConnectionsParameters(String path, boolean addToDiagramType) {
+	public Pair<Component, VarUse> DiagramType.addConnectionsParameters(
+			String path, boolean addToDiagramType, String parameterName) {
 		String parts[] = path.split("\\.");
 		if (parts.length < 3 ) {
 			throw new RuntimeException("The path " + path + " needs to have at least 3 parts");
@@ -102,10 +105,11 @@ aspect AddParametersAndConnections {
 		}
 		ComponentParameter cp = (ComponentParameter) vdCp;
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(outerComponent, innerComponent, cp);
+		String componentParameterName = addToDiagramType ? null : parameterName;
+		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(outerComponent, innerComponent, cp, componentParameterName);
 		Pair<Component, VarUse> result;
 		if (addToDiagramType) {
-			String parameterName = getUniqueName(outerComponent.name() + cp.name());
+			//String parameterName = getUniqueName(outerComponent.name() + cp.name());
 			addParameter(parameterName, cp);
 			addConnection(new SimpleVarUse(parameterName), p.second, cp.isInParameter());
 			result = new Pair<>(p.first, new SimpleVarUse(parameterName));
@@ -120,11 +124,16 @@ aspect AddParametersAndConnections {
 
 	/**
 	 * See test cases for how to use this method
+	 * The parameter outerParameterName can be null, then this name will be computed
 	 */
 	public static Pair<Component, VarUse> ASTNode.addConnectionsParameters(
-			Component outerComponent, Component innerEnclosingComponent, ComponentParameter componentParameter) {
+			Component outerComponent,
+			Component innerEnclosingComponent,
+			ComponentParameter componentParameter,
+			String outerParameterName) {
 		if (!innerEnclosingComponent.isEnclosedBy(outerComponent)) {
-			throw new RuntimeException("Component " +  innerEnclosingComponent + " + is not enclosed by component " + outerComponent.name());
+			throw new RuntimeException("Component " +  innerEnclosingComponent
+					+ " + is not enclosed by component " + outerComponent.name());
 		}
 		// TODO: Do sanity check on componentParameter
 		
@@ -151,10 +160,15 @@ aspect AddParametersAndConnections {
 		while (enclosingComp != null) {
 			Component newComponent = enclosingComp.treeCopy();
 			
-			// Create unique parameter name
-			String parameterName = enclosingComp.anonymousDiagramType()
+			// Parameter name
+			String parameterName;
+			if (outerParameterName != null && enclosingComp == outerComponent.declaredComponent()) {
+				parameterName = outerParameterName;
+			} else {
+				parameterName = enclosingComp.anonymousDiagramType()
 					.getUniqueName(component.name() + componentParameter.name());
-		
+			}
+			
 			// Add new parameter
 			newComponent.anonymousDiagramType().addParameter(parameterName, componentParameter);
 	

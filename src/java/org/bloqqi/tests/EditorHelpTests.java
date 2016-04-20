@@ -1122,7 +1122,7 @@ public class EditorHelpTests extends TestSuite {
 		Component b = (Component) a.type().lookup("b");
 		ComponentParameter in = (ComponentParameter) b.findMember("in2");
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, a, in);
+		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, a, in, null);
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		dtMain.getLocalComponentList().setChild(p.first, 0);
@@ -1169,13 +1169,13 @@ public class EditorHelpTests extends TestSuite {
 		
 		try {
 			// Reversing the arguments should yield an exception
-			ASTNode.addConnectionsParameters(b, a, in);
+			ASTNode.addConnectionsParameters(b, a, in, null);
 			fail("An exception should be thrown here");
 		} catch (RuntimeException e) {
 			// OK
 		}
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, b, in);
+		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		dtMain.getLocalComponentList().setChild(p.first, 0);
@@ -1222,7 +1222,7 @@ public class EditorHelpTests extends TestSuite {
 		Component c = (Component) b.type().lookup("c");
 		ComponentParameter in = (ComponentParameter) c.findMember("in");
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, b, in);
+		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		dtMain.getLocalComponentList().setChild(p.first, 0);
@@ -1259,7 +1259,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.in2");
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.in2", "bin2");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1296,7 +1296,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in");
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1336,7 +1336,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in");
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1373,7 +1373,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a3.b.in2");
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a3.b.in2", "bin2");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1409,7 +1409,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addConnectionsParametersToDiagramType("a.b.in2");
+		dtMain.addConnectionsParametersToDiagramType("a.b.in2", "ain2");
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 		
@@ -1445,7 +1445,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in");
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1490,7 +1490,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addConnectionsParametersToDiagramType("a.b.in2");
+		dtMain.addConnectionsParametersToDiagramType("a.b.in2", "ain2");
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 		
@@ -1536,7 +1536,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in");
+		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
