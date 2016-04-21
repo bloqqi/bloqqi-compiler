@@ -172,7 +172,7 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtA = (DiagramType) cu.typeDecls().get(1);
 
 		FeatureConfiguration confDt = dtA.specialize();
-		ConfReplaceableAlternative alt = confDt.getReplaceables().first().getAlternatives().first();
+		MandatoryFeatureAlternative alt = confDt.getMandatoryFeatures().first().getAlternatives().first();
 		assertEquals("Block", alt.getType().name());
 		
 		FeatureConfiguration confBlock = alt.specialize();
@@ -346,8 +346,8 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		FeatureConfiguration conf = dtA.specialize();
 
-		assertEquals(2, conf.getReplaceables().first().getAlternatives().size());
-		Iterator<ConfReplaceableAlternative> itr = conf.getReplaceables().first().getAlternatives().iterator();
+		assertEquals(2, conf.getMandatoryFeatures().first().getAlternatives().size());
+		Iterator<MandatoryFeatureAlternative> itr = conf.getMandatoryFeatures().first().getAlternatives().iterator();
 		assertEquals("Block", itr.next().getType().name());
 		assertEquals("SubBlock", itr.next().getType().name());
 	}
@@ -533,11 +533,11 @@ public class RecommendationTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		FeatureConfiguration conf = dtA.specialize();
-		ConfReplaceable c = conf.getReplaceables().first();
-		Iterator<ConfReplaceableAlternative> a = c.getAlternatives().iterator();
+		MandatoryFeature m = conf.getMandatoryFeatures().first();
+		Iterator<MandatoryFeatureAlternative> a = m.getAlternatives().iterator();
 		a.next();
 		a.next();
-		c.setSelectedAlternative(a.next());
+		m.setSelectedAlternative(a.next());
 		
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("block.in", "block.in2"));
 		assertEquals(expectedSet, conf.getNewInParameters());
@@ -582,15 +582,15 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
 		FeatureConfiguration confA = dtA.specialize();
-		ConfReplaceable replA = confA.getReplaceables().first();
-		replA.setSelectedAlternative(replA.getAlternatives().first());
+		MandatoryFeature mandatoryA = confA.getMandatoryFeatures().first();
+		mandatoryA.setSelectedAlternative(mandatoryA.getAlternatives().first());
 		
-		FeatureConfiguration confCompB = replA.getSelectedAlternative().specialize();
-		ConfReplaceable replB = confCompB.getReplaceables().first();
-		Iterator<ConfReplaceableAlternative> itr = replB.getAlternatives().iterator();
+		FeatureConfiguration confCompB = mandatoryA.getSelectedAlternative().specialize();
+		MandatoryFeature mandatoryB = confCompB.getMandatoryFeatures().first();
+		Iterator<MandatoryFeatureAlternative> itr = mandatoryB.getAlternatives().iterator();
 		itr.next();
 		itr.next();
-		replB.setSelectedAlternative(itr.next());
+		mandatoryB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
@@ -639,10 +639,10 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
 		FeatureConfiguration confA = dtA.specialize();
-		ConfReplaceable replA = confA.getReplaceables().first();
-		replA.setSelectedAlternative(replA.getAlternatives().first());
+		MandatoryFeature mandatoryA = confA.getMandatoryFeatures().first();
+		mandatoryA.setSelectedAlternative(mandatoryA.getAlternatives().first());
 		
-		FeatureConfiguration confCompB = replA.getSelectedAlternative().specialize();
+		FeatureConfiguration confCompB = mandatoryA.getSelectedAlternative().specialize();
 		OptionalFeature optB = confCompB.getOptionalFeatures().first();
 		Iterator<OptionalFeatureAlternative> itr = optB.getAlternatives().iterator();
 		itr.next();

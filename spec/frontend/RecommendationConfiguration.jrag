@@ -18,28 +18,28 @@ aspect RecommendationConfiguration {
 	public class FeatureConfiguration {
 		private final DiagramType diagramType;
 		private final SortedMap<String, OptionalFeature> optionals;
-		private final SortedMap<String, ConfReplaceable> replaceables;
+		private final SortedMap<String, MandatoryFeature> mandatories;
 
 		public FeatureConfiguration(DiagramType diagramType) {
 			SortedMap<String, OptionalFeature> optionalsTmp = new TreeMap<>();
 			for (RecommendationGroup rg: diagramType.getRecommendationGroups()) {
 				optionalsTmp.put(rg.name(), new OptionalFeature(rg));
 			}
-			SortedMap<String, ConfReplaceable> replaceablesTmp = new TreeMap<>();
+			SortedMap<String, MandatoryFeature> mandatoriesTmp = new TreeMap<>();
 			for (RecommendationReplaceable rr: diagramType.recommendedReplaceables()) {
-				replaceablesTmp.put(rr.name(), new ConfReplaceable(rr));
+				mandatoriesTmp.put(rr.name(), new MandatoryFeature(rr));
 			}
 			this.diagramType = diagramType;
 			this.optionals = Collections.unmodifiableSortedMap(optionalsTmp);
-			this.replaceables = Collections.unmodifiableSortedMap(replaceablesTmp);
+			this.mandatories = Collections.unmodifiableSortedMap(mandatoriesTmp);
 		}
 
 		public SortedSet<OptionalFeature> getOptionalFeatures() {
 			return Collections.unmodifiableSortedSet(new TreeSet(optionals.values()));
 		}
 		
-		public SortedSet<ConfReplaceable> getReplaceables() {
-			return Collections.unmodifiableSortedSet(new TreeSet(replaceables.values()));
+		public SortedSet<MandatoryFeature> getMandatoryFeatures() {
+			return Collections.unmodifiableSortedSet(new TreeSet(mandatories.values()));
 		}
 		
 		public Component newAnonymousComponent(String componentName) {
@@ -77,9 +77,9 @@ aspect RecommendationConfiguration {
 					newDt.addLocalComponent(opt.newComponent());
 				}
 			}
-			for (ConfReplaceable r: replaceables.values()) {
-				if (r.isRedeclared()) {
-					newDt.addLocalComponent(r.newAnonymousRedeclare());
+			for (MandatoryFeature m: mandatories.values()) {
+				if (m.isRedeclared()) {
+					newDt.addLocalComponent(m.newAnonymousRedeclare());
 				}
 			}
 		}
@@ -90,8 +90,8 @@ aspect RecommendationConfiguration {
 					return true;
 				}
 			}
-			for (ConfReplaceable repl: replaceables.values()) {
-				if (repl.isRedeclared()) {
+			for (MandatoryFeature m: mandatories.values()) {
+				if (m.isRedeclared()) {
 					return true;
 				}
 			}
@@ -142,9 +142,9 @@ aspect RecommendationConfiguration {
 					if (opt != null && !c.isLocallyRedeclared()) {
 						opt.match(cType, typeName);
 					} else {
-						ConfReplaceable r = replaceables.get(c.name());
-						if (r != null && c.isLocallyRedeclared()) {
-							r.match(cType, typeName);
+						MandatoryFeature m = mandatories.get(c.name());
+						if (m != null && c.isLocallyRedeclared()) {
+							m.match(cType, typeName);
 						}
 					}
 				}
@@ -160,8 +160,8 @@ aspect RecommendationConfiguration {
 			for (OptionalFeature opt: optionals.values()) {
 				set.addAll(opt.getNewInParameters(prefixPath + opt.getName()));
 			}
-			for (ConfReplaceable repl: replaceables.values()) {
-				set.addAll(repl.getNewInParameters(prefixPath + repl.getName()));
+			for (MandatoryFeature m: mandatories.values()) {
+				set.addAll(m.getNewInParameters(prefixPath + m.getName()));
 			}
 			return set;
 		}
@@ -169,13 +169,13 @@ aspect RecommendationConfiguration {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Diagramtype: " + diagramType.name() + "\n");
-			sb.append("Recommended components:\n");
+			sb.append("Optional features:\n");
 			for (OptionalFeature opt: optionals.values()) {
 				sb.append("- " + opt.toString() + "\n");
 			}
-			sb.append("Replaceables:\n");
-			for (ConfReplaceable r: replaceables.values()) {
-				sb.append("- " + r.toString() + "\n");
+			sb.append("Mandatory features:\n");
+			for (MandatoryFeature m: mandatories.values()) {
+				sb.append("- " + m.toString() + "\n");
 			}
 			return sb.toString();
 		}
@@ -389,19 +389,19 @@ aspect RecommendationConfiguration {
 		}
 	}
 	
-	public class ConfReplaceable implements Comparable<ConfReplaceable> {
+	public class MandatoryFeature implements Comparable<MandatoryFeature> {
 		private final RecommendationReplaceable replaceable; 
-		private final SortedMap<String, ConfReplaceableAlternative> alternatives;
+		private final SortedMap<String, MandatoryFeatureAlternative> alternatives;
 		
 		private final DiagramType defaultType;
-		private ConfReplaceableAlternative selectedAlternative;
+		private MandatoryFeatureAlternative selectedAlternative;
 		
-		public ConfReplaceable(RecommendationReplaceable replaceable) {
+		public MandatoryFeature(RecommendationReplaceable replaceable) {
 			this.replaceable = replaceable;
-			SortedMap<String, ConfReplaceableAlternative> tmpMap = new TreeMap<>();
+			SortedMap<String, MandatoryFeatureAlternative> tmpMap = new TreeMap<>();
 			for (DiagramType subType: replaceable.componentType().namedSubTypes()) {
 				boolean isDefault = subType == replaceable.componentType();
-				ConfReplaceableAlternative alt = new ConfReplaceableAlternative(this, subType, isDefault);
+				MandatoryFeatureAlternative alt = new MandatoryFeatureAlternative(this, subType, isDefault);
 				if (isDefault) {
 					selectedAlternative = alt;
 				}
@@ -419,20 +419,20 @@ aspect RecommendationConfiguration {
 			return !selectedAlternative.isDefault() || selectedAlternative.containsChanges();
 		}
 		
-		public SortedSet<ConfReplaceableAlternative> getAlternatives() {
+		public SortedSet<MandatoryFeatureAlternative> getAlternatives() {
 			return Collections.unmodifiableSortedSet(new TreeSet(alternatives.values()));
 		}
 		
-		public void setSelectedAlternative(ConfReplaceableAlternative selectedAlternative) {
+		public void setSelectedAlternative(MandatoryFeatureAlternative selectedAlternative) {
 			this.selectedAlternative = selectedAlternative;
 		}
 		
-		public ConfReplaceableAlternative getSelectedAlternative() {
+		public MandatoryFeatureAlternative getSelectedAlternative() {
 			return selectedAlternative;
 		}
 		
 		public void match(DiagramType dt, String typeName) {
-			ConfReplaceableAlternative alt = alternatives.get(typeName);
+			MandatoryFeatureAlternative alt = alternatives.get(typeName);
 			if (alt != null) {
 				setSelectedAlternative(alt);
 				if (dt.isAnonymousType()) {
@@ -453,7 +453,7 @@ aspect RecommendationConfiguration {
 				false);
 		}
 
-		public int compareTo(ConfReplaceable other) {
+		public int compareTo(MandatoryFeature other) {
 			return replaceable.name().compareTo(other.replaceable.name());
 		}
 
@@ -462,23 +462,23 @@ aspect RecommendationConfiguration {
 		}
 	}
 	
-	public class ConfReplaceableAlternative implements Comparable<ConfReplaceableAlternative> {
-		private final ConfReplaceable confReplaceable;
+	public class MandatoryFeatureAlternative implements Comparable<MandatoryFeatureAlternative> {
+		private final MandatoryFeature mandatoryFeature;
 		private final DiagramType type;
 		private final boolean isDefault;
 		
 		private FeatureConfiguration conf;
 		
-		public ConfReplaceableAlternative(ConfReplaceable confReplaceable,
+		public MandatoryFeatureAlternative(MandatoryFeature mandatoryFeature,
 				DiagramType type, boolean isDefault) {
-			this.confReplaceable = confReplaceable;
+			this.mandatoryFeature = mandatoryFeature;
 			this.type = type;
 			this.isDefault = isDefault;
 			this.conf = null;
 		}
 		
-		public ConfReplaceable getConfReplaceable() {
-			return confReplaceable;
+		public MandatoryFeature getMandatoryFeature() {
+			return mandatoryFeature;
 		}
 		
 		public DiagramType getType() {
@@ -526,7 +526,7 @@ aspect RecommendationConfiguration {
 			}
 		}		
 		
-		public int compareTo(ConfReplaceableAlternative other) {
+		public int compareTo(MandatoryFeatureAlternative other) {
 			return type.name().compareTo(other.type.name());
 		}
 		
