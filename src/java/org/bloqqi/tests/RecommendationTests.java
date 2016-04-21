@@ -44,13 +44,13 @@ public class RecommendationTests extends TestSuite {
 			"}";
 
 		DiagramType dt = parseValidDiagramType(str);
-		SpecializeDiagramType s = dt.specialize();
+		FeatureConfiguration conf = dt.specialize();
 
-		for (ConfComponentGroup g: s.getGroups()) {
-			g.setSelected(true);
+		for (OptionalFeature opt: conf.getOptionalFeatures()) {
+			opt.setSelected(true);
 		}
 		
-		DiagramType newDt = s.newDiagramType("SubA");
+		DiagramType newDt = conf.newDiagramType("SubA");
 		assertEquals("a", newDt.getLocalComponent(0).name());
 		assertEquals("b", newDt.getLocalComponent(1).name());
 		assertEquals("c", newDt.getLocalComponent(2).name());
@@ -83,18 +83,18 @@ public class RecommendationTests extends TestSuite {
 			"}";
 
 		DiagramType dt = parseValidDiagramType(str);
-		SpecializeDiagramType s = dt.specialize();
+		FeatureConfiguration conf = dt.specialize();
 
-		assertEquals(1, s.getGroups().size());
-		ConfComponentGroup g = s.getGroups().first();
-		ConfComponent[] components = g.getRecommendations().toArray(new ConfComponent[0]);
-		assertEquals("S", components[0].getType().name());
-		assertEquals("T", components[1].getType().name());
+		assertEquals(1, conf.getOptionalFeatures().size());
+		OptionalFeature opt = conf.getOptionalFeatures().first();
+		OptionalFeatureAlternative[] alternatives = opt.getAlternatives().toArray(new OptionalFeatureAlternative[0]);
+		assertEquals("S", alternatives[0].getType().name());
+		assertEquals("T", alternatives[1].getType().name());
 		
-		g.setSelected(true);
-		g.setSelectedComponent(components[0]);
+		opt.setSelected(true);
+		opt.setSelectedAlternative(alternatives[0]);
 		
-		DiagramType newDt = s.newDiagramType("SubA");
+		DiagramType newDt = conf.newDiagramType("SubA");
 		dt.program().getCompilationUnit(0).addDeclaration(newDt);
 		dt.program().flushAllAttributes();
 		assertEquals("S", newDt.getLocalComponent(0).type().name());
@@ -126,13 +126,13 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtC1 = (DiagramType) cu.typeDecls().get(2);
 		DiagramType dtC2 = (DiagramType) cu.typeDecls().get(3);
 		
-		assertEquals(1, dtA.specialize().getGroups().size());
-		assertEquals(1, dtB.specialize().getGroups().size());
-		assertEquals(1, dtC1.specialize().getGroups().size());
-		assertEquals(0, dtC2.specialize().getGroups().size());
+		assertEquals(1, dtA.specialize().getOptionalFeatures().size());
+		assertEquals(1, dtB.specialize().getOptionalFeatures().size());
+		assertEquals(1, dtC1.specialize().getOptionalFeatures().size());
+		assertEquals(0, dtC2.specialize().getOptionalFeatures().size());
 	}
 	
-	private Pair<Program, SpecializeDiagramType> buildHierarchicalSpecialization() {
+	private Pair<Program, FeatureConfiguration> buildHierarchicalSpecialization() {
 		String str = 
 			"diagramtype Main {" +
 			"}" +
@@ -171,25 +171,25 @@ public class RecommendationTests extends TestSuite {
 		CompilationUnit cu = p.getCompilationUnit(0);
 		DiagramType dtA = (DiagramType) cu.typeDecls().get(1);
 
-		SpecializeDiagramType specDt = dtA.specialize();
-		ConfReplaceableAlternative alt = specDt.getReplaceables().first().getAlternatives().first();
+		FeatureConfiguration confDt = dtA.specialize();
+		ConfReplaceableAlternative alt = confDt.getReplaceables().first().getAlternatives().first();
 		assertEquals("Block", alt.getType().name());
 		
-		SpecializeDiagramType blockSpecDt = alt.specializeType();
-		blockSpecDt.getGroups().first().setSelected(true);
+		FeatureConfiguration confBlock = alt.specialize();
+		confBlock.getOptionalFeatures().first().setSelected(true);
 
-		return new Pair<>(p, specDt);
+		return new Pair<>(p, confDt);
 	}
 	
 	@Test
 	public void testHierarchicalSpecialization() {
-		Pair<Program, SpecializeDiagramType> pair = buildHierarchicalSpecialization();
+		Pair<Program, FeatureConfiguration> pair = buildHierarchicalSpecialization();
 		Program p = pair.first;
-		SpecializeDiagramType specDt = pair.second;
+		FeatureConfiguration conf = pair.second;
 		CompilationUnit cu = p.getCompilationUnit(0);
 		
 		// Create new specialization and add them to the program
-		DiagramType newDt = specDt.newDiagramType("SubA");
+		DiagramType newDt = conf.newDiagramType("SubA");
 		cu.addDeclaration(newDt);
 		p.flushAllAttributes();
 
@@ -205,13 +205,13 @@ public class RecommendationTests extends TestSuite {
 	}
 	@Test
 	public void testAnonymousHierarchicalSpecialization() {
-		Pair<Program, SpecializeDiagramType> pair = buildHierarchicalSpecialization();
+		Pair<Program, FeatureConfiguration> pair = buildHierarchicalSpecialization();
 		Program p = pair.first;
-		SpecializeDiagramType specDt = pair.second;
+		FeatureConfiguration conf = pair.second;
 		CompilationUnit cu = p.getCompilationUnit(0);
 		
 		// Create new specialization and add them to the program
-		Component comp = specDt.newAnonymousComponent("a");
+		Component comp = conf.newAnonymousComponent("a");
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		dtMain.addLocalComponent(comp);
 		p.flushAllAttributes();
@@ -254,12 +254,12 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
-		SpecializeDiagramType specA = dtA.specialize();
-		for (ConfComponentGroup group: specA.getGroups()) {
-			group.setSelected(true);
+		FeatureConfiguration confA = dtA.specialize();
+		for (OptionalFeature opt: confA.getOptionalFeatures()) {
+			opt.setSelected(true);
 		}
 		
-		Component comp = specA.newAnonymousComponent("a");
+		Component comp = confA.newAnonymousComponent("a");
 		dtMain.addLocalComponent(comp);
 		program.flushAllAttributes();
 		
@@ -295,8 +295,8 @@ public class RecommendationTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
-		SpecializeDiagramType specA = dtA.specialize();
-		Component comp = specA.newAnonymousComponent("a");
+		FeatureConfiguration confA = dtA.specialize();
+		Component comp = confA.newAnonymousComponent("a");
 		assertFalse(comp.hasAnonymousDiagramType());
 	}
 
@@ -324,9 +324,9 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
 		// Do not include anonymous subtypes in alternatives
-		SpecializeDiagramType specA = dtA.specialize();
-		assertEquals(1, specA.getGroups().first().getRecommendations().size());
-		assertEquals("T", specA.getGroups().first().getRecommendations().first().getType().name());
+		FeatureConfiguration conf = dtA.specialize();
+		assertEquals(1, conf.getOptionalFeatures().first().getAlternatives().size());
+		assertEquals("T", conf.getOptionalFeatures().first().getAlternatives().first().getType().name());
 	}
 
 	@Test
@@ -344,10 +344,10 @@ public class RecommendationTests extends TestSuite {
 			"}";
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		SpecializeDiagramType specA = dtA.specialize();
+		FeatureConfiguration conf = dtA.specialize();
 
-		assertEquals(2, specA.getReplaceables().first().getAlternatives().size());
-		Iterator<ConfReplaceableAlternative> itr = specA.getReplaceables().first().getAlternatives().iterator();
+		assertEquals(2, conf.getReplaceables().first().getAlternatives().size());
+		Iterator<ConfReplaceableAlternative> itr = conf.getReplaceables().first().getAlternatives().iterator();
 		assertEquals("Block", itr.next().getType().name());
 		assertEquals("SubBlock", itr.next().getType().name());
 	}
@@ -374,18 +374,18 @@ public class RecommendationTests extends TestSuite {
 
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
-		SpecializeDiagramType specA = dtA.specialize();
+		FeatureConfiguration conf = dtA.specialize();
 		
 		
-		ConfComponentGroup group = specA.getGroups().first();
-		group.setSelected(true);
-		Iterator<ConfComponent> itr = group.getRecommendations().iterator();
+		OptionalFeature opt = conf.getOptionalFeatures().first();
+		opt.setSelected(true);
+		Iterator<OptionalFeatureAlternative> itr = opt.getAlternatives().iterator();
 		itr.next();
 		itr.next();
-		group.setSelectedComponent(itr.next());
+		opt.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(conf.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -396,7 +396,7 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expected, dtMain.prettyPrint());
 
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("block.in2", "block.in3"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, conf.getNewInParameters());
 	}
 	
 	@Test
@@ -423,22 +423,22 @@ public class RecommendationTests extends TestSuite {
 
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
-		SpecializeDiagramType specA = dtA.specialize();
+		FeatureConfiguration confA = dtA.specialize();
 		
-		ConfComponentGroup groupA = specA.getGroups().first();
-		groupA.setSelected(true);
-		groupA.setSelectedComponent(groupA.getRecommendations().first());
+		OptionalFeature optA = confA.getOptionalFeatures().first();
+		optA.setSelected(true);
+		optA.setSelectedAlternative(optA.getAlternatives().first());
 		
-		SpecializeDiagramType specCompB = groupA.getSelectedComponent().specializeType();
-		ConfComponentGroup groupB = specCompB.getGroups().first();
-		groupB.setSelected(true);
-		Iterator<ConfComponent> itr = groupB.getRecommendations().iterator();
+		FeatureConfiguration confCompB = optA.getSelectedAlternative().specialize();
+		OptionalFeature optB = confCompB.getOptionalFeatures().first();
+		optB.setSelected(true);
+		Iterator<OptionalFeatureAlternative> itr = optB.getAlternatives().iterator();
 		itr.next();
 		itr.next();
-		groupB.setSelectedComponent(itr.next());
+		optB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -451,7 +451,7 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expected, dtMain.prettyPrint());
 
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("b.block.in", "b.block.in2", "b.block.in3"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, confA.getNewInParameters());
 	}
 	
 	@Test
@@ -481,22 +481,22 @@ public class RecommendationTests extends TestSuite {
 
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
-		SpecializeDiagramType specA = dtA.specialize();
+		FeatureConfiguration confA = dtA.specialize();
 		
-		ConfComponentGroup groupA = specA.getGroups().first();
-		groupA.setSelected(true);
-		groupA.setSelectedComponent(groupA.getRecommendations().first());
+		OptionalFeature optA = confA.getOptionalFeatures().first();
+		optA.setSelected(true);
+		optA.setSelectedAlternative(optA.getAlternatives().first());
 		
-		SpecializeDiagramType specCompB = groupA.getSelectedComponent().specializeType();
-		ConfComponentGroup groupB = specCompB.getGroups().first();
-		groupB.setSelected(true);
-		Iterator<ConfComponent> itr = groupB.getRecommendations().iterator();
+		FeatureConfiguration confCompB = optA.getSelectedAlternative().specialize();
+		OptionalFeature optB = confCompB.getOptionalFeatures().first();
+		optB.setSelected(true);
+		Iterator<OptionalFeatureAlternative> itr = optB.getAlternatives().iterator();
 		itr.next();
 		itr.next();
-		groupB.setSelectedComponent(itr.next());
+		optB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -509,7 +509,7 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expected, dtMain.prettyPrint());
 
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("b.block.in2", "b.block.in3", "b.in"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, confA.getNewInParameters());
 	}
 	
 	@Test
@@ -532,18 +532,18 @@ public class RecommendationTests extends TestSuite {
 
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
-		SpecializeDiagramType specA = dtA.specialize();
-		ConfReplaceable c = specA.getReplaceables().first();
+		FeatureConfiguration conf = dtA.specialize();
+		ConfReplaceable c = conf.getReplaceables().first();
 		Iterator<ConfReplaceableAlternative> a = c.getAlternatives().iterator();
 		a.next();
 		a.next();
 		c.setSelectedAlternative(a.next());
 		
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("block.in", "block.in2"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, conf.getNewInParameters());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(conf.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -581,19 +581,19 @@ public class RecommendationTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
-		SpecializeDiagramType specA = dtA.specialize();
-		ConfReplaceable replA = specA.getReplaceables().first();
+		FeatureConfiguration confA = dtA.specialize();
+		ConfReplaceable replA = confA.getReplaceables().first();
 		replA.setSelectedAlternative(replA.getAlternatives().first());
 		
-		SpecializeDiagramType specCompB = replA.getSelectedAlternative().specializeType();
-		ConfReplaceable replB = specCompB.getReplaceables().first();
+		FeatureConfiguration confCompB = replA.getSelectedAlternative().specialize();
+		ConfReplaceable replB = confCompB.getReplaceables().first();
 		Iterator<ConfReplaceableAlternative> itr = replB.getAlternatives().iterator();
 		itr.next();
 		itr.next();
 		replB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -606,7 +606,7 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expected, dtMain.prettyPrint());
 
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("b.block.in", "b.block.in2"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, confA.getNewInParameters());
 	}
 	
 	@Test
@@ -638,20 +638,20 @@ public class RecommendationTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
-		SpecializeDiagramType specA = dtA.specialize();
-		ConfReplaceable replA = specA.getReplaceables().first();
+		FeatureConfiguration confA = dtA.specialize();
+		ConfReplaceable replA = confA.getReplaceables().first();
 		replA.setSelectedAlternative(replA.getAlternatives().first());
 		
-		SpecializeDiagramType specCompB = replA.getSelectedAlternative().specializeType();
-		ConfComponentGroup groupB = specCompB.getGroups().first();
-		Iterator<ConfComponent> itr = groupB.getRecommendations().iterator();
+		FeatureConfiguration confCompB = replA.getSelectedAlternative().specialize();
+		OptionalFeature optB = confCompB.getOptionalFeatures().first();
+		Iterator<OptionalFeatureAlternative> itr = optB.getAlternatives().iterator();
 		itr.next();
 		itr.next();
-		groupB.setSelected(true);
-		groupB.setSelectedComponent(itr.next());
+		optB.setSelected(true);
+		optB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -664,7 +664,7 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expected, dtMain.prettyPrint());
 
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("b.in", "b.block.in2", "b.block.in3"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, confA.getNewInParameters());
 	}
 	
 	@Test
@@ -690,17 +690,17 @@ public class RecommendationTests extends TestSuite {
 
 		Program program = parseValidProgram(str);
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
-		SpecializeDiagramType specA = dtA.specialize();
+		FeatureConfiguration conf = dtA.specialize();
 		
-		ConfComponentGroup group = specA.getGroups().first();
-		group.setSelected(true);
-		Iterator<ConfComponent> itr = group.getRecommendations().iterator();
+		OptionalFeature opt = conf.getOptionalFeatures().first();
+		opt.setSelected(true);
+		Iterator<OptionalFeatureAlternative> itr = opt.getAlternatives().iterator();
 		itr.next();
 		itr.next();
-		group.setSelectedComponent(itr.next());
+		opt.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(specA.newAnonymousComponent("a"));
+		dtMain.addLocalComponent(conf.newAnonymousComponent("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -711,6 +711,6 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expected, dtMain.prettyPrint());
 
 		Set<String> expectedSet = new HashSet<>(Arrays.asList("block.in2", "block.in3", "block.in4"));
-		assertEquals(expectedSet, specA.getNewInParameters());
+		assertEquals(expectedSet, conf.getNewInParameters());
 	}
 }

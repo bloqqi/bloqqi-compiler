@@ -5,37 +5,37 @@ import java.util.TreeSet;
 import java.util.TreeMap;
 
 aspect RecommendationConfiguration {
-	public SpecializeDiagramType DiagramType.specialize() {
-		return new SpecializeDiagramType(this);
+	public FeatureConfiguration DiagramType.specialize() {
+		return new FeatureConfiguration(this);
 	}
 	
-	public SpecializeDiagramType DiagramType.specialize(DiagramType subType) {
-		SpecializeDiagramType spec = new SpecializeDiagramType(this);
-		spec.match(subType);
-		return spec;
+	public FeatureConfiguration DiagramType.specialize(DiagramType subType) {
+		FeatureConfiguration conf = new FeatureConfiguration(this);
+		conf.match(subType);
+		return conf;
 	}
 	
-	public class SpecializeDiagramType {
+	public class FeatureConfiguration {
 		private final DiagramType diagramType;
-		private final SortedMap<String, ConfComponentGroup> groups;
+		private final SortedMap<String, OptionalFeature> optionals;
 		private final SortedMap<String, ConfReplaceable> replaceables;
 
-		public SpecializeDiagramType(DiagramType diagramType) {
-			SortedMap<String, ConfComponentGroup> groupsTmp = new TreeMap<>();
+		public FeatureConfiguration(DiagramType diagramType) {
+			SortedMap<String, OptionalFeature> optionalsTmp = new TreeMap<>();
 			for (RecommendationGroup rg: diagramType.getRecommendationGroups()) {
-				groupsTmp.put(rg.name(), new ConfComponentGroup(rg));
+				optionalsTmp.put(rg.name(), new OptionalFeature(rg));
 			}
 			SortedMap<String, ConfReplaceable> replaceablesTmp = new TreeMap<>();
 			for (RecommendationReplaceable rr: diagramType.recommendedReplaceables()) {
 				replaceablesTmp.put(rr.name(), new ConfReplaceable(rr));
 			}
 			this.diagramType = diagramType;
-			this.groups = Collections.unmodifiableSortedMap(groupsTmp);
+			this.optionals = Collections.unmodifiableSortedMap(optionalsTmp);
 			this.replaceables = Collections.unmodifiableSortedMap(replaceablesTmp);
 		}
 
-		public SortedSet<ConfComponentGroup> getGroups() {
-			return Collections.unmodifiableSortedSet(new TreeSet(groups.values()));
+		public SortedSet<OptionalFeature> getOptionalFeatures() {
+			return Collections.unmodifiableSortedSet(new TreeSet(optionals.values()));
 		}
 		
 		public SortedSet<ConfReplaceable> getReplaceables() {
@@ -72,9 +72,9 @@ aspect RecommendationConfiguration {
 		}
 		
 		private void addComponents(DiagramType newDt) {
-			for (ConfComponentGroup group: computeSortedGroups(groups.values())) {
-				if (group.isSelected()) {
-					newDt.addLocalComponent(group.newComponent());
+			for (OptionalFeature opt: computeSortedOptionals(optionals.values())) {
+				if (opt.isSelected()) {
+					newDt.addLocalComponent(opt.newComponent());
 				}
 			}
 			for (ConfReplaceable r: replaceables.values()) {
@@ -85,8 +85,8 @@ aspect RecommendationConfiguration {
 		}
 		
 		public boolean containsChanges() {
-			for (ConfComponentGroup group: groups.values()) {
-				if (group.isSelected()) {
+			for (OptionalFeature opt: optionals.values()) {
+				if (opt.isSelected()) {
 					return true;
 				}
 			}
@@ -98,28 +98,28 @@ aspect RecommendationConfiguration {
 			return false;
 		}
 
-		private Collection<ConfComponentGroup> computeSortedGroups(
-				Collection<ConfComponentGroup> coll) {
-			Map<RecommendationGroup, ConfComponentGroup> map = new HashMap<>();
-			for (ConfComponentGroup g: coll) {
-				map.put(g.getRecommendationGroup(), g);
+		private Collection<OptionalFeature> computeSortedOptionals(
+				Collection<OptionalFeature> coll) {
+			Map<RecommendationGroup, OptionalFeature> map = new HashMap<>();
+			for (OptionalFeature opt: coll) {
+				map.put(opt.getRecommendationGroup(), opt);
 			}
 			
-			SuccessorFunction<ConfComponentGroup> succFunc; 
-			succFunc = new SuccessorFunction<ConfComponentGroup>() {
-				public Collection<ConfComponentGroup> successors(ConfComponentGroup g) {
-					Set<ConfComponentGroup> set = new HashSet<>();
-					for (RecommendationGroup rg: g.getRecommendationGroup().groupsAfter()) {
+			SuccessorFunction<OptionalFeature> succFunc;
+			succFunc = new SuccessorFunction<OptionalFeature>() {
+				public Collection<OptionalFeature> successors(OptionalFeature opt) {
+					Set<OptionalFeature> set = new HashSet<>();
+					for (RecommendationGroup rg: opt.getRecommendationGroup().groupsAfter()) {
 						set.add(map.get(rg));
 					}
 					return set;
 				}
 			};
 			
-			Comparator<ConfComponentGroup> tieOrdering;
-			tieOrdering = new Comparator<ConfComponentGroup>() {
-				public int compare(ConfComponentGroup g1, ConfComponentGroup g2) {
-					return g1.getName().compareTo(g2.getName());
+			Comparator<OptionalFeature> tieOrdering;
+			tieOrdering = new Comparator<OptionalFeature>() {
+				public int compare(OptionalFeature opt1, OptionalFeature opt2) {
+					return opt1.getName().compareTo(opt2.getName());
 				}
 			};
 			
@@ -138,9 +138,9 @@ aspect RecommendationConfiguration {
 						typeName = cType.name();
 					}
 				
-					ConfComponentGroup g = groups.get(c.name());
-					if (g != null && !c.isLocallyRedeclared()) {
-						g.match(cType, typeName);
+					OptionalFeature opt = optionals.get(c.name());
+					if (opt != null && !c.isLocallyRedeclared()) {
+						opt.match(cType, typeName);
 					} else {
 						ConfReplaceable r = replaceables.get(c.name());
 						if (r != null && c.isLocallyRedeclared()) {
@@ -157,8 +157,8 @@ aspect RecommendationConfiguration {
 		protected SortedSet<String> getNewInParameters(String path) {
 			SortedSet<String> set = new TreeSet<>();
 			String prefixPath = path.isEmpty() ? "" : path + ".";
-			for (ConfComponentGroup g: groups.values()) {
-				set.addAll(g.getNewInParameters(prefixPath + g.getName()));
+			for (OptionalFeature opt: optionals.values()) {
+				set.addAll(opt.getNewInParameters(prefixPath + opt.getName()));
 			}
 			for (ConfReplaceable repl: replaceables.values()) {
 				set.addAll(repl.getNewInParameters(prefixPath + repl.getName()));
@@ -170,8 +170,8 @@ aspect RecommendationConfiguration {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Diagramtype: " + diagramType.name() + "\n");
 			sb.append("Recommended components:\n");
-			for (ConfComponentGroup group: groups.values()) {
-				sb.append("- " + group.toString() + "\n");
+			for (OptionalFeature opt: optionals.values()) {
+				sb.append("- " + opt.toString() + "\n");
 			}
 			sb.append("Replaceables:\n");
 			for (ConfReplaceable r: replaceables.values()) {
@@ -181,30 +181,30 @@ aspect RecommendationConfiguration {
 		}
 	}
 	
-	public class ConfComponentGroup implements Comparable<ConfComponentGroup> {
+	public class OptionalFeature implements Comparable<OptionalFeature> {
 		private final RecommendationGroup group;
-		private final SortedMap<String, ConfComponent> components;
+		private final SortedMap<String, OptionalFeatureAlternative> alternatives;
 		private final DiagramType defaultType;
 		
 		private boolean isSelected;
-		private ConfComponent selectedComp;
+		private OptionalFeatureAlternative selectedAlternative;
 		
-		public ConfComponentGroup(RecommendationGroup group) {
+		public OptionalFeature(RecommendationGroup group) {
 			this.group = group;
 			defaultType = (DiagramType) group.superType().componentType();
 
-			SortedMap<String, ConfComponent> tmpMap = new TreeMap<String, ConfComponent>();
+			SortedMap<String, OptionalFeatureAlternative> tmpMap = new TreeMap<>();
 			for (RecommendationComponent subRc: group.recommendedComponents()) {
 				for (DiagramType subType: subRc.componentType().namedSubTypes()) {
 					boolean isDefault = subType == defaultType;
-					ConfComponent cc = new ConfComponent(this, subRc, subType, isDefault);
-					tmpMap.put(subType.name(), cc);
+					OptionalFeatureAlternative alt = new OptionalFeatureAlternative(this, subRc, subType, isDefault);
+					tmpMap.put(subType.name(), alt);
 					if (isDefault) {
-						selectedComp = cc;
+						selectedAlternative = alt;
 					}
 				}
 			}
-			components = Collections.unmodifiableSortedMap(tmpMap);
+			alternatives = Collections.unmodifiableSortedMap(tmpMap);
 			isSelected = false;
 		}
 
@@ -216,8 +216,8 @@ aspect RecommendationConfiguration {
 			return group.name();
 		}
 
-		public SortedSet<ConfComponent> getRecommendations() {
-			return Collections.unmodifiableSortedSet(new TreeSet(components.values()));
+		public SortedSet<OptionalFeatureAlternative> getAlternatives() {
+			return Collections.unmodifiableSortedSet(new TreeSet(alternatives.values()));
 		}
 		public boolean isSelected() {
 			return isSelected;
@@ -225,23 +225,23 @@ aspect RecommendationConfiguration {
 		public DiagramType getDefaultType() {
 			return defaultType;
 		}
-		public ConfComponent getSelectedComponent() {
-			return selectedComp;
+		public OptionalFeatureAlternative getSelectedAlternative() {
+			return selectedAlternative;
 		}
 		
 		public void setSelected(boolean isSelected) {
 			this.isSelected = isSelected;
 		}
-		public void setSelectedComponent(ConfComponent selectedComp) {
-			this.selectedComp = selectedComp;
+		public void setSelectedAlternative(OptionalFeatureAlternative alt) {
+			this.selectedAlternative = alt;
 		}
 		
 		public void match(DiagramType dt, String typeName) {
-			ConfComponent c = components.get(typeName);
-			if (c != null) {
-				setSelectedComponent(c);
+			OptionalFeatureAlternative alt = alternatives.get(typeName);
+			if (alt != null) {
+				setSelectedAlternative(alt);
 				if (dt.isAnonymousType()) {
-					c.specializeType(dt);
+					alt.specialize(dt);
 				}
 			}
 			setSelected(true);
@@ -249,44 +249,44 @@ aspect RecommendationConfiguration {
 		
 		public SortedSet<String> getNewInParameters(String path) {
 			if (isSelected()) {
-				return getSelectedComponent().getNewInParameters(path);
+				return getSelectedAlternative().getNewInParameters(path);
 			} else {
 				return Collections.emptySortedSet();
 			}
 		}
 		
-		public int compareTo(ConfComponentGroup other) {
+		public int compareTo(OptionalFeature other) {
 			return getName().compareTo(other.getName());
 		}
 
 		protected Component newComponent() {
-			return isSelected() ? selectedComp.newComponent() : null;
+			return isSelected() ? getSelectedAlternative().newComponent() : null;
 		}
 	
 		public String toString() {
-			String selectedStr = isSelected() ? selectedComp.toString() : "N/A";
-			return selectedStr + " selected of " + components.values();
+			String selectedStr = isSelected() ? getSelectedAlternative().toString() : "N/A";
+			return selectedStr + " selected of " + alternatives.values();
 		}
 	}
 	
-	public class ConfComponent implements Comparable<ConfComponent> {
-		private final ConfComponentGroup confGroup;
+	public class OptionalFeatureAlternative implements Comparable<OptionalFeatureAlternative> {
+		private final OptionalFeature optFeature;
 		private final RecommendationComponent rc;
 		private final DiagramType type;
 		private final boolean isDefault;
 		
-		private SpecializeDiagramType specDt;
+		private FeatureConfiguration conf;
 		
-		public ConfComponent(ConfComponentGroup confGroup, RecommendationComponent rc,
+		public OptionalFeatureAlternative(OptionalFeature optFeature, RecommendationComponent rc,
 				DiagramType type, boolean isDefault) {
-			this.confGroup = confGroup;
+			this.optFeature = optFeature;
 			this.rc = rc;
 			this.type = type;
 			this.isDefault = isDefault;
 		}
 		
-		public ConfComponentGroup getGroup() {
-			return confGroup;
+		public OptionalFeature getOptionalFeature() {
+			return optFeature;
 		}
 		
 		public DiagramType getType() {
@@ -297,22 +297,22 @@ aspect RecommendationConfiguration {
 			return isDefault;
 		}
 		
-		public SpecializeDiagramType specializeType() {
-			return specializeType(null);
+		public FeatureConfiguration specialize() {
+			return specialize(null);
 		}
-		public SpecializeDiagramType specializeType(DiagramType dt) {
-			if (specDt == null) {
+		public FeatureConfiguration specialize(DiagramType dt) {
+			if (conf == null) {
 				if (dt != null) {
-					specDt = type.specialize(dt);
+					conf = type.specialize(dt);
 				} else {
-					specDt = type.specialize();
+					conf = type.specialize();
 				}
 			}
-			return specDt;
+			return conf;
 		}
 
 		public boolean containsChanges() {
-			return specDt != null ? specDt.containsChanges() : false;
+			return conf != null ? conf.containsChanges() : false;
 		}
 		
 		public SortedSet<String> getNewInParameters(String path) {
@@ -335,7 +335,7 @@ aspect RecommendationConfiguration {
 			
 			// Add parameters belonging to nested types
 			if (containsChanges()) {
-				newInPars.addAll(specDt.getNewInParameters(path));
+				newInPars.addAll(conf.getNewInParameters(path));
 			}
 			
 			// Add parameters added in wiring, e.g, "inPar" in "block: Type[inPar: Int]",
@@ -355,7 +355,7 @@ aspect RecommendationConfiguration {
 		
 		protected Type newType() {
 			if (containsChanges()) {
-				return new AnonymousType(specDt.newAnonymousDiagramType());
+				return new AnonymousType(conf.newAnonymousDiagramType());
 			} else {
 				return new TypeUse(type.name());
 			}
@@ -379,7 +379,7 @@ aspect RecommendationConfiguration {
 			}
 		}
 	
-		public int compareTo(ConfComponent other) {
+		public int compareTo(OptionalFeatureAlternative other) {
 			return type.name().compareTo(other.type.name());
 		}
 		
@@ -436,7 +436,7 @@ aspect RecommendationConfiguration {
 			if (alt != null) {
 				setSelectedAlternative(alt);
 				if (dt.isAnonymousType()) {
-					alt.specializeType(dt);
+					alt.specialize(dt);
 				}
 			}
 		}
@@ -467,14 +467,14 @@ aspect RecommendationConfiguration {
 		private final DiagramType type;
 		private final boolean isDefault;
 		
-		private SpecializeDiagramType specDt;
+		private FeatureConfiguration conf;
 		
 		public ConfReplaceableAlternative(ConfReplaceable confReplaceable,
 				DiagramType type, boolean isDefault) {
 			this.confReplaceable = confReplaceable;
 			this.type = type;
 			this.isDefault = isDefault;
-			this.specDt = null;
+			this.conf = null;
 		}
 		
 		public ConfReplaceable getConfReplaceable() {
@@ -489,22 +489,22 @@ aspect RecommendationConfiguration {
 			return isDefault;
 		}
 		
-		public SpecializeDiagramType specializeType() {
-			return specializeType(null);
+		public FeatureConfiguration specialize() {
+			return specialize(null);
 		}
-		public SpecializeDiagramType specializeType(DiagramType dt) {
-			if (specDt == null) {
+		public FeatureConfiguration specialize(DiagramType dt) {
+			if (conf == null) {
 				if (dt != null) {
-					specDt = type.specialize(dt);
+					conf = type.specialize(dt);
 				} else {
-					specDt = type.specialize();
+					conf = type.specialize();
 				}
 			}
-			return specDt;
+			return conf;
 		}
 		
 		public boolean containsChanges() {
-			return specDt != null ? specDt.containsChanges() : false;
+			return conf != null ? conf.containsChanges() : false;
 		}
 		
 		public SortedSet<String> getNewInParameters(String path, DiagramType defaultType) {
@@ -513,14 +513,14 @@ aspect RecommendationConfiguration {
 				set.add(path + "." + in.name());
 			}
 			if (containsChanges()) {
-				set.addAll(specDt.getNewInParameters(path));
+				set.addAll(conf.getNewInParameters(path));
 			}
 			return set;
 		}
 		
 		protected Type newType() {
 			if (containsChanges()) {
-				return new AnonymousType(specDt.newAnonymousDiagramType());
+				return new AnonymousType(conf.newAnonymousDiagramType());
 			} else {
 				return new TypeUse(type.name());
 			}

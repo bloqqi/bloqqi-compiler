@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.bloqqi.compiler.ast.Component;
 import org.bloqqi.compiler.ast.DiagramType;
+import org.bloqqi.compiler.ast.FeatureConfiguration;
 import org.bloqqi.compiler.ast.Program;
-import org.bloqqi.compiler.ast.SpecializeDiagramType;
 import org.bloqqi.tests.testsuite.TestSuite;
 import org.junit.Test;
 
@@ -244,8 +244,8 @@ public class RecommendationMatching extends TestSuite {
 		DiagramType specType = c.type().directSuperTypes().iterator().next();
 
 		String expected = dtMain.prettyPrint();
-		SpecializeDiagramType spec = specType.specialize(c.anonymousDiagramType());
-		dtMain.setLocalComponent(spec.newAnonymousComponent(c.name()), 0);
+		FeatureConfiguration conf = specType.specialize(c.anonymousDiagramType());
+		dtMain.setLocalComponent(conf.newAnonymousComponent(c.name()), 0);
 		dtMain.flushAllAttributes();
 		assertEquals(expected, dtMain.prettyPrint());
 	}
