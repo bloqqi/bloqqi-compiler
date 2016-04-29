@@ -113,8 +113,7 @@ aspect NameAnalysis {
 	syn nta Component Wiring.component()
 		= new Component(false, new TypeUse(diagramType().name()), new IdName(getTypeUse().getID()), false);
 	
-	WiringParameter implements VarDecl;
-	syn String WiringParameter.name() = getID();
+	eq WiringParameter.name() = getID();
 	eq Wiring.getChild().lookup(String name) {
 		for (WiringParameter p: getWiringParameters()) {
 			if (p.name().equals(name)) {

@@ -426,11 +426,7 @@ aspect StateStructs {
  * Names in C.
  */
 aspect CNames {
-	syn String VarDecl.nameC();
-	eq Component.nameC() = nameCFiltered();
-	eq ComponentParameter.nameC() = nameCFiltered();
-	eq Parameter.nameC() = nameCFiltered();
-	eq StructField.nameC() = nameCFiltered();
+	syn String VarDecl.nameC() = nameCFiltered();
 	eq Variable.nameC() = ASTNode.STATE_VAR + "->" + cNameDeclaration();
 	eq WiringInParameter.nameC() = "<undefined>";
 	eq WiringOutParameter.nameC() = "<undefined>";

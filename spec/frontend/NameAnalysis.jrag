@@ -56,15 +56,6 @@ aspect LookupVariables {
 	 *   connect(Sub_1, Neg) is interpreted as connect(Sub_1.out, Neg.in)
 	 *   For more details, see rewrite below (SimpleVarUse -> DotVarUse).
 	 */
-	public interface VarDecl { 
-		String name();
-	}
-	Component implements VarDecl;
-	ComponentParameter implements VarDecl;
-	Parameter implements VarDecl;
-	StructField implements VarDecl;
-	Variable implements VarDecl;
-	
 	syn VarDecl VarUse.decl();
 	eq AbstractSimpleVarUse.decl() = lookup(getID());
 	eq TypedSimpleVarUse.decl() = lookup(getTypeUse().getID(), getID());
@@ -272,11 +263,12 @@ aspect Names {
 	eq StringType.name() = "String";
 	eq UnknownType.name() = "<Unknown>";
 
-	syn String Parameter.name() = getID();
-	syn String Variable.name() = getID();
-	syn String Component.name() = getName().name();
-	syn String ComponentParameter.name() = getParameter().name();
-	syn String StructField.name() = getID();
+	syn String VarDecl.name();
+	eq Parameter.name() = getID();
+	eq Variable.name() = getID();
+	eq Component.name() = getName().name();
+	eq ComponentParameter.name() = getParameter().name();
+	eq StructField.name() = getID();
 	syn String Literal.name() = "<unknown name>";
 	
 	syn String Name.name();

@@ -2,6 +2,9 @@ Program ::= CompilationUnit* [StandardLibrary:CompilationUnit];
 CompilationUnit ::= <PackageName> ImportDecl* Declaration*;
 ImportDecl ::= <PackageName> TypeUse;
 
+/** VarDecl */
+abstract VarDecl;
+
 /** Declarations */
 abstract Declaration;
 abstract TypeDecl : Declaration;
@@ -17,13 +20,14 @@ DiagramType : UserDefType ::=
 AnonymousDiagramType : DiagramType;
 ExternalFunction : UserDefType ::= InParameter* [OutParameter];
 Struct : UserDefType ::= StructField*;
-StructField ::= TypeUse <ID>;
+StructField : VarDecl ::= TypeUse <ID>;
 abstract PrimitiveType : TypeDecl;
 IntType : PrimitiveType;
 RealType : PrimitiveType;
 BoolType : PrimitiveType;
 StringType : PrimitiveType;
 UnknownType : TypeDecl;
+
 
 /** Types */
 abstract Type;
@@ -32,14 +36,14 @@ AnonymousType : Type ::= AnonymousDiagramType;
 AnonymousTypeImplicitSuper : AnonymousType;
 
 /** Parameters */
-abstract Parameter ::= TypeUse <ID>;
+abstract Parameter : VarDecl ::= TypeUse <ID>;
 InParameter : Parameter;
 InheritedInParameter : InParameter ::= <DeclaredInParameter:InParameter>;
 OutParameter : Parameter;
 InheritedOutParameter : OutParameter ::= <DeclaredOutParameter:OutParameter>;
 
 /** Components */
-Component ::=
+Component : VarDecl ::=
 	<Inline:boolean>
 	Type
 	Name
@@ -60,10 +64,10 @@ InlinedComponent : InheritedComponent ::=
 abstract Name;
 IdName : Name ::= <ID>;
 InlinedName : Name ::= Outer:Name Inner:Name;
-ComponentParameter ::= <Parameter:Parameter>;
+ComponentParameter : VarDecl ::= <Parameter:Parameter>;
 
 /** Variables */
-Variable ::= TypeUse <ID>;
+Variable : VarDecl ::= TypeUse <ID>;
 InheritedVariable : Variable ::= <DeclaredVariable:Variable>;
 
 /** Flow declarations */
@@ -93,7 +97,7 @@ DotVarUse : VarUse ::= VarUse <ID>;
 
 /** Wirings */
 Wiring ::= TypeUse WiringParameter* FlowDecl*;
-abstract WiringParameter ::= TypeUse <ID>;
+abstract WiringParameter : VarDecl ::= TypeUse <ID>;
 WiringInParameter : WiringParameter;
 WiringOutParameter : WiringParameter;
 
@@ -104,7 +108,7 @@ RecommendationComponent : RecommendationElement ::= Component;
 RecommendationBefore : RecommendationElement ::= BeforeVarUse:SimpleVarUse AfterVarUse:SimpleVarUse;
 RecommendationReplaceable : RecommendationElement ::= SimpleVarUse;
 RecommendationExtendsSuper : Declaration ::= DeclaredForType:TypeUse;
-RecommendationGroup ::= <Name>;
+RecommendationGroup : VarDecl ::= <Name>;
 
 /** Annotations */
 Annotation ::= VarUse <X:int> <Y:int> <Width:int> <Height:int>;

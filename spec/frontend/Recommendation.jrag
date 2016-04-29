@@ -147,7 +147,6 @@ aspect GroupRecommendations {
 	 * and because they have the same block name.
 	 * If S is a subtype of T, then the first recommendation is a super recommendation of
 	 */
-	RecommendationGroup implements VarDecl;
 	syn String RecommendationGroup.name() = getName();
 	eq RecommendationGroup.findMember(String name) = null;
 	eq RecommendationGroup.type() = program().unknownType();
