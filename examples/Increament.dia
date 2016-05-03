@@ -1,0 +1,15 @@
+external Print(in: Int);
+
+diagramtype Main() {
+  inc: Inc;
+  print: Print;
+  connect(2, inc.in);
+  connect(inc.out, print.in);
+}
+diagramtype Inc(in: Int => out: Int) {
+  add: Add;
+  connect(in, add.in1);
+  connect(1, add.in2);
+  connect(add.out, out);
+}
+
