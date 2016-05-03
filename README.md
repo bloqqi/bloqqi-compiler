@@ -25,3 +25,7 @@ Execute the program TwoCounters by generating C code:
     ...
 
 The file `example/PrintFunction.c` contains C functions for printing different kinds of values.
+
+# License
+
+The Bloqqi compiler is covered by the modified BSD License. For the full license text see the LICENSE file.
