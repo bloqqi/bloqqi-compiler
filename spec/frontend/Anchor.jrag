@@ -75,6 +75,19 @@ aspect AnchorFlow {
 	eq Connection.connectedAnchors() = Utils.asSet(getSource().anchor(), getTarget().anchor());
 	eq Interception.connectedAnchors()
 		= Utils.asSet(getIntercepted().anchor(), getTarget().anchor(), getSource().anchor());
+
+	syn Set<Pair<Node, Anchor>> FlowDecl.connectedNodesAnchors();
+	eq Connection.connectedNodesAnchors() {
+		return Utils.asSet(
+				new Pair<>(getSource().node(), getSource().anchor()),
+				new Pair<>(getTarget().node(), getTarget().anchor()));
+	}
+	eq Interception.connectedNodesAnchors() {
+		return Utils.asSet(
+				new Pair<>(getIntercepted().node(), getIntercepted().anchor()),
+				new Pair<>(getTarget().node(), getTarget().anchor()),
+				new Pair<>(getSource().node(), getSource().anchor()));
+	}
 }
 
 /**
