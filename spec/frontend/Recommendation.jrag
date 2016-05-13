@@ -299,10 +299,14 @@ aspect RecommendationOrder {
 }
 
 aspect RecommendationErrors {
+	syn boolean RecommendationGroup.hasErrors()
+		= superType() == null || !superType().componentType().isDiagramType();
+	syn boolean RecommendationReplaceable.hasErrors() = false;
+	
 	Recommendation contributes 
 		error(getDeclaredForType() + " does not refer to a diagram type")
 		when getDeclaredForType().decl() != null 
-			&& !getDeclaredForType().type().isDiagramType()
+				&& !getDeclaredForType().type().isDiagramType()
 		to CompilationUnit.errors();
 	
 	RecommendationComponent contributes 

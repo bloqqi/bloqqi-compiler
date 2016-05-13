@@ -23,11 +23,15 @@ aspect RecommendationConfiguration {
 		public FeatureConfiguration(DiagramType diagramType) {
 			SortedMap<String, OptionalFeature> optionalsTmp = new TreeMap<>();
 			for (RecommendationGroup rg: diagramType.getRecommendationGroups()) {
-				optionalsTmp.put(rg.name(), new OptionalFeature(rg));
+				if (!rg.hasErrors()) {
+					optionalsTmp.put(rg.name(), new OptionalFeature(rg));
+				}
 			}
 			SortedMap<String, MandatoryFeature> mandatoriesTmp = new TreeMap<>();
 			for (RecommendationReplaceable rr: diagramType.recommendedReplaceables()) {
-				mandatoriesTmp.put(rr.name(), new MandatoryFeature(rr));
+				if (!rr.hasErrors()) {
+					mandatoriesTmp.put(rr.name(), new MandatoryFeature(rr));
+				}
 			}
 			this.diagramType = diagramType;
 			this.optionals = Collections.unmodifiableSortedMap(optionalsTmp);

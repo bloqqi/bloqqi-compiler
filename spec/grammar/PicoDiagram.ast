@@ -101,7 +101,7 @@ abstract WiringParameter : VarDecl ::= TypeUse <ID>;
 WiringInParameter : WiringParameter;
 WiringOutParameter : WiringParameter;
 
-/** Recommmendations */
+/** Recommendations */
 Recommendation : Declaration ::= DeclaredForType:TypeUse RecommendationElement*;
 abstract RecommendationElement;
 RecommendationComponent : RecommendationElement ::= Component;
