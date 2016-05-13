@@ -26,6 +26,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
@@ -67,6 +68,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
@@ -110,6 +112,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
@@ -154,6 +157,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
@@ -198,6 +202,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
@@ -244,6 +249,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
@@ -290,6 +296,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
@@ -332,6 +339,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
@@ -380,6 +388,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		
+		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
@@ -425,6 +434,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankSecondFilling");
 
+		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("ValveExtension", "Valve2");
 
@@ -472,6 +482,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankSecondEmptying");
 		
+		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("PumpExtension", "Pump2");
 
@@ -529,6 +540,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankHeating");
 
+		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("HeatingExtension", "Heating");
 
@@ -593,6 +605,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankAgitation");
 
+		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("AgitationExtension", "Agitation");
 		
@@ -746,6 +759,21 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		assertFalse(dtB.canExtractSubtypeAsBlock());
+	}
+	
+	@Test
+	public void isLocallyEmpty() {
+		String str =
+			"diagramtype A {" +
+			"  addSuper1: Add;" +
+			"  addSuper2: Add;" +
+			"}" +
+			"diagramtype B extends A {" +
+			"}";
+		Program program = parseValidProgram(str);
+
+		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
+		assertTrue(dtB.isLocallyEmpty());
 	}
 	
 	private DiagramType createAndAddSubtypeWith(DiagramType superType, Component component) {

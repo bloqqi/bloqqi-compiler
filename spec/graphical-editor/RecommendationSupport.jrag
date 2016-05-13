@@ -70,6 +70,13 @@ aspect IsParameterExposed {
  * Checks that a subtype can be extracted as a block
  */
 aspect CanExtractSubType {
+	syn boolean DiagramType.isLocallyEmpty()
+		= getNumLocalInParameter() == 0
+			&& getNumLocalOutParameter() == 0
+			&& getNumLocalVariable() == 0
+			&& getNumLocalComponent() == 0
+			&& getNumFlowDecl() == 0;
+	
 	syn boolean DiagramType.canExtractSubtypeAsBlock() {
 		for (Component c: components()) {
 			if (c.isInherited()
