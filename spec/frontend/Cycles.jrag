@@ -17,7 +17,7 @@ aspect Cycles {
 	public SCCList DiagramType.scc() {
 		Map<Component, Set<Component>> succ = new HashMap<>();
 		for (Component c: components()) {
-			succ.put(c, c.succ());
+			succ.put(c, c.succComponents());
 		}
 		return scc(succ);
 	}
@@ -85,8 +85,8 @@ aspect Cycles {
 		data.pred = new HashMap<>();
 		data.succ = new HashMap<>();
 		for (Component c: components()) {
-			data.pred.put(c, new HashSet<>(c.pred()));
-			data.succ.put(c, new HashSet<>(c.succ()));
+			data.pred.put(c, new HashSet<>(c.predComponents()));
+			data.succ.put(c, new HashSet<>(c.succComponents()));
 		}
 		data.parent = new HashMap<>();
 		

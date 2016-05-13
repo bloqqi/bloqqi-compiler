@@ -82,21 +82,41 @@ aspect NodeFlow {
 	
 	// Collect incoming connections. 
 	// Ignore connections that are connected to a parameter to this diagram type.
-	coll Set<Component> Component.pred() [new HashSet<Component>()] root DiagramType;
-	Connection contributes (Component) getSource().node()
-		when getSource().node() instanceof Component
-			&& getTarget().node() instanceof Component
-		to Component.pred() for (Component) getTarget().node();
+	coll Set<Node> Node.pred() [new HashSet<Node>()] root DiagramType;
+	Connection contributes getSource().node()
+		when getSource().node() != null
+			&& getTarget().node() != null
+		to Node.pred() for getTarget().node();
 	// Include nta connections() in collection attribute
-	DiagramType contributes nta connections() to Component.pred();
+	DiagramType contributes nta connections() to Node.pred();
 
 	// Collect incoming connections. 
 	// Ignore connections that are connected to a parameter to this diagram type.
-	coll Set<Component> Component.succ() [new HashSet<Component>()] root DiagramType;
-	Connection contributes (Component) getTarget().node()
-		when getSource().node() instanceof Component
-			&& getTarget().node() instanceof Component
-		to Component.succ() for (Component) getSource().node();
+	coll Set<Node> Node.succ() [new HashSet<Node>()] root DiagramType;
+	Connection contributes getTarget().node()
+		when getSource().node() != null
+			&& getTarget().node() != null
+		to Node.succ() for getSource().node();
 	// Include nta connections() in collection attribute
-	DiagramType contributes nta connections() to Component.succ();
+	DiagramType contributes nta connections() to Node.succ();
+				
+	syn Set<Component> Component.predComponents() {
+		Set<Component> set = new HashSet<>();
+		for (Node n: pred()) {
+			if (n.isComponent()) {
+				set.add((Component) n);
+			}
+		}
+		return set;
+	}
+
+	syn Set<Component> Component.succComponents() {
+		Set<Component> set = new HashSet<>();
+		for (Node n: succ()) {
+			if (n.isComponent()) {
+				set.add((Component) n);
+			}
+		}
+		return set;
+	}
 }

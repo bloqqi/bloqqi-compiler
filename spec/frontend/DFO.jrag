@@ -63,7 +63,7 @@ aspect DFO {
 	syn lazy Set<Component> DiagramType.roots() {
 		Set<Component> set = new HashSet<Component>();
 		for (Component c: getComponents()) {
-			if (c.pred().isEmpty()) {
+			if (c.predComponents().isEmpty()) {
 				set.add(c);
 			}
 		}
