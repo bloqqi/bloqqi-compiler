@@ -26,6 +26,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -66,6 +67,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -108,6 +110,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -151,6 +154,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -194,6 +198,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -239,6 +244,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -284,6 +290,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -325,6 +332,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -371,7 +379,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
-
+		
+		assertTrue(dtB.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -416,6 +425,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankSecondFilling");
 
+		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("ValveExtension", "Valve2");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -461,7 +471,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankSecondEmptying");
-
+		
+		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("PumpExtension", "Pump2");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -518,6 +529,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankHeating");
 
+		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("HeatingExtension", "Heating");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -581,6 +593,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		DiagramType dtTank = (DiagramType) program.getCompilationUnit(0).localLookupType("Tank");
 		DiagramType dtTwo = (DiagramType) program.getCompilationUnit(0).localLookupType("TankAgitation");
 
+		assertTrue(dtTwo.canExtractSubtypeAsBlock());
 		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("AgitationExtension", "Agitation");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
@@ -677,6 +690,62 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}" +
 			"diagramtype OperatorBool( => out: Bool) {" +
 			"}";
+	}
+	
+	@Test
+	public void testCanExtractBlock() {
+		String str =
+			"diagramtype A {" +
+			"  addSuper: Add;" +
+			"}" +
+			"diagramtype B extends A {" +
+			"  addLocal1: Add;" +
+			"  addLocal2: Add;" +
+			"  connect(addLocal1, addSuper.in1);" +
+			"  connect(addSuper, addLocal2.in1);" +
+			"}";
+		Program program = parseValidProgram(str);
+
+		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
+		assertFalse(dtB.canExtractSubtypeAsBlock());
+	}
+	
+	@Test
+	public void testCanExtractBlock2() {
+		String str =
+			"diagramtype A {" +
+			"  addSuper1: Add;" +
+			"  addSuper2: Add;" +
+			"}" +
+			"diagramtype B extends A {" +
+			"  addLocal1: Add;" +
+			"  addLocal2: Add;" +
+			"  connect(addLocal1, addSuper1.in1);" +
+			"  connect(addSuper1, addSuper2.in1);" +
+			"  connect(addSuper2, addLocal2.in1);" +
+			"  connect(addLocal1, addLocal2.in2);" +
+			"}";
+		Program program = parseValidProgram(str);
+
+		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
+		assertFalse(dtB.canExtractSubtypeAsBlock());
+	}
+	
+	@Test
+	public void testCanExtractBlock3() {
+		String str =
+			"diagramtype A {" +
+			"  addSuper1: Add;" +
+			"  addSuper2: Add;" +
+			"}" +
+			"diagramtype B extends A {" +
+			"  connect(addSuper1, addSuper2.in1);" +
+			"  connect(addSuper2, addSuper1.in1);" +
+			"}";
+		Program program = parseValidProgram(str);
+
+		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
+		assertFalse(dtB.canExtractSubtypeAsBlock());
 	}
 	
 	private DiagramType createAndAddSubtypeWith(DiagramType superType, Component component) {

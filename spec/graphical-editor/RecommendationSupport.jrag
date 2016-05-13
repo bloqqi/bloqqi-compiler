@@ -66,7 +66,49 @@ aspect IsParameterExposed {
 	}
 }
 
-aspect RecommendationSupport {
+/**
+ * Checks that a subtype can be extracted as a block
+ */
+aspect CanExtractSubType {
+	syn boolean DiagramType.canExtractSubtypeAsBlock() {
+		for (Component c: components()) {
+			if (c.isInherited()
+					&& c.isReachedFromLocalNode()
+					&& c.isReachingLocalNode()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	syn boolean Node.isReachedFromLocalNode() circular[true] {
+		if (isInherited()) {
+			for (Node n: pred()) {
+				if (n.isReachedFromLocalNode()) {
+					return true;
+				}
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	syn boolean Node.isReachingLocalNode() circular[true] {
+		if (isInherited()) {
+			for (Node n: succ()) {
+				if (n.isReachingLocalNode()) {
+					return true;
+				}
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+}
+
+aspect ExtractSubType {
 	public Pair<DiagramType, WiredComponent> DiagramType.extractsubTypeAsWiredBlock(String diagramTypeName, String componentName) {
 		SubTypeWrapperCreator creator = new SubTypeWrapperCreator(this, diagramTypeName, componentName);
 		creator.create();
