@@ -126,6 +126,12 @@ aspect HelperAttributes {
 				list.add("Parameter '" + out.name() + "' has more than one incoming connection");
 			}
 		}
+		for (Variable v: variables()) {
+			int n = v.ingoingConnections().size();
+			if (n > 1) {
+				list.add("Variable '" + v.name() + "' has more than one incoming connection");
+			}
+		}
 		for (Component c: getComponents()) {
 			for (ComponentParameter cp: c.getInParameters()) {
 				int n = cp.ingoingConnections().size();

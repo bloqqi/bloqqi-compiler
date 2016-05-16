@@ -1,0 +1,9 @@
+diagramtype Main(in: Int) {
+	var state: Int;
+	connect(in, state);
+}
+
+diagramtype SubMain extends Main {
+	add: Add;
+	connect(add, state);
+}

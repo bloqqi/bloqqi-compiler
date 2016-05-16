@@ -1,0 +1,5 @@
+diagramtype Main(in1: Int, in2: Int) {
+	var state: Int;
+	connect(in1, state);
+	connect(in2, state);
+}
