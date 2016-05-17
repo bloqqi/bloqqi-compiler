@@ -431,6 +431,9 @@ aspect Inheritance {
 	syn Component Component.declaredComponent() = this;
 	eq InheritedComponent.declaredComponent() = getDeclaredComponent();
 
+	syn Variable Variable.declaredVariable() = this;
+	eq InheritedVariable.declaredVariable() = getDeclaredVariable();
+
 	syn boolean Connection.isIntercept() = false;
 	eq InterceptConnection.isIntercept() = true;
 	
