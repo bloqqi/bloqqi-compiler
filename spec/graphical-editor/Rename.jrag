@@ -40,6 +40,31 @@ aspect Rename {
 		}
 	}
 	
+
+	public interface Node {
+		boolean changeName(String newName);
+	}
+	
+	public boolean VarDecl.changeName(String newName) {
+		if (lookup(newName) != null) {
+			return false;
+		}
+		changeUses(newName);
+		setNewIdToken(newName);
+		program().flushAllAttributes();
+		return true;
+	}
+	
+	protected void VarDecl.setNewIdToken(String id) {
+		throw new UnsupportedOperationException();
+	}
+	protected void Parameter.setNewIdToken(String id) {
+		setID(id);
+	}
+	protected void Variable.setNewIdToken(String id) {
+		setID(id);
+	}
+	
 	public boolean Component.changeName(String newName) {
 		return changeName(newName, true);
 	}
@@ -56,26 +81,10 @@ aspect Rename {
 		return true;
 	}
 	
-	public boolean Parameter.changeName(String newName) {
-		if (lookup(newName) != null) {
-			return false;
-		}
-		changeUses(newName);
-		setID(newName);
-		program().flushAllAttributes();
-		return true;
+	public boolean Literal.changeName(String newName) {
+		throw new UnsupportedOperationException();
 	}
 	
-	public boolean Variable.changeName(String newName) {
-		if (lookup(newName) != null) {
-			return false;
-		}
-		changeUses(newName);
-		setID(newName);
-		program().flushAllAttributes();
-		return true;
-	}
-
 	
 	protected void VarDecl.changeUses(String newName) {
 		for (VarUse use: uses()) {
