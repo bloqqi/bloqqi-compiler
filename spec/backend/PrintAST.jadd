@@ -48,6 +48,7 @@ aspect PrintAST {
 		super.printAST(prefix, i);
 		getInParameters().printAST("InParameters", i+1);
 		getOutParameters().printAST("OutParameters", i+1);
+		getVariables().printAST("Variables", i+1);
 		getComponents().printAST("Components", i+1);
 		getConnections().printAST("Connections", i+1);
 		recommendedElements().printAST("recommendedElements()", i+1);

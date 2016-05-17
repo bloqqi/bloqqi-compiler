@@ -34,6 +34,7 @@ aspect SimpleAccess {
 	eq ComponentParameter.canAccess() = access() != null;
 	eq Parameter.canAccess() = true;
 	eq Variable.canAccess() = true;
+	eq InlinedVariable.canAccess() = false;
 	eq WiringParameter.canAccess() = true;
 	eq Literal.canAccess() = false;
 	

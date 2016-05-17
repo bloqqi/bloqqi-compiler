@@ -18,13 +18,15 @@ aspect Inline {
 	eq Component.isInlined() = false;
 	eq Literal.isInlined() = false;
 	eq InlinedComponent.isInlined() = true;
+	eq InlinedVariable.isInlined() = true;
 
 	syn Component Node.inlinedComponent();
 	eq Parameter.inlinedComponent() = null;
 	eq WiringParameter.inlinedComponent() = null;
 	eq Variable.inlinedComponent() = null;
-	eq Component.inlinedComponent() = null;
+	eq InlinedVariable.inlinedComponent() = getInlinedComponent();
 	eq Literal.inlinedComponent() = null;
+	eq Component.inlinedComponent() = null;
 	eq InlinedComponent.inlinedComponent()
 		= getInlinedComponents().get(0);
 	syn java.util.List<Component> Component.inlinedComponents()

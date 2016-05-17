@@ -69,6 +69,7 @@ ComponentParameter : VarDecl ::= <Parameter:Parameter>;
 /** Variables */
 Variable : VarDecl ::= TypeUse <ID>;
 InheritedVariable : Variable ::= <DeclaredVariable:Variable>;
+InlinedVariable : InheritedVariable ::= <InlinedComponent:Component>;
 
 /** Flow declarations */
 abstract FlowDecl;

@@ -464,10 +464,12 @@ aspect Factories {
 		if (shouldBeInlined()) {
 			DiagramType dt = (DiagramType) type();
 			for (InheritedVariable inhVar: dt.variables()) {
-				InheritedVariable iv = new InheritedVariable(
+				InlinedVariable iv = new InlinedVariable(
 					inhVar.getTypeUse().treeCopy(),
 					name() + "$" + inhVar.getID(),
-					inhVar.getDeclaredVariable());
+					inhVar.getDeclaredVariable(),
+					this
+				);
 				list.add(iv);
 			}
 		}
