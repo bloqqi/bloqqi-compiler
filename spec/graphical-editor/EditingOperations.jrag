@@ -16,7 +16,7 @@ aspect EditingOperations {
 			return true;
 		}
 	}
-	syn boolean Component.canDelete() = !isInherited() && !isInlined();
+	syn boolean Node.canDelete() = !isInherited() && !isInlined();
 
 
 	public static boolean Program.isIdValid(String name) {
