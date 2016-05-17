@@ -62,6 +62,8 @@ aspect Inline {
 	
 	eq InlinedName.flatName() = getOuter().flatName() + INLINE_SEP + getInner().flatName();
 	eq InlinedName.name() = getOuter().name() + INLINE_SEP + getInner().name();
+	
+	syn String Node.inlinedName() = name().substring(name().lastIndexOf(ASTNode.INLINE_SEP)+1);
 }
 
 aspect InlineErrors {
