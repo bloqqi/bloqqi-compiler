@@ -209,6 +209,26 @@ public class EditingTests extends TestSuite {
 		assertEquals(expected, p2.getCompilationUnit(0).prettyPrint());
 	}
 	
+	@Test
+	public void changeVariable() {
+		String s =
+				"diagramtype Main {" +
+				"	var state: Int;" +
+				"	add: Add;" +
+				"	connect(state, add.in1);" +
+				"	connect(add, state);" +
+				"}";
+		Program p = parseValidProgram(s);
+		
+		DiagramType dtMain = (DiagramType) p.getCompilationUnit(0).typeDecls().get(0);
+		Variable v = dtMain.getLocalVariable(0);
+
+		assertFalse(v.changeName("add"));
+		assertTrue(v.changeName("s"));
+		assertEquals("connect(s, add.in1)", dtMain.getFlowDecl(0).prettyPrint());
+		assertEquals("connect(add.out, s)", dtMain.getFlowDecl(1).prettyPrint());
+	}
+	
 
 	private Program createParameterTest() {
 		String s = 

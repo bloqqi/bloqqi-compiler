@@ -47,9 +47,7 @@ aspect Rename {
 		if (lookup(newName) != null) {
 			return false;
 		}
-		for (VarUse use: uses()) {
-			use.changeName(newName);
-		}
+		changeUses(newName);
 		setName(new IdName(newName));
 		setHasSimpleName(false);
 		if (flush) {
@@ -62,13 +60,29 @@ aspect Rename {
 		if (lookup(newName) != null) {
 			return false;
 		}
-		for (VarUse use: uses()) {
-			use.changeName(newName);
-		}
+		changeUses(newName);
 		setID(newName);
 		program().flushAllAttributes();
 		return true;
 	}
+	
+	public boolean Variable.changeName(String newName) {
+		if (lookup(newName) != null) {
+			return false;
+		}
+		changeUses(newName);
+		setID(newName);
+		program().flushAllAttributes();
+		return true;
+	}
+
+	
+	protected void VarDecl.changeUses(String newName) {
+		for (VarUse use: uses()) {
+			use.changeName(newName);
+		}
+	}
+	
 	public abstract void VarUse.changeName(String newName);
 	public void AbstractSimpleVarUse.changeName(String newName) {
 		setID(newName);
