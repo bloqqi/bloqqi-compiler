@@ -1,2 +1,2 @@
-Line 9, column 7: Expected a source port, 'z.in' is a target port
-Line 9, column 13: Expected a target port, 'z.out' is a source port
+Line 10, column 7: Expected a source port, 'z1.in' is a target port
+Line 10, column 14: Expected a target port, 'z2.out' is a source port

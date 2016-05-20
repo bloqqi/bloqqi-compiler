@@ -755,7 +755,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"  connect(addSuper1, addSuper2.in1);" +
 			"  connect(addSuper2, addSuper1.in1);" +
 			"}";
-		Program program = parseValidProgram(str);
+		Program program = parseProgram(str);
 
 		DiagramType dtB = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 		assertFalse(dtB.canExtractSubtypeAsBlock());

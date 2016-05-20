@@ -31,20 +31,9 @@ aspect GenerateDOT {
 			sb.append("\"];\n");
 		}
 		for (Connection c: connections()) {
-			if (!c.isBroken()) {
-				sb.append(c.getSource().firstName());
-				sb.append(" -> ");
-				sb.append(c.getTarget().firstName()).append("[tailport=e,headport=w];\n");
-			}
-		}
-		
-		for (Connection c: connections()) {
-			if (c.isBroken()) {
-				sb.append(c.getSource().firstName());
-				sb.append(" -> ");
-				sb.append(c.getTarget().firstName());
-				sb.append("[arrowType=inv,tailport=e,headport=w];\n");   // constraint=false
-			}
+			sb.append(c.getSource().firstName());
+			sb.append(" -> ");
+			sb.append(c.getTarget().firstName()).append("[tailport=e,headport=w];\n");
 		}
 		
 		sb.append("}");

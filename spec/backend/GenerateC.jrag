@@ -293,12 +293,6 @@ aspect FunctionDefinitions {
 				sb.append(v.ingoingValueC() + ";\n");
 			}
 		}
-		// Update implicit variables for connection that make a diagram cyclic
-		for (Connection c: connections()) {
-			if (c.isBroken()) {
-				sb.append("  " + c.brokenNameC() + " = " + c.getSource().cCode() + ";\n");
-			}
-		}
 	}
 	
 	private void DiagramType.genReturnValueC(StringBuilder sb) {
@@ -320,11 +314,7 @@ aspect FunctionDefinitions {
 	}
 	
 	public String Connection.cSourceName() {
-		if (isBroken()) {
-			return brokenNameC();
-		} else {
-			return getSource().cCode();
-		}
+		return getSource().cCode();
 	}
 
 	public abstract String Expr.cCode();
@@ -403,12 +393,6 @@ aspect StateStructs {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
-			}
-			// Create implicit variables for connections that make a diagram cyclic
-			for (Connection c: connections()) {
-				if (c.isBroken()) {
-					sb.append("  " + c.getSource().type().nameC() + " " + c.brokenFieldNameC() + ";\n");
-				}
 			}
 			for (Component c: components()) {
 				if (c.type().containsVariablesTransitive()) {
@@ -510,35 +494,5 @@ aspect CNames {
 		reservedCNames.add("printf");
 		// Add more, for example, names in stdio.h, stdlib.h.
 		// Or possible always prefix names with an underscore.
-	}
-
-	/**
-	 * Implicit variable names for connections that make a diagram cyclic
-	 */
-	syn Map<Connection, Integer> DiagramType.brokenConnectionIndex() {
-		Map<Connection, Integer> map = new HashMap<>();
-		int index = 1;
-		for (Connection c: connections()) {
-			if (c.isBroken()) {
-				map.put(c, index);
-				index++;
-			}
-		}
-		return map;
-	}
-	inh int Connection.brokenIndex();
-	eq DiagramType.getConnection(int index).brokenIndex() {
-		Integer i = brokenConnectionIndex().get(getConnection(index));
-		return i == null ? -1 : i;
-	}
-	eq Program.getChild().brokenIndex() = -1;
-
-	syn String Connection.brokenNameC() = ASTNode.STATE_VAR + "->" + brokenFieldNameC();
-	syn String Connection.brokenFieldNameC() {
-		if (isBroken()) {
-			return "__broken_connection_" + brokenIndex();
-		} else {
-			return "<error: connection is not broken>";
-		}
 	}
 }

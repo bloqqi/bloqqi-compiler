@@ -5,8 +5,9 @@ wiring X[Int x, =>Bool y] {
     connect(X.out, y);
 }
 diagramtype Y() {
-	Z z;
-    X[z.out, z.in] x;
+	Z z1;
+	Z z2;
+    X[z1.out, z2.in] x;
 }
 diagramtype Z(Int in => Bool out) {
 }

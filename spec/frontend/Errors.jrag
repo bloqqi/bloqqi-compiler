@@ -80,6 +80,12 @@ aspect ConnectionErrors {
 		when !tooManyIncomingConnections().isEmpty()
 		to CompilationUnit.errors();
 
+	DiagramType contributes error("Diagram type " + name()
+			+ " contains dataflow cycles. Involved components: "
+			+ componentsInDataflowCycle())
+		when hasDataflowCycles()
+		to CompilationUnit.errors();
+	
 	VarUse contributes error("Expected a source port, '" + toString() + "' is a target port")
 		when unexpectedTargetPort()
 		to CompilationUnit.errors();

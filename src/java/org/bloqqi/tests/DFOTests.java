@@ -397,4 +397,28 @@ public class DFOTests extends TestSuite {
 		assertEquals(6, dt.getComponent(4).dfo());
 		assertEquals(3, dt.getComponent(5).dfo());
 	}
+	
+	@Test
+	public void circularDataflow() {
+		String s =
+			"diagramtype T() { " +
+			"  S A;" +
+			"  S B;" +
+			"  S C;" +
+			"  connect(A, B);" +
+			"  connect(B, C);" +
+			"  connect(C, A);" +
+			"}" +
+			"diagramtype S(Int in => Int out) {}";
+		Program p = parseProgram(s);
+		DiagramType dt = (DiagramType) p.getCompilationUnit(0).typeDecls().get(0);
+		
+		Component a = dt.getComponent(0);
+		Component b = dt.getComponent(1);
+		Component c = dt.getComponent(2);
+		
+		assertEquals(-1, a.dfo());
+		assertEquals(-1, b.dfo());
+		assertEquals(-1, c.dfo());
+	}
 }

@@ -15,46 +15,36 @@ aspect DFO {
 	syn nta Component DiagramType.startComponent() 
 		= new Component(false, new TypeUse(""), new IdName("<root>"), false);
 
-	syn lazy PredSuccData DiagramType.predSucc() = breakCycles();
-	syn Set<Component> DiagramType.succP(Component c) = predSucc().succ.get(c);
-	syn Set<Component> DiagramType.predP(Component c) = predSucc().pred.get(c);
-	syn Component DiagramType.sccParent(Component c) = predSucc().parent.get(c);
-	
-	inh Component Component.sccParent();
-	eq DiagramType.getComponent(int i).sccParent() = sccParent(getComponent(i));
-	eq DiagramType.getLocalComponent().sccParent() = null;
-	eq Program.getChild().sccParent() = null;
-	
 	inh lazy Set<Component> Component.predP();
 	eq DiagramType.getComponent(int i).predP() {
+		if (hasDataflowCycles()) {
+			return Collections.emptySet();
+		}
 		Component c = getComponent(i);
-		if (predP(c).isEmpty()) {
+		if (c.predComponents().isEmpty()) {
 			Set<Component> set = new HashSet<Component>();
 			set.add(startComponent());
 			return set;
 		} else {
-			return predP(c);
+			return c.predComponents();
 		}
 	}
 	eq DiagramType.startComponent().predP() = new HashSet<Component>();
 	eq DiagramType.getLocalComponent().predP() = new HashSet<Component>();
 	eq Program.getChild().predP() = new HashSet<Component>();
 	inh Set<Component> Component.succP();
-	eq DiagramType.getComponent(int i).succP() = succP(getComponent(i));
+	eq DiagramType.getComponent(int i).succP() {
+		if (hasDataflowCycles()) {
+			return Collections.emptySet();
+		} else {
+			return getComponent(i).succComponents();
+		}
+	}
 	eq DiagramType.startComponent().succP() = roots();
 	eq Program.getChild().succP() = new HashSet<Component>();
 
 	syn boolean Expr.isComponent() = false;
 	eq VarUse.isComponent() = node() instanceof Component;
-	syn boolean Connection.isBroken() {
-		if (getSource().isComponent() && getTarget().isComponent()) {
-			Component source = (Component) getSource().node();
-			Component target = (Component) getTarget().node();
-			return !source.succP().contains(target);
-		} else {
-			return false;
-		}
-	}
 	
 	inh Set<Component> Component.roots();
 	eq DiagramType.getComponent().roots() = roots();
@@ -147,6 +137,9 @@ aspect DFO {
 			return children().last().maxDfo();
 	}
 	syn lazy int Component.declDfo() {
+		if (diagramType().hasDataflowCycles()) {
+			return -1;
+		}
 		if (predP().isEmpty()) 
 			return 0;
 		int max = 0;
