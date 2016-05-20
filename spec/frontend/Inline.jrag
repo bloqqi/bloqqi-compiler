@@ -9,7 +9,7 @@ aspect Inline {
 		return inline && canBeInlined();
 	}
 	syn boolean Component.canBeInlined()
-		= !isCircular() && type().containsComponents() && type().isDiagramType();
+		= !isOnTypeCycle() && type().containsComponents() && type().isDiagramType();
 
 	syn boolean Node.isInlined();
 	eq Parameter.isInlined() = false;

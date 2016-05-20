@@ -92,7 +92,7 @@ aspect TypeAnalysis {
 		return set;
 	}
 	
-	syn boolean Component.isCircular() 
+	syn boolean Component.isOnTypeCycle()
 		= type().reachable().contains(diagramType());
 	
 	
