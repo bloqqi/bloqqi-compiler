@@ -122,7 +122,7 @@ aspect NodeFlow {
 	}
 }
 
-aspect ComponentCycles {
+aspect Cycles {
 	syn boolean DiagramType.hasDataflowCycles() {
 		for (Component c: components()) {
 			if (c.isDataflowCircular()) {
@@ -146,12 +146,19 @@ aspect ComponentCycles {
 		return joiner.toString();
 	}
 	
-	syn boolean Component.isDataflowCircular() circular[true] {
+	syn Set<Component> Component.reachableComponents() circular[new TreeSet<>()] {
+		Set<Component> set = new TreeSet<Component>();
 		for (Component c: succComponents()) {
-			if (c.isDataflowCircular()) {
-				return true;
-			}
+			set.add(c);
+			set.addAll(c.reachableComponents());
 		}
-		return false;
+		return set;
 	}
+	
+	syn boolean Component.isDataflowCircular()
+		= reachableComponents().contains(this);
+	
+	syn boolean Connection.isOnDataflowCycle()
+		= getSource().isComponent() && ((Component) getSource().node()).isDataflowCircular()
+			&& getTarget().isComponent() && ((Component) getTarget().node()).isDataflowCircular();
 }

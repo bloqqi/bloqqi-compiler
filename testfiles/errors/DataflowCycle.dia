@@ -1,0 +1,11 @@
+diagramtype Main {
+	b1: Block;
+	b2: Block;
+	b3: Block;
+	connect(b1, b2.in1);
+	connect(b2, b3.in1);
+	connect(b3, b2.in2);
+}
+
+diagramtype Block(in1: Int, in2: Int => out: Int) {
+}
