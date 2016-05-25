@@ -103,7 +103,7 @@
 		<delete dir="${bindir}" />
 		<delete file="${jarfile}" />
 		<delete>
-			<fileset dir="." includes="**/*.class"/>
+			<fileset dir="." includes="**/*.class" excludes="bin/" />
 			<fileset dir="testfiles/code_generation/" includes="*.c *.executable *.out"/>
 		</delete>
 	</target>
