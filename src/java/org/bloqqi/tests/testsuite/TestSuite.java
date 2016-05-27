@@ -23,7 +23,7 @@ import org.bloqqi.compiler.ast.*;
 
 abstract public class TestSuite {
 	protected static final String TEST_FILES_PATH = "testfiles/";
-	protected static final int DEFAULT_EXECUTION_TIMEOUT = 1500; // In ms
+	protected static final int DEFAULT_EXECUTION_TIMEOUT = 3000; // In ms
 
 	protected DiagramType parseValidDiagramType(String s) {
 		Program p = parseValidProgram(s);
