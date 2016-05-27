@@ -54,6 +54,14 @@ aspect EditModifiers {
 			addModifier(new Modifier(modifier));
 		}
 	}
+	
+	public void Modifiers.setModifier(String modifierName, boolean setModifier) {
+		if (setModifier) {
+			addModifier(modifierName);
+		} else {
+			removeModifier(modifierName);
+		}
+	}
 }
 
 aspect ModifiersErrors {
