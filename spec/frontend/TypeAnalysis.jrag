@@ -189,3 +189,37 @@ aspect IsSubTypeOf {
 		= dt.superTypesLinearized().contains(this);
 	eq UnknownType.isSuperTypeOfDiagramType(DiagramType dt) = true;
 }
+
+aspect AbstractType {
+	syn boolean TypeDecl.isAbstract() = false;
+	eq DiagramType.isAbstract() = getModifiers().isAbstract();
+	
+	syn String DiagramType.needsToBeAbstractErrorMessage() {
+		if (getModifiers().isAbstract()) {
+			return "";
+		}
+		
+		StringJoiner joiner = new StringJoiner(", ");
+		for (Component c: declaredComponentsTransitive()) {
+			if (c.type().isAbstract()) {
+				joiner.add(c.name());
+			}
+		}
+		
+		if (joiner.length() == 0) {
+			return "";
+		} else {
+			return "Diagram type " + name() + " needs to be declared abstract, "
+					+ "since the type of the following components are abstract: "
+					+ joiner.toString();
+		}
+	}
+	
+	DiagramType contributes error(needsToBeAbstractErrorMessage())
+		when !needsToBeAbstractErrorMessage().isEmpty()
+		to CompilationUnit.errors();
+	
+	DiagramType contributes error("The diagram type Main cannot be abstract")
+		when name().equals("Main") && isAbstract()
+		to CompilationUnit.errors();
+}

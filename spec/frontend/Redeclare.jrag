@@ -70,6 +70,19 @@ aspect MostSpecificComponent {
 	
 	syn boolean DiagramType.isMostSpecificComponent(Component component)
 		= mostSpecificComponent(component) == component;
+	
+	
+	syn java.util.List<Component> DiagramType.declaredComponentsTransitive() {
+		ArrayList<Component> list = new ArrayList<>();
+		for (DiagramType superType: superTypesLinearized()) {
+			for (Component comp: superType.getLocalComponents()) {
+				if (isMostSpecificComponent(comp)) {
+					list.add(comp);
+				}
+			}
+		}
+		return list;
+	}
 }
 
 aspect Errors {

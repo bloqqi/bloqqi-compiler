@@ -119,11 +119,9 @@ aspect Inheritance {
 				list.add(v.createInheritedVariable());
 			}
 		}
-		for (DiagramType superType: superTypesLinearized()) {
-			for (Component comp: superType.getLocalComponents()) {
-				if (isMostSpecificComponent(comp) && comp.shouldBeInlined()) {
-					list.addAll(comp.createInlinedVariables());
-				}
+		for (Component comp: declaredComponentsTransitive()) {
+			if (comp.shouldBeInlined()) {
+				list.addAll(comp.createInlinedVariables());
 			}
 		}
 		return list;
@@ -133,14 +131,8 @@ aspect Inheritance {
 	syn List<InheritedComponent> DiagramType.getComponentList() {
 		List<InheritedComponent> list = new List<>();
 		Map<Component, InheritedComponent> map = new HashMap<>();
-		for (DiagramType superType: superTypesLinearized()) {
-			for (Component c: superType.getLocalComponents()) {
-				// Only the most specific component is added (due to redeclare),
-				// that is, only components that are not redeclared further are added
-				if (isMostSpecificComponent(c)) {
-					list.addAll(c.createInheritedComponents());
-				}
-			}
+		for (Component c: declaredComponentsTransitive()) {
+			list.addAll(c.createInheritedComponents());
 		}
 		return list;
 	}
@@ -163,9 +155,11 @@ aspect Inheritance {
 			}
 			// Wired components may add connections
 			for (Component c: superType.getLocalComponents()) {
-				for (FlowDecl fd: c.flowDecls()) {
-					if (fd instanceof Connection) {
-						list.add(((Connection) fd).createInheritedConnection(this));
+				if (isMostSpecificComponent(c)) {
+					for (FlowDecl fd: c.flowDecls()) {
+						if (fd instanceof Connection) {
+							list.add(((Connection) fd).createInheritedConnection(this));
+						}
 					}
 				}
 			}
@@ -187,11 +181,9 @@ aspect Inheritance {
 		}
 		
 		// Add inlining
-		for (DiagramType superType: superTypesLinearized()) {
-			for (Component comp: superType.getLocalComponents()) {
-				if (isMostSpecificComponent(comp) && comp.shouldBeInlined()) {
-					addInlinedConnections(list, comp);
-				}
+		for (Component comp: declaredComponentsTransitive()) {
+			if (comp.shouldBeInlined()) {
+				addInlinedConnections(list, comp);
 			}
 		}
 

@@ -1,0 +1,15 @@
+// Needs to be declared as abstract
+diagramtype A {
+	t: T;
+} 
+
+// Does not need to be declared as abstract
+diagramtype B extends A {
+	redeclare t: S;
+}
+
+abstract diagramtype T {
+}
+
+diagramtype S extends T {
+}
