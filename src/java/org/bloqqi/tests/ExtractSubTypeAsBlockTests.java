@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.bloqqi.compiler.ast.Component;
 import org.bloqqi.compiler.ast.DiagramType;
+import org.bloqqi.compiler.ast.Modifiers;
 import org.bloqqi.compiler.ast.Pair;
 import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.compiler.ast.TypeUse;
@@ -779,6 +780,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 	private DiagramType createAndAddSubtypeWith(DiagramType superType, Component component) {
 		DiagramType dt = new DiagramType();
 		dt.setID("Sub" + superType.name());
+		dt.setModifiers(new Modifiers());
 		dt.addSuperType(new TypeUse(superType.name()));
 		dt.addLocalComponent(component);
 		superType.compUnit().addDeclaration(dt);

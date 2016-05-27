@@ -35,6 +35,7 @@ Declaration declaration =
 	;
 
 DiagramType diagram_type =
+	modifiers.m?
 	DIAGRAMTYPE ID diagram_type_parameters.dt super_types
 	LBRA
 		vars.v? 
@@ -43,8 +44,9 @@ DiagramType diagram_type =
 	RBRA
 	annotations.a?
 	wiring.w?
-	{: 
+	{:
 		dt.setID(ID);
+		dt.setModifiers(new Modifiers(m));
 		dt.setSuperTypeList(super_types);
 		dt.setLocalVariableList(v);
 		dt.setLocalComponentList(c);
@@ -53,6 +55,16 @@ DiagramType diagram_type =
 		dt.setLocalWiringOpt(w);
 		return dt;
 	:}
+	;
+	
+List modifiers =
+	modifier.m					{: return new List().add(m); :}
+	| modifiers.l modifier.m	{: return l.add(m); :}
+	;
+
+Modifier modifier =
+	ABSTRACT					{: return new Modifier("abstract"); :}
+	| INLINE					{: return new Modifier("inline"); :}
 	;
 	
 DiagramType diagram_type_parameters =
@@ -266,6 +278,7 @@ AnonymousDiagramType anon_dt_body =
 		adt.setLocalInParameterList(dt.getLocalInParameterList());
 		adt.setLocalOutParameterList(dt.getLocalOutParameterList());
 		adt.setID("<anonymous>");
+		adt.setModifiers(new Modifiers());
 		adt.setLocalVariableList(v);
 		adt.setLocalComponentList(c);
 		adt.setFlowDeclList(fd);

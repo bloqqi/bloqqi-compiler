@@ -31,7 +31,7 @@ aspect Recommendation {
 		= diagramType().localComponentLookup(name()) != null;
 
 	syn nta DiagramType Program.unknownDiagramType() 
-		= new DiagramType("<UnknownDiagramType>", 
+		= new DiagramType("<UnknownDiagramType>", new Modifiers(),
 			new List(), new List(), new List(), new List(), 
 			new List(), new List(), new List(), new Opt());
 	eq Program.unknownDiagramType().isAlreadyLocallyDeclared() = false;

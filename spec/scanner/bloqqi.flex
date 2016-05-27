@@ -61,6 +61,7 @@ NUM = -?[0-9]+
 	"connect"		{ return sym(Terminals.CONNECT); }
 	"annotation"	{ return sym(Terminals.ANNOTATION); }
 	"extends"		{ return sym(Terminals.EXTENDS); }
+	"abstract"		{ return sym(Terminals.ABSTRACT); }
 	"intercept"		{ return sym(Terminals.INTERCEPT); }
 	"redeclare"		{ return sym(Terminals.REDECLARE); }
 	"source"		{ return sym(Terminals.SOURCE); }

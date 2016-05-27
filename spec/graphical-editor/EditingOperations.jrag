@@ -301,6 +301,7 @@ aspect AddAnonymousTypes {
 		RedeclareComponent rc = new RedeclareComponent();
 		rc.setName(getName().treeCopy());
 		AnonymousDiagramType anonDt = new AnonymousDiagramType();
+		anonDt.setModifiers(new Modifiers());
 		AnonymousTypeImplicitSuper anonType = new AnonymousTypeImplicitSuper(anonDt);
 		rc.setType(anonType);
 		return rc;
@@ -308,6 +309,7 @@ aspect AddAnonymousTypes {
 
 	protected AnonymousType Component.createAnonymousType() {
 		AnonymousDiagramType anonDt = new AnonymousDiagramType();
+		anonDt.setModifiers(new Modifiers());
 		anonDt.addSuperType((TypeUse) getType().treeCopy());
 		return new AnonymousType(anonDt);
 	}

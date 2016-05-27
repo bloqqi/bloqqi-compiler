@@ -62,6 +62,7 @@ aspect RecommendationConfiguration {
 		public DiagramType newDiagramType(String newName) {
 			DiagramType newDt = new DiagramType();
 			newDt.setID(newName);
+			newDt.setModifiers(new Modifiers());
 			newDt.addSuperType(new TypeUse(diagramType.name()));
 			addComponents(newDt);
 			return newDt;
@@ -70,6 +71,7 @@ aspect RecommendationConfiguration {
 		protected AnonymousDiagramType newAnonymousDiagramType() {
 			AnonymousDiagramType newAdt = new AnonymousDiagramType();
 			newAdt.setID("<anonymous>");
+			newAdt.setModifiers(new Modifiers());
 			newAdt.addSuperType(new TypeUse(diagramType.name()));
 			addComponents(newAdt);
 			return newAdt;

@@ -10,7 +10,8 @@ abstract Declaration;
 abstract TypeDecl : Declaration;
 abstract UserDefType : TypeDecl ::= <ID>;
 DiagramType : UserDefType ::= 
-	LocalInParameter:InParameter* LocalOutParameter:OutParameter* SuperType:TypeUse* 
+	Modifiers
+	LocalInParameter:InParameter* LocalOutParameter:OutParameter* SuperType:TypeUse*
 	LocalVariable:Variable* LocalComponent:Component* FlowDecl* Annotation*
 	[LocalWiring:Wiring]
 	/InParameter:InheritedInParameter*/ /OutParameter:InheritedOutParameter*/ /Variable:InheritedVariable*/
@@ -111,6 +112,9 @@ RecommendationReplaceable : RecommendationElement ::= SimpleVarUse;
 RecommendationExtendsSuper : Declaration ::= DeclaredForType:TypeUse;
 RecommendationGroup : VarDecl ::= <Name>;
 
+/** Modifiers */
+Modifiers ::= Modifier*;
+Modifier ::= <Name:String>;
+
 /** Annotations */
 Annotation ::= VarUse <X:int> <Y:int> <Width:int> <Height:int>;
-

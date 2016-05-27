@@ -1,0 +1,65 @@
+aspect Modifiers {
+	inh boolean Modifiers.canBeAbstract();
+	inh boolean Modifiers.canBeInline();
+
+	eq Program.getChild().canBeAbstract() = false;
+	eq Program.getChild().canBeInline() = false;
+	
+	eq DiagramType.getModifiers().canBeAbstract() = true;
+
+
+	syn boolean Modifiers.isAbstract() = hasModifier("abstract");
+	syn boolean Modifiers.isInline() = hasModifier("inline");
+	
+
+	syn boolean Modifiers.hasModifier(String name) 
+		= localModifierLookup(name) != null;
+	syn Modifier Modifiers.localModifierLookup(String name) {
+		for (Modifier m: getModifiers()) {
+			if (m.getName().equals(name)) {
+				return m;
+			}
+		}
+		return null;
+	}
+	
+	inh Modifier Modifier.lookupModifier(String name);
+	eq Modifiers.getModifier().lookupModifier(String name)
+		= localModifierLookup(name);
+	
+	syn boolean Modifier.isRepeatedModifier()
+		= lookupModifier(getName()) != this;
+}
+
+aspect ModifiersErrors {
+	syn String Modifiers.errorMessage() {
+		StringJoiner joiner = new StringJoiner(", ");
+		if (isAbstract() && !canBeAbstract()) {
+			joiner.add("abstract");
+		}
+		if (isInline() && !canBeInline()) {
+			joiner.add("inline");
+		}
+		
+		if (joiner.length() == 0) {
+			return "";
+		} else {
+			return context().kindDescription() 
+				+ "s are not allowed to have the modifiers: " 
+				+ joiner.toString();
+		}
+	}
+	
+	inh ASTNode Modifiers.context();
+	eq DiagramType.getModifiers().context() = this;
+	syn String ASTNode.kindDescription() = "";
+	eq DiagramType.kindDescription() = "Diagram type";
+	
+	Modifiers contributes context().error(errorMessage())
+		when !errorMessage().isEmpty()
+		to CompilationUnit.errors();
+		
+	Modifier contributes error("Repeated modifier: " + getName())
+		when isRepeatedModifier()
+		to CompilationUnit.errors();
+}

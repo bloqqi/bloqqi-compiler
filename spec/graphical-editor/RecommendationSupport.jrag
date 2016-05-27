@@ -140,6 +140,7 @@ aspect ExtractSubType {
 			
 
 			newDiagramType = new DiagramType();
+			newDiagramType.setModifiers(new Modifiers());
 			newWiredComponent = new WiredComponent();
 			toInPar = new HashMap<>();
 			toOutPar = new HashMap<>();
