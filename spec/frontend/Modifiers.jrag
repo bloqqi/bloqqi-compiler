@@ -31,6 +31,31 @@ aspect Modifiers {
 		= lookupModifier(getName()) != this;
 }
 
+aspect EditModifiers {
+	public boolean Modifiers.removeModifier(String modifier) {
+		ArrayList<Modifier> remove = new ArrayList<Modifier>();
+		for (Modifier m: getModifiers()) {
+			if (m.getName().equals(modifier)) {
+				remove.add(m);
+			}
+		}
+		if (remove.isEmpty()) {
+			return false;
+		} else {
+			for (Modifier m: remove) {
+				getModifiers().removeChild(m);
+			}
+			return true;
+		}
+	}
+	
+	public void Modifiers.addModifier(String modifier) {
+		if (localModifierLookup(modifier) == null) {
+			addModifier(new Modifier(modifier));
+		}
+	}
+}
+
 aspect ModifiersErrors {
 	syn String Modifiers.errorMessage() {
 		StringJoiner joiner = new StringJoiner(", ");
