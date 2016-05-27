@@ -48,7 +48,7 @@ aspect RecommendationConfiguration {
 		
 		public Component newAnonymousComponent(String componentName) {
 			Component component = new Component();
-			component.setInline(false);
+			component.setModifiers(new Modifiers());
 			component.setName(new IdName(componentName));
 			component.setHasSimpleName(false);
 			if (containsChanges()) {
@@ -371,14 +371,14 @@ aspect RecommendationConfiguration {
 			if (rc.getComponent() instanceof WiredComponent) {
 				WiredComponent wiredComponent = (WiredComponent) rc.getComponent();
 				return new WiredComponent(
-						wiredComponent.getInline(),
+						wiredComponent.getModifiers().treeCopy(),
 						newType(),
 						wiredComponent.getName().treeCopy(),
 						false,
 						wiredComponent.getWiredComponentParameterList().treeCopy());
 			} else {
 				return new Component(
-						rc.getComponent().getInline(),
+						rc.getComponent().getModifiers().treeCopy(),
 						newType(),
 						rc.getComponent().getName().treeCopy(),
 						false);
@@ -453,7 +453,7 @@ aspect RecommendationConfiguration {
 		
 		protected Component newAnonymousRedeclare() {
 			return new RedeclareComponent(
-				false,
+				new Modifiers(),
 				selectedAlternative.newType(),
 				new IdName(replaceable.name()),
 				false);

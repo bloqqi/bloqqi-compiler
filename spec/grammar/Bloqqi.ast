@@ -45,7 +45,7 @@ InheritedOutParameter : OutParameter ::= <DeclaredOutParameter:OutParameter>;
 
 /** Components */
 Component : VarDecl ::=
-	<Inline:boolean>
+	Modifiers
 	Type
 	Name
 	<HasSimpleName:boolean>  // true for names like Add_1

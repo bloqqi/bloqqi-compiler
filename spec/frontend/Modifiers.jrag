@@ -6,7 +6,7 @@ aspect Modifiers {
 	eq Program.getChild().canBeInline() = false;
 	
 	eq DiagramType.getModifiers().canBeAbstract() = true;
-
+	eq Component.getModifiers().canBeInline() = true;
 
 	syn boolean Modifiers.isAbstract() = hasModifier("abstract");
 	syn boolean Modifiers.isInline() = hasModifier("inline");
@@ -52,8 +52,10 @@ aspect ModifiersErrors {
 	
 	inh ASTNode Modifiers.context();
 	eq DiagramType.getModifiers().context() = this;
+	eq Component.getModifiers().context() = this;
 	syn String ASTNode.kindDescription() = "";
 	eq DiagramType.kindDescription() = "Diagram type";
+	eq Component.kindDescription() = "Component";
 	
 	Modifiers contributes context().error(errorMessage())
 		when !errorMessage().isEmpty()

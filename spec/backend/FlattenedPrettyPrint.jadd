@@ -50,7 +50,7 @@ aspect FlattenedPrettyPrint {
 
 	public String Component.flattenedPrettyPrint() {
 		if (isNameAmbiguous()) {
-			String inline = getInline() ? "inline " : "";
+			String inline = getModifiers().isInline() ? "inline " : "";
 			return inline + flatName() + ": " + getType().prettyPrint();
 		} else {
 			return prettyPrint();

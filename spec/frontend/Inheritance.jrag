@@ -479,7 +479,7 @@ aspect Factories {
 				inlinedComps.add(this);
 				inlinedComps.addAll(inhComp.inlinedComponents());
 				InheritedComponent ic = new InlinedComponent(
-					false,
+					inhComp.getModifiers().treeCopy(),
 					inhComp.getType().treeCopy(),
 					new InlinedName(new IdName(name()), new IdName(inhComp.name())),
 					false,
@@ -490,7 +490,7 @@ aspect Factories {
 			}
 		} else {
 			InheritedComponent ic = new InheritedComponent(
-				getInline(),
+				getModifiers().treeCopy(),
 				getType().treeCopy(),
 				getName().treeCopy(),
 				false,

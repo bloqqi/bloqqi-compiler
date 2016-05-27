@@ -111,7 +111,7 @@ aspect Wiring {
 
 aspect NameAnalysis {
 	syn nta Component Wiring.component()
-		= new Component(false, new TypeUse(diagramType().name()), new IdName(getTypeUse().getID()), false);
+		= new Component(new Modifiers(), new TypeUse(diagramType().name()), new IdName(getTypeUse().getID()), false);
 	
 	eq WiringParameter.name() = getID();
 	eq Wiring.getChild().lookup(String name) {

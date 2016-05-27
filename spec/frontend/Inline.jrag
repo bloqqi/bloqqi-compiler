@@ -1,8 +1,8 @@
 aspect Inline {
 	syn boolean Component.shouldBeInlined()
-		= getInline() && canBeInlined();
+		= getModifiers().isInline() && canBeInlined();
 	eq RedeclareComponent.shouldBeInlined() {
-		boolean inline = getInline();
+		boolean inline = getModifiers().isInline();
 		if (redeclaredComponent() != null) {
 			inline = inline || redeclaredComponent().shouldBeInlined();
 		}
@@ -70,6 +70,6 @@ aspect Inline {
 
 aspect InlineErrors {
 	Component contributes error("Only components of diagram types can be inlined")
-		when getInline() && !type().isUnknown() && !type().isDiagramType()
+		when getModifiers().isInline() && !type().isUnknown() && !type().isDiagramType()
 		to CompilationUnit.errors();
 }
