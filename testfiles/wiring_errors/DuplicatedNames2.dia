@@ -1,0 +1,11 @@
+diagramtype Main {
+	a: A[in: Int];
+	a2: A[in: Int];
+}
+
+diagramtype A(in: Int) {
+}
+wiring A[in: Int] {
+	connect(in, A.in);
+}
+

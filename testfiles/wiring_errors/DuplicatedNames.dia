@@ -1,0 +1,19 @@
+diagramtype Main(in: Int => out: Int) {
+	a: A[in: Int];
+	a2: A[a: Int];
+	b: B[=> out: Int];
+	b2: B[=> b: Int];
+}
+
+diagramtype A(in: Int) {
+}
+wiring A[in: Int] {
+	connect(in, A.in);
+}
+
+diagramtype B(=> out: Int) {
+}
+wiring B[=> out: Int] {
+	connect(B.out, out);
+}
+

@@ -242,4 +242,16 @@ aspect Errors {
 			+ "') does not correspond to diagram type name ('" + diagramType().name() + "')")
 		when !getTypeUse().getID().equals(diagramType().name())
 		to CompilationUnit.errors();
+		
+	WiredComponentParameterInParameter contributes
+			error("Name '" + getInParameter().name() + "' is already declared")
+		when diagramType().lookup(getInParameter().name()) != getInParameter()
+			&& diagramType().lookup(getInParameter().name()) != null
+		to CompilationUnit.errors();
+		
+	WiredComponentParameterOutParameter contributes
+			error("Name '" + getOutParameter().name() + "' is already declared")
+		when diagramType().lookup(getOutParameter().name()) != getOutParameter()
+			&& diagramType().lookup(getOutParameter().name()) != null
+		to CompilationUnit.errors();
 }

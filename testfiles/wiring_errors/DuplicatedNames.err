@@ -1,0 +1,4 @@
+Line 2, column 7: Name 'in' is already declared
+Line 3, column 8: Name 'a' is already declared
+Line 4, column 7: Name 'out' is already declared
+Line 5, column 8: Name 'b' is already declared
