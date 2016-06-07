@@ -1,0 +1,12 @@
+diagramtype Main(in: Int) {
+}
+recommendation Main {
+	a: A[in: Int];
+}
+
+diagramtype A(in: Int) {
+}
+wiring A[in: Int] {
+	connect(in, A.in);
+}
+
