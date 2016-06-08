@@ -138,7 +138,7 @@ FlowDecl flow_decl =
 
 Component component =
 	modifiers.m? component2.c {:
-		c.setModifiers(new Modifiers(m));
+		c.getModifiers().getModifierList().addAll(m);
 		return c;
 	:}
 	;
@@ -151,8 +151,8 @@ Component component2 =
 	;
 
 Component ordinary_component = 
-	type.t name.n   {: return new Component(new Modifiers(), t, n, false); :}
-	| name.n COL type.t {: return new Component(new Modifiers(), t, n, false); :}
+	type.t name.n   {: return new Component(new Modifiers(), t, n); :}
+	| name.n COL type.t {: return new Component(new Modifiers(), t, n); :}
 	;
 
 Component simple_component =
@@ -165,7 +165,9 @@ Component simple_component =
 			try {
 				String i = id.substring(index+1);
 				Integer.parseInt(i);
-				return new Component(new Modifiers(), t, n, true);
+				Modifiers m = new Modifiers();
+				m.addModifier(new Modifier("simple"));
+				return new Component(m, t, n);
 			} catch (NumberFormatException e) {
 				// fall through
 			}
@@ -184,27 +186,27 @@ Name name =
 
 RedeclareComponent redeclare_component =
 	REDECLARE type.t name.n
-	  {: return new RedeclareComponent(new Modifiers(), t, n, false); :}
+	  {: return new RedeclareComponent(new Modifiers(), t, n); :}
 	| REDECLARE name.n COL type.t
-	  {: return new RedeclareComponent(new Modifiers(), t, n, false); :}
+	  {: return new RedeclareComponent(new Modifiers(), t, n); :}
 	| REDECLARE name.n COL SUPER anon_dt_body.a
-	  {: return new RedeclareComponent(new Modifiers(), new AnonymousTypeImplicitSuper(a), n, false); :}
+	  {: return new RedeclareComponent(new Modifiers(), new AnonymousTypeImplicitSuper(a), n); :}
 	;
 
 WiredComponent wired_component =
 	type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA name.n
-	  {: return new WiredComponent(new Modifiers(), t, n, false, p); :}
+	  {: return new WiredComponent(new Modifiers(), t, n, p); :}
 	| type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA anon_dt_body.b name.n
 	  {:
 		b.addSuperType(t);
-		return new WiredComponent(new Modifiers(), new AnonymousType(b), n, false, p);
+		return new WiredComponent(new Modifiers(), new AnonymousType(b), n, p);
 	  :}
 	| name.n COL type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA
-	  {: return new WiredComponent(new Modifiers(), t, n, false, p); :}
+	  {: return new WiredComponent(new Modifiers(), t, n, p); :}
 	| name.n COL type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA anon_dt_body.b
 	  {:
 		b.addSuperType(t);
-		return new WiredComponent(new Modifiers(), new AnonymousType(b), n, false, p);
+		return new WiredComponent(new Modifiers(), new AnonymousType(b), n, p);
 	  :}
 	;
 

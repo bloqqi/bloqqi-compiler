@@ -28,6 +28,12 @@ aspect ASTUtils {
 		}
 	}
 
+	public void List.addAll(List<T> list) {
+		for (T node: list) {
+			add(node);
+		}
+	}
+
 	public void ASTNode.copyColumnLineFrom(ASTNode other) {
 		setStart(other.getStartLine(), other.getStartColumn());
 		setEnd(other.getEndLine(), other.getEndColumn());

@@ -49,15 +49,12 @@ aspect FlattenedPrettyPrint {
 	}
 
 	public String Component.flattenedPrettyPrint() {
-		if (isNameAmbiguous()) {
-			String inline = getModifiers().isInline() ? "inline " : "";
-			return inline + flatName() + ": " + getType().prettyPrint();
-		} else {
-			return prettyPrint();
-		}
+		String inline = getModifiers().isInline() ? "inline " : "";
+		return inline + flatName() + ": " + prettyPrintType();
 	}
 	public String Connection.flattenedPrettyPrint() {
-		return "connect(" + getSource().flattenedPrettyPrint() + ", " + getTarget().flattenedPrettyPrint() + ")";
+		return "connect(" + getSource().flattenedPrettyPrint()
+			+ ", " + getTarget().flattenedPrettyPrint() + ")";
 	}
 
 	public abstract String Expr.flattenedPrettyPrint();
@@ -72,14 +69,6 @@ aspect FlattenedPrettyPrint {
 		}
 	}
 	public String DotVarUse.flattenedPrettyPrint() {
-		/* Do not pretty print on simplified form.
-		 * The simplified form should be removed in later versions.
-		 */
-		// if (isTopLevel() && getVarUse().isOnSimplifiedForm()) {
-		//	return getVarUse().flattenedPrettyPrint();
-		//} else {
-		//	return getVarUse().flattenedPrettyPrint() + "." + getID();
-		//}
 		return getVarUse().flattenedPrettyPrint() + "." + getID();
 	}
 }

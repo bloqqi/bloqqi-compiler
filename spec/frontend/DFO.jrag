@@ -13,7 +13,7 @@ aspect DFO {
 	syn int Component.dfo() = declDfo();
 
 	syn nta Component DiagramType.startComponent() 
-		= new Component(new Modifiers(), new TypeUse(""), new IdName("<root>"), false);
+		= new Component(new Modifiers(), new TypeUse(""), new IdName("<root>"));
 
 	inh lazy Set<Component> Component.predP();
 	eq DiagramType.getComponent(int i).predP() {

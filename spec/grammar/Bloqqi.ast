@@ -48,7 +48,6 @@ Component : VarDecl ::=
 	Modifiers
 	Type
 	Name
-	<HasSimpleName:boolean>  // true for names like Add_1
 	/InParameter:ComponentParameter*/ 
 	/OutParameter:ComponentParameter*/;
 RedeclareComponent : Component;

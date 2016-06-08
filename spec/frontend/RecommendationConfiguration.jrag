@@ -50,7 +50,6 @@ aspect RecommendationConfiguration {
 			Component component = new Component();
 			component.setModifiers(new Modifiers());
 			component.setName(new IdName(componentName));
-			component.setHasSimpleName(false);
 			if (containsChanges()) {
 				component.setType(new AnonymousType(newAnonymousDiagramType()));
 			} else {
@@ -374,14 +373,12 @@ aspect RecommendationConfiguration {
 						wiredComponent.getModifiers().treeCopy(),
 						newType(),
 						wiredComponent.getName().treeCopy(),
-						false,
 						wiredComponent.getWiredComponentParameterList().treeCopy());
 			} else {
 				return new Component(
 						rc.getComponent().getModifiers().treeCopy(),
 						newType(),
-						rc.getComponent().getName().treeCopy(),
-						false);
+						rc.getComponent().getName().treeCopy());
 			}
 		}
 	
@@ -455,8 +452,7 @@ aspect RecommendationConfiguration {
 			return new RedeclareComponent(
 				new Modifiers(),
 				selectedAlternative.newType(),
-				new IdName(replaceable.name()),
-				false);
+				new IdName(replaceable.name()));
 		}
 
 		public int compareTo(MandatoryFeature other) {

@@ -482,7 +482,6 @@ aspect Factories {
 					inhComp.getModifiers().treeCopy(),
 					inhComp.getType().treeCopy(),
 					new InlinedName(new IdName(name()), new IdName(inhComp.name())),
-					false,
 					inhComp.getDeclaredComponent(),
 					inlinedComps,
 					inhComp.lastDiagramType());
@@ -493,7 +492,6 @@ aspect Factories {
 				getModifiers().treeCopy(),
 				getType().treeCopy(),
 				getName().treeCopy(),
-				false,
 				this);
 			list.add(ic);
 		}

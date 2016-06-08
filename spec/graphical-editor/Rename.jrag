@@ -27,7 +27,7 @@ aspect Rename {
 		setID(newName);
 	}
 	public void Component.updateTypeName(String newName) {
-		if (getHasSimpleName()) {
+		if (getModifiers().isOnSimpleNameForm()) {
 			String name = getName().toString();
 			String index = name.substring(name.lastIndexOf('_')+1);
 			String newFullName = newName + "_" + index;
@@ -74,7 +74,7 @@ aspect Rename {
 		}
 		changeUses(newName);
 		setName(new IdName(newName));
-		setHasSimpleName(false);
+		getModifiers().removeModifier("simple");
 		if (flush) {
 			program().flushAllAttributes();
 		}

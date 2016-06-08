@@ -1,17 +1,22 @@
 aspect Modifiers {
 	inh boolean Modifiers.canBeAbstract();
 	inh boolean Modifiers.canBeInline();
+	inh boolean Modifiers.canBeOnSimpleNameForm(); // represents Add_1 etc.
 
 	eq Program.getChild().canBeAbstract() = false;
 	eq Program.getChild().canBeInline() = false;
+	eq Program.getChild().canBeOnSimpleNameForm() = false;
 	
 	eq DiagramType.getModifiers().canBeAbstract() = true;
 	eq Component.getModifiers().canBeInline() = true;
+	eq Component.getModifiers().canBeOnSimpleNameForm() = true;
 
 	syn boolean Modifiers.isAbstract() = hasModifier("abstract");
 	syn boolean Modifiers.isInline() = hasModifier("inline");
-	
+	syn boolean Modifiers.isOnSimpleNameForm() = hasModifier("simple"); // the parser creates the modifier simple
+}	
 
+aspect AnalyzeModifiers {
 	syn boolean Modifiers.hasModifier(String name) 
 		= localModifierLookup(name) != null;
 	syn Modifier Modifiers.localModifierLookup(String name) {
@@ -31,7 +36,7 @@ aspect Modifiers {
 		= lookupModifier(getName()) != this;
 }
 
-aspect EditModifiers {
+aspect ModifiersOperations {
 	public boolean Modifiers.removeModifier(String modifier) {
 		ArrayList<Modifier> remove = new ArrayList<Modifier>();
 		for (Modifier m: getModifiers()) {

@@ -138,7 +138,7 @@ aspect PrettyPrint {
 	
 	public String Component.prettyPrint() {
 		String inline = getModifiers().isInline() ? "inline " : "";
-		if (getHasSimpleName() && !hasAnonymousDiagramType()) {
+		if (getModifiers().isOnSimpleNameForm() && !hasAnonymousDiagramType()) {
 			return inline + getName().prettyPrint();
 		} else {
 			return inline + getName().prettyPrint() + ": " + prettyPrintType();
