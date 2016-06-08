@@ -166,7 +166,7 @@ Component simple_component =
 				String i = id.substring(index+1);
 				Integer.parseInt(i);
 				Modifiers m = new Modifiers();
-				m.addModifier(new Modifier("simple"));
+				m.addModifier(new Modifier(ASTNode.MODIFIER_SIMPLE));
 				return new Component(m, t, n);
 			} catch (NumberFormatException e) {
 				// fall through

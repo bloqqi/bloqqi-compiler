@@ -74,7 +74,7 @@ aspect Rename {
 		}
 		changeUses(newName);
 		setName(new IdName(newName));
-		getModifiers().removeModifier("simple");
+		getModifiers().removeModifier(ASTNode.MODIFIER_SIMPLE);
 		if (flush) {
 			program().flushAllAttributes();
 		}

@@ -1,4 +1,8 @@
 aspect Modifiers {
+	// Synthetical modifier that is created by the parser to represent
+	// components with name like "Add_1".
+	public static final String ASTNode.MODIFIER_SIMPLE = "simple";
+
 	inh boolean Modifiers.canBeAbstract();
 	inh boolean Modifiers.canBeInline();
 	inh boolean Modifiers.canBeOnSimpleNameForm(); // represents Add_1 etc.
@@ -13,7 +17,7 @@ aspect Modifiers {
 
 	syn boolean Modifiers.isAbstract() = hasModifier("abstract");
 	syn boolean Modifiers.isInline() = hasModifier("inline");
-	syn boolean Modifiers.isOnSimpleNameForm() = hasModifier("simple"); // the parser creates the modifier simple
+	syn boolean Modifiers.isOnSimpleNameForm() = hasModifier(ASTNode.MODIFIER_SIMPLE);
 }	
 
 aspect AnalyzeModifiers {
