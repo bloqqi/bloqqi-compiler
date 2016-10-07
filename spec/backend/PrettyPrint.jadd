@@ -236,27 +236,14 @@ aspect PrettyPrint {
 		return toString();
 	}
 	public String AbstractSimpleVarUse.prettyPrint() {
-		if (!isAmbiguous()
-				&& node() instanceof Component
-				&& node().diagramType() != diagramType()
-				&& !node().diagramType().isAnonymousType()) {
-			return node().diagramType().name() + DECLARED_IN_SEP + toString();
-		} else {
+		// Qualify access if needed
+		if (needsTypeQualification()) {
 			return toString();
+		} else {
+			return getID();
 		}
 	}
-	public String TypedSimpleVarUse.prettyPrint() {
-		return toString();
-	}
 	public String DotVarUse.prettyPrint() {
-		/* Do not pretty print on simplified form.
-		 * The simplified form should be removed in later versions.
-		 */
-		//if (isTopLevel() && getVarUse().isOnSimplifiedForm()) {
-		//	return getVarUse().prettyPrint();
-		//} else {
-		//	return getVarUse().prettyPrint() + "." + getID();
-		//}
 		return getVarUse().prettyPrint() + "." + getID();
 	}
 

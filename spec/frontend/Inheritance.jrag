@@ -551,7 +551,7 @@ aspect InheritanceErrors {
 				&& !getSource().type().isStructType())
 		to CompilationUnit.errors();
 
-	Interception contributes error(getIntercepted() + " is already intercepted in this type")
+	Interception contributes error(getIntercepted().prettyPrint() + " is already intercepted in this type")
 		when isAlreadyIntercepted()
 		to CompilationUnit.errors();
 	
@@ -633,8 +633,10 @@ aspect InheritanceErrorsHelperAttributes {
 		}
 	}
 
-	syn boolean AbstractSimpleVarUse.isAmbiguous() 
+
+	syn boolean AbstractSimpleVarUse.needsTypeQualification()
 		= isNameAmbiguous(getID()) && node() != null && node().diagramType() != diagramType();
+	syn boolean AbstractSimpleVarUse.isAmbiguous() = needsTypeQualification();
 	eq TypedSimpleVarUse.isAmbiguous() = false;
 	inh boolean AbstractSimpleVarUse.isNameAmbiguous(String name);
 	eq Program.getChild().isNameAmbiguous(String name) = false;

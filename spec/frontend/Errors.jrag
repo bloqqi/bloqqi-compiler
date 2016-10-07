@@ -86,11 +86,11 @@ aspect ConnectionErrors {
 		when hasDataflowCycles()
 		to CompilationUnit.errors();
 	
-	VarUse contributes error("Expected a source port, '" + toString() + "' is a target port")
+	VarUse contributes error("Expected a source port, '" + prettyPrint() + "' is a target port")
 		when unexpectedTargetPort()
 		to CompilationUnit.errors();
 
-	VarUse contributes error("Expected a target port, '" + toString() + "' is a source port")
+	VarUse contributes error("Expected a target port, '" + prettyPrint() + "' is a source port")
 		when unexpectedSourcePort()
 		to CompilationUnit.errors();
 

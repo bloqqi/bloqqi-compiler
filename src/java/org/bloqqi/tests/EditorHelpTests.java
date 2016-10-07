@@ -408,7 +408,7 @@ public class EditorHelpTests extends TestSuite {
 				"diagramtype Main(in: Int) {\n" +
 				"  inline a: A (addin1: Int, add2in1: Int) {\n" +
 				"    add2: Add;\n" +
-				"    connect(addin1, A::add.in1);\n" +
+				"    connect(addin1, add.in1);\n" +
 				"    connect(add2in1, add2.in1);\n" +
 				"  };\n" +
 				"  connect(in, a.addin1);\n" +
@@ -461,7 +461,7 @@ public class EditorHelpTests extends TestSuite {
 			"  inline a: A (bin1: Int, bin12: Int) {\n" +
 			"    inline b: B (addin1: Int, add2in1: Int) {\n" +
 			"      add2: Add;\n" +
-			"      connect(addin1, B::add.in1);\n" +
+			"      connect(addin1, add.in1);\n" +
 			"      connect(add2in1, add2.in1);\n" +
 			"    };\n" +
 			"    connect(bin1, b.addin1);\n" +
@@ -529,7 +529,7 @@ public class EditorHelpTests extends TestSuite {
 			"diagramtype Main( => out1: Int, out2: Int) {\n" +
 			"  inline a: A ( => addout: Int, add2out: Int) {\n" +
 			"    add2: Add;\n" +
-			"    connect(A::add.out, addout);\n" +
+			"    connect(add.out, addout);\n" +
 			"    connect(add2.out, add2out);\n" +
 			"  };\n" +
 			"  connect(a.addout, out1);\n" +
@@ -605,7 +605,7 @@ public class EditorHelpTests extends TestSuite {
 		String expected =
 				"diagramtype Main(in: Int) {\n" +
 				"  inline a: A (addin1: Int, addin12: Int) {\n" +
-				"    connect(addin12, A::add.in1);\n" +
+				"    connect(addin12, add.in1);\n" +
 				"  };\n" +
 				"  connect(in, a.addin12);\n" +
 				"}\n";
@@ -1062,7 +1062,7 @@ public class EditorHelpTests extends TestSuite {
 			"diagramtype Main {\n" +
 			"  inline a: A (bin1: Int) {\n" +
 			"    redeclare b: super (addin1: Int) {\n" +
-			"      connect(addin1, B::add.in1);\n" +
+			"      connect(addin1, add.in1);\n" +
 			"    };\n" +
 			"    connect(bin1, b.addin1);\n" +
 			"  };\n" +
@@ -1093,7 +1093,7 @@ public class EditorHelpTests extends TestSuite {
 			"diagramtype Main {\n" +
 			"  inline a: A (bin1: Int) {\n" +
 			"    inline b: B (addin1: Int) {\n" +
-			"      connect(addin1, B::add.in1);\n" +
+			"      connect(addin1, add.in1);\n" +
 			"    };\n" +
 			"    connect(bin1, b.addin1);\n" +
 			"  };\n" +
@@ -1233,7 +1233,7 @@ public class EditorHelpTests extends TestSuite {
 		"diagramtype Main {\n" +
 		"  inline a: A (bin: Int) {\n" +
 		"    b: B (cin: Int) {\n" +
-		"      connect(cin, B::c.in);\n" +
+		"      connect(cin, c.in);\n" +
 		"    };\n" +
 		"    connect(bin, b.cin);\n" +
 		"  };\n" +
@@ -1345,7 +1345,7 @@ public class EditorHelpTests extends TestSuite {
 		"diagramtype Main {\n" +
 		"  inline a: A (bin: Int) {\n" +
 		"    b: B (cin: Int) {\n" +
-		"      connect(cin, B::c.in);\n" +
+		"      connect(cin, c.in);\n" +
 		"    };\n" +
 		"    connect(bin, b.cin);\n" +
 		"  };\n" +

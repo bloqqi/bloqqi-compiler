@@ -109,14 +109,14 @@ public class InheritanceTests extends TestSuite {
 		s += "}\n";
 		s += "diagramtype D extends B {\n";
 		s += "  c: T;\n";
-		s += "  intercept B::b.in with c.in, c.out;\n";
+		s += "  intercept b.in with c.in, c.out;\n";
 		s += "}";
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		List<InheritedConnection> connections = ((DiagramType) cu.typeDecls().get(2)).connections();
 		assertEquals(2, connections.getNumChild());
-		assertEquals("connect(B::a.out, D::c.in)", connections.getChild(0).prettyPrint());
-		assertEquals("connect(D::c.out, B::b.in)", connections.getChild(1).prettyPrint());
+		assertEquals("connect(a.out, c.in)", connections.getChild(0).prettyPrint());
+		assertEquals("connect(c.out, b.in)", connections.getChild(1).prettyPrint());
 	}
 	
 	@Test
@@ -131,15 +131,15 @@ public class InheritanceTests extends TestSuite {
 		s += "diagramtype D extends B {\n";
 		s += "  a: T;\n";
 		s += "  c: T;\n";
-		s += "  connect(D::a.out, c.in);\n";
+		s += "  connect(a.out, c.in);\n";
 		s += "}";
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		List<InheritedConnection> connections = ((DiagramType) cu.typeDecls().get(2)).connections();
 		
 		assertEquals(2, connections.getNumChild());
-		assertEquals("connect(B::a.out, B::b.in)", connections.getChild(0).prettyPrint());
-		assertEquals("connect(D::a.out, D::c.in)", connections.getChild(1).prettyPrint());
+		assertEquals("connect(a.out, b.in)", connections.getChild(0).prettyPrint());
+		assertEquals("connect(a.out, c.in)", connections.getChild(1).prettyPrint());
 	}
 	
 	@Test
@@ -155,17 +155,17 @@ public class InheritanceTests extends TestSuite {
 		s += "  a: T;\n";
 		s += "  c: T;\n";
 		s += "  d: T;\n";
-		s += "  connect(D::a.out, c.in);\n";
-		s += "  intercept B::b.in with d.in, d.out;\n";
+		s += "  connect(a.out, c.in);\n";
+		s += "  intercept b.in with d.in, d.out;\n";
 		s += "}";
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		List<InheritedConnection> connections = ((DiagramType) cu.typeDecls().get(2)).connections();
 		
 		assertEquals(3, connections.getNumChild());
-		assertEquals("connect(D::a.out, D::c.in)", connections.getChild(0).prettyPrint());
-		assertEquals("connect(B::a.out, D::d.in)", connections.getChild(1).prettyPrint());
-		assertEquals("connect(D::d.out, B::b.in)", connections.getChild(2).prettyPrint());
+		assertEquals("connect(a.out, c.in)", connections.getChild(0).prettyPrint());
+		assertEquals("connect(a.out, d.in)", connections.getChild(1).prettyPrint());
+		assertEquals("connect(d.out, b.in)", connections.getChild(2).prettyPrint());
 	}
 	
 	
@@ -177,23 +177,23 @@ public class InheritanceTests extends TestSuite {
 
 		List<InheritedConnection> connectionsB = ((DiagramType) cu.typeDecls().get(1)).connections();
 		assertEquals(1, connectionsB.getNumChild());
-		assertEquals("connect(B::a.out, B::b.in)", connectionsB.getChild(0).prettyPrint());
+		assertEquals("connect(a.out, b.in)", connectionsB.getChild(0).prettyPrint());
 		
 		List<InheritedConnection> connectionsB1 = ((DiagramType) cu.typeDecls().get(2)).connections();
 		assertEquals(2, connectionsB1.getNumChild());
-		assertEquals("connect(B::a.out, B1::c.in)", connectionsB1.getChild(0).prettyPrint());
-		assertEquals("connect(B1::c.out, B::b.in)", connectionsB1.getChild(1).prettyPrint());
+		assertEquals("connect(a.out, c.in)", connectionsB1.getChild(0).prettyPrint());
+		assertEquals("connect(c.out, b.in)", connectionsB1.getChild(1).prettyPrint());
 
 		List<InheritedConnection> connectionsB2 = ((DiagramType) cu.typeDecls().get(3)).connections();
 		assertEquals(2, connectionsB2.getNumChild());
-		assertEquals("connect(B::a.out, B2::d.in)", connectionsB2.getChild(0).prettyPrint());
-		assertEquals("connect(B2::d.out, B::b.in)", connectionsB2.getChild(1).prettyPrint());
+		assertEquals("connect(a.out, d.in)", connectionsB2.getChild(0).prettyPrint());
+		assertEquals("connect(d.out, b.in)", connectionsB2.getChild(1).prettyPrint());
 		
 		List<InheritedConnection> connectionsD = ((DiagramType) cu.typeDecls().get(4)).connections();
 		assertEquals(3, connectionsD.getNumChild());
-		assertEquals("connect(B::a.out, B1::c.in)", connectionsD.getChild(0).prettyPrint());
-		assertEquals("connect(B1::c.out, B2::d.in)", connectionsD.getChild(1).prettyPrint());
-		assertEquals("connect(B2::d.out, B::b.in)", connectionsD.getChild(2).prettyPrint());
+		assertEquals("connect(a.out, c.in)", connectionsD.getChild(0).prettyPrint());
+		assertEquals("connect(c.out, d.in)", connectionsD.getChild(1).prettyPrint());
+		assertEquals("connect(d.out, b.in)", connectionsD.getChild(2).prettyPrint());
 	}
 
 	private String createInterceptionDiamond() {
@@ -206,11 +206,11 @@ public class InheritanceTests extends TestSuite {
 		s += "}\n";
 		s += "diagramtype B1 extends B {\n";
 		s += "  c: T;\n";
-		s += "  intercept B::b.in with c.in, c.out;\n";
+		s += "  intercept b.in with c.in, c.out;\n";
 		s += "}\n";
 		s += "diagramtype B2 extends B {\n";
 		s += "  d: T;\n";
-		s += "  intercept B::b.in with d.in, d.out;\n";
+		s += "  intercept b.in with d.in, d.out;\n";
 		s += "}\n";
 		s += "diagramtype D extends B1, B2 {\n";
 		s += "}";
@@ -228,20 +228,20 @@ public class InheritanceTests extends TestSuite {
 		s += "}\n";
 		s += "diagramtype B2(in2: Int => out2: Int) extends B1 {\n";
 		s += "  c: T;\n";
-		s += "  intercept B1::b.in with c.in, c.out;\n";
+		s += "  intercept b.in with c.in, c.out;\n";
 		s += "}\n";
 		s += "diagramtype B3(in3: Int => out3: Int) extends B2 {\n";
 		s += "  d: T;\n";
-		s += "  intercept B1::b.in with d.in, d.out;\n";
+		s += "  intercept b.in with d.in, d.out;\n";
 		s += "}";
 
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		List<InheritedConnection> connectionsB3 = ((DiagramType) cu.typeDecls().get(3)).connections();
 		assertEquals(3, connectionsB3.getNumChild());
-		assertEquals("connect(B1::a.out, B2::c.in)", connectionsB3.getChild(0).prettyPrint());
-		assertEquals("connect(B2::c.out, B3::d.in)", connectionsB3.getChild(1).prettyPrint());
-		assertEquals("connect(B3::d.out, B1::b.in)", connectionsB3.getChild(2).prettyPrint());
+		assertEquals("connect(a.out, c.in)", connectionsB3.getChild(0).prettyPrint());
+		assertEquals("connect(c.out, d.in)", connectionsB3.getChild(1).prettyPrint());
+		assertEquals("connect(d.out, b.in)", connectionsB3.getChild(2).prettyPrint());
 	}
 	
 	@Test
@@ -274,7 +274,7 @@ public class InheritanceTests extends TestSuite {
 			"}\n" +
 			"diagramtype D extends B {\n" +
 			"  t3: T;\n" +
-			"  connect(t3.out, B::t2.in);\n" +
+			"  connect(t3.out, t2.in);\n" +
 			"}";
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
@@ -299,7 +299,7 @@ public class InheritanceTests extends TestSuite {
 			"}\n" +
 			"diagramtype D extends B {\n" +
 			"  t3: T;\n" +
-			"  intercept B::t1.in with t3.in, t3.out;\n" +
+			"  intercept t1.in with t3.in, t3.out;\n" +
 			"}";
 		CompilationUnit cu = parseAndPrettyPrint(s);
 

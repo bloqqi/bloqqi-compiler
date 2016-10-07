@@ -92,7 +92,7 @@ aspect LookupVariables {
 	 */
 	inh VarDecl VarUse.lookup(String type, String name);
 	eq Program.getChild().lookup(String type, String name) = null;
-	eq DiagramType.getFlowDecl().lookup(String type, String name) {
+	eq DiagramType.getChild().lookup(String type, String name) {
 		TypeDecl td = lookupType(type);
 		if (td == null) return null;
 		return td.localLookup(name);
@@ -313,7 +313,20 @@ aspect RewriteSimplifiedForm {
 		}
 	}
 	public VarUse ParseSimpleVarUse.newSimpleVarUse() {
-		VarUse u = new SimpleVarUse(getID());
+		VarUse u;
+		
+		VarDecl vd = decl();
+		// Fully qualify accesses to components declared in supertype
+		if (vd instanceof Component
+				&& vd.diagramType() != diagramType()
+				&& !vd.diagramType().isAnonymousType()
+				&& !isAmbiguous()) {
+			TypeUse typeUse = new TypeUse(vd.diagramType().name());
+			u = new TypedSimpleVarUse(typeUse, getID());
+		} else {
+			u = new SimpleVarUse(getID());
+		}
+		
 		u.copyColumnLineFrom(this);
 		return u;
 	}
