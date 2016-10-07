@@ -1,0 +1,14 @@
+diagramtype Main( => out: Int, out2: Int, out3: Int) {
+	var v: Int;
+	input i: Int;
+	output o: Int;
+	
+	connect(1, v);
+	connect(v, out);
+
+	connect(2, i);     // ERROR
+	connect(i, out2);
+
+	connect(3, o);
+	connect(o, out3);  // ERROR
+}

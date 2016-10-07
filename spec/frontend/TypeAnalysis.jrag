@@ -125,13 +125,19 @@ aspect TypeAnalysis {
 	eq ComponentParameter.isSource() = getParameter().isOutParameter();
 	eq Parameter.isSource() = false;
 	eq InParameter.isSource() = true;
-	eq Variable.isSource() = true;
+	eq StateVariable.isSource() = true;
+	eq InputVariable.isSource() = true;
+	eq OutputVariable.isSource() = false;
+	eq InheritedVariable.isSource() = getDeclaredVariable().isSource();
 	eq Literal.isSource() = true;
 	syn boolean Anchor.isTarget();
 	eq ComponentParameter.isTarget() = !isSource();
 	eq Parameter.isTarget() = !isSource();
 	eq InParameter.isTarget() = !isSource();
-	eq Variable.isTarget() = true;
+	eq StateVariable.isTarget() = true;
+	eq InputVariable.isTarget() = false;
+	eq OutputVariable.isTarget() = true;
+	eq InheritedVariable.isTarget() = getDeclaredVariable().isTarget();
 	eq Literal.isTarget() = false;
 	
 	

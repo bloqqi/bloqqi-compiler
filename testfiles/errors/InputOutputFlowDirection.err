@@ -1,0 +1,2 @@
+Line 9, column 13: Expected a target port, 'i' is a source port
+Line 13, column 10: Expected a source port, 'o' is a target port
