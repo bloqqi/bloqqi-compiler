@@ -140,6 +140,17 @@ aspect TypeAnalysis {
 	eq InheritedVariable.isTarget() = getDeclaredVariable().isTarget();
 	eq Literal.isTarget() = false;
 	
+	// Variable kind
+	syn boolean Variable.isStateVariable() = false;
+	eq StateVariable.isStateVariable() = true;
+	eq InheritedVariable.isStateVariable() = getDeclaredVariable().isStateVariable();
+	syn boolean Variable.isInputVariable() = false;
+	eq InputVariable.isInputVariable() = true;
+	eq InheritedVariable.isInputVariable() = getDeclaredVariable().isInputVariable();
+	syn boolean Variable.isOutputVariable() = false;
+	eq OutputVariable.isOutputVariable() = true;
+	eq InheritedVariable.isOutputVariable() = getDeclaredVariable().isOutputVariable();
+	
 	
 	syn boolean Expr.isLiteral() = false;
 	eq Literal.isLiteral() = true;
