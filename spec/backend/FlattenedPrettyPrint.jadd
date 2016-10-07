@@ -36,6 +36,9 @@ aspect FlattenedPrettyPrint {
 		}
 
 		sb.append(") {\n");
+		for (Variable v : variables()) {
+			sb.append("  " + v.prettyPrint() + ";\n");
+		}
 		for (Component c: components()) {
 			sb.append("  " + c.flattenedPrettyPrint() + ";\n");
 		}

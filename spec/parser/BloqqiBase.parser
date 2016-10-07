@@ -94,8 +94,12 @@ List vars =
 	;
 	
 Variable var =
-	VARIABLE type_use.t ID.id		{: return new Variable(t, id); :}
-	| VARIABLE ID.id COL type_use.t	{: return new Variable(t, id); :}
+	VARIABLE type_use.t ID.id		{: return new StateVariable(t, id); :}
+	| VARIABLE ID.id COL type_use.t	{: return new StateVariable(t, id); :}
+	| INPUT type_use.t ID.id		{: return new InputVariable(t, id); :}
+	| INPUT ID.id COL type_use.t	{: return new InputVariable(t, id); :}
+	| OUTPUT type_use.t ID.id		{: return new OutputVariable(t, id); :}
+	| OUTPUT ID.id COL type_use.t	{: return new OutputVariable(t, id); :}
 	;
 
 List in_pars =

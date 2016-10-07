@@ -1,0 +1,16 @@
+diagramtype Main() {
+  var state: Int;
+  input sensor$value: Int;
+  output actuator$value: Int;
+  connect(sensor$value, state);
+  connect(sensor$value, actuator$value);
+}
+diagramtype Sensor( => out: Int) {
+  input value: Int;
+  connect(value, out);
+}
+diagramtype Actuator(in: Int) {
+  output value: Int;
+  connect(in, value);
+}
+

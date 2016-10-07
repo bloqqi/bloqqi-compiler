@@ -67,7 +67,10 @@ InlinedName : Name ::= Outer:Name Inner:Name;
 ComponentParameter : VarDecl ::= <Parameter:Parameter>;
 
 /** Variables */
-Variable : VarDecl ::= TypeUse <ID>;
+abstract Variable : VarDecl ::= TypeUse <ID>;
+StateVariable : Variable;
+InputVariable : Variable;
+OutputVariable : Variable;
 InheritedVariable : Variable ::= <DeclaredVariable:Variable>;
 InlinedVariable : InheritedVariable ::= <InlinedComponent:Component>;
 

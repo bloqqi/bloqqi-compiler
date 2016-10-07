@@ -9,7 +9,8 @@ aspect Inline {
 		return inline && canBeInlined();
 	}
 	syn boolean Component.canBeInlined()
-		= !isOnTypeCycle() && type().containsComponents() && type().isDiagramType();
+		= !isOnTypeCycle() && type().isDiagramType()
+			&& (type().containsComponents() || type().containsVariables());
 
 	syn boolean Node.isInlined();
 	eq Parameter.isInlined() = false;
@@ -54,6 +55,9 @@ aspect Inline {
 
 	syn boolean TypeDecl.containsComponents() = false;
 	eq DiagramType.containsComponents() = components().getNumChild() > 0;
+
+	syn boolean TypeDecl.containsVariables() = false;
+	eq DiagramType.containsVariables() = variables().getNumChild() > 0;
 
 	syn boolean Connection.isInlined() = false;
 	eq InlinedConnection.isInlined() = true;

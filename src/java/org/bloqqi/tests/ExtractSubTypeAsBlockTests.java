@@ -527,8 +527,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"  Or_1;" +
 			"  heater: Valve;" +
 			"  connect(Tank::level.out, Le_3.in1);" +
-			"  connect(minLevelHeating.output, Le_3.in2);" +
-			"  connect(maxTemp.output, Le_4.in1);" +
+			"  connect(minLevelHeating.out, Le_3.in2);" +
+			"  connect(maxTemp.out, Le_4.in1);" +
 			"  connect(temp.out, Le_4.in2);" +
 			"  connect(Le_3.out, Or_1.in1);" +
 			"  connect(Le_4.out, Or_1.in2);" +
@@ -559,8 +559,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"  Or_1;\n" +
 			"  heater: Valve;\n" +
 			"  connect(levelout, Le_3.in1);\n" +
-			"  connect(minLevelHeating.output, Le_3.in2);\n" +
-			"  connect(maxTemp.output, Le_4.in1);\n" +
+			"  connect(minLevelHeating.out, Le_3.in2);\n" +
+			"  connect(maxTemp.out, Le_4.in1);\n" +
 			"  connect(temp.out, Le_4.in2);\n" +
 			"  connect(Le_3.out, Or_1.in1);\n" +
 			"  connect(Le_4.out, Or_1.in2);\n" +
@@ -660,12 +660,12 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"  Le_2;" +
 			"  connect(valve.status, filling);" +
 			"  connect(pump.status, emptying);" +
-			"  connect(maxLevel.output, Le_1.in1);" +
+			"  connect(maxLevel.out, Le_1.in1);" +
 			"  connect(level.out, Le_1.in2);" +
 			"  connect(Le_1.out, valve.interlock);" +
 			"  connect(fill, valve.open);" +
 			"  connect(level.out, Le_2.in1);" +
-			"  connect(minLevel.output, Le_2.in2);" +
+			"  connect(minLevel.out, Le_2.in2);" +
 			"  connect(Le_2.out, pump.interlock);" +
 			"  connect(empty, pump.open);" +
 			"}" +
@@ -700,7 +700,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}" +
 			"diagramtype ActuatorBool(open: Bool) {" +
 			"}" +
-			"diagramtype OperatorInt( => output: Int) {" +
+			"diagramtype OperatorInt( => out: Int) {" +
 			"}" +
 			"diagramtype OperatorBool( => out: Bool) {" +
 			"}";

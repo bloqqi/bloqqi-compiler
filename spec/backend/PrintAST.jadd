@@ -16,6 +16,7 @@ aspect PrintAST {
 	eq DiagramType.printASTInfo() = name() + ", " + sortedRecommendations();
 	eq RecommendationComponent.printASTInfo() = interceptingAnchors() + ", " + conflictingRecommendations().toString();
 	eq TypeUse.printASTInfo() = toString() + ", " + decl();
+	eq Variable.printASTInfo() = name();
 	 
 	public void ASTNode.printAST() {
 		printAST("", 0);

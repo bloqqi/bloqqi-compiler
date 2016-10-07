@@ -133,9 +133,16 @@ aspect PrettyPrint {
 	}
 
 	public String Variable.prettyPrint() {
-		return "var " + getID() + ": " + getTypeUse();
+		return prettyPrintKind() + " " + name() + ": " + getTypeUse();
 	}
-	
+	public abstract String Variable.prettyPrintKind();
+	public String StateVariable.prettyPrintKind() { return "var"; }
+	public String InputVariable.prettyPrintKind() { return "input"; }
+	public String OutputVariable.prettyPrintKind() { return "output"; }
+	public String InheritedVariable.prettyPrintKind() {
+		return getDeclaredVariable().prettyPrintKind();
+	}
+
 	public String Component.prettyPrint() {
 		String inline = getModifiers().isInline() ? "inline " : "";
 		if (getModifiers().isOnSimpleNameForm() && !hasAnonymousDiagramType()) {

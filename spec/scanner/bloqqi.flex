@@ -58,6 +58,8 @@ NUM = -?[0-9]+
 	"function"		{ return sym(Terminals.FUNCTION); }
 	"struct"		{ return sym(Terminals.STRUCT); }
 	"var"			{ return sym(Terminals.VARIABLE); }
+	"input"			{ return sym(Terminals.INPUT); }
+	"output"		{ return sym(Terminals.OUTPUT); }
 	"connect"		{ return sym(Terminals.CONNECT); }
 	"annotation"	{ return sym(Terminals.ANNOTATION); }
 	"extends"		{ return sym(Terminals.EXTENDS); }
