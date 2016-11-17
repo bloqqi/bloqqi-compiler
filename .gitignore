@@ -19,3 +19,6 @@ a.out
 /src/generated/
 /diagrams/
 /report-tests/
+/.gradle
+/drast
+/DrAST.cfg

@@ -19,4 +19,8 @@ aspect StandardLibrary {
 		CompilationUnit stdLib = (CompilationUnit) parser.parse(scanner);
 		return stdLib;
 	}
+
+	inh boolean CompilationUnit.isStandardLibrary();
+	eq Program.getCompilationUnit().isStandardLibrary() = false;
+	eq Program.getStandardLibrary().isStandardLibrary() = true;
 }

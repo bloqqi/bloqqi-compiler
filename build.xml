@@ -35,7 +35,7 @@
 			nowarn="true"
 			srcdir="${basedir}"
 			destdir="${bindir}"
-			includes="**/*.java"
+			includes="src/**/*.java"
 			classpath=".:${tools}/beaver-rt.jar:${junitjar}"
 			fork="true"
 			includeAntRuntime="false"
@@ -159,5 +159,23 @@
 			<arg value="-ragroot"/>
 			<arg value="."/>
 		</javadoc>
+	</target>
+
+
+	<!-- Run DrAST. Clone and build DrAST if it's not there -->
+	<target name="drast" depends="drast-init" >
+		<java jar="drast/DrAST-1.2.0.jar" fork="true" spawn="true" />
+	</target>
+	<target name="drast-init" depends="drast-check" unless="drast.exists" >
+		<exec executable="git">
+			<arg value="clone"/>
+			<arg value="git@bitbucket.org:jastadd/drast.git"/>
+		</exec>
+		<exec dir="drast" executable="./gradlew" />
+	</target>
+	<target name="drast-check">
+		<condition property="drast.exists">
+			<available file="drast" type="dir" />
+		</condition>
 	</target>
 </project>
