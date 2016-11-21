@@ -269,7 +269,7 @@ aspect FunctionDefinitions {
 			// Pass parameters
 			sb.append(b.type().nameC() + "(");
 			int i = 0;
-			for (ComponentParameter in: b.getInParameterList()) {
+			for (Port in: b.getInPortList()) {
 				if (i++ > 0) {
 					sb.append(", ");
 				}
@@ -277,7 +277,7 @@ aspect FunctionDefinitions {
 			}
 			// Pass state variable
 			if (b.type().containsVariablesTransitive()) {
-				if (b.getNumInParameter() > 0) {
+				if (b.getNumInPort() > 0) {
 					sb.append(", ");
 				}
 				sb.append("&" + ASTNode.STATE_VAR + "->" + b.nameC());

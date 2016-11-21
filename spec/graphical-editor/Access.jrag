@@ -2,7 +2,7 @@ aspect SimpleAccess {
 	// follow the design principle described in the refactor paper
 	
 	public abstract VarUse Anchor.access();
-	public VarUse ComponentParameter.access() {
+	public VarUse Port.access() {
 		if (belongsToInlinedBlock()) {
 			return accessInlinedBlock();
 		} else {
@@ -31,7 +31,7 @@ aspect SimpleAccess {
 	}
 	
 	syn boolean Anchor.canAccess();
-	eq ComponentParameter.canAccess() = access() != null;
+	eq Port.canAccess() = access() != null;
 	eq Parameter.canAccess() = true;
 	eq Variable.canAccess() = true;
 	eq InlinedVariable.canAccess() = false;
@@ -49,7 +49,7 @@ aspect SimpleAccess {
 
 
 aspect AccessInlinedBlocks {
-	protected VarUse ComponentParameter.accessInlinedBlock() {
+	protected VarUse Port.accessInlinedBlock() {
 		if (!belongsToInlinedBlock()) {
 			return null;
 		}
@@ -59,14 +59,14 @@ aspect AccessInlinedBlocks {
 			
 		DiagramType inlinedDt = (DiagramType) block().inlinedBlock().type();
 		VarDecl varDecl = inlinedDt.inheritedLookup(innerName).findMember(name());
-		if (!(varDecl instanceof ComponentParameter)) {
+		if (!(varDecl instanceof Port)) {
 			return null;
 		}
-		ComponentParameter cp = (ComponentParameter) varDecl;
+		Port port = (Port) varDecl;
 
 		Node node = null;
 		if (isOutParameter()) {
-			Set<Connection> connections = cp.outgoingConnections();
+			Set<Connection> connections = port.outgoingConnections();
 			if (connections.size() != 1) {
 				return null;
 			}
@@ -75,7 +75,7 @@ aspect AccessInlinedBlocks {
 				return null;
 			}
 		} else {
-			Set<Connection> connections = cp.ingoingConnections();
+			Set<Connection> connections = port.ingoingConnections();
 			if (connections.size() != 1) {
 				return null;
 			}
@@ -96,7 +96,7 @@ aspect CanModifyToAccess {
 	eq Variable.canModifyToAccess() = false;
 	eq WiringParameter.canModifyToAccess() = false;
 	eq Literal.canModifyToAccess() = false;
-	eq ComponentParameter.canModifyToAccess() {
+	eq Port.canModifyToAccess() {
 		if (!belongsToInlinedBlock()) {
 			return false;
 		}
@@ -115,8 +115,8 @@ aspect CanModifyToAccess {
 					break;
 				}
 			}
-			ComponentParameter cpLastDiagram = blockLastDiagram.getInParameter(index());
-			if (!cpLastDiagram.ingoingConnections().isEmpty()) {
+			Port portLastDiagram = blockLastDiagram.getInPort(index());
+			if (!portLastDiagram.ingoingConnections().isEmpty()) {
 				return false;
 			}
 		}
@@ -129,7 +129,7 @@ aspect CanModifyToAccess {
 	eq Variable.hasAnonymousTypesTransitively() = false;
 	eq WiringParameter.hasAnonymousTypesTransitively() = false;
 	eq Literal.hasAnonymousTypesTransitively() = false;
-	eq ComponentParameter.hasAnonymousTypesTransitively() {
+	eq Port.hasAnonymousTypesTransitively() {
 		DiagramType inlinedAdt = block().inlinedBlock().anonymousDiagramType();
 		return block().lastDiagramType().isEnclosedBy(inlinedAdt);
 	}
@@ -137,37 +137,37 @@ aspect CanModifyToAccess {
 	public Pair<Block, VarUse> Anchor.modifyToAccess() {
 		return null;
 	}
-	public Pair<Block, VarUse> ComponentParameter.modifyToAccess() {
+	public Pair<Block, VarUse> Port.modifyToAccess() {
 		return modifyToAccess(this);
 	}
 	
-	protected static Pair<Block, VarUse> ASTNode.modifyToAccess(ComponentParameter cp) {
-		if (!cp.canModifyToAccess()) {
+	protected static Pair<Block, VarUse> ASTNode.modifyToAccess(Port port) {
+		if (!port.canModifyToAccess()) {
 			return null;
 		}
 		
-		DiagramType dt = cp.diagramType();
-		int index = dt.getLocalBlockList().getIndexOfChild(cp.block().inlinedBlock());
+		DiagramType dt = port.diagramType();
+		int index = dt.getLocalBlockList().getIndexOfChild(port.block().inlinedBlock());
 		
 		// Step 1, add anonymous types
-		if (!cp.hasAnonymousTypesTransitively()) {
-			Block newBlock = cp.addAnonymousTypesToInlinedBlock();
+		if (!port.hasAnonymousTypesTransitively()) {
+			Block newBlock = port.addAnonymousTypesToInlinedBlock();
 			if (newBlock != null) {
-				Parameter declaredParameter = cp.declaredParameter();
-				String blockName = cp.block().name();
+				Parameter declaredParameter = port.declaredParameter();
+				String blockName = port.block().name();
 
 				// We will now add the new block and clear all caches
 				dt.getLocalBlockList().setChild(newBlock, index);
 				dt.program().flushAllAttributes();
-				cp = null;
+				port = null;
 				
 				// Since all caches were cleared, we need to find the new computed
 				// block parameter again
 				VarDecl varDecl = dt.inheritedLookup(blockName);
 				if (varDecl != null) {
-					cp = (ComponentParameter) varDecl.findMember(declaredParameter.name());
+					port = (Port) varDecl.findMember(declaredParameter.name());
 				}
-				if (cp == null) {
+				if (port == null) {
 					throw new RuntimeException("something went wrong here");
 				}
 			}
@@ -175,9 +175,9 @@ aspect CanModifyToAccess {
 		
 		// Step 2, add parameters and connections
 		Pair<Block, VarUse> p = addConnectionsParameters(
-				cp.block().inlinedBlock(),
-				cp.block().lastDiagramType().enclosingBlock(),
-				cp,
+				port.block().inlinedBlock(),
+				port.block().lastDiagramType().enclosingBlock(),
+				port,
 				null);
 		dt.getLocalBlockList().setChild(p.first, index);
 		dt.program().flushAllAttributes();
@@ -190,7 +190,7 @@ aspect AddAnonymousTypesInline {
 	public Block Anchor.addAnonymousTypesToInlinedBlock() {
 		return null;
 	}
-	public Block ComponentParameter.addAnonymousTypesToInlinedBlock() {
+	public Block Port.addAnonymousTypesToInlinedBlock() {
 		return block().addAnonymousTypesToInlinedBlock();
 	}
 

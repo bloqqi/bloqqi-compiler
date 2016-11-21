@@ -115,11 +115,11 @@ aspect NameUses {
 		when decl() != null
 		to VarDecl.uses() for decl();
 	VarUse contributes this
-		when decl() instanceof ComponentParameter
+		when decl() instanceof Port
 		to VarDecl.uses() for decl().declaredParameter();
 
 	syn Parameter VarDecl.declaredParameter();
-	eq ComponentParameter.declaredParameter() = getParameter().declaredParameter();
+	eq Port.declaredParameter() = getParameter().declaredParameter();
 	eq Parameter.declaredParameter() = this;
 	eq InheritedInParameter.declaredParameter() = getDeclaredInParameter();
 	eq InheritedOutParameter.declaredParameter() = getDeclaredOutParameter();

@@ -219,10 +219,10 @@ List wired_comp_pars =
 	| wired_comp_pars.l COMMA wired_comp_par.p {: return l.add(p); :}
 	;
 
-WiredComponentParameter wired_comp_par =
-	in_par.in	                    {: return new WiredComponentParameterInParameter(in); :}
-	| ARROW out_par.out             {: return new WiredComponentParameterOutParameter(out); :}
-	| var_use.u                     {: return new WiredComponentParameterVarUse(u); :}
+WiredBlockParameter wired_comp_par =
+	in_par.in	                    {: return new WiredBlockParameterInParameter(in); :}
+	| ARROW out_par.out             {: return new WiredBlockParameterOutParameter(out); :}
+	| var_use.u                     {: return new WiredBlockParameterVarUse(u); :}
 	;
 
 Connection connection =

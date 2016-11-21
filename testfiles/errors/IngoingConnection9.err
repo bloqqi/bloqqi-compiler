@@ -1,1 +1,1 @@
-Line 1, column 1: Parameter 'in' in component 'b1' has more than one incoming connection, Parameter 'in' in component 'b3' has more than one incoming connection
+Line 1, column 1: Parameter 'in' in block 'b1' has more than one incoming connection, Parameter 'in' in block 'b3' has more than one incoming connection

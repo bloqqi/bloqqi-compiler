@@ -34,7 +34,7 @@ aspect IsParameterExposed {
 			return par;
 		}
 		
-		ComponentParameter cp = comp.findComponentParameter(par);
+		Port cp = comp.findPort(par);
 		if (cp == null) {
 			return null;
 		}
@@ -56,10 +56,10 @@ aspect IsParameterExposed {
 		return null;
 	}
 
-	syn ComponentParameter Block.findComponentParameter(Parameter p) {
+	syn Port Block.findPort(Parameter p) {
 		VarDecl vd = findMember(p.name());
-		if (vd instanceof ComponentParameter) {
-			return (ComponentParameter) vd;
+		if (vd instanceof Port) {
+			return (Port) vd;
 		} else {
 			return null;
 		}
@@ -253,8 +253,8 @@ aspect ExtractSubType {
 					if (isCrossing(c.getSource())) {
 						if (c.declaredFlowDecl() instanceof SourceInterception) {
 							Expr source = removeTypedVarUse(c.getSource().treeCopy());
-							newWiredBlock.addWiredComponentParameter(
-								new WiredComponentParameterVarUse((VarUse) source));
+							newWiredBlock.addWiredBlockParameter(
+								new WiredBlockParameterVarUse((VarUse) source));
 						} else if (c.declaredFlowDecl() instanceof Connection 
 								&& !sourceNodes.contains(c.getSource().node())) {
 							createWiredParameterForSourceConnection(c, inPar);
@@ -265,8 +265,8 @@ aspect ExtractSubType {
 					if (isCrossing(c.getTarget())) {
 						if (c.declaredFlowDecl() instanceof ConnectionInterception) {
 							VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
-							newWiredBlock.addWiredComponentParameter(
-								new WiredComponentParameterVarUse(target));
+							newWiredBlock.addWiredBlockParameter(
+								new WiredBlockParameterVarUse(target));
 						} else if (c.declaredFlowDecl() instanceof Connection) {
 							createWiredParameterForTargetConnection(c, outPar);
 						}
@@ -369,24 +369,24 @@ aspect ExtractSubType {
 		// Help methods for creating wired block
 		//
 		private void createWiredParameterForSourceConnection(Connection c, InParameter inPar) {
-			WiredComponentParameter wiredPar;
+			WiredBlockParameter wiredPar;
 			if (c.getSource().node().isParameter() && !c.getSource().node().isInherited()) {
-				wiredPar = new WiredComponentParameterInParameter(inPar.treeCopy());
+				wiredPar = new WiredBlockParameterInParameter(inPar.treeCopy());
 			} else {
 				VarUse source = (VarUse) removeTypedVarUse(c.getSource().treeCopy());
-				wiredPar = new WiredComponentParameterVarUse(source);
+				wiredPar = new WiredBlockParameterVarUse(source);
 			}
-			newWiredBlock.addWiredComponentParameter(wiredPar);
+			newWiredBlock.addWiredBlockParameter(wiredPar);
 		}
 		private void createWiredParameterForTargetConnection(Connection c, OutParameter outPar) {
-			WiredComponentParameter wiredPar;
+			WiredBlockParameter wiredPar;
 			if (c.getTarget().node().isParameter() && !c.getTarget().node().isInherited()) {
-				wiredPar = new WiredComponentParameterOutParameter(outPar.treeCopy());
+				wiredPar = new WiredBlockParameterOutParameter(outPar.treeCopy());
 			} else {
 				VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
-				wiredPar = new WiredComponentParameterVarUse(target);
+				wiredPar = new WiredBlockParameterVarUse(target);
 			}
-			newWiredBlock.addWiredComponentParameter(wiredPar);
+			newWiredBlock.addWiredBlockParameter(wiredPar);
 		}
 	}
 }

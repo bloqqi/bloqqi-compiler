@@ -41,7 +41,7 @@ aspect TypeAnalysis {
 	eq Block.type() = getType().type();
 	eq InheritedBlock.type()
 		= getDeclaredBlock().type();
-	eq ComponentParameter.type() = getParameter().type();
+	eq Port.type() = getParameter().type();
 	eq Parameter.type() = getTypeUse().type();
 	eq Variable.type() = getTypeUse().type();
 	eq StructField.type() = getTypeUse().type();
@@ -122,7 +122,7 @@ aspect TypeAnalysis {
 	eq Program.getChild().isTarget() = false;
 
 	syn boolean Anchor.isSource();
-	eq ComponentParameter.isSource() = getParameter().isOutParameter();
+	eq Port.isSource() = getParameter().isOutParameter();
 	eq Parameter.isSource() = false;
 	eq InParameter.isSource() = true;
 	eq StateVariable.isSource() = true;
@@ -131,7 +131,7 @@ aspect TypeAnalysis {
 	eq InheritedVariable.isSource() = getDeclaredVariable().isSource();
 	eq Literal.isSource() = true;
 	syn boolean Anchor.isTarget();
-	eq ComponentParameter.isTarget() = !isSource();
+	eq Port.isTarget() = !isSource();
 	eq Parameter.isTarget() = !isSource();
 	eq InParameter.isTarget() = !isSource();
 	eq StateVariable.isTarget() = true;

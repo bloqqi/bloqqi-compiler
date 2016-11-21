@@ -13,8 +13,8 @@ public class ValidTestsPrettyPrinting extends AbstractValidTests {
 	}
 	
 	@Test 
-	public final void localComponentRequireNoQualification() {
-		testFile("LocalComponentRequireNoQualification");
+	public final void localBlockRequireNoQualification() {
+		testFile("LocalBlockRequireNoQualification");
 	}
 	
 	@Test

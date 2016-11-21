@@ -48,14 +48,14 @@ Block : VarDecl ::=
 	Modifiers
 	Type
 	Name
-	/InParameter:ComponentParameter*/ 
-	/OutParameter:ComponentParameter*/;
+	/InPort:Port*/ 
+	/OutPort:Port*/;
 RedeclareBlock : Block;
-WiredBlock : Block ::= WiredComponentParameter*;
-abstract WiredComponentParameter;
-WiredComponentParameterVarUse : WiredComponentParameter ::= VarUse;
-WiredComponentParameterInParameter : WiredComponentParameter ::= InParameter;
-WiredComponentParameterOutParameter : WiredComponentParameter ::= OutParameter;
+WiredBlock : Block ::= WiredBlockParameter*;
+abstract WiredBlockParameter;
+WiredBlockParameterVarUse : WiredBlockParameter ::= VarUse;
+WiredBlockParameterInParameter : WiredBlockParameter ::= InParameter;
+WiredBlockParameterOutParameter : WiredBlockParameter ::= OutParameter;
 InheritedBlock : Block ::= <DeclaredBlock:Block>;
 InlinedBlock : InheritedBlock ::=
 	<InlinedBlocks:java.util.List<Block>>
@@ -64,7 +64,7 @@ InlinedBlock : InheritedBlock ::=
 abstract Name;
 IdName : Name ::= <ID>;
 InlinedName : Name ::= Outer:Name Inner:Name;
-ComponentParameter : VarDecl ::= <Parameter:Parameter>;
+Port : VarDecl ::= <Parameter:Parameter>;
 
 /** Variables */
 abstract Variable : VarDecl ::= TypeUse <ID>;

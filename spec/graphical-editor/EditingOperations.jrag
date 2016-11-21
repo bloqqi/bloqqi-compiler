@@ -99,19 +99,19 @@ aspect AddParametersAndConnections {
 		}
 		Block innerInner = (Block) vdComp;
 		
-		VarDecl vdCp = innerInner.findMember(parts[parts.length-1]);
-		if (!(vdCp instanceof ComponentParameter)) {
+		VarDecl vdPort = innerInner.findMember(parts[parts.length-1]);
+		if (!(vdPort instanceof Port)) {
 			throw new RuntimeException("Could not find block " + parts[parts.length-1] + " in " + path);
 		}
-		ComponentParameter cp = (ComponentParameter) vdCp;
+		Port port = (Port) vdPort;
 		
-		String componentParameterName = addToDiagramType ? null : parameterName;
-		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(outerBlock, innerBlock, cp, componentParameterName);
+		String portName = addToDiagramType ? null : parameterName;
+		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(outerBlock, innerBlock, port, portName);
 		Pair<Block, VarUse> result;
 		if (addToDiagramType) {
-			//String parameterName = getUniqueName(outerBlock.name() + cp.name());
-			addParameter(parameterName, cp);
-			addConnection(new SimpleVarUse(parameterName), p.second, cp.isInParameter());
+			//String parameterName = getUniqueName(outerBlock.name() + port.name());
+			addParameter(parameterName, port);
+			addConnection(new SimpleVarUse(parameterName), p.second, port.isInParameter());
 			result = new Pair<>(p.first, new SimpleVarUse(parameterName));
 		} else {
 			result = new Pair<>(p.first, p.second);
@@ -129,17 +129,17 @@ aspect AddParametersAndConnections {
 	public static Pair<Block, VarUse> ASTNode.addConnectionsParameters(
 			Block outerBlock,
 			Block innerEnclosingBlock,
-			ComponentParameter componentParameter,
+			Port port,
 			String outerParameterName) {
 		if (!innerEnclosingBlock.isEnclosedBy(outerBlock)) {
 			throw new RuntimeException("Block " +  innerEnclosingBlock
 					+ " + is not enclosed by block " + outerBlock.name());
 		}
-		// TODO: Do sanity check on componentParameter
+		// TODO: Do sanity check on port
 		
 		// Add the related blocks in list
 		ArrayList<Block> blocks = new ArrayList<>();
-		blocks.add(componentParameter.block().declaredBlock());
+		blocks.add(port.block().declaredBlock());
 		Block current = innerEnclosingBlock;
 		while (current != outerBlock) {
 			blocks.add(current.declaredBlock());
@@ -152,7 +152,7 @@ aspect AddParametersAndConnections {
 		// and modify the blocks by creating a new copy of them.
 		Block lastNewBlock = null;
 		int lastIndex = -1;
-		String lastParameterName = componentParameter.name();
+		String lastParameterName = port.name();
 		
 		Iterator<Block> itr = blocks.iterator();
 		Block block = itr.next();
@@ -166,17 +166,17 @@ aspect AddParametersAndConnections {
 				parameterName = outerParameterName;
 			} else {
 				parameterName = enclosingBlock.anonymousDiagramType()
-					.getUniqueName(block.name() + componentParameter.name());
+					.getUniqueName(block.name() + port.name());
 			}
 			
 			// Add new parameter
-			newBlock.anonymousDiagramType().addParameter(parameterName, componentParameter);
+			newBlock.anonymousDiagramType().addParameter(parameterName, port);
 	
 			// Create connection
 			newBlock.anonymousDiagramType().addConnection(
 					new SimpleVarUse(parameterName),
 					new DotVarUse(new SimpleVarUse(block.name()), lastParameterName),
-					componentParameter.isInParameter());
+					port.isInParameter());
 			
 			// Add previous created block to current block
 			if (lastNewBlock != null) {
@@ -212,15 +212,15 @@ aspect AddParametersAndConnections {
 		return newName;
 	}
 	
-	public void DiagramType.addParameter(String parameterName, ComponentParameter cp) {
-		if (cp.isInParameter()) {
+	public void DiagramType.addParameter(String parameterName, Port port) {
+		if (port.isInParameter()) {
 			InParameter inParameter = new InParameter(
-				cp.getParameter().getTypeUse().treeCopy(),
+				port.getParameter().getTypeUse().treeCopy(),
 				parameterName);
 			addLocalInParameter(inParameter);
 		} else {
 			OutParameter outParameter = new OutParameter(
-				cp.getParameter().getTypeUse().treeCopy(),
+				port.getParameter().getTypeUse().treeCopy(),
 				parameterName);
 			addLocalOutParameter(outParameter);
 		}

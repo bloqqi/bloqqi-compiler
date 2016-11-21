@@ -3,9 +3,9 @@ aspect Wiring {
 		= new ArrayList<InParameter>(); 
 	eq WiredBlock.inParameters() {
 		ArrayList<InParameter> list = new ArrayList<>();
-		for (WiredComponentParameter p: getWiredComponentParameters()) {
-			if (p instanceof WiredComponentParameterInParameter) {
-				list.add(((WiredComponentParameterInParameter) p).getInParameter());
+		for (WiredBlockParameter p: getWiredBlockParameters()) {
+			if (p instanceof WiredBlockParameterInParameter) {
+				list.add(((WiredBlockParameterInParameter) p).getInParameter());
 			}
 		}
 		return list;
@@ -14,9 +14,9 @@ aspect Wiring {
 		= new ArrayList<>();
 	eq WiredBlock.outParameters() {
 		ArrayList<OutParameter> list = new ArrayList<>();
-		for (WiredComponentParameter p: getWiredComponentParameters()) {
-			if (p instanceof WiredComponentParameterOutParameter) {
-				list.add(((WiredComponentParameterOutParameter) p).getOutParameter());
+		for (WiredBlockParameter p: getWiredBlockParameters()) {
+			if (p instanceof WiredBlockParameterOutParameter) {
+				list.add(((WiredBlockParameterOutParameter) p).getOutParameter());
 			}
 		}
 		return list;
@@ -71,13 +71,13 @@ aspect Wiring {
 
 	syn boolean WiredBlock.nbrOfParsMatch() {
 		if (type().hasWiring()) {
-			return getNumWiredComponentParameter() == type().wiring().getNumWiringParameter();
+			return getNumWiredBlockParameter() == type().wiring().getNumWiringParameter();
 		} else {
 			return false;
 		}
 	}
 	
-	syn WiringParameter WiredComponentParameter.wiringParameter() {
+	syn WiringParameter WiredBlockParameter.wiringParameter() {
 		if (wiredBlock().nbrOfParsMatch()) {
 			return wiredBlock().type().wiring().getWiringParameter(parameterIndex());
 		} else {
@@ -85,11 +85,11 @@ aspect Wiring {
 		}
 	}
 	
-	inh WiredBlock WiredComponentParameter.wiredBlock();
+	inh WiredBlock WiredBlockParameter.wiredBlock();
 	eq WiredBlock.getChild().wiredBlock() = this;
 	
-	inh int WiredComponentParameter.parameterIndex();
-	eq WiredBlock.getWiredComponentParameter(int index).parameterIndex() = index;
+	inh int WiredBlockParameter.parameterIndex();
+	eq WiredBlock.getWiredBlockParameter(int index).parameterIndex() = index;
 	inh int WiringParameter.parameterIndex();
 	eq Wiring.getWiringParameter(int index).parameterIndex() = index;
 	
@@ -100,8 +100,8 @@ aspect Wiring {
 		for (FlowDecl fd: getFlowDecls()) {
 			for (Anchor anchor: fd.connectedAnchors()) {
 				if (anchor.node().isBlock() && anchor.isInParameter()) {
-					ComponentParameter cp = (ComponentParameter) anchor;
-					set.add((InheritedInParameter) cp.getParameter());
+					Port port = (Port) anchor;
+					set.add((InheritedInParameter) port.getParameter());
 				}
 			}
 		}
@@ -131,10 +131,10 @@ aspect NameAnalysis {
 }
 
 aspect TypeAnalysis {
-	syn TypeDecl WiredComponentParameter.type();
-	eq WiredComponentParameterVarUse.type() = getVarUse().type();
-	eq WiredComponentParameterInParameter.type() = getInParameter().type();
-	eq WiredComponentParameterOutParameter.type() = getOutParameter().type();
+	syn TypeDecl WiredBlockParameter.type();
+	eq WiredBlockParameterVarUse.type() = getVarUse().type();
+	eq WiredBlockParameterInParameter.type() = getInParameter().type();
+	eq WiredBlockParameterOutParameter.type() = getOutParameter().type();
 	
 	WiringParameter implements Anchor;
 	eq WiringInParameter.isSource() = true;
@@ -146,25 +146,25 @@ aspect TypeAnalysis {
 	eq WiringOutParameter.isInParameter() = false;
 	eq WiringOutParameter.isOutParameter() = true;
 	
-	inh TypeDecl WiredComponentParameter.expectedType();
-	eq WiredBlock.getWiredComponentParameter(int index).expectedType() {
-		WiringParameter par = getWiredComponentParameter(index).wiringParameter();
+	inh TypeDecl WiredBlockParameter.expectedType();
+	eq WiredBlock.getWiredBlockParameter(int index).expectedType() {
+		WiringParameter par = getWiredBlockParameter(index).wiringParameter();
 		return par != null ? par.type() : program().unknownType();
 	}
 	
-	syn boolean WiredComponentParameter.isSource();
-	eq WiredComponentParameterVarUse.isSource() 
+	syn boolean WiredBlockParameter.isSource();
+	eq WiredBlockParameterVarUse.isSource() 
 		= getVarUse().declAnchor() != null 
 		? getVarUse().declAnchor().isSource()
 		: false;
-	eq WiredComponentParameterInParameter.isSource() = true;
-	eq WiredComponentParameterOutParameter.isSource() = false;
+	eq WiredBlockParameterInParameter.isSource() = true;
+	eq WiredBlockParameterOutParameter.isSource() = false;
 	
 	
 	// Used for simplification form rewrite
-	eq WiredComponentParameterVarUse.getVarUse().isSource()
+	eq WiredBlockParameterVarUse.getVarUse().isSource()
 		= wiringParameter() != null ? wiringParameter().isSource() : false;
-	eq WiredComponentParameterVarUse.getVarUse().isTarget()
+	eq WiredBlockParameterVarUse.getVarUse().isTarget()
 		= wiringParameter() != null ? !wiringParameter().isSource() : false;
 }
 
@@ -201,16 +201,16 @@ aspect ApplyWiring {
 		return new SimpleVarUse(b.name());
 	}
 	public VarUse WiringParameter.getAppliedVarUse(WiredBlock b) {
-		return b.getWiredComponentParameter(parameterIndex()).getAppliedVarUse();
+		return b.getWiredBlockParameter(parameterIndex()).getAppliedVarUse();
 	}
-	public abstract VarUse WiredComponentParameter.getAppliedVarUse();
-	public VarUse WiredComponentParameterVarUse.getAppliedVarUse() {
+	public abstract VarUse WiredBlockParameter.getAppliedVarUse();
+	public VarUse WiredBlockParameterVarUse.getAppliedVarUse() {
 		return getVarUse().treeCopy();
 	}
-	public VarUse WiredComponentParameterInParameter.getAppliedVarUse() {
+	public VarUse WiredBlockParameterInParameter.getAppliedVarUse() {
 		return new SimpleVarUse(getInParameter().name());
 	}
-	public VarUse WiredComponentParameterOutParameter.getAppliedVarUse() {
+	public VarUse WiredBlockParameterOutParameter.getAppliedVarUse() {
 		return new SimpleVarUse(getOutParameter().name());
 	}
 }
@@ -224,16 +224,16 @@ aspect Errors {
 		when type().hasWiring() && !nbrOfParsMatch()
 		to CompilationUnit.errors();
 		
-	WiredComponentParameter contributes error("Incompatible types. Required: " + expectedType().name() + ", found: " + type().name())
+	WiredBlockParameter contributes error("Incompatible types. Required: " + expectedType().name() + ", found: " + type().name())
 		when !type().compatibleWith(expectedType())
 		to CompilationUnit.errors();
 		
-	WiredComponentParameter contributes error("Expected a source port, '" + toString() + "' is a target port")
+	WiredBlockParameter contributes error("Expected a source port, '" + toString() + "' is a target port")
 		when wiringParameter() != null
 			&& wiringParameter().isSource() && !isSource()
 		to CompilationUnit.errors();
 
-	WiredComponentParameter contributes error("Expected a target port, '" + toString() + "' is a source port")
+	WiredBlockParameter contributes error("Expected a target port, '" + toString() + "' is a source port")
 		when wiringParameter() != null
 			&& !wiringParameter().isSource() && isSource()
 		to CompilationUnit.errors();
@@ -243,13 +243,13 @@ aspect Errors {
 		when !getTypeUse().getID().equals(diagramType().name())
 		to CompilationUnit.errors();
 		
-	WiredComponentParameterInParameter contributes
+	WiredBlockParameterInParameter contributes
 			error("Name '" + getInParameter().name() + "' is already declared")
 		when diagramType().lookup(getInParameter().name()) != getInParameter()
 			&& diagramType().lookup(getInParameter().name()) != null
 		to CompilationUnit.errors();
 		
-	WiredComponentParameterOutParameter contributes
+	WiredBlockParameterOutParameter contributes
 			error("Name '" + getOutParameter().name() + "' is already declared")
 		when diagramType().lookup(getOutParameter().name()) != getOutParameter()
 			&& diagramType().lookup(getOutParameter().name()) != null

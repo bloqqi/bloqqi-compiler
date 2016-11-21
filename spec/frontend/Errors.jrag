@@ -139,11 +139,11 @@ aspect HelperAttributes {
 			}
 		}
 		for (Block b: getBlocks()) {
-			for (ComponentParameter cp: b.getInParameters()) {
-				int n = cp.ingoingConnections().size();
+			for (Port p: b.getInPorts()) {
+				int n = p.ingoingConnections().size();
 				if (n > 1) {
 					String s;
-					s  = "Parameter '" + cp.name() + "' in component '" + b.name() + "' ";
+					s  = "Parameter '" + p.name() + "' in block '" + b.name() + "' ";
 					s += "has more than one incoming connection";
 					list.add(s);
 				}

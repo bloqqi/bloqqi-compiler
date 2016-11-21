@@ -133,7 +133,7 @@ aspect LookupVariables {
 
 	/** 
 	 * Search for a name in the NTAs representing all parameters, variables
-	 * and components (both inherited and local). If multiply declarations exists, 
+	 * and blocks (both inherited and local). If multiply declarations exists, 
 	 * then return the most local declaration.
 	 */
 	syn VarDecl DiagramType.inheritedLookup(String name) 
@@ -171,19 +171,19 @@ aspect LookupVariables {
 
 	syn VarDecl VarDecl.findMember(String name);	
 	eq Block.findMember(String name) {
-		for (ComponentParameter in: getInParameters()) {
+		for (Port in: getInPorts()) {
 			if (in.name().equals(name)) {
 				return in;
 			}
 		}
-		for (ComponentParameter out: getOutParameters()) {
+		for (Port out: getOutPorts()) {
 			if (out.name().equals(name)) {
 				return out;
 			}
 		}
 		return null;
 	}
-	eq ComponentParameter.findMember(String name) = type().lookupField(name);
+	eq Port.findMember(String name) = type().lookupField(name);
 	eq Parameter.findMember(String name) = type().lookupField(name);
 	eq Variable.findMember(String name) = type().lookupField(name);
 	eq StructField.findMember(String name) = type().lookupField(name);
@@ -267,7 +267,7 @@ aspect Names {
 	eq Parameter.name() = getID();
 	eq Variable.name() = getID();
 	eq Block.name() = getName().name();
-	eq ComponentParameter.name() = getParameter().name();
+	eq Port.name() = getParameter().name();
 	eq StructField.name() = getID();
 	syn String Literal.name() = "<unknown name>";
 	
@@ -300,11 +300,11 @@ aspect RewriteSimplifiedForm {
 		to VarUse {
 			if (isTopLevel() && isOnSimplifiedForm()) {
 				Block b = (Block) decl();
-				ComponentParameter p;
+				Port p;
 				if (isSource()) {
-					p = b.getOutParameter(0);
+					p = b.getOutPort(0);
 				} else {
-					p = b.getInParameter(0);
+					p = b.getInPort(0);
 				}
 				return new DotVarUse(newSimpleVarUse(), p.name());
 			} else {
@@ -346,8 +346,8 @@ aspect RewriteSimplifiedForm {
 	eq AbstractSimpleVarUse.isOnSimplifiedForm() {
 		if (decl() instanceof Block) {
 			Block b = (Block) decl();
-			return isSource() && b.getNumOutParameter() == 1
-				|| isTarget() && b.getNumInParameter() == 1;
+			return isSource() && b.getNumOutPort() == 1
+				|| isTarget() && b.getNumInPort() == 1;
 		}
 		return false;
 	}

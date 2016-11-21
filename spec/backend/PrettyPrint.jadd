@@ -158,7 +158,7 @@ aspect PrettyPrint {
 		return getType().prettyPrint();
 	}
 	public String WiredBlock.prettyPrintType() {
-		String pars = getWiredComponentParameters().toString(", ");
+		String pars = getWiredBlockParameters().toString(", ");
 		String typeUse;
 		String anonType;
 		if (hasAnonymousDiagramType()) {
@@ -174,13 +174,13 @@ aspect PrettyPrint {
 		return typeUse + "[" + pars + "]" + anonType;
 	}
 
-	public String WiredComponentParameterVarUse.toString() {
+	public String WiredBlockParameterVarUse.toString() {
 		return getVarUse().toString();
 	}
-	public String WiredComponentParameterInParameter.toString() {
+	public String WiredBlockParameterInParameter.toString() {
 		return getInParameter().toString();
 	}
-	public String WiredComponentParameterOutParameter.toString() {
+	public String WiredBlockParameterOutParameter.toString() {
 		return "=>" + getOutParameter().toString();
 	}
 
@@ -303,8 +303,8 @@ aspect PrettyPrint {
 		return getVarUse() + "." + getID();
 	}
 	
-	public String ComponentParameter.toString() {
-		return "ComponentParameter(" + getParameter() + ")";
+	public String Port.toString() {
+		return "Port(" + getParameter() + ")";
 	}
 	
 	public String StructField.toString() {

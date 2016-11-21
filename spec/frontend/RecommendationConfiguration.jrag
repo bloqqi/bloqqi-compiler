@@ -373,7 +373,7 @@ aspect RecommendationConfiguration {
 						wiredBlock.getModifiers().treeCopy(),
 						newType(),
 						wiredBlock.getName().treeCopy(),
-						wiredBlock.getWiredComponentParameterList().treeCopy());
+						wiredBlock.getWiredBlockParameterList().treeCopy());
 			} else {
 				return new Block(
 						rb.getBlock().getModifiers().treeCopy(),

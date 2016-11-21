@@ -1,12 +1,12 @@
 import java.util.Iterator;
 
 /** 
- * This module defines the execution order/dataflow order for components
- * and it is based on connections between components and the declaration order 
- * of the components. This module assumes a acyclic dataflow graph, and cyclic
+ * This module defines the execution order/dataflow order for blocks
+ * and it is based on connections between blocks and the declaration order 
+ * of the blocks. This module assumes a acyclic dataflow graph, and cyclic
  * dataflow graphs are converted into acyclic dataflow graphs in the module Cycles.jrag. 
- * This module defines the execution order in terms of all inherited components, 
- * and not only locally defined components.
+ * This module defines the execution order in terms of all inherited blocks, 
+ * and not only locally defined blocks.
  */
 
 aspect DFO {

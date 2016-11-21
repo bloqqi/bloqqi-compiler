@@ -10,7 +10,7 @@ aspect PrintAST {
 		s += lastDiagramType().name();
 		return s;
 	}
-	eq ComponentParameter.printASTInfo() = "in=" + ingoingConnections() + ", out=" + outgoingConnections();
+	eq Port.printASTInfo() = "in=" + ingoingConnections() + ", out=" + outgoingConnections();
 	eq DotVarUse.printASTInfo() = toString() + ", " + decl();
 	eq Parameter.printASTInfo() = uses().toString();
 	eq DiagramType.printASTInfo() = name() + ", " + sortedRecommendations();
@@ -56,8 +56,8 @@ aspect PrintAST {
 	}
 	protected void Block.printAST(String prefix, int i) {
 		super.printAST(prefix, i);
-		getInParameters().printAST("InParameters", i+1);
-		getOutParameters().printAST("OutParameters", i+1);
+		getInPorts().printAST("InPorts", i+1);
+		getOutPorts().printAST("OutPorts", i+1);
 	}
 	protected void WiredBlock.printAST(String prefix, int i) {
 		super.printAST(prefix, i);

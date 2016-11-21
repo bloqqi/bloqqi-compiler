@@ -1,6 +1,5 @@
 /**
- * This module defines anchors and dataflow between anchors. An anchor is either 
- * a parameter or a parameter in a block (called ComponentParameter). 
+ * This module defines anchors and dataflow between anchors. 
  * A connection is between two anchors.
  * 
  * The dataflow between anchors is used, for example, to 
@@ -15,7 +14,7 @@ aspect AnchorFlow {
 		TypeDecl type();
 	}
 	Parameter implements Anchor;
-	ComponentParameter implements Anchor;
+	Port implements Anchor;
 	Variable implements Anchor;
 	Literal implements Anchor;
 
@@ -46,13 +45,13 @@ aspect AnchorFlow {
 	DiagramType contributes nta connections() to Anchor.ingoingConnections();
 	
 	syn boolean Anchor.isInParameter();
-	eq ComponentParameter.isInParameter() = getParameter().isInParameter();
+	eq Port.isInParameter() = getParameter().isInParameter();
 	eq Parameter.isInParameter() = false;
 	eq InParameter.isInParameter() = true;
 	eq Variable.isInParameter() = false;
 	eq Literal.isInParameter() = false;
 	syn boolean Anchor.isOutParameter();
-	eq ComponentParameter.isOutParameter() = !isInParameter();
+	eq Port.isOutParameter() = !isInParameter();
 	eq Parameter.isOutParameter() = !isInParameter();
 	eq InParameter.isOutParameter() = !isInParameter();
 	eq Variable.isOutParameter() = false;
@@ -61,12 +60,12 @@ aspect AnchorFlow {
 	syn boolean Expr.isOutParameter() = anchor() != null && anchor().isOutParameter();
 
 
-	inh int ComponentParameter.index();
-	eq Block.getInParameter(int index).index() = index;
-	eq Block.getOutParameter(int index).index() = index;
+	inh int Port.index();
+	eq Block.getInPort(int index).index() = index;
+	eq Block.getOutPort(int index).index() = index;
 	
 	syn Node Anchor.node();
-	eq ComponentParameter.node() = block();
+	eq Port.node() = block();
 	eq Parameter.node() = this;
 	eq Variable.node() = this;
 	eq Literal.node() = this;
@@ -91,65 +90,65 @@ aspect AnchorFlow {
 }
 
 /**
- * A component has a type and the type defines the parameters 
- * of the component. The graphical editor wants an object representing
- * each parameter of the component, which is called ComponentParameter.
- * A ComponentParameter refer to the corresponding Parameter in the type.
+ * A block has a type and the type defines the parameters 
+ * of the block. The graphical editor wants an object representing
+ * each parameter of the block, which is called port.
+ * A Port refer to the corresponding Parameter in the type.
  */
-aspect ComponentParameters {
-	syn lazy List<ComponentParameter> Block.getInParameterList() 
-		= type().createInComponentParameterList();
+aspect Ports {
+	syn lazy List<Port> Block.getInPortList() 
+		= type().createInPortList();
 
-	syn lazy List<ComponentParameter> Block.getOutParameterList() 
-		= type().createOutComponentParameterList();
+	syn lazy List<Port> Block.getOutPortList() 
+		= type().createOutPortList();
 	
 
-	protected List<ComponentParameter> TypeDecl.createInComponentParameterList() {
+	protected List<Port> TypeDecl.createInPortList() {
 		return new List<>();
 	}
-	protected List<ComponentParameter> DiagramType.createInComponentParameterList() {
-		List<ComponentParameter> list = new List<>();
+	protected List<Port> DiagramType.createInPortList() {
+		List<Port> list = new List<>();
 		for (InParameter p: getInParameters()) {
-			list.add(new ComponentParameter(p));
+			list.add(new Port(p));
 		}
 		return list;
 	}
-	protected List<ComponentParameter> ExternalFunction.createInComponentParameterList() {
-		List<ComponentParameter> list = new List<>();
+	protected List<Port> ExternalFunction.createInPortList() {
+		List<Port> list = new List<>();
 		for (InParameter p: getInParameters()) {
-			list.add(new ComponentParameter(p));
+			list.add(new Port(p));
 		}
 		return list;
 	}
-	protected List<ComponentParameter> Function.createInComponentParameterList() {
-		List<ComponentParameter> list = new List<>();
+	protected List<Port> Function.createInPortList() {
+		List<Port> list = new List<>();
 		for (InParameter p: getInParameters()) {
-			list.add(new ComponentParameter(p));
+			list.add(new Port(p));
 		}
 		return list;
 	}
 	
-	protected List<ComponentParameter> TypeDecl.createOutComponentParameterList() {
+	protected List<Port> TypeDecl.createOutPortList() {
 		return new List<>();
 	}
-	protected List<ComponentParameter> DiagramType.createOutComponentParameterList() {
-		List<ComponentParameter> list = new List<>();
+	protected List<Port> DiagramType.createOutPortList() {
+		List<Port> list = new List<>();
 		for (OutParameter p: getOutParameters()) {
-			list.add(new ComponentParameter(p));
+			list.add(new Port(p));
 		}
 		return list;
 	}
-	protected List<ComponentParameter> ExternalFunction.createOutComponentParameterList() {
-		List<ComponentParameter> list = new List<>();
+	protected List<Port> ExternalFunction.createOutPortList() {
+		List<Port> list = new List<>();
 		if (hasOutParameter()) {
-			list.add(new ComponentParameter(getOutParameter()));
+			list.add(new Port(getOutParameter()));
 		}
 		return list;
 	}
-	protected List<ComponentParameter> Function.createOutComponentParameterList() {
-		List<ComponentParameter> list = new List<>();
+	protected List<Port> Function.createOutPortList() {
+		List<Port> list = new List<>();
 		for (OutParameter p: getOutParameters()) {
-			list.add(new ComponentParameter(p));
+			list.add(new Port(p));
 		}
 		return list;
 	}

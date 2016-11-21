@@ -52,7 +52,7 @@ aspect Node {
 		return false;
 	}
 	syn boolean Block.hasIncomingLiterals() {
-		for (ComponentParameter in: getInParameterList()) {
+		for (Port in: getInPorts()) {
 			if (in.hasIncomingLiterals()) {
 				return true;
 			}
@@ -62,7 +62,7 @@ aspect Node {
 }
 
 aspect NodeFlow {
-	inh Block ComponentParameter.block();
+	inh Block Port.block();
 	eq Block.getChild().block() = this;
 	
 	syn lazy Node Expr.node() = null;

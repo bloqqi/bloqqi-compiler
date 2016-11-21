@@ -1,5 +1,5 @@
 A = []
 B = []
 C = []
-D = [ComponentParameter(in: Int)=[B, C]]
+D = [Port(in: Int)=[B, C]]
 T = []

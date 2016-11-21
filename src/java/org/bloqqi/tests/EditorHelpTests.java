@@ -8,13 +8,13 @@ import org.junit.Test;
 import org.bloqqi.compiler.ast.ASTNode;
 import org.bloqqi.compiler.ast.CompilationUnit;
 import org.bloqqi.compiler.ast.Block;
-import org.bloqqi.compiler.ast.ComponentParameter;
 import org.bloqqi.compiler.ast.Connection;
 import org.bloqqi.compiler.ast.DiagramType;
 import org.bloqqi.compiler.ast.FlowDecl;
 import org.bloqqi.compiler.ast.IntLiteral;
 import org.bloqqi.compiler.ast.Pair;
 import org.bloqqi.compiler.ast.Parameter;
+import org.bloqqi.compiler.ast.Port;
 import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.compiler.ast.SimpleVarUse;
 import org.bloqqi.compiler.ast.VarUse;
@@ -40,24 +40,24 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_add = dt.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
-		assertTrue(a_add.getInParameter(0).canAccess());
-		assertEquals("a.in", a_add.getInParameter(0).access().toString());
-		assertFalse(a_add.getInParameter(1).canAccess());
-		assertNull(a_add.getInParameter(1).access());
+		assertTrue(a_add.getInPort(0).canAccess());
+		assertEquals("a.in", a_add.getInPort(0).access().toString());
+		assertFalse(a_add.getInPort(1).canAccess());
+		assertNull(a_add.getInPort(1).access());
 
 		Block a2_add = dt.blocks().getChild(1);
 		assertEquals("a2$add", a2_add.name());
-		assertTrue(a2_add.getInParameter(0).canAccess());
-		assertEquals("a2.in", a2_add.getInParameter(0).access().toString());
-		assertFalse(a2_add.getInParameter(1).canAccess());
-		assertNull(a2_add.getInParameter(1).access());
+		assertTrue(a2_add.getInPort(0).canAccess());
+		assertEquals("a2.in", a2_add.getInPort(0).access().toString());
+		assertFalse(a2_add.getInPort(1).canAccess());
+		assertNull(a2_add.getInPort(1).access());
 
 		Block a2_add2 = dt.blocks().getChild(2);
 		assertEquals("a2$add2", a2_add2.name());
-		assertFalse(a2_add2.getInParameter(0).canAccess());
-		assertNull(a2_add2.getInParameter(0).access());
-		assertTrue(a2_add2.getInParameter(1).canAccess());
-		assertEquals("a2.in", a2_add2.getInParameter(1).access().toString());
+		assertFalse(a2_add2.getInPort(0).canAccess());
+		assertNull(a2_add2.getInPort(0).access());
+		assertTrue(a2_add2.getInPort(1).canAccess());
+		assertEquals("a2.in", a2_add2.getInPort(1).access().toString());
 	}
 	
 	@Test
@@ -79,18 +79,18 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_add = dt.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
-		assertTrue(a_add.getOutParameter(0).canAccess());
-		assertEquals("a.out", a_add.getOutParameter(0).access().toString());
+		assertTrue(a_add.getOutPort(0).canAccess());
+		assertEquals("a.out", a_add.getOutPort(0).access().toString());
 
 		Block a2_add = dt.blocks().getChild(1);
 		assertEquals("a2$add", a2_add.name());
-		assertTrue(a2_add.getOutParameter(0).canAccess());
-		assertEquals("a2.out", a2_add.getOutParameter(0).access().toString());
+		assertTrue(a2_add.getOutPort(0).canAccess());
+		assertEquals("a2.out", a2_add.getOutPort(0).access().toString());
 		
 		Block a2_add2 = dt.blocks().getChild(2);
 		assertEquals("a2$add2", a2_add2.name());
-		assertTrue(a2_add2.getOutParameter(0).canAccess());
-		assertEquals("a2.out2", a2_add2.getOutParameter(0).access().toString());
+		assertTrue(a2_add2.getOutPort(0).canAccess());
+		assertEquals("a2.out2", a2_add2.getOutPort(0).access().toString());
 	}
 	
 	@Test
@@ -112,10 +112,10 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_b_add = dt.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
-		assertTrue(a_b_add.getInParameter(0).canAccess());
-		assertEquals("a.in", a_b_add.getInParameter(0).access().toString());
-		assertFalse(a_b_add.getInParameter(1).canAccess());
-		assertNull(a_b_add.getInParameter(1).access());
+		assertTrue(a_b_add.getInPort(0).canAccess());
+		assertEquals("a.in", a_b_add.getInPort(0).access().toString());
+		assertFalse(a_b_add.getInPort(1).canAccess());
+		assertNull(a_b_add.getInPort(1).access());
 	}
 	
 	@Test
@@ -132,9 +132,9 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_add = dt.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
-		assertFalse(a_add.getInParameter(0).canAccess());
-		assertFalse(a_add.getInParameter(1).canAccess());
-		assertFalse(a_add.getOutParameter(0).canAccess());
+		assertFalse(a_add.getInPort(0).canAccess());
+		assertFalse(a_add.getInPort(1).canAccess());
+		assertFalse(a_add.getOutPort(0).canAccess());
 	}
 	
 	@Test
@@ -252,19 +252,19 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a1_add = dtMain.blocks().getChild(0);
 		assertEquals("a1$add", a1_add.name());
-		assertFalse(a1_add.getInParameter(0).canAccess());
-		assertTrue(a1_add.getInParameter(0).canModifyToAccess());
-		assertTrue(!a1_add.getInParameter(0).hasAnonymousTypesTransitively());
+		assertFalse(a1_add.getInPort(0).canAccess());
+		assertTrue(a1_add.getInPort(0).canModifyToAccess());
+		assertTrue(!a1_add.getInPort(0).hasAnonymousTypesTransitively());
 
 		Block a2_add = dtMain.blocks().getChild(1);
 		assertEquals("a2$add", a2_add.name());
-		assertFalse(a2_add.getInParameter(0).canAccess());
-		assertTrue(a2_add.getInParameter(0).canModifyToAccess());
+		assertFalse(a2_add.getInPort(0).canAccess());
+		assertTrue(a2_add.getInPort(0).canModifyToAccess());
 
 		Block a2_add2 = dtMain.blocks().getChild(2);
 		assertEquals("a2$add2", a2_add2.name());
-		assertFalse(a2_add2.getInParameter(0).canAccess());
-		assertTrue(a2_add2.getInParameter(0).canModifyToAccess());
+		assertFalse(a2_add2.getInPort(0).canAccess());
+		assertTrue(a2_add2.getInPort(0).canModifyToAccess());
 	}
 	
 	@Test
@@ -280,19 +280,19 @@ public class EditorHelpTests extends TestSuite {
 			"}";
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 
-		// Local component - ok
+		// Local block - ok
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		Block main_a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", main_a_add.name());
-		assertFalse(main_a_add.getInParameter(0).canAccess());
-		assertTrue(main_a_add.getInParameter(0).canModifyToAccess());
+		assertFalse(main_a_add.getInPort(0).canAccess());
+		assertTrue(main_a_add.getInPort(0).canModifyToAccess());
 
-		// Inherited component - not ok
+		// Inherited block - not ok
 		DiagramType dtSubMain = (DiagramType) cu.getDeclaration(1);
 		Block subMain_a_add = dtSubMain.blocks().getChild(0);
 		assertEquals("a$add", subMain_a_add.name());
-		assertFalse(subMain_a_add.getInParameter(0).canAccess());
-		assertFalse(subMain_a_add.getInParameter(0).canModifyToAccess());
+		assertFalse(subMain_a_add.getInPort(0).canAccess());
+		assertFalse(subMain_a_add.getInPort(0).canModifyToAccess());
 	}
 	
 	@Test
@@ -311,13 +311,13 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
-		assertFalse(a_b_add.getInParameter(0).canAccess());
-		assertTrue(a_b_add.getInParameter(0).canModifyToAccess());
+		assertFalse(a_b_add.getInPort(0).canAccess());
+		assertTrue(a_b_add.getInPort(0).canModifyToAccess());
 
 		Block a_b_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$b$add2", a_b_add2.name());
-		assertFalse(a_b_add2.getInParameter(0).canAccess());
-		assertTrue(a_b_add2.getInParameter(0).canModifyToAccess());
+		assertFalse(a_b_add2.getInPort(0).canAccess());
+		assertTrue(a_b_add2.getInPort(0).canModifyToAccess());
 	}
 	
 	@Test
@@ -336,9 +336,9 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_b_c_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$c$add", a_b_c_add.name());
-		assertFalse(a_b_c_add.getInParameter(0).canAccess());
-		assertTrue(a_b_c_add.getInParameter(0).canModifyToAccess());
-		assertFalse(a_b_c_add.getInParameter(0).hasAnonymousTypesTransitively());
+		assertFalse(a_b_c_add.getInPort(0).canAccess());
+		assertTrue(a_b_c_add.getInPort(0).canModifyToAccess());
+		assertFalse(a_b_c_add.getInPort(0).hasAnonymousTypesTransitively());
 	}
 	
 	@Test
@@ -357,10 +357,10 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
-		assertFalse(a_b_add.getInParameter(0).canAccess());
-		assertFalse(a_b_add.getInParameter(0).canModifyToAccess());
-		assertFalse(a_b_add.getInParameter(1).canAccess());
-		assertFalse(a_b_add.getInParameter(1).canModifyToAccess());
+		assertFalse(a_b_add.getInPort(0).canAccess());
+		assertFalse(a_b_add.getInPort(0).canModifyToAccess());
+		assertFalse(a_b_add.getInPort(1).canAccess());
+		assertFalse(a_b_add.getInPort(1).canModifyToAccess());
 
 	}
 	
@@ -380,17 +380,17 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
-		assertFalse(a_add.getInParameter(0).canAccess());
-		assertTrue(a_add.getInParameter(0).canModifyToAccess());
+		assertFalse(a_add.getInPort(0).canAccess());
+		assertTrue(a_add.getInPort(0).canModifyToAccess());
 		
 		Block a_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$add2", a_add2.name());
-		assertFalse(a_add2.getInParameter(0).canAccess());
-		assertTrue(a_add2.getInParameter(0).canModifyToAccess());
+		assertFalse(a_add2.getInPort(0).canAccess());
+		assertTrue(a_add2.getInPort(0).canModifyToAccess());
 
 		// Access a$add.in1
 		a_add = dtMain.blocks().getChild(0);
-		Pair<Block, VarUse> p = a_add.getInParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p = a_add.getInPort(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
@@ -398,7 +398,7 @@ public class EditorHelpTests extends TestSuite {
 
 		// Access a$add2.in1
 		a_add2 = dtMain.blocks().getChild(1);
-		Pair<Block, VarUse> p2 = a_add2.getInParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p2 = a_add2.getInPort(0).modifyToAccess();
 		assertNotNull(p2);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p2.second));
 		cu.program().flushAllAttributes();
@@ -432,17 +432,17 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
-		assertFalse(a_b_add.getInParameter(0).canAccess());
-		assertTrue(a_b_add.getInParameter(0).canModifyToAccess());
+		assertFalse(a_b_add.getInPort(0).canAccess());
+		assertTrue(a_b_add.getInPort(0).canModifyToAccess());
 		
 		Block a_b_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$b$add2", a_b_add2.name());
-		assertFalse(a_b_add2.getInParameter(0).canAccess());
-		assertTrue(a_b_add2.getInParameter(0).canModifyToAccess());
+		assertFalse(a_b_add2.getInPort(0).canAccess());
+		assertTrue(a_b_add2.getInPort(0).canModifyToAccess());
 		
 		// Access a$b$add.in1
 		a_b_add = dtMain.blocks().getChild(0);
-		Pair<Block, VarUse> p = a_b_add.getInParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p = a_b_add.getInPort(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
@@ -450,7 +450,7 @@ public class EditorHelpTests extends TestSuite {
 		
 		// Access a$b$add2.in1
 		a_b_add2 = dtMain.blocks().getChild(1);
-		Pair<Block, VarUse> p2 = a_b_add2.getInParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p2 = a_b_add2.getInPort(0).modifyToAccess();
 		assertNotNull(p2);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p2.second));
 		cu.program().flushAllAttributes();
@@ -475,11 +475,11 @@ public class EditorHelpTests extends TestSuite {
 		// Remove connection and try to access it again
 		dtMain.getFlowDeclList().removeChild(0);
 		a_b_add = dtMain.blocks().getChild(0);
-		assertTrue(a_b_add.getInParameter(0).canAccess());
-		assertFalse(a_b_add.getInParameter(0).canModifyToAccess());
+		assertTrue(a_b_add.getInPort(0).canAccess());
+		assertFalse(a_b_add.getInPort(0).canModifyToAccess());
 		
 		// Access a$b$add.in1 again
-		VarUse access = a_b_add.getInParameter(0).access();
+		VarUse access = a_b_add.getInPort(0).access();
 		Connection newConn = new Connection(new SimpleVarUse("in"), access);
 		dtMain.getFlowDecls().insertChild(newConn, 0);
 		cu.program().flushAllAttributes();
@@ -501,17 +501,17 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
-		assertFalse(a_add.getOutParameter(0).canAccess());
-		assertTrue(a_add.getOutParameter(0).canModifyToAccess());
+		assertFalse(a_add.getOutPort(0).canAccess());
+		assertTrue(a_add.getOutPort(0).canModifyToAccess());
 		
 		Block a_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$add2", a_add2.name());
-		assertFalse(a_add2.getOutParameter(0).canAccess());
-		assertTrue(a_add2.getOutParameter(0).canModifyToAccess());
+		assertFalse(a_add2.getOutPort(0).canAccess());
+		assertTrue(a_add2.getOutPort(0).canModifyToAccess());
 
 		// Access a$add.out
 		a_add = dtMain.blocks().getChild(0);
-		Pair<Block, VarUse> p = a_add.getOutParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p = a_add.getOutPort(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(p.second, new SimpleVarUse("out1")));
 		cu.program().flushAllAttributes();
@@ -519,7 +519,7 @@ public class EditorHelpTests extends TestSuite {
 		
 		// Access a$add2.out
 		a_add2 = dtMain.blocks().getChild(1);
-		Pair<Block, VarUse> p2 = a_add2.getOutParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p2 = a_add2.getOutPort(0).modifyToAccess();
 		assertNotNull(p2);
 		dtMain.addFlowDecl(new Connection(p2.second, new SimpleVarUse("out2")));
 		cu.program().flushAllAttributes();
@@ -552,12 +552,12 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
-		assertFalse(a_b_add.getOutParameter(0).canAccess());
-		assertTrue(a_b_add.getOutParameter(0).canModifyToAccess());
+		assertFalse(a_b_add.getOutPort(0).canAccess());
+		assertTrue(a_b_add.getOutPort(0).canModifyToAccess());
 		
 		// Access a$add.out
 		a_b_add = dtMain.blocks().getChild(0);
-		Pair<Block, VarUse> p = a_b_add.getOutParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p = a_b_add.getOutPort(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(p.second, new SimpleVarUse("out")));
 		cu.program().flushAllAttributes();
@@ -591,12 +591,12 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
-		assertFalse(a_add.getInParameter(0).canAccess());
-		assertTrue(a_add.getInParameter(0).canModifyToAccess());
+		assertFalse(a_add.getInPort(0).canAccess());
+		assertTrue(a_add.getInPort(0).canModifyToAccess());
 		
 		// Access a$add.in1
 		a_add = dtMain.blocks().getChild(0);
-		Pair<Block, VarUse> p = a_add.getInParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p = a_add.getInPort(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
@@ -626,12 +626,12 @@ public class EditorHelpTests extends TestSuite {
 		Block a_b_add = dtMain.blocks().getChild(0);
 		
 		assertEquals("a$b$Add_1", a_b_add.name());
-		assertFalse(a_b_add.getInParameter(0).canAccess());
-		assertTrue(a_b_add.getInParameter(0).canModifyToAccess());
+		assertFalse(a_b_add.getInPort(0).canAccess());
+		assertTrue(a_b_add.getInPort(0).canModifyToAccess());
 		
 		// Access a$b$Add_1.in1
 		a_b_add = dtMain.blocks().getChild(0);
-		Pair<Block, VarUse> p = a_b_add.getInParameter(0).modifyToAccess();
+		Pair<Block, VarUse> p = a_b_add.getInPort(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
@@ -954,8 +954,8 @@ public class EditorHelpTests extends TestSuite {
 		
 		Block a = (Block) dtMain.lookup("a");
 		Block b = (Block) a.type().lookup("b");
-		java.util.List<Block> components = Arrays.asList(a, b);
-		Block newBlock = Block.addAnonymousTypesForNestedBlocks(components);
+		java.util.List<Block> blocks = Arrays.asList(a, b);
+		Block newBlock = Block.addAnonymousTypesForNestedBlocks(blocks);
 		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
@@ -989,8 +989,8 @@ public class EditorHelpTests extends TestSuite {
 		Block a = (Block) dtMain.lookup("a");
 		Block b = (Block) a.type().lookup("b");
 		Block c = (Block) b.type().lookup("c");
-		java.util.List<Block> components = Arrays.asList(a, b, c);
-		Block newBlock = Block.addAnonymousTypesForNestedBlocks(components);
+		java.util.List<Block> blockcomponents = Arrays.asList(a, b, c);
+		Block newBlock = Block.addAnonymousTypesForNestedBlocks(blockcomponents);
 		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
@@ -1056,7 +1056,7 @@ public class EditorHelpTests extends TestSuite {
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
 		Block mainAdd = dtMain.blocks().getChild(0);
-		mainAdd.getInParameter(0).modifyToAccess();
+		mainAdd.getInPort(0).modifyToAccess();
 		
 		String expected =
 			"diagramtype Main {\n" +
@@ -1087,7 +1087,7 @@ public class EditorHelpTests extends TestSuite {
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
 		Block mainAdd = dtMain.blocks().getChild(0);
-		mainAdd.getInParameter(0).modifyToAccess();
+		mainAdd.getInPort(0).modifyToAccess();
 		
 		String expected =
 			"diagramtype Main {\n" +
@@ -1120,7 +1120,7 @@ public class EditorHelpTests extends TestSuite {
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
 		Block a = (Block) dtMain.lookup("a");
 		Block b = (Block) a.type().lookup("b");
-		ComponentParameter in = (ComponentParameter) b.findMember("in2");
+		Port in = (Port) b.findMember("in2");
 		
 		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(a, a, in, null);
 		assertNotNull(p);
@@ -1165,7 +1165,7 @@ public class EditorHelpTests extends TestSuite {
 		Block a = (Block) dtMain.lookup("a");
 		Block b = (Block) a.type().lookup("b");
 		Block c = (Block) b.type().lookup("c");
-		ComponentParameter in = (ComponentParameter) c.findMember("in");
+		Port in = (Port) c.findMember("in");
 		
 		try {
 			// Reversing the arguments should yield an exception
@@ -1220,7 +1220,7 @@ public class EditorHelpTests extends TestSuite {
 		Block a = (Block) dtMain.lookup("a");
 		Block b = (Block) a.type().lookup("b");
 		Block c = (Block) b.type().lookup("c");
-		ComponentParameter in = (ComponentParameter) c.findMember("in");
+		Port in = (Port) c.findMember("in");
 		
 		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
 		assertNotNull(p);
