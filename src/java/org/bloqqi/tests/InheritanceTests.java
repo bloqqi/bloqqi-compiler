@@ -258,9 +258,9 @@ public class InheritanceTests extends TestSuite {
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		DiagramType D = (DiagramType) cu.typeDecls().get(2);
-		assertEquals(1, D.getComponent(0).dfo());
-		assertEquals(2, D.getComponent(1).dfo());
-		assertEquals(3, D.getComponent(2).dfo());
+		assertEquals(1, D.getBlock(0).dfo());
+		assertEquals(2, D.getBlock(1).dfo());
+		assertEquals(3, D.getBlock(2).dfo());
 	}
 	
 	@Test
@@ -279,13 +279,13 @@ public class InheritanceTests extends TestSuite {
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		DiagramType B = (DiagramType) cu.typeDecls().get(1);
-		assertEquals(2, B.getComponent(0).dfo());
-		assertEquals(1, B.getComponent(1).dfo());
+		assertEquals(2, B.getBlock(0).dfo());
+		assertEquals(1, B.getBlock(1).dfo());
 		
 		DiagramType D = (DiagramType) cu.typeDecls().get(2);
-		assertEquals(3, D.getComponent(0).dfo());
-		assertEquals(2, D.getComponent(1).dfo());
-		assertEquals(1, D.getComponent(2).dfo());
+		assertEquals(3, D.getBlock(0).dfo());
+		assertEquals(2, D.getBlock(1).dfo());
+		assertEquals(1, D.getBlock(2).dfo());
 	}
 	
 	@Test
@@ -304,9 +304,9 @@ public class InheritanceTests extends TestSuite {
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		DiagramType D = (DiagramType) cu.typeDecls().get(2);
-		assertEquals(3, D.getComponent(0).dfo());
-		assertEquals(1, D.getComponent(1).dfo());
-		assertEquals(2, D.getComponent(2).dfo());
+		assertEquals(3, D.getBlock(0).dfo());
+		assertEquals(1, D.getBlock(1).dfo());
+		assertEquals(2, D.getBlock(2).dfo());
 	}
 	
 	@Test
@@ -315,10 +315,10 @@ public class InheritanceTests extends TestSuite {
 		CompilationUnit cu = parseAndPrettyPrint(s);
 
 		DiagramType D = (DiagramType) cu.typeDecls().get(4);
-		assertEquals(1, D.getComponent(0).dfo());
-		assertEquals(4, D.getComponent(1).dfo());
-		assertEquals(2, D.getComponent(2).dfo());
-		assertEquals(3, D.getComponent(3).dfo());
+		assertEquals(1, D.getBlock(0).dfo());
+		assertEquals(4, D.getBlock(1).dfo());
+		assertEquals(2, D.getBlock(2).dfo());
+		assertEquals(3, D.getBlock(3).dfo());
 	}
 
 	@Test
@@ -337,8 +337,8 @@ public class InheritanceTests extends TestSuite {
 		}
 		
 		DiagramType D = (DiagramType) cu.typeDecls().get(4);
-		for (Component c: D.getComponents()) {
-			assertTrue(c.isInherited());
+		for (Block b: D.getBlocks()) {
+			assertTrue(b.isInherited());
 		}
 		for (Connection c: D.getConnections()) {
 			assertTrue(c.isInherited());

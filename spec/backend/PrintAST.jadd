@@ -3,7 +3,7 @@ aspect PrintAST {
 	syn String ASTNode.printASTInfo() = "";
 	eq VarUse.printASTInfo() = decl() + ", " + type();
 	eq AbstractSimpleVarUse.printASTInfo() = getID() + ", " + decl() + ", " + type();
-	eq Component.printASTInfo() {
+	eq Block.printASTInfo() {
 		String s = name() + ", ";
 		s += diagramType().name() + ", ";
 		s += declaredInDiagramType().name() + ", ";
@@ -14,7 +14,7 @@ aspect PrintAST {
 	eq DotVarUse.printASTInfo() = toString() + ", " + decl();
 	eq Parameter.printASTInfo() = uses().toString();
 	eq DiagramType.printASTInfo() = name() + ", " + sortedRecommendations();
-	eq RecommendationComponent.printASTInfo() = interceptingAnchors() + ", " + conflictingRecommendations().toString();
+	eq RecommendationBlock.printASTInfo() = interceptingAnchors() + ", " + conflictingRecommendations().toString();
 	eq TypeUse.printASTInfo() = toString() + ", " + decl();
 	eq Variable.printASTInfo() = name();
 	 
@@ -50,16 +50,16 @@ aspect PrintAST {
 		getInParameters().printAST("InParameters", i+1);
 		getOutParameters().printAST("OutParameters", i+1);
 		getVariables().printAST("Variables", i+1);
-		getComponents().printAST("Components", i+1);
+		getBlocks().printAST("Blocks", i+1);
 		getConnections().printAST("Connections", i+1);
 		recommendedElements().printAST("recommendedElements()", i+1);
 	}
-	protected void Component.printAST(String prefix, int i) {
+	protected void Block.printAST(String prefix, int i) {
 		super.printAST(prefix, i);
 		getInParameters().printAST("InParameters", i+1);
 		getOutParameters().printAST("OutParameters", i+1);
 	}
-	protected void WiredComponent.printAST(String prefix, int i) {
+	protected void WiredBlock.printAST(String prefix, int i) {
 		super.printAST(prefix, i);
 		flowDecls().printAST("flowDecls", i+1);
 	}

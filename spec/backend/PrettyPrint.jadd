@@ -66,8 +66,8 @@ aspect PrettyPrint {
 		for (Variable v : getLocalVariables()) {
 			sb.append(v.indent() + v.prettyPrint() + ";\n");
 		} 
-		for (Component c : getLocalComponents()) {
-			sb.append(c.indent() + c.prettyPrint() + ";\n");
+		for (Block b : getLocalBlocks()) {
+			sb.append(b.indent() + b.prettyPrint() + ";\n");
 		}
 		for (FlowDecl fd : getFlowDecls()) {
 			sb.append(fd.indent() + fd.prettyPrint() + ";\n");
@@ -90,8 +90,8 @@ aspect PrettyPrint {
 		sb.append("}\n");
 	}
 	public abstract String RecommendationElement.prettyPrint();
-	public String RecommendationComponent.prettyPrint() {
-		return getComponent().prettyPrint();
+	public String RecommendationBlock.prettyPrint() {
+		return getBlock().prettyPrint();
 	}
 	public String RecommendationBefore.prettyPrint() {
 		return getBeforeVarUse() + " before " + getAfterVarUse();
@@ -143,7 +143,7 @@ aspect PrettyPrint {
 		return getDeclaredVariable().prettyPrintKind();
 	}
 
-	public String Component.prettyPrint() {
+	public String Block.prettyPrint() {
 		String inline = getModifiers().isInline() ? "inline " : "";
 		if (getModifiers().isOnSimpleNameForm() && !hasAnonymousDiagramType()) {
 			return inline + getName().prettyPrint();
@@ -151,13 +151,13 @@ aspect PrettyPrint {
 			return inline + getName().prettyPrint() + ": " + prettyPrintType();
 		}
 	}
-	public String RedeclareComponent.prettyPrint() {
+	public String RedeclareBlock.prettyPrint() {
 		return "redeclare " + super.prettyPrint();
 	}
-	public String Component.prettyPrintType() {
+	public String Block.prettyPrintType() {
 		return getType().prettyPrint();
 	}
-	public String WiredComponent.prettyPrintType() {
+	public String WiredBlock.prettyPrintType() {
 		String pars = getWiredComponentParameters().toString(", ");
 		String typeUse;
 		String anonType;

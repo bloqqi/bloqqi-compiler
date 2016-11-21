@@ -4,13 +4,13 @@ import static org.junit.Assert.*;
 
 
 import org.junit.Test;
-import org.bloqqi.compiler.ast.Component;
+import org.bloqqi.compiler.ast.Block;
 import org.bloqqi.compiler.ast.DiagramType;
 import org.bloqqi.compiler.ast.Modifiers;
 import org.bloqqi.compiler.ast.Pair;
 import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.compiler.ast.TypeUse;
-import org.bloqqi.compiler.ast.WiredComponent;
+import org.bloqqi.compiler.ast.WiredBlock;
 import org.bloqqi.tests.testsuite.TestSuite;
 
 public class ExtractSubTypeAsBlockTests extends TestSuite {
@@ -29,7 +29,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -46,8 +46,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[in, out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[in, out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -71,7 +71,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -89,8 +89,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[in, out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[in, out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -115,7 +115,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -132,8 +132,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -160,7 +160,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -177,8 +177,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[block.in]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[block.in]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -205,7 +205,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -225,8 +225,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[in2: Int, =>out2: Int, out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[in2: Int, =>out2: Int, out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -252,7 +252,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -269,8 +269,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[block.out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[block.out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -299,7 +299,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -319,8 +319,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[block.out, out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[block.out, out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -342,7 +342,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -360,8 +360,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[in, out, out2]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[in, out, out2]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -391,7 +391,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		
 		assertFalse(dtB.isLocallyEmpty());
 		assertTrue(dtB.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
+		Pair<DiagramType, WiredBlock> p = dtB.extractsubTypeAsWiredBlock("BWrapper", "bWrapper");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtA, p.second);
@@ -411,8 +411,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "bWrapper: BWrapper[out]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "bWrapper: BWrapper[out]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -437,7 +437,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("ValveExtension", "Valve2");
+		Pair<DiagramType, WiredBlock> p = dtTwo.extractsubTypeAsWiredBlock("ValveExtension", "Valve2");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtTank, p.second);
@@ -460,8 +460,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "Valve2: ValveExtension[Le_1.out, fill2: Bool, filling]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "Valve2: ValveExtension[Le_1.out, fill2: Bool, filling]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -485,7 +485,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		
 		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("PumpExtension", "Pump2");
+		Pair<DiagramType, WiredBlock> p = dtTwo.extractsubTypeAsWiredBlock("PumpExtension", "Pump2");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtTank, p.second);
@@ -508,8 +508,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 				"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "Pump2: PumpExtension[Le_2.out, empty2: Bool, emptying]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "Pump2: PumpExtension[Le_2.out, empty2: Bool, emptying]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -543,7 +543,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("HeatingExtension", "Heating");
+		Pair<DiagramType, WiredBlock> p = dtTwo.extractsubTypeAsWiredBlock("HeatingExtension", "Heating");
 
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtTank, p.second);
@@ -575,8 +575,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "Heating: HeatingExtension[level.out, heat: Bool, =>heating: Bool]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "Heating: HeatingExtension[level.out, heat: Bool, =>heating: Bool]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -608,7 +608,7 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 
 		assertFalse(dtTwo.isLocallyEmpty());
 		assertTrue(dtTwo.canExtractSubtypeAsBlock());
-		Pair<DiagramType, WiredComponent> p = dtTwo.extractsubTypeAsWiredBlock("AgitationExtension", "Agitation");
+		Pair<DiagramType, WiredBlock> p = dtTwo.extractsubTypeAsWiredBlock("AgitationExtension", "Agitation");
 		
 		program.getCompilationUnit(0).addDeclaration(p.first);
 		createAndAddSubtypeWith(dtTank, p.second);
@@ -641,8 +641,8 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedDiagramType, p.first.prettyPrint());
 		
-		String expectedComponent = "Agitation: AgitationExtension[level.out, =>agitating: Bool, agitate: Bool, empty, pump.interlock]";
-		assertEquals(expectedComponent, p.second.prettyPrint());
+		String expectedBlock = "Agitation: AgitationExtension[level.out, =>agitating: Bool, agitate: Bool, empty, pump.interlock]";
+		assertEquals(expectedBlock, p.second.prettyPrint());
 		
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 	}
@@ -777,12 +777,12 @@ public class ExtractSubTypeAsBlockTests extends TestSuite {
 		assertTrue(dtB.isLocallyEmpty());
 	}
 	
-	private DiagramType createAndAddSubtypeWith(DiagramType superType, Component component) {
+	private DiagramType createAndAddSubtypeWith(DiagramType superType, Block block) {
 		DiagramType dt = new DiagramType();
 		dt.setID("Sub" + superType.name());
 		dt.setModifiers(new Modifiers());
 		dt.addSuperType(new TypeUse(superType.name()));
-		dt.addLocalComponent(component);
+		dt.addLocalBlock(block);
 		superType.compUnit().addDeclaration(dt);
 		return dt;
 	}

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.bloqqi.compiler.ast.ASTNode;
 import org.bloqqi.compiler.ast.CompilationUnit;
-import org.bloqqi.compiler.ast.Component;
+import org.bloqqi.compiler.ast.Block;
 import org.bloqqi.compiler.ast.ComponentParameter;
 import org.bloqqi.compiler.ast.Connection;
 import org.bloqqi.compiler.ast.DiagramType;
@@ -22,7 +22,7 @@ import org.bloqqi.tests.testsuite.TestSuite;
 
 public class EditorHelpTests extends TestSuite {
 	@Test
-	public void testAccessInlinedComponentInParameter() {
+	public void testAccessInlinedBlockInParameter() {
 		String str = 
 			"diagramtype Main() {" +
 			"	inline A a;" +
@@ -38,21 +38,21 @@ public class EditorHelpTests extends TestSuite {
 
 		DiagramType dt = parseValidDiagramType(str);
 		
-		Component a_add = dt.components().getChild(0);
+		Block a_add = dt.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
 		assertTrue(a_add.getInParameter(0).canAccess());
 		assertEquals("a.in", a_add.getInParameter(0).access().toString());
 		assertFalse(a_add.getInParameter(1).canAccess());
 		assertNull(a_add.getInParameter(1).access());
 
-		Component a2_add = dt.components().getChild(1);
+		Block a2_add = dt.blocks().getChild(1);
 		assertEquals("a2$add", a2_add.name());
 		assertTrue(a2_add.getInParameter(0).canAccess());
 		assertEquals("a2.in", a2_add.getInParameter(0).access().toString());
 		assertFalse(a2_add.getInParameter(1).canAccess());
 		assertNull(a2_add.getInParameter(1).access());
 
-		Component a2_add2 = dt.components().getChild(2);
+		Block a2_add2 = dt.blocks().getChild(2);
 		assertEquals("a2$add2", a2_add2.name());
 		assertFalse(a2_add2.getInParameter(0).canAccess());
 		assertNull(a2_add2.getInParameter(0).access());
@@ -61,7 +61,7 @@ public class EditorHelpTests extends TestSuite {
 	}
 	
 	@Test
-	public void testAccessInlinedComponentOutParameter() {
+	public void testAccessInlinedBlockOutParameter() {
 		String str = 
 			"diagramtype Main() {" +
 			"	inline A a;" +
@@ -77,17 +77,17 @@ public class EditorHelpTests extends TestSuite {
 
 		DiagramType dt = parseValidDiagramType(str);
 		
-		Component a_add = dt.components().getChild(0);
+		Block a_add = dt.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
 		assertTrue(a_add.getOutParameter(0).canAccess());
 		assertEquals("a.out", a_add.getOutParameter(0).access().toString());
 
-		Component a2_add = dt.components().getChild(1);
+		Block a2_add = dt.blocks().getChild(1);
 		assertEquals("a2$add", a2_add.name());
 		assertTrue(a2_add.getOutParameter(0).canAccess());
 		assertEquals("a2.out", a2_add.getOutParameter(0).access().toString());
 		
-		Component a2_add2 = dt.components().getChild(2);
+		Block a2_add2 = dt.blocks().getChild(2);
 		assertEquals("a2$add2", a2_add2.name());
 		assertTrue(a2_add2.getOutParameter(0).canAccess());
 		assertEquals("a2.out2", a2_add2.getOutParameter(0).access().toString());
@@ -110,7 +110,7 @@ public class EditorHelpTests extends TestSuite {
 
 		DiagramType dt = parseValidDiagramType(str);
 		
-		Component a_b_add = dt.components().getChild(0);
+		Block a_b_add = dt.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
 		assertTrue(a_b_add.getInParameter(0).canAccess());
 		assertEquals("a.in", a_b_add.getInParameter(0).access().toString());
@@ -119,7 +119,7 @@ public class EditorHelpTests extends TestSuite {
 	}
 	
 	@Test
-	public void testAccessLocalInlinedComponents() {
+	public void testAccessLocalInlinedBlocks() {
 		String str = 
 			"diagramtype Main() {" +
 			"	inline A a; "+
@@ -130,7 +130,7 @@ public class EditorHelpTests extends TestSuite {
 
 		DiagramType dt = parseValidDiagramType(str);
 		
-		Component a_add = dt.components().getChild(0);
+		Block a_add = dt.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
 		assertFalse(a_add.getInParameter(0).canAccess());
 		assertFalse(a_add.getInParameter(1).canAccess());
@@ -250,25 +250,25 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a1_add = dtMain.components().getChild(0);
+		Block a1_add = dtMain.blocks().getChild(0);
 		assertEquals("a1$add", a1_add.name());
 		assertFalse(a1_add.getInParameter(0).canAccess());
 		assertTrue(a1_add.getInParameter(0).canModifyToAccess());
 		assertTrue(!a1_add.getInParameter(0).hasAnonymousTypesTransitively());
 
-		Component a2_add = dtMain.components().getChild(1);
+		Block a2_add = dtMain.blocks().getChild(1);
 		assertEquals("a2$add", a2_add.name());
 		assertFalse(a2_add.getInParameter(0).canAccess());
 		assertTrue(a2_add.getInParameter(0).canModifyToAccess());
 
-		Component a2_add2 = dtMain.components().getChild(2);
+		Block a2_add2 = dtMain.blocks().getChild(2);
 		assertEquals("a2$add2", a2_add2.name());
 		assertFalse(a2_add2.getInParameter(0).canAccess());
 		assertTrue(a2_add2.getInParameter(0).canModifyToAccess());
 	}
 	
 	@Test
-	public void canModifyToAccessOnlyLocalComponents() {
+	public void canModifyToAccessOnlyLocalBlocks() {
 		String str =
 			"diagramtype Main {" +
 			"	inline A { } a;" +
@@ -282,14 +282,14 @@ public class EditorHelpTests extends TestSuite {
 
 		// Local component - ok
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
-		Component main_a_add = dtMain.components().getChild(0);
+		Block main_a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", main_a_add.name());
 		assertFalse(main_a_add.getInParameter(0).canAccess());
 		assertTrue(main_a_add.getInParameter(0).canModifyToAccess());
 
 		// Inherited component - not ok
 		DiagramType dtSubMain = (DiagramType) cu.getDeclaration(1);
-		Component subMain_a_add = dtSubMain.components().getChild(0);
+		Block subMain_a_add = dtSubMain.blocks().getChild(0);
 		assertEquals("a$add", subMain_a_add.name());
 		assertFalse(subMain_a_add.getInParameter(0).canAccess());
 		assertFalse(subMain_a_add.getInParameter(0).canModifyToAccess());
@@ -309,12 +309,12 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_b_add = dtMain.components().getChild(0);
+		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
 		assertFalse(a_b_add.getInParameter(0).canAccess());
 		assertTrue(a_b_add.getInParameter(0).canModifyToAccess());
 
-		Component a_b_add2 = dtMain.components().getChild(1);
+		Block a_b_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$b$add2", a_b_add2.name());
 		assertFalse(a_b_add2.getInParameter(0).canAccess());
 		assertTrue(a_b_add2.getInParameter(0).canModifyToAccess());
@@ -334,7 +334,7 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_b_c_add = dtMain.components().getChild(0);
+		Block a_b_c_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$c$add", a_b_c_add.name());
 		assertFalse(a_b_c_add.getInParameter(0).canAccess());
 		assertTrue(a_b_c_add.getInParameter(0).canModifyToAccess());
@@ -355,7 +355,7 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_b_add = dtMain.components().getChild(0);
+		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
 		assertFalse(a_b_add.getInParameter(0).canAccess());
 		assertFalse(a_b_add.getInParameter(0).canModifyToAccess());
@@ -378,27 +378,27 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_add = dtMain.components().getChild(0);
+		Block a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
 		assertFalse(a_add.getInParameter(0).canAccess());
 		assertTrue(a_add.getInParameter(0).canModifyToAccess());
 		
-		Component a_add2 = dtMain.components().getChild(1);
+		Block a_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$add2", a_add2.name());
 		assertFalse(a_add2.getInParameter(0).canAccess());
 		assertTrue(a_add2.getInParameter(0).canModifyToAccess());
 
 		// Access a$add.in1
-		a_add = dtMain.components().getChild(0);
-		Pair<Component, VarUse> p = a_add.getInParameter(0).modifyToAccess();
+		a_add = dtMain.blocks().getChild(0);
+		Pair<Block, VarUse> p = a_add.getInParameter(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
 //		assertEquals("[]", cu.errors().toString());
 
 		// Access a$add2.in1
-		a_add2 = dtMain.components().getChild(1);
-		Pair<Component, VarUse> p2 = a_add2.getInParameter(0).modifyToAccess();
+		a_add2 = dtMain.blocks().getChild(1);
+		Pair<Block, VarUse> p2 = a_add2.getInParameter(0).modifyToAccess();
 		assertNotNull(p2);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p2.second));
 		cu.program().flushAllAttributes();
@@ -430,27 +430,27 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_b_add = dtMain.components().getChild(0);
+		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
 		assertFalse(a_b_add.getInParameter(0).canAccess());
 		assertTrue(a_b_add.getInParameter(0).canModifyToAccess());
 		
-		Component a_b_add2 = dtMain.components().getChild(1);
+		Block a_b_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$b$add2", a_b_add2.name());
 		assertFalse(a_b_add2.getInParameter(0).canAccess());
 		assertTrue(a_b_add2.getInParameter(0).canModifyToAccess());
 		
 		// Access a$b$add.in1
-		a_b_add = dtMain.components().getChild(0);
-		Pair<Component, VarUse> p = a_b_add.getInParameter(0).modifyToAccess();
+		a_b_add = dtMain.blocks().getChild(0);
+		Pair<Block, VarUse> p = a_b_add.getInParameter(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
 		assertEquals("[]", cu.errors().toString());
 		
 		// Access a$b$add2.in1
-		a_b_add2 = dtMain.components().getChild(1);
-		Pair<Component, VarUse> p2 = a_b_add2.getInParameter(0).modifyToAccess();
+		a_b_add2 = dtMain.blocks().getChild(1);
+		Pair<Block, VarUse> p2 = a_b_add2.getInParameter(0).modifyToAccess();
 		assertNotNull(p2);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p2.second));
 		cu.program().flushAllAttributes();
@@ -474,7 +474,7 @@ public class EditorHelpTests extends TestSuite {
 		
 		// Remove connection and try to access it again
 		dtMain.getFlowDeclList().removeChild(0);
-		a_b_add = dtMain.components().getChild(0);
+		a_b_add = dtMain.blocks().getChild(0);
 		assertTrue(a_b_add.getInParameter(0).canAccess());
 		assertFalse(a_b_add.getInParameter(0).canModifyToAccess());
 		
@@ -499,27 +499,27 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_add = dtMain.components().getChild(0);
+		Block a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
 		assertFalse(a_add.getOutParameter(0).canAccess());
 		assertTrue(a_add.getOutParameter(0).canModifyToAccess());
 		
-		Component a_add2 = dtMain.components().getChild(1);
+		Block a_add2 = dtMain.blocks().getChild(1);
 		assertEquals("a$add2", a_add2.name());
 		assertFalse(a_add2.getOutParameter(0).canAccess());
 		assertTrue(a_add2.getOutParameter(0).canModifyToAccess());
 
 		// Access a$add.out
-		a_add = dtMain.components().getChild(0);
-		Pair<Component, VarUse> p = a_add.getOutParameter(0).modifyToAccess();
+		a_add = dtMain.blocks().getChild(0);
+		Pair<Block, VarUse> p = a_add.getOutParameter(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(p.second, new SimpleVarUse("out1")));
 		cu.program().flushAllAttributes();
 		assertEquals("[]", cu.errors().toString());
 		
 		// Access a$add2.out
-		a_add2 = dtMain.components().getChild(1);
-		Pair<Component, VarUse> p2 = a_add2.getOutParameter(0).modifyToAccess();
+		a_add2 = dtMain.blocks().getChild(1);
+		Pair<Block, VarUse> p2 = a_add2.getOutParameter(0).modifyToAccess();
 		assertNotNull(p2);
 		dtMain.addFlowDecl(new Connection(p2.second, new SimpleVarUse("out2")));
 		cu.program().flushAllAttributes();
@@ -550,14 +550,14 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_b_add = dtMain.components().getChild(0);
+		Block a_b_add = dtMain.blocks().getChild(0);
 		assertEquals("a$b$add", a_b_add.name());
 		assertFalse(a_b_add.getOutParameter(0).canAccess());
 		assertTrue(a_b_add.getOutParameter(0).canModifyToAccess());
 		
 		// Access a$add.out
-		a_b_add = dtMain.components().getChild(0);
-		Pair<Component, VarUse> p = a_b_add.getOutParameter(0).modifyToAccess();
+		a_b_add = dtMain.blocks().getChild(0);
+		Pair<Block, VarUse> p = a_b_add.getOutParameter(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(p.second, new SimpleVarUse("out")));
 		cu.program().flushAllAttributes();
@@ -589,14 +589,14 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_add = dtMain.components().getChild(0);
+		Block a_add = dtMain.blocks().getChild(0);
 		assertEquals("a$add", a_add.name());
 		assertFalse(a_add.getInParameter(0).canAccess());
 		assertTrue(a_add.getInParameter(0).canModifyToAccess());
 		
 		// Access a$add.in1
-		a_add = dtMain.components().getChild(0);
-		Pair<Component, VarUse> p = a_add.getInParameter(0).modifyToAccess();
+		a_add = dtMain.blocks().getChild(0);
+		Pair<Block, VarUse> p = a_add.getInParameter(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
@@ -623,15 +623,15 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a_b_add = dtMain.components().getChild(0);
+		Block a_b_add = dtMain.blocks().getChild(0);
 		
 		assertEquals("a$b$Add_1", a_b_add.name());
 		assertFalse(a_b_add.getInParameter(0).canAccess());
 		assertTrue(a_b_add.getInParameter(0).canModifyToAccess());
 		
 		// Access a$b$Add_1.in1
-		a_b_add = dtMain.components().getChild(0);
-		Pair<Component, VarUse> p = a_b_add.getInParameter(0).modifyToAccess();
+		a_b_add = dtMain.blocks().getChild(0);
+		Pair<Block, VarUse> p = a_b_add.getInParameter(0).modifyToAccess();
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new SimpleVarUse("in"), p.second));
 		cu.program().flushAllAttributes();
@@ -664,9 +664,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -692,10 +692,10 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
+		Block mainAdd = dtMain.blocks().getChild(0);
 
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -723,9 +723,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 
 		String expected =
@@ -754,9 +754,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -788,9 +788,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtSubMain = (DiagramType) cu.getDeclaration(1);
 
-		Component subMainAdd = dtSubMain.components().getChild(0);
-		Component newComponent = subMainAdd.addAnonymousTypesToInlinedComponent();
-		dtSubMain.getLocalComponents().setChild(newComponent, 0);
+		Block subMainAdd = dtSubMain.blocks().getChild(0);
+		Block newBlock = subMainAdd.addAnonymousTypesToInlinedBlock();
+		dtSubMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 
 		String expected =
@@ -819,9 +819,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -853,9 +853,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -889,9 +889,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -922,9 +922,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -952,11 +952,11 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component a = (Component) dtMain.lookup("a");
-		Component b = (Component) a.type().lookup("b");
-		java.util.List<Component> components = Arrays.asList(a, b);
-		Component newComponent = Component.addAnonymousTypesForNestedComponents(components);
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block a = (Block) dtMain.lookup("a");
+		Block b = (Block) a.type().lookup("b");
+		java.util.List<Block> components = Arrays.asList(a, b);
+		Block newBlock = Block.addAnonymousTypesForNestedBlocks(components);
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -986,12 +986,12 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 
-		Component a = (Component) dtMain.lookup("a");
-		Component b = (Component) a.type().lookup("b");
-		Component c = (Component) b.type().lookup("c");
-		java.util.List<Component> components = Arrays.asList(a, b, c);
-		Component newComponent = Component.addAnonymousTypesForNestedComponents(components);
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block a = (Block) dtMain.lookup("a");
+		Block b = (Block) a.type().lookup("b");
+		Block c = (Block) b.type().lookup("c");
+		java.util.List<Block> components = Arrays.asList(a, b, c);
+		Block newBlock = Block.addAnonymousTypesForNestedBlocks(components);
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -1025,9 +1025,9 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component mainAdd = dtMain.components().getChild(0);
-		Component newComponent = mainAdd.addAnonymousTypesToInlinedComponent();
-		dtMain.getLocalComponents().setChild(newComponent, 0);
+		Block mainAdd = dtMain.blocks().getChild(0);
+		Block newBlock = mainAdd.addAnonymousTypesToInlinedBlock();
+		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
 		String expected =
@@ -1055,7 +1055,7 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component mainAdd = dtMain.components().getChild(0);
+		Block mainAdd = dtMain.blocks().getChild(0);
 		mainAdd.getInParameter(0).modifyToAccess();
 		
 		String expected =
@@ -1086,7 +1086,7 @@ public class EditorHelpTests extends TestSuite {
 		CompilationUnit cu = parseValidProgram(str).getCompilationUnit(0);
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
 		
-		Component mainAdd = dtMain.components().getChild(0);
+		Block mainAdd = dtMain.blocks().getChild(0);
 		mainAdd.getInParameter(0).modifyToAccess();
 		
 		String expected =
@@ -1118,14 +1118,14 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Component a = (Component) dtMain.lookup("a");
-		Component b = (Component) a.type().lookup("b");
+		Block a = (Block) dtMain.lookup("a");
+		Block b = (Block) a.type().lookup("b");
 		ComponentParameter in = (ComponentParameter) b.findMember("in2");
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, a, in, null);
+		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(a, a, in, null);
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
-		dtMain.getLocalComponentList().setChild(p.first, 0);
+		dtMain.getLocalBlockList().setChild(p.first, 0);
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 		
@@ -1162,9 +1162,9 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Component a = (Component) dtMain.lookup("a");
-		Component b = (Component) a.type().lookup("b");
-		Component c = (Component) b.type().lookup("c");
+		Block a = (Block) dtMain.lookup("a");
+		Block b = (Block) a.type().lookup("b");
+		Block c = (Block) b.type().lookup("c");
 		ComponentParameter in = (ComponentParameter) c.findMember("in");
 		
 		try {
@@ -1175,10 +1175,10 @@ public class EditorHelpTests extends TestSuite {
 			// OK
 		}
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
+		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
-		dtMain.getLocalComponentList().setChild(p.first, 0);
+		dtMain.getLocalBlockList().setChild(p.first, 0);
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 
@@ -1217,15 +1217,15 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Component a = (Component) dtMain.lookup("a");
-		Component b = (Component) a.type().lookup("b");
-		Component c = (Component) b.type().lookup("c");
+		Block a = (Block) dtMain.lookup("a");
+		Block b = (Block) a.type().lookup("b");
+		Block c = (Block) b.type().lookup("c");
 		ComponentParameter in = (ComponentParameter) c.findMember("in");
 		
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
+		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(a, b, in, null);
 		assertNotNull(p);
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
-		dtMain.getLocalComponentList().setChild(p.first, 0);
+		dtMain.getLocalBlockList().setChild(p.first, 0);
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
 
@@ -1259,7 +1259,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.in2", "bin2");
+		Pair<Block, VarUse> p = dtMain.addConnectionsParameters("a.b.in2", "bin2");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1296,7 +1296,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
+		Pair<Block, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1336,7 +1336,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
+		Pair<Block, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1373,7 +1373,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a3.b.in2", "bin2");
+		Pair<Block, VarUse> p = dtMain.addConnectionsParameters("a3.b.in2", "bin2");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1445,7 +1445,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
+		Pair<Block, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());
@@ -1504,7 +1504,7 @@ public class EditorHelpTests extends TestSuite {
 			"}\n";
 		assertEquals(expected, dtMain.prettyPrint());
 		
-		DiagramType anonDt = dtMain.getLocalComponent(0).anonymousDiagramType();
+		DiagramType anonDt = dtMain.getLocalBlock(0).anonymousDiagramType();
 		Parameter binPar = (Parameter) anonDt.lookupInnerVarDecl("bin2");
 		assertSame(binPar, anonDt.isInnerParameterExposed("b.in2"));
 		assertNull(anonDt.isInnerParameterExposed("b.in"));
@@ -1536,7 +1536,7 @@ public class EditorHelpTests extends TestSuite {
 		Program program = parseValidProgram(str);
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		Pair<Component, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
+		Pair<Block, VarUse> p = dtMain.addConnectionsParameters("a.b.c.in", "bin");
 		dtMain.addFlowDecl(new Connection(new IntLiteral(5), p.second));
 		program.flushAllAttributes();
 		assertEquals("[]", program.getCompilationUnit(0).errors().toString());

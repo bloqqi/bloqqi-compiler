@@ -46,16 +46,16 @@ aspect RecommendationConfiguration {
 			return Collections.unmodifiableSortedSet(new TreeSet(mandatories.values()));
 		}
 		
-		public Component newAnonymousComponent(String componentName) {
-			Component component = new Component();
-			component.setModifiers(new Modifiers());
-			component.setName(new IdName(componentName));
+		public Block newAnonymousBlock(String blockName) {
+			Block block = new Block();
+			block.setModifiers(new Modifiers());
+			block.setName(new IdName(blockName));
 			if (containsChanges()) {
-				component.setType(new AnonymousType(newAnonymousDiagramType()));
+				block.setType(new AnonymousType(newAnonymousDiagramType()));
 			} else {
-				component.setType(new TypeUse(diagramType.name()));
+				block.setType(new TypeUse(diagramType.name()));
 			}
-			return component;
+			return block;
 		}
 
 		public DiagramType newDiagramType(String newName) {
@@ -63,7 +63,7 @@ aspect RecommendationConfiguration {
 			newDt.setID(newName);
 			newDt.setModifiers(new Modifiers());
 			newDt.addSuperType(new TypeUse(diagramType.name()));
-			addComponents(newDt);
+			addBlocks(newDt);
 			return newDt;
 		}
 
@@ -72,19 +72,19 @@ aspect RecommendationConfiguration {
 			newAdt.setID("<anonymous>");
 			newAdt.setModifiers(new Modifiers());
 			newAdt.addSuperType(new TypeUse(diagramType.name()));
-			addComponents(newAdt);
+			addBlocks(newAdt);
 			return newAdt;
 		}
 		
-		private void addComponents(DiagramType newDt) {
+		private void addBlocks(DiagramType newDt) {
 			for (OptionalFeature opt: computeSortedOptionals(optionals.values())) {
 				if (opt.isSelected()) {
-					newDt.addLocalComponent(opt.newComponent());
+					newDt.addLocalBlock(opt.newBlock());
 				}
 			}
 			for (MandatoryFeature m: mandatories.values()) {
 				if (m.isRedeclared()) {
-					newDt.addLocalComponent(m.newAnonymousRedeclare());
+					newDt.addLocalBlock(m.newAnonymousRedeclare());
 				}
 			}
 		}
@@ -132,24 +132,24 @@ aspect RecommendationConfiguration {
 		}
 		
 		public void match(DiagramType dt) {
-			for (Component c: dt.getLocalComponents()) {
-				if (c.type().isDiagramType()) {
-					DiagramType cType = (DiagramType) c.type();
+			for (Block b: dt.getLocalBlocks()) {
+				if (b.type().isDiagramType()) {
+					DiagramType bType = (DiagramType) b.type();
 
 					String typeName;
-					if (cType.isAnonymousType()) {
-						typeName = cType.directSuperTypes().iterator().next().name();
+					if (bType.isAnonymousType()) {
+						typeName = bType.directSuperTypes().iterator().next().name();
 					} else {
-						typeName = cType.name();
+						typeName = bType.name();
 					}
 				
-					OptionalFeature opt = optionals.get(c.name());
-					if (opt != null && !c.isLocallyRedeclared()) {
-						opt.match(cType, typeName);
+					OptionalFeature opt = optionals.get(b.name());
+					if (opt != null && !b.isLocallyRedeclared()) {
+						opt.match(bType, typeName);
 					} else {
-						MandatoryFeature m = mandatories.get(c.name());
-						if (m != null && c.isLocallyRedeclared()) {
-							m.match(cType, typeName);
+						MandatoryFeature m = mandatories.get(b.name());
+						if (m != null && b.isLocallyRedeclared()) {
+							m.match(bType, typeName);
 						}
 					}
 				}
@@ -196,11 +196,11 @@ aspect RecommendationConfiguration {
 		
 		public OptionalFeature(RecommendationGroup group) {
 			this.group = group;
-			defaultType = (DiagramType) group.superType().componentType();
+			defaultType = (DiagramType) group.superType().blockType();
 
 			SortedMap<String, OptionalFeatureAlternative> tmpMap = new TreeMap<>();
-			for (RecommendationComponent subRc: group.recommendedComponents()) {
-				for (DiagramType subType: subRc.componentType().namedSubTypes()) {
+			for (RecommendationBlock subRc: group.recommendedBlocks()) {
+				for (DiagramType subType: subRc.blockType().namedSubTypes()) {
 					boolean isDefault = subType == defaultType;
 					OptionalFeatureAlternative alt = new OptionalFeatureAlternative(this, subRc, subType, isDefault);
 					tmpMap.put(subType.name(), alt);
@@ -264,8 +264,8 @@ aspect RecommendationConfiguration {
 			return getName().compareTo(other.getName());
 		}
 
-		protected Component newComponent() {
-			return isSelected() ? getSelectedAlternative().newComponent() : null;
+		protected Block newBlock() {
+			return isSelected() ? getSelectedAlternative().newBlock() : null;
 		}
 	
 		public String toString() {
@@ -276,16 +276,16 @@ aspect RecommendationConfiguration {
 	
 	public class OptionalFeatureAlternative implements Comparable<OptionalFeatureAlternative> {
 		private final OptionalFeature optFeature;
-		private final RecommendationComponent rc;
+		private final RecommendationBlock rb;
 		private final DiagramType type;
 		private final boolean isDefault;
 		
 		private FeatureConfiguration conf;
 		
-		public OptionalFeatureAlternative(OptionalFeature optFeature, RecommendationComponent rc,
+		public OptionalFeatureAlternative(OptionalFeature optFeature, RecommendationBlock rb,
 				DiagramType type, boolean isDefault) {
 			this.optFeature = optFeature;
-			this.rc = rc;
+			this.rb = rb;
 			this.type = type;
 			this.isDefault = isDefault;
 		}
@@ -326,8 +326,8 @@ aspect RecommendationConfiguration {
 			for (InParameter in: type.getInParameters()) {
 				localParNames.add(in.name());
 			}
-			if (rc.getComponent().hasWiring()) {
-				for (InParameter in: rc.getComponent().wiring().connectedInParameters()) {
+			if (rb.getBlock().hasWiring()) {
+				for (InParameter in: rb.getBlock().wiring().connectedInParameters()) {
 					localParNames.remove(in.name());
 				}
 			}
@@ -348,7 +348,7 @@ aspect RecommendationConfiguration {
 			// Only add inner/nested parameters, and not parameters on the outermost level,
 			// since parameters on the outermost level already are exposed as parameters.
 			if (path.lastIndexOf(".") > 0) {
-				for (InParameter in: rc.getComponent().inParameters()) {
+				for (InParameter in: rb.getBlock().inParameters()) {
 					String parentPath = path.substring(0, path.lastIndexOf("."));
 					String s = parentPath + "." + in.name();
 					newInPars.add(s);
@@ -366,19 +366,19 @@ aspect RecommendationConfiguration {
 			}
 		}
 		
-		protected Component newComponent() {
-			if (rc.getComponent() instanceof WiredComponent) {
-				WiredComponent wiredComponent = (WiredComponent) rc.getComponent();
-				return new WiredComponent(
-						wiredComponent.getModifiers().treeCopy(),
+		protected Block newBlock() {
+			if (rb.getBlock() instanceof WiredBlock) {
+				WiredBlock wiredBlock = (WiredBlock) rb.getBlock();
+				return new WiredBlock(
+						wiredBlock.getModifiers().treeCopy(),
 						newType(),
-						wiredComponent.getName().treeCopy(),
-						wiredComponent.getWiredComponentParameterList().treeCopy());
+						wiredBlock.getName().treeCopy(),
+						wiredBlock.getWiredComponentParameterList().treeCopy());
 			} else {
-				return new Component(
-						rc.getComponent().getModifiers().treeCopy(),
+				return new Block(
+						rb.getBlock().getModifiers().treeCopy(),
 						newType(),
-						rc.getComponent().getName().treeCopy());
+						rb.getBlock().getName().treeCopy());
 			}
 		}
 	
@@ -402,8 +402,8 @@ aspect RecommendationConfiguration {
 		public MandatoryFeature(RecommendationReplaceable replaceable) {
 			this.replaceable = replaceable;
 			SortedMap<String, MandatoryFeatureAlternative> tmpMap = new TreeMap<>();
-			for (DiagramType subType: replaceable.componentType().namedSubTypes()) {
-				boolean isDefault = subType == replaceable.componentType();
+			for (DiagramType subType: replaceable.blockType().namedSubTypes()) {
+				boolean isDefault = subType == replaceable.blockType();
 				MandatoryFeatureAlternative alt = new MandatoryFeatureAlternative(this, subType, isDefault);
 				if (isDefault) {
 					selectedAlternative = alt;
@@ -448,8 +448,8 @@ aspect RecommendationConfiguration {
 			return selectedAlternative.getNewInParameters(path, defaultType);
 		}
 		
-		protected Component newAnonymousRedeclare() {
-			return new RedeclareComponent(
+		protected Block newAnonymousRedeclare() {
+			return new RedeclareBlock(
 				new Modifiers(),
 				selectedAlternative.newType(),
 				new IdName(replaceable.name()));
@@ -460,7 +460,7 @@ aspect RecommendationConfiguration {
 		}
 
 		public String toString() {
-			return replaceable.componentType().name();
+			return replaceable.blockType().name();
 		}
 	}
 	

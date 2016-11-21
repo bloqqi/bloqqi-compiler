@@ -9,14 +9,14 @@ aspect AutoLayout {
 		public int offsetY = 20;
 	}
 
-	syn int Component.autoLayoutX(AutoLayoutConfig c) 
+	syn int Block.autoLayoutX(AutoLayoutConfig c) 
 		= c.offsetX + (c.width + c.horizontalPadding) * (depth()-1);
-	syn int Component.autoLayoutY(AutoLayoutConfig c) 
+	syn int Block.autoLayoutY(AutoLayoutConfig c) 
 		= minY(c) + childrenHeight(c)/2 - c.height/2;
 
-	syn lazy int Component.minY(AutoLayoutConfig c) {
+	syn lazy int Block.minY(AutoLayoutConfig c) {
 		int minY = sinkPred() == null ? c.offsetY : sinkPred().minY(c);
-		for (Component sibling: sinkSiblings()) {
+		for (Block sibling: sinkSiblings()) {
 			if (sibling == this) {
 				break;
 			}
@@ -25,9 +25,9 @@ aspect AutoLayout {
 		return minY;
 	}
 
-	syn lazy int Component.childrenHeight(AutoLayoutConfig c) {
+	syn lazy int Block.childrenHeight(AutoLayoutConfig c) {
 		int h = 0;
-		for (Component child: children()) {
+		for (Block child: children()) {
 			h += child.childrenHeight(c);
 		}
 		h += (children().size() - 1) * c.verticalPadding;

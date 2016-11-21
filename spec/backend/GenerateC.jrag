@@ -143,9 +143,9 @@ aspect Structs {
 			}
 			sb.append("} " + returnTypeC() + ";\n");
 		}
-		for (Component c: components()) {
-			if (c.hasAnonymousDiagramType()) {
-				c.anonymousDiagramType().genStructs(sb);
+		for (Block b: blocks()) {
+			if (b.hasAnonymousDiagramType()) {
+				b.anonymousDiagramType().genStructs(sb);
 			}
 		}
 	}
@@ -171,9 +171,9 @@ aspect FunctionDeclarations {
 		sb.append(functionSignature() + ";\n");
 		
 		// Generate declarations for anonymous subtypes too
-		for (Component c: components()) {
-			if (c.hasAnonymousDiagramType()) {
-				c.anonymousDiagramType().genDecls(sb);
+		for (Block b: blocks()) {
+			if (b.hasAnonymousDiagramType()) {
+				b.anonymousDiagramType().genDecls(sb);
 			}
 		}
 	}
@@ -234,7 +234,7 @@ aspect FunctionDefinitions {
 	public void DiagramType.genFunctionDefinitionsC(StringBuilder sb) {
 		sb.append(functionSignature() + " {\n");
 		// Step 1: compute values
-		genComponentsC(sb);
+		genBlocksC(sb);
 		// Step 2: update variables
 		genUpdateVariablesC(sb);
 		// Step 3: return value
@@ -242,45 +242,45 @@ aspect FunctionDefinitions {
 		sb.append("}\n");
 		
 		// Generate code for anonymous subtypes
-		for (Component c: components()) {
-			if (c.hasAnonymousDiagramType()) {
-				c.anonymousDiagramType().genFunctionDefinitionsC(sb);
+		for (Block b: blocks()) {
+			if (b.hasAnonymousDiagramType()) {
+				b.anonymousDiagramType().genFunctionDefinitionsC(sb);
 			}
 		}
 	}
 	
-	private void DiagramType.genComponentsC(StringBuilder sb) {
-		// Sort components according to their data-flow order (DFO)
-		ArrayList<Component> list = new ArrayList<Component>();
-		for (Component c: getComponents()) {
-			list.add(c);
+	private void DiagramType.genBlocksC(StringBuilder sb) {
+		// Sort blocks according to their data-flow order (DFO)
+		ArrayList<Block> list = new ArrayList<Block>();
+		for (Block b: getBlocks()) {
+			list.add(b);
 		}
-		Collections.sort(list, new Comparator<Component>() {
-			public int compare(Component c1, Component c2) {
-				return c1.dfo() - c2.dfo();
+		Collections.sort(list, new Comparator<Block>() {
+			public int compare(Block b1, Block b2) {
+				return b1.dfo() - b2.dfo();
 			}
 		});
 		
-		for(Component c: list) {
+		for(Block b: list) {
 			sb.append("  ");
-			if (!c.type().returnTypeC().equals("void")) {
-				sb.append(c.type().returnTypeC() + " " + c.nameC() + " = ");
+			if (!b.type().returnTypeC().equals("void")) {
+				sb.append(b.type().returnTypeC() + " " + b.nameC() + " = ");
 			}
 			// Pass parameters
-			sb.append(c.type().nameC() + "(");
+			sb.append(b.type().nameC() + "(");
 			int i = 0;
-			for (ComponentParameter in: c.getInParameterList()) {
+			for (ComponentParameter in: b.getInParameterList()) {
 				if (i++ > 0) {
 					sb.append(", ");
 				}
 				sb.append(in.ingoingValueC());
 			}
 			// Pass state variable
-			if (c.type().containsVariablesTransitive()) {
-				if (c.getNumInParameter() > 0) {
+			if (b.type().containsVariablesTransitive()) {
+				if (b.getNumInParameter() > 0) {
 					sb.append(", ");
 				}
-				sb.append("&" + ASTNode.STATE_VAR + "->" + c.nameC());
+				sb.append("&" + ASTNode.STATE_VAR + "->" + b.nameC());
 			}
 			sb.append(");\n");
 		}
@@ -343,8 +343,8 @@ aspect StateStructs {
 		if (variables().getNumChild() > 0) {
 			return true;
 		}
-		for (Component c: components()) {
-			if (c.type().containsVariablesTransitive()) {
+		for (Block b: blocks()) {
+			if (b.type().containsVariablesTransitive()) {
 				return true;
 			}
 		}
@@ -394,9 +394,9 @@ aspect StateStructs {
 			for (Variable v: variables()) {
 				sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
 			}
-			for (Component c: components()) {
-				if (c.type().containsVariablesTransitive()) {
-					sb.append("  " + c.type().stateStructName() + " " + c.nameC() + ";\n");
+			for (Block b: blocks()) {
+				if (b.type().containsVariablesTransitive()) {
+					sb.append("  " + b.type().stateStructName() + " " + b.nameC() + ";\n");
 				}
 			}
 			sb.append("} " + stateStructName() + ";\n");

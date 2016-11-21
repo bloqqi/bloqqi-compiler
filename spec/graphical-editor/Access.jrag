@@ -3,15 +3,15 @@ aspect SimpleAccess {
 	
 	public abstract VarUse Anchor.access();
 	public VarUse ComponentParameter.access() {
-		if (belongsToInlinedComponent()) {
-			return accessInlinedComponent();
+		if (belongsToInlinedBlock()) {
+			return accessInlinedBlock();
 		} else {
 			VarUse src;
-			if (component().isInherited()) {
-				TypeUse u = new TypeUse(component().declaredInDiagramType().name());
-				src = new TypedSimpleVarUse(u, component().name());
+			if (block().isInherited()) {
+				TypeUse u = new TypeUse(block().declaredInDiagramType().name());
+				src = new TypedSimpleVarUse(u, block().name());
 			} else {
-				src = new SimpleVarUse(component().name());
+				src = new SimpleVarUse(block().name());
 			}
 			src = new DotVarUse(src, getParameter().name());
 			return src;
@@ -48,16 +48,16 @@ aspect SimpleAccess {
 }
 
 
-aspect AccessInlinedComponents {
-	protected VarUse ComponentParameter.accessInlinedComponent() {
-		if (!belongsToInlinedComponent()) {
+aspect AccessInlinedBlocks {
+	protected VarUse ComponentParameter.accessInlinedBlock() {
+		if (!belongsToInlinedBlock()) {
 			return null;
 		}
 			
-		String innerName = component().name();
+		String innerName = block().name();
 		innerName = innerName.substring(innerName.indexOf(ASTNode.INLINE_SEP)+1);
 			
-		DiagramType inlinedDt = (DiagramType) component().inlinedComponent().type();
+		DiagramType inlinedDt = (DiagramType) block().inlinedBlock().type();
 		VarDecl varDecl = inlinedDt.inheritedLookup(innerName).findMember(name());
 		if (!(varDecl instanceof ComponentParameter)) {
 			return null;
@@ -85,7 +85,7 @@ aspect AccessInlinedComponents {
 			}
 		}
 		
-		VarUse src = new SimpleVarUse(component().inlinedComponent().name());
+		VarUse src = new SimpleVarUse(block().inlinedBlock().name());
 		return new DotVarUse(src, node.name());
 	}
 }
@@ -97,25 +97,25 @@ aspect CanModifyToAccess {
 	eq WiringParameter.canModifyToAccess() = false;
 	eq Literal.canModifyToAccess() = false;
 	eq ComponentParameter.canModifyToAccess() {
-		if (!belongsToInlinedComponent()) {
+		if (!belongsToInlinedBlock()) {
 			return false;
 		}
 		
-		// Inlined components declared in supertype cannot be accessed
-		if (diagramType() != component().inlinedComponent().declaredInDiagramType()) {
+		// Inlined blocks declared in supertype cannot be accessed
+		if (diagramType() != block().inlinedBlock().declaredInDiagramType()) {
 			return false;
 		}
 		
 		// For in parameters, check that there are no incoming connections
 		if (isInParameter()) {
-			Component componentLastDiagram = null;
-			for (Component c: component().lastDiagramType().components()) {
-				if (c.name().equals(component().declaredComponent().name())) {
-					componentLastDiagram = c;
+			Block blockLastDiagram = null;
+			for (Block b: block().lastDiagramType().blocks()) {
+				if (b.name().equals(block().declaredBlock().name())) {
+					blockLastDiagram = b;
 					break;
 				}
 			}
-			ComponentParameter cpLastDiagram = componentLastDiagram.getInParameter(index());
+			ComponentParameter cpLastDiagram = blockLastDiagram.getInParameter(index());
 			if (!cpLastDiagram.ingoingConnections().isEmpty()) {
 				return false;
 			}
@@ -130,40 +130,40 @@ aspect CanModifyToAccess {
 	eq WiringParameter.hasAnonymousTypesTransitively() = false;
 	eq Literal.hasAnonymousTypesTransitively() = false;
 	eq ComponentParameter.hasAnonymousTypesTransitively() {
-		DiagramType inlinedAdt = component().inlinedComponent().anonymousDiagramType();
-		return component().lastDiagramType().isEnclosedBy(inlinedAdt);
+		DiagramType inlinedAdt = block().inlinedBlock().anonymousDiagramType();
+		return block().lastDiagramType().isEnclosedBy(inlinedAdt);
 	}
 
-	public Pair<Component, VarUse> Anchor.modifyToAccess() {
+	public Pair<Block, VarUse> Anchor.modifyToAccess() {
 		return null;
 	}
-	public Pair<Component, VarUse> ComponentParameter.modifyToAccess() {
+	public Pair<Block, VarUse> ComponentParameter.modifyToAccess() {
 		return modifyToAccess(this);
 	}
 	
-	protected static Pair<Component, VarUse> ASTNode.modifyToAccess(ComponentParameter cp) {
+	protected static Pair<Block, VarUse> ASTNode.modifyToAccess(ComponentParameter cp) {
 		if (!cp.canModifyToAccess()) {
 			return null;
 		}
 		
 		DiagramType dt = cp.diagramType();
-		int index = dt.getLocalComponentList().getIndexOfChild(cp.component().inlinedComponent());
+		int index = dt.getLocalBlockList().getIndexOfChild(cp.block().inlinedBlock());
 		
 		// Step 1, add anonymous types
 		if (!cp.hasAnonymousTypesTransitively()) {
-			Component newComp = cp.addAnonymousTypesToInlinedComponent();
-			if (newComp != null) {
+			Block newBlock = cp.addAnonymousTypesToInlinedBlock();
+			if (newBlock != null) {
 				Parameter declaredParameter = cp.declaredParameter();
-				String componentName = cp.component().name();
+				String blockName = cp.block().name();
 
-				// We will now add the new component and clear all caches
-				dt.getLocalComponentList().setChild(newComp, index);
+				// We will now add the new block and clear all caches
+				dt.getLocalBlockList().setChild(newBlock, index);
 				dt.program().flushAllAttributes();
 				cp = null;
 				
 				// Since all caches were cleared, we need to find the new computed
-				// component parameter again
-				VarDecl varDecl = dt.inheritedLookup(componentName);
+				// block parameter again
+				VarDecl varDecl = dt.inheritedLookup(blockName);
 				if (varDecl != null) {
 					cp = (ComponentParameter) varDecl.findMember(declaredParameter.name());
 				}
@@ -174,12 +174,12 @@ aspect CanModifyToAccess {
 		}
 		
 		// Step 2, add parameters and connections
-		Pair<Component, VarUse> p = addConnectionsParameters(
-				cp.component().inlinedComponent(),
-				cp.component().lastDiagramType().enclosingComponent(),
+		Pair<Block, VarUse> p = addConnectionsParameters(
+				cp.block().inlinedBlock(),
+				cp.block().lastDiagramType().enclosingBlock(),
 				cp,
 				null);
-		dt.getLocalComponentList().setChild(p.first, index);
+		dt.getLocalBlockList().setChild(p.first, index);
 		dt.program().flushAllAttributes();
 		
 		return p;
@@ -187,18 +187,18 @@ aspect CanModifyToAccess {
 }
 
 aspect AddAnonymousTypesInline {
-	public Component Anchor.addAnonymousTypesToInlinedComponent() {
+	public Block Anchor.addAnonymousTypesToInlinedBlock() {
 		return null;
 	}
-	public Component ComponentParameter.addAnonymousTypesToInlinedComponent() {
-		return component().addAnonymousTypesToInlinedComponent();
+	public Block ComponentParameter.addAnonymousTypesToInlinedBlock() {
+		return block().addAnonymousTypesToInlinedBlock();
 	}
 
-	public Component Component.addAnonymousTypesToInlinedComponent() {
+	public Block Block.addAnonymousTypesToInlinedBlock() {
 		return null;
 	}
 
-	public Component InlinedComponent.addAnonymousTypesToInlinedComponent() {
-		return addAnonymousTypesForNestedComponents(getInlinedComponents());
+	public Block InlinedBlock.addAnonymousTypesToInlinedBlock() {
+		return addAnonymousTypesForNestedBlocks(getInlinedBlocks());
 	}
 }

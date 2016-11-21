@@ -1,6 +1,6 @@
 /**
  * This module defines anchors and dataflow between anchors. An anchor is either 
- * a parameter or a parameter in a component (called ComponentParameter). 
+ * a parameter or a parameter in a block (called ComponentParameter). 
  * A connection is between two anchors.
  * 
  * The dataflow between anchors is used, for example, to 
@@ -62,11 +62,11 @@ aspect AnchorFlow {
 
 
 	inh int ComponentParameter.index();
-	eq Component.getInParameter(int index).index() = index;
-	eq Component.getOutParameter(int index).index() = index;
+	eq Block.getInParameter(int index).index() = index;
+	eq Block.getOutParameter(int index).index() = index;
 	
 	syn Node Anchor.node();
-	eq ComponentParameter.node() = component();
+	eq ComponentParameter.node() = block();
 	eq Parameter.node() = this;
 	eq Variable.node() = this;
 	eq Literal.node() = this;
@@ -97,10 +97,10 @@ aspect AnchorFlow {
  * A ComponentParameter refer to the corresponding Parameter in the type.
  */
 aspect ComponentParameters {
-	syn lazy List<ComponentParameter> Component.getInParameterList() 
+	syn lazy List<ComponentParameter> Block.getInParameterList() 
 		= type().createInComponentParameterList();
 
-	syn lazy List<ComponentParameter> Component.getOutParameterList() 
+	syn lazy List<ComponentParameter> Block.getOutParameterList() 
 		= type().createOutComponentParameterList();
 	
 

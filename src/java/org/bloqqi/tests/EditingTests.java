@@ -87,8 +87,8 @@ public class EditingTests extends TestSuite {
 		assertFalse(dtB.changeName("A"));
 		
 		assertTrue(dtB.changeName("B2"));
-		assertEquals("b1: B2", dtA.getLocalComponent(0).prettyPrint());
-		assertEquals("B2_2", dtA.getLocalComponent(1).prettyPrint());
+		assertEquals("b1: B2", dtA.getLocalBlock(0).prettyPrint());
+		assertEquals("B2_2", dtA.getLocalBlock(1).prettyPrint());
 		assertEquals("B2_2.in", ((Connection) dtA.getFlowDecl(1)).getTarget().prettyPrint());
 	}
 	
@@ -112,8 +112,8 @@ public class EditingTests extends TestSuite {
 
 		// Check that the supertype of the anonymous type is NewA
 		DiagramType dtSubMain = (DiagramType) cu.typeDecls().get(1);
-		RedeclareComponent rc = (RedeclareComponent) dtSubMain.getLocalComponent(0);
-		assertSame("NewA", rc.anonymousDiagramType().directSuperTypes().iterator().next().getID());
+		RedeclareBlock rb = (RedeclareBlock) dtSubMain.getLocalBlock(0);
+		assertSame("NewA", rb.anonymousDiagramType().directSuperTypes().iterator().next().getID());
 		
 		String expected =
 			"diagramtype Main {\n" +
@@ -131,17 +131,17 @@ public class EditingTests extends TestSuite {
 	}
 	
 	@Test
-	public void changeComponentName() {
+	public void changeBlockName() {
 		Program p = createParameterTest();
 		
 		DiagramType dtA = (DiagramType) p.getCompilationUnit(0).typeDecls().get(0);
 		
-		assertFalse(dtA.getLocalComponent(1).changeName("b1"));
-		assertFalse(dtA.getLocalComponent(1).changeName("in"));
-		assertFalse(dtA.getLocalComponent(1).changeName("in2"));
+		assertFalse(dtA.getLocalBlock(1).changeName("b1"));
+		assertFalse(dtA.getLocalBlock(1).changeName("in"));
+		assertFalse(dtA.getLocalBlock(1).changeName("in2"));
 		
-		assertTrue(dtA.getLocalComponent(1).changeName("b2"));
-		assertEquals("b2: B", dtA.getLocalComponent(1).prettyPrint());
+		assertTrue(dtA.getLocalBlock(1).changeName("b2"));
+		assertEquals("b2: B", dtA.getLocalBlock(1).prettyPrint());
 		assertEquals("connect(b1.out, b2.in)", dtA.getFlowDecl(1).prettyPrint());
 	}
 	
@@ -168,7 +168,7 @@ public class EditingTests extends TestSuite {
 		DiagramType dtB = (DiagramType) p.getCompilationUnit(0).typeDecls().get(1);
 		DiagramType dtC = (DiagramType) p.getCompilationUnit(0).typeDecls().get(2);
 
-		assertTrue(dtA.getLocalComponent(0).changeName("newB"));
+		assertTrue(dtA.getLocalBlock(0).changeName("newB"));
 		assertTrue(dtA.changeName("NewA"));
 		assertTrue(dtB.getLocalInParameter(0).changeName("newIn1"));
 		assertTrue(dtC.changeName("NewC"));

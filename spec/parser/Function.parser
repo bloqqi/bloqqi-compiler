@@ -5,12 +5,12 @@ Declaration declaration =
 
 Function function =
 		FUNCTION ID LPAR in_pars.in? out_pars.out RPAR LBRA
-		block
-		RBRA						{: return new Function(ID, in, out, block); :}
+		block_stmt
+		RBRA						{: return new Function(ID, in, out, block_stmt); :}
 	;
 	
-Block block = 
-	  stmts.s?						{: return new Block(s); :}
+BlockStmt block_stmt = 
+	  stmts.s?						{: return new BlockStmt(s); :}
 	;
 	
 List stmts = 
@@ -38,19 +38,19 @@ AssignStmt assignStmt =
 	;
 	
 WhileStmt whileStmt = 
-		WHILE LPAR fexpr RPAR LBRA block RBRA		{: return new WhileStmt(fexpr, block); :}
+		WHILE LPAR fexpr RPAR LBRA block_stmt RBRA		{: return new WhileStmt(fexpr, block_stmt); :}
 	;
 	
 IfStmt ifStmt =
 		IF LPAR fexpr RPAR LBRA 
-		block
-		RBRA 								{: return new IfStmt(fexpr, block, new Opt()); :}
+		block_stmt
+		RBRA 								{: return new IfStmt(fexpr, block_stmt, new Opt()); :}
 	|	IF LPAR fexpr RPAR LBRA 
-		block
+		block_stmt
 		RBRA
 		ELSE LBRA
-		block.e
-		RBRA 								{: return new IfStmt(fexpr, block, new Opt(e)); :}
+		block_stmt.e
+		RBRA 								{: return new IfStmt(fexpr, block_stmt, new Opt(e)); :}
 	;
 	
 ReturnStmt returnStmt =

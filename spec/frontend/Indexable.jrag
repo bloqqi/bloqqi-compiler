@@ -2,7 +2,7 @@ aspect Indexable {
 	public interface Indexable {
 		int index();
 	}
-	Component implements Indexable;
+	Block implements Indexable;
 
 	public class NameMap<V extends Indexable> extends HashMap<String, V> {
 		public void add(KeyValue<String,V> p) {
@@ -20,8 +20,8 @@ aspect Indexable {
 		}
 	}
 	
-	inh lazy int Component.index();
-	eq DiagramType.getLocalComponent(int index).index() = index;
-	eq DiagramType.getComponent(int index).index() = index;
+	inh lazy int Block.index();
+	eq DiagramType.getLocalBlock(int index).index() = index;
+	eq DiagramType.getBlock(int index).index() = index;
 	eq Program.getChild().index() = -1;
 }

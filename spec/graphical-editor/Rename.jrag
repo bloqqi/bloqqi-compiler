@@ -11,22 +11,22 @@ aspect Rename {
 		return true;
 	}
 	
-	inh Component TypeUse.component();
-	eq Component.getType().component() = this;
-	eq Program.getChild().component() = null;
+	inh Block TypeUse.block();
+	eq Block.getType().block() = this;
+	eq Program.getChild().block() = null;
 	inh Wiring TypeUse.wiring();
 	eq Wiring.getTypeUse().wiring() = this;
 	eq Program.getChild().wiring() = null;
 	public void TypeUse.changeName(String newName) {
-		if (component() != null) {
-			component().updateTypeName(newName);
+		if (block() != null) {
+			block().updateTypeName(newName);
 		}
 		if (wiring() != null) {
-			wiring().component().changeName(newName, false);
+			wiring().block().changeName(newName, false);
 		}
 		setID(newName);
 	}
-	public void Component.updateTypeName(String newName) {
+	public void Block.updateTypeName(String newName) {
 		if (getModifiers().isOnSimpleNameForm()) {
 			String name = getName().toString();
 			String index = name.substring(name.lastIndexOf('_')+1);
@@ -65,10 +65,10 @@ aspect Rename {
 		setID(id);
 	}
 	
-	public boolean Component.changeName(String newName) {
+	public boolean Block.changeName(String newName) {
 		return changeName(newName, true);
 	}
-	protected boolean Component.changeName(String newName, boolean flush) {
+	protected boolean Block.changeName(String newName, boolean flush) {
 		if (lookup(newName) != null) {
 			return false;
 		}
@@ -124,6 +124,6 @@ aspect NameUses {
 	eq InheritedInParameter.declaredParameter() = getDeclaredInParameter();
 	eq InheritedOutParameter.declaredParameter() = getDeclaredOutParameter();
 	eq Variable.declaredParameter() = null;
-	eq Component.declaredParameter() = null;
+	eq Block.declaredParameter() = null;
 	eq StructField.declaredParameter() = null;
 }

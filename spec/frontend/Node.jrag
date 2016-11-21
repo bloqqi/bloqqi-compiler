@@ -6,7 +6,7 @@ import java.util.StringJoiner;
 
 /**
  * This module defines nodes and dataflow between nodes. A node is either a 
- * parameter, variable or component. A node corresponds to  a graphical block 
+ * parameter, variable or block. A node corresponds to  a graphical block 
  * in the graphical editor. 
  */
 
@@ -22,26 +22,26 @@ aspect Node {
 	Parameter implements Node;
 	WiringParameter implements Node;
 	Variable implements Node;
-	Component implements Node;
+	Block implements Node;
 	Literal implements Node;
 	
 	syn boolean Node.isParameter();
 	eq Parameter.isParameter() = true;
 	eq WiringParameter.isParameter() = true;
 	eq Variable.isParameter() = false;
-	eq Component.isParameter() = false;
+	eq Block.isParameter() = false;
 	eq Literal.isParameter() = false;
 	
 
-	syn boolean Component.isInParameter() = false;
-	syn boolean Component.isOutParameter() = false;
+	syn boolean Block.isInParameter() = false;
+	syn boolean Block.isOutParameter() = false;
 	
-	syn boolean Node.isComponent();
-	eq Parameter.isComponent() = false;
-	eq WiringParameter.isComponent() = false;
-	eq Variable.isComponent() = false;
-	eq Component.isComponent() = true;
-	eq Literal.isComponent() = false;
+	syn boolean Node.isBlock();
+	eq Parameter.isBlock() = false;
+	eq WiringParameter.isBlock() = false;
+	eq Variable.isBlock() = false;
+	eq Block.isBlock() = true;
+	eq Literal.isBlock() = false;
 	
 	syn boolean Anchor.hasIncomingLiterals() {
 		for (Connection c: ingoingConnections()) {
@@ -51,7 +51,7 @@ aspect Node {
 		}
 		return false;
 	}
-	syn boolean Component.hasIncomingLiterals() {
+	syn boolean Block.hasIncomingLiterals() {
 		for (ComponentParameter in: getInParameterList()) {
 			if (in.hasIncomingLiterals()) {
 				return true;
@@ -62,8 +62,8 @@ aspect Node {
 }
 
 aspect NodeFlow {
-	inh Component ComponentParameter.component();
-	eq Component.getChild().component() = this;
+	inh Block ComponentParameter.block();
+	eq Block.getChild().block() = this;
 	
 	syn lazy Node Expr.node() = null;
 	eq AbstractSimpleVarUse.node() 
@@ -101,21 +101,21 @@ aspect NodeFlow {
 	// Include nta connections() in collection attribute
 	DiagramType contributes nta connections() to Node.succ();
 				
-	syn Set<Component> Component.predComponents() {
-		Set<Component> set = new HashSet<>();
+	syn Set<Block> Block.predBlocks() {
+		Set<Block> set = new HashSet<>();
 		for (Node n: pred()) {
-			if (n.isComponent()) {
-				set.add((Component) n);
+			if (n.isBlock()) {
+				set.add((Block) n);
 			}
 		}
 		return set;
 	}
 
-	syn Set<Component> Component.succComponents() {
-		Set<Component> set = new HashSet<>();
+	syn Set<Block> Block.succBlocks() {
+		Set<Block> set = new HashSet<>();
 		for (Node n: succ()) {
-			if (n.isComponent()) {
-				set.add((Component) n);
+			if (n.isBlock()) {
+				set.add((Block) n);
 			}
 		}
 		return set;
@@ -124,41 +124,41 @@ aspect NodeFlow {
 
 aspect Cycles {
 	syn boolean DiagramType.hasDataflowCycles() {
-		for (Component c: components()) {
-			if (c.isDataflowCircular()) {
+		for (Block b: blocks()) {
+			if (b.isDataflowCircular()) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	syn String DiagramType.componentsInDataflowCycle() {
+	syn String DiagramType.blocksInDataflowCycle() {
 		if (!hasDataflowCycles()) {
 			return "";
 		}
 		
 		StringJoiner joiner = new StringJoiner(", ");
-		for (Component c: components()) {
-			if (c.isDataflowCircular()) {
-				joiner.add(c.name());
+		for (Block b: blocks()) {
+			if (b.isDataflowCircular()) {
+				joiner.add(b.name());
 			}
 		}
 		return joiner.toString();
 	}
 	
-	syn Set<Component> Component.reachableComponents() circular[new TreeSet<>()] {
-		Set<Component> set = new TreeSet<Component>();
-		for (Component c: succComponents()) {
-			set.add(c);
-			set.addAll(c.reachableComponents());
+	syn Set<Block> Block.reachableBlocks() circular[new TreeSet<>()] {
+		Set<Block> set = new TreeSet<Block>();
+		for (Block b: succBlocks()) {
+			set.add(b);
+			set.addAll(b.reachableBlocks());
 		}
 		return set;
 	}
 	
-	syn boolean Component.isDataflowCircular()
-		= reachableComponents().contains(this);
+	syn boolean Block.isDataflowCircular()
+		= reachableBlocks().contains(this);
 	
 	syn boolean Connection.isOnDataflowCycle()
-		= getSource().isComponent() && ((Component) getSource().node()).isDataflowCircular()
-			&& getTarget().isComponent() && ((Component) getTarget().node()).isDataflowCircular();
+		= getSource().isBlock() && ((Block) getSource().node()).isDataflowCircular()
+			&& getTarget().isBlock() && ((Block) getTarget().node()).isDataflowCircular();
 }

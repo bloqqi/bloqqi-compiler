@@ -14,7 +14,7 @@ aspect FunctionNameAnalysis {
 	
 	inh FunctionVarDecl IdFExpr.lookupId(String id);
 	
-	eq Function.getBlock().lookupId(String id) {
+	eq Function.getBlockStmt().lookupId(String id) {
 		for (InParameter ip : getInParameters()) {
 			if (ip.name().equals(id)) {
 				return ip;
@@ -28,9 +28,9 @@ aspect FunctionNameAnalysis {
 		return null;
 	}
 	
-	inh FunctionVarDecl Block.lookupId(String id);
+	inh FunctionVarDecl BlockStmt.lookupId(String id);
 	
-	eq Block.getStmt(int index).lookupId(String id) {
+	eq BlockStmt.getStmt(int index).lookupId(String id) {
 		for (int i = 0; i < index; i++) {
 			FunctionVarDecl d = getStmt(i).localLookupId(id);
 			if (d != null) {
@@ -122,13 +122,13 @@ aspect FunctionTypeAnalysis {
 
 aspect StatementAnalys {
 	inh boolean ReturnStmt.isReturnInAllowedContext();
-	eq Function.getBlock().isReturnInAllowedContext() = false;
-	eq IfStmt.getBlock().isReturnInAllowedContext() = true;
+	eq Function.getBlockStmt().isReturnInAllowedContext() = false;
+	eq IfStmt.getBlockStmt().isReturnInAllowedContext() = true;
 	eq IfStmt.getElse().isReturnInAllowedContext() = true;
-	eq WhileStmt.getBlock().isReturnInAllowedContext() = true;
+	eq WhileStmt.getBlockStmt().isReturnInAllowedContext() = true;
 	
 	inh boolean ReturnStmt.existStmtsAfterReturn();
-	eq Block.getStmt(int index).existStmtsAfterReturn() {
+	eq BlockStmt.getStmt(int index).existStmtsAfterReturn() {
 		return (getNumStmt() > index+1);
 	}
 }

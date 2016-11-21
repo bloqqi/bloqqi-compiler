@@ -69,7 +69,7 @@ aspect LookupVariables {
 	eq Program.getChild().lookup(String name) = null;
 
 	// Local declarations
-	eq DiagramType.getLocalComponent().lookup(String name) = lookup(name);
+	eq DiagramType.getLocalBlock().lookup(String name) = lookup(name);
 	eq DiagramType.getFlowDecl().lookup(String name) = lookup(name);
 	eq DiagramType.getLocalInParameter().lookup(String name) = lookup(name);
 	eq DiagramType.getLocalOutParameter().lookup(String name) = lookup(name);
@@ -83,12 +83,12 @@ aspect LookupVariables {
 	/**
 	 * Lookup with a type
 	 * 
-	 * A subtype can inherit two components from two different supertypes
-	 * with the same name. To distinguish between these two components in the
-	 * subtype, the name of the component can be prefixed with the supertype
+	 * A subtype can inherit two blocks from two different supertypes
+	 * with the same name. To distinguish between these two blocks in the
+	 * subtype, the name of the block can be prefixed with the supertype
 	 * name. For example,
-	 *   Connect(A:c, ...)
-	 * Where the component c is defined in type A and A is a supertype.
+	 *   Connect(A:b, ...)
+	 * Where the block b is defined in type A and A is a supertype.
 	 */
 	inh VarDecl VarUse.lookup(String type, String name);
 	eq Program.getChild().lookup(String type, String name) = null;
@@ -105,7 +105,7 @@ aspect LookupVariables {
 	syn VarDecl TypeDecl.localLookup(String name) = null;
 	eq DiagramType.localLookup(String name) {
 		VarDecl decl = localParameterLookup(name);
-		if (decl == null) decl = localComponentLookup(name);
+		if (decl == null) decl = localBlockLookup(name);
 		return decl;
 	}
 	
@@ -125,7 +125,7 @@ aspect LookupVariables {
 			if (decl != null) list.add(decl);
 			decl = superType.localVariableLookup(name);
 			if (decl != null) list.add(decl);
-			decl = superType.localComponentLookup(name);
+			decl = superType.localBlockLookup(name);
 			if (decl != null) list.add(decl);
 		}
 		return list;
@@ -159,10 +159,10 @@ aspect LookupVariables {
 				list.add(v);
 			}
 		} 
-		for (InheritedComponent c: getComponents()) {
-			String dtName = c.getDeclaredComponent().diagramType().name();
-			if (c.name().equals(name) && (type.isEmpty() || dtName.equals(type))) {
-				list.add(c);
+		for (InheritedBlock b: getBlocks()) {
+			String dtName = b.getDeclaredBlock().diagramType().name();
+			if (b.name().equals(name) && (type.isEmpty() || dtName.equals(type))) {
+				list.add(b);
 			}
 		}
 		return list;
@@ -170,7 +170,7 @@ aspect LookupVariables {
 	
 
 	syn VarDecl VarDecl.findMember(String name);	
-	eq Component.findMember(String name) {
+	eq Block.findMember(String name) {
 		for (ComponentParameter in: getInParameters()) {
 			if (in.name().equals(name)) {
 				return in;
@@ -209,13 +209,13 @@ aspect LookupVariables {
 				return p;
 			}
 		}
-		for (Component c: getLocalComponents()) {
-			for (InParameter p: c.inParameters()) {
+		for (Block b: getLocalBlocks()) {
+			for (InParameter p: b.inParameters()) {
 				if (p.name().equals(name)) {
 					return p;
 				}
 			}
-			for (OutParameter p: c.outParameters()) {
+			for (OutParameter p: b.outParameters()) {
 				if (p.name().equals(name)) {
 					return p;
 				}
@@ -242,15 +242,15 @@ aspect LookupVariables {
 		}
 		return null;
 	}
-	// Use a collection attribute when searching for components to speed
-	// up the search. All components names are collected in a map (String->Component).
-	// The map is then used to search for a component name in O(1) time.
-	syn Component DiagramType.localComponentLookup(String name) 
-		= componentMap().get(name);
-	coll NameMap<Component> DiagramType.componentMap() 
-		[new NameMap<Component>()] with add root DiagramType;
-	Component contributes new KeyValue(name(), this)
-		to DiagramType.componentMap() for diagramType();
+	// Use a collection attribute when searching for blocks to speed
+	// up the search. All blocks names are collected in a map (String->Block).
+	// The map is then used to search for a block name in O(1) time.
+	syn Block DiagramType.localBlockLookup(String name) 
+		= blockMap().get(name);
+	coll NameMap<Block> DiagramType.blockMap() 
+		[new NameMap<Block>()] with add root DiagramType;
+	Block contributes new KeyValue(name(), this)
+		to DiagramType.blockMap() for diagramType();
 }	
 
 aspect Names {
@@ -266,7 +266,7 @@ aspect Names {
 	syn String VarDecl.name();
 	eq Parameter.name() = getID();
 	eq Variable.name() = getID();
-	eq Component.name() = getName().name();
+	eq Block.name() = getName().name();
 	eq ComponentParameter.name() = getParameter().name();
 	eq StructField.name() = getID();
 	syn String Literal.name() = "<unknown name>";
@@ -279,16 +279,16 @@ aspect Names {
 	eq AnonymousType.name() = "<anonymous>";
 
 	inh String AnonymousDiagramType.anonymousFullName();
-	inh String Component.anonymousFullName();
+	inh String Block.anonymousFullName();
 	eq Program.getChild().anonymousFullName() = "";
 	eq DiagramType.getChild().anonymousFullName() = name();
 	eq AnonymousDiagramType.getChild().anonymousFullName() = anonymousFullName();
-	eq Component.getType().anonymousFullName()
+	eq Block.getType().anonymousFullName()
 		= anonymousFullName() + "." + name();
 
-	inh String AnonymousDiagramType.enclosingComponentName();
-	eq Component.getType().enclosingComponentName() = name();
-	eq Program.getChild().enclosingComponentName() = "";
+	inh String AnonymousDiagramType.enclosingBlockName();
+	eq Block.getType().enclosingBlockName() = name();
+	eq Program.getChild().enclosingBlockName() = "";
 }
 
 aspect RewriteSimplifiedForm {
@@ -299,12 +299,12 @@ aspect RewriteSimplifiedForm {
 	rewrite ParseSimpleVarUse {
 		to VarUse {
 			if (isTopLevel() && isOnSimplifiedForm()) {
-				Component c = (Component) decl();
+				Block b = (Block) decl();
 				ComponentParameter p;
 				if (isSource()) {
-					p = c.getOutParameter(0);
+					p = b.getOutParameter(0);
 				} else {
-					p = c.getInParameter(0);
+					p = b.getInParameter(0);
 				}
 				return new DotVarUse(newSimpleVarUse(), p.name());
 			} else {
@@ -316,8 +316,8 @@ aspect RewriteSimplifiedForm {
 		VarUse u;
 		
 		VarDecl vd = decl();
-		// Fully qualify accesses to components declared in supertype
-		if (vd instanceof Component
+		// Fully qualify accesses to blocks declared in supertype
+		if (vd instanceof Block
 				&& vd.diagramType() != diagramType()
 				&& !vd.diagramType().isAnonymousType()
 				&& !isAmbiguous()) {
@@ -344,10 +344,10 @@ aspect RewriteSimplifiedForm {
 
 	syn boolean VarUse.isOnSimplifiedForm() = false;
 	eq AbstractSimpleVarUse.isOnSimplifiedForm() {
-		if (decl() instanceof Component) {
-			Component c = (Component) decl();
-			return isSource() && c.getNumOutParameter() == 1
-				|| isTarget() && c.getNumInParameter() == 1;
+		if (decl() instanceof Block) {
+			Block b = (Block) decl();
+			return isSource() && b.getNumOutParameter() == 1
+				|| isTarget() && b.getNumInParameter() == 1;
 		}
 		return false;
 	}

@@ -1,11 +1,11 @@
-Function : UserDefType ::= InParameter* OutParameter* Block;
+Function : UserDefType ::= InParameter* OutParameter* BlockStmt;
 
 abstract Stmt;
 AssignStmt : Stmt ::= Left:IdFExpr Right:FExpr;
-Block : Stmt ::= Stmt*;
+BlockStmt : Stmt ::= Stmt*;
 DeclStmt : Stmt ::= TypeUse <ID> [FExpr];
-IfStmt : Stmt ::= FExpr Block [Else:Block];
-WhileStmt : Stmt ::= FExpr Block;
+IfStmt : Stmt ::= FExpr BlockStmt [Else:BlockStmt];
+WhileStmt : Stmt ::= FExpr BlockStmt;
 ReturnStmt : Stmt;
 
 abstract FExpr;

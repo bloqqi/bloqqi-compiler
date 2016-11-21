@@ -1,7 +1,7 @@
 aspect Wiring {
-	syn ArrayList<InParameter> Component.inParameters() 
+	syn ArrayList<InParameter> Block.inParameters() 
 		= new ArrayList<InParameter>(); 
-	eq WiredComponent.inParameters() {
+	eq WiredBlock.inParameters() {
 		ArrayList<InParameter> list = new ArrayList<>();
 		for (WiredComponentParameter p: getWiredComponentParameters()) {
 			if (p instanceof WiredComponentParameterInParameter) {
@@ -10,9 +10,9 @@ aspect Wiring {
 		}
 		return list;
 	}
-	syn ArrayList<OutParameter> Component.outParameters() 
+	syn ArrayList<OutParameter> Block.outParameters() 
 		= new ArrayList<>();
-	eq WiredComponent.outParameters() {
+	eq WiredBlock.outParameters() {
 		ArrayList<OutParameter> list = new ArrayList<>();
 		for (WiredComponentParameter p: getWiredComponentParameters()) {
 			if (p instanceof WiredComponentParameterOutParameter) {
@@ -22,8 +22,8 @@ aspect Wiring {
 		return list;
 	}
 	
-	syn nta List<FlowDecl> Component.flowDecls() = new List<>();
-	eq WiredComponent.flowDecls() {
+	syn nta List<FlowDecl> Block.flowDecls() = new List<>();
+	eq WiredBlock.flowDecls() {
 		List<FlowDecl> list = new List<>();
 		if (type().hasWiring() && nbrOfParsMatch()) {
 			for (FlowDecl fd: type().wiring().apply(this)) {
@@ -35,11 +35,11 @@ aspect Wiring {
 	
 	syn boolean TypeDecl.hasWiring() = false;
 	eq DiagramType.hasWiring() = wiring() != null;
-	syn boolean Component.hasWiring() = false;
-	eq WiredComponent.hasWiring() = type().hasWiring();
+	syn boolean Block.hasWiring() = false;
+	eq WiredBlock.hasWiring() = type().hasWiring();
 	
-	syn Wiring Component.wiring() = null;
-	eq WiredComponent.wiring() = type().wiring();
+	syn Wiring Block.wiring() = null;
+	eq WiredBlock.wiring() = type().wiring();
 	syn lazy Wiring TypeDecl.wiring() = null;
 	eq DiagramType.wiring() {
 		if (hasLocalWiring()) {
@@ -69,7 +69,7 @@ aspect Wiring {
 		return null;
 	}
 
-	syn boolean WiredComponent.nbrOfParsMatch() {
+	syn boolean WiredBlock.nbrOfParsMatch() {
 		if (type().hasWiring()) {
 			return getNumWiredComponentParameter() == type().wiring().getNumWiringParameter();
 		} else {
@@ -78,18 +78,18 @@ aspect Wiring {
 	}
 	
 	syn WiringParameter WiredComponentParameter.wiringParameter() {
-		if (wiredComponent().nbrOfParsMatch()) {
-			return wiredComponent().type().wiring().getWiringParameter(parameterIndex());
+		if (wiredBlock().nbrOfParsMatch()) {
+			return wiredBlock().type().wiring().getWiringParameter(parameterIndex());
 		} else {
 			return null;
 		}
 	}
 	
-	inh WiredComponent WiredComponentParameter.wiredComponent();
-	eq WiredComponent.getChild().wiredComponent() = this;
+	inh WiredBlock WiredComponentParameter.wiredBlock();
+	eq WiredBlock.getChild().wiredBlock() = this;
 	
 	inh int WiredComponentParameter.parameterIndex();
-	eq WiredComponent.getWiredComponentParameter(int index).parameterIndex() = index;
+	eq WiredBlock.getWiredComponentParameter(int index).parameterIndex() = index;
 	inh int WiringParameter.parameterIndex();
 	eq Wiring.getWiringParameter(int index).parameterIndex() = index;
 	
@@ -99,7 +99,7 @@ aspect Wiring {
 		Set<InheritedInParameter> set = new HashSet<>();
 		for (FlowDecl fd: getFlowDecls()) {
 			for (Anchor anchor: fd.connectedAnchors()) {
-				if (anchor.node().isComponent() && anchor.isInParameter()) {
+				if (anchor.node().isBlock() && anchor.isInParameter()) {
 					ComponentParameter cp = (ComponentParameter) anchor;
 					set.add((InheritedInParameter) cp.getParameter());
 				}
@@ -110,8 +110,8 @@ aspect Wiring {
 }
 
 aspect NameAnalysis {
-	syn nta Component Wiring.component()
-		= new Component(new Modifiers(), new TypeUse(diagramType().name()), new IdName(getTypeUse().getID()));
+	syn nta Block Wiring.block()
+		= new Block(new Modifiers(), new TypeUse(diagramType().name()), new IdName(getTypeUse().getID()));
 	
 	eq WiringParameter.name() = getID();
 	eq Wiring.getChild().lookup(String name) {
@@ -120,8 +120,8 @@ aspect NameAnalysis {
 				return p;
 			}
 		}
-		if (component().name().equals(name)) {
-			return component();
+		if (block().name().equals(name)) {
+			return block();
 		}
 		return null;
 	}
@@ -147,7 +147,7 @@ aspect TypeAnalysis {
 	eq WiringOutParameter.isOutParameter() = true;
 	
 	inh TypeDecl WiredComponentParameter.expectedType();
-	eq WiredComponent.getWiredComponentParameter(int index).expectedType() {
+	eq WiredBlock.getWiredComponentParameter(int index).expectedType() {
 		WiringParameter par = getWiredComponentParameter(index).wiringParameter();
 		return par != null ? par.type() : program().unknownType();
 	}
@@ -169,39 +169,39 @@ aspect TypeAnalysis {
 }
 
 aspect ApplyWiring {
-	public Collection<FlowDecl> Wiring.apply(WiredComponent c) {
+	public Collection<FlowDecl> Wiring.apply(WiredBlock b) {
 		ArrayList<FlowDecl> list = new ArrayList<>();
 		for (FlowDecl fd: getFlowDecls()) {
-			list.add((FlowDecl) fd.copyAndApply(c));
+			list.add((FlowDecl) fd.copyAndApply(b));
 		}
 		return list;
 	}
 	
-	public ASTNode ASTNode.copyAndApply(WiredComponent c) {
+	public ASTNode ASTNode.copyAndApply(WiredBlock b) {
 		ASTNode res = (ASTNode)copy();
 		for(int i = 0; i < getNumChild(); i++) {
 			ASTNode node = getChild(i);
-			if(node != null) node = node.copyAndApply(c);
+			if(node != null) node = node.copyAndApply(b);
 			res.setChild(node, i);
 		}
 		return res;
 	}
-	public ASTNode SimpleVarUse.copyAndApply(WiredComponent c) {
+	public ASTNode SimpleVarUse.copyAndApply(WiredBlock b) {
 		if (decl() != null) {
-			return decl().getAppliedVarUse(c);
+			return decl().getAppliedVarUse(b);
 		} else {
-			return new SimpleVarUse(c.name());
+			return new SimpleVarUse(b.name());
 		}
 	}
 
-	public VarUse VarDecl.getAppliedVarUse(WiredComponent c) {
+	public VarUse VarDecl.getAppliedVarUse(WiredBlock b) {
 		return new SimpleVarUse(name());
 	}
-	public VarUse Component.getAppliedVarUse(WiredComponent c) {
-		return new SimpleVarUse(c.name());
+	public VarUse Block.getAppliedVarUse(WiredBlock b) {
+		return new SimpleVarUse(b.name());
 	}
-	public VarUse WiringParameter.getAppliedVarUse(WiredComponent c) {
-		return c.getWiredComponentParameter(parameterIndex()).getAppliedVarUse();
+	public VarUse WiringParameter.getAppliedVarUse(WiredBlock b) {
+		return b.getWiredComponentParameter(parameterIndex()).getAppliedVarUse();
 	}
 	public abstract VarUse WiredComponentParameter.getAppliedVarUse();
 	public VarUse WiredComponentParameterVarUse.getAppliedVarUse() {
@@ -216,11 +216,11 @@ aspect ApplyWiring {
 }
 
 aspect Errors {
-	WiredComponent contributes error("The type " + type().name() + " has no applicable wiring")
+	WiredBlock contributes error("The type " + type().name() + " has no applicable wiring")
 		when type().isKnown() && !type().hasWiring()
 		to CompilationUnit.errors();
 
-	WiredComponent contributes error("The number of wiring parameters does not match")
+	WiredBlock contributes error("The number of wiring parameters does not match")
 		when type().hasWiring() && !nbrOfParsMatch()
 		to CompilationUnit.errors();
 		

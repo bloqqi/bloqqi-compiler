@@ -22,11 +22,11 @@ aspect DataFlowErrors {
 		
 	syn String DiagramType.missingIncomingConnections() {
 		ArrayList<String> missingConnections = new ArrayList<>();
-		for (Component c: components()) {
-			for (ComponentParameter cp: c.getInParameterList()) {
+		for (Block b: blocks()) {
+			for (ComponentParameter cp: b.getInParameterList()) {
 				int n = cp.ingoingConnections().size(); // + cp.ingoingLiterals().size();
 				if (n == 0) {
-					missingConnections.add(c.name() + "." + cp.name());
+					missingConnections.add(b.name() + "." + cp.name());
 				}
 			}
 		}

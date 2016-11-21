@@ -12,10 +12,10 @@ abstract UserDefType : TypeDecl ::= <ID>;
 DiagramType : UserDefType ::= 
 	Modifiers
 	LocalInParameter:InParameter* LocalOutParameter:OutParameter* SuperType:TypeUse*
-	LocalVariable:Variable* LocalComponent:Component* FlowDecl* Annotation*
+	LocalVariable:Variable* LocalBlock:Block* FlowDecl* Annotation*
 	[LocalWiring:Wiring]
 	/InParameter:InheritedInParameter*/ /OutParameter:InheritedOutParameter*/ /Variable:InheritedVariable*/
-	/Component:InheritedComponent*/ /Connection:InheritedConnection*/
+	/Block:InheritedBlock*/ /Connection:InheritedConnection*/
 	/RecommendationGroup*/
 	;
 AnonymousDiagramType : DiagramType;
@@ -43,22 +43,22 @@ InheritedInParameter : InParameter ::= <DeclaredInParameter:InParameter>;
 OutParameter : Parameter;
 InheritedOutParameter : OutParameter ::= <DeclaredOutParameter:OutParameter>;
 
-/** Components */
-Component : VarDecl ::=
+/** Blocks */
+Block : VarDecl ::=
 	Modifiers
 	Type
 	Name
 	/InParameter:ComponentParameter*/ 
 	/OutParameter:ComponentParameter*/;
-RedeclareComponent : Component;
-WiredComponent : Component ::= WiredComponentParameter*;
+RedeclareBlock : Block;
+WiredBlock : Block ::= WiredComponentParameter*;
 abstract WiredComponentParameter;
 WiredComponentParameterVarUse : WiredComponentParameter ::= VarUse;
 WiredComponentParameterInParameter : WiredComponentParameter ::= InParameter;
 WiredComponentParameterOutParameter : WiredComponentParameter ::= OutParameter;
-InheritedComponent : Component ::= <DeclaredComponent:Component>;
-InlinedComponent : InheritedComponent ::=
-	<InlinedComponents:java.util.List<Component>>
+InheritedBlock : Block ::= <DeclaredBlock:Block>;
+InlinedBlock : InheritedBlock ::=
+	<InlinedBlocks:java.util.List<Block>>
 	<LastDiagramType:DiagramType>;
 
 abstract Name;
@@ -72,13 +72,13 @@ StateVariable : Variable;
 InputVariable : Variable;
 OutputVariable : Variable;
 InheritedVariable : Variable ::= <DeclaredVariable:Variable>;
-InlinedVariable : InheritedVariable ::= <InlinedComponent:Component>;
+InlinedVariable : InheritedVariable ::= <InlinedBlock:Block>;
 
 /** Flow declarations */
 abstract FlowDecl;
 Connection : FlowDecl ::= Source:Expr Target:VarUse;
 InheritedConnection : Connection ::= <DeclaredFlowDecl:FlowDecl>;
-InlinedConnection : InheritedConnection ::= <InlinedComponent:Component>;
+InlinedConnection : InheritedConnection ::= <InlinedBlock:Block>;
 InterceptConnection : InheritedConnection ::= <IsFirstConnection:Boolean>;
 abstract Interception : FlowDecl ::= Intercepted:VarUse Target:VarUse Source:VarUse;
 ConnectionInterception : Interception;
@@ -108,7 +108,7 @@ WiringOutParameter : WiringParameter;
 /** Recommendations */
 Recommendation : Declaration ::= DeclaredForType:TypeUse RecommendationElement*;
 abstract RecommendationElement;
-RecommendationComponent : RecommendationElement ::= Component;
+RecommendationBlock : RecommendationElement ::= Block;
 RecommendationBefore : RecommendationElement ::= BeforeVarUse:SimpleVarUse AfterVarUse:SimpleVarUse;
 RecommendationReplaceable : RecommendationElement ::= SimpleVarUse;
 RecommendationExtendsSuper : Declaration ::= DeclaredForType:TypeUse;

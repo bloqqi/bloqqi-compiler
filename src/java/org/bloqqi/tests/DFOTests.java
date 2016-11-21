@@ -19,9 +19,9 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(2, dt.components().getChild(1).dfo());
-		assertEquals(3, dt.components().getChild(2).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(2, dt.blocks().getChild(1).dfo());
+		assertEquals(3, dt.blocks().getChild(2).dfo());
 	}
 	
 	@Test
@@ -35,8 +35,8 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(2, dt.components().getChild(1).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(2, dt.blocks().getChild(1).dfo());
 	}
 	
 	@Test
@@ -50,8 +50,8 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 
-		assertEquals(2, dt.components().getChild(0).dfo());
-		assertEquals(1, dt.components().getChild(1).dfo());
+		assertEquals(2, dt.blocks().getChild(0).dfo());
+		assertEquals(1, dt.blocks().getChild(1).dfo());
 	}
 	
 	@Test
@@ -66,9 +66,9 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 
-		assertEquals(3, dt.components().getChild(0).dfo());
-		assertEquals(1, dt.components().getChild(1).dfo());
-		assertEquals(2, dt.components().getChild(2).dfo());
+		assertEquals(3, dt.blocks().getChild(0).dfo());
+		assertEquals(1, dt.blocks().getChild(1).dfo());
+		assertEquals(2, dt.blocks().getChild(2).dfo());
 	}
 	
 	@Test
@@ -95,13 +95,13 @@ public class DFOTests extends TestSuite {
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(5, dt.components().getChild(1).dfo());
-		assertEquals(2, dt.components().getChild(2).dfo());
-		assertEquals(6, dt.components().getChild(3).dfo());
-		assertEquals(7, dt.components().getChild(4).dfo());
-		assertEquals(3, dt.components().getChild(5).dfo());
-		assertEquals(4, dt.components().getChild(6).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(5, dt.blocks().getChild(1).dfo());
+		assertEquals(2, dt.blocks().getChild(2).dfo());
+		assertEquals(6, dt.blocks().getChild(3).dfo());
+		assertEquals(7, dt.blocks().getChild(4).dfo());
+		assertEquals(3, dt.blocks().getChild(5).dfo());
+		assertEquals(4, dt.blocks().getChild(6).dfo());
 	}
 
 	@Test
@@ -123,11 +123,11 @@ public class DFOTests extends TestSuite {
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(3, dt.components().getChild(1).dfo());
-		assertEquals(4, dt.components().getChild(2).dfo());
-		assertEquals(2, dt.components().getChild(3).dfo());
-		assertEquals(5, dt.components().getChild(4).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(3, dt.blocks().getChild(1).dfo());
+		assertEquals(4, dt.blocks().getChild(2).dfo());
+		assertEquals(2, dt.blocks().getChild(3).dfo());
+		assertEquals(5, dt.blocks().getChild(4).dfo());
 	}
 
 	
@@ -149,10 +149,10 @@ public class DFOTests extends TestSuite {
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 		
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(3, dt.components().getChild(1).dfo());
-		assertEquals(4, dt.components().getChild(2).dfo());
-		assertEquals(2, dt.components().getChild(3).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(3, dt.blocks().getChild(1).dfo());
+		assertEquals(4, dt.blocks().getChild(2).dfo());
+		assertEquals(2, dt.blocks().getChild(3).dfo());
 	}
 	
 	/** Same test as testDfo10, but C and D have switched declaration order */
@@ -173,10 +173,10 @@ public class DFOTests extends TestSuite {
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 		
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(3, dt.components().getChild(1).dfo());
-		assertEquals(2, dt.components().getChild(2).dfo());
-		assertEquals(4, dt.components().getChild(3).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(3, dt.blocks().getChild(1).dfo());
+		assertEquals(2, dt.blocks().getChild(2).dfo());
+		assertEquals(4, dt.blocks().getChild(3).dfo());
 	}
 	
 	
@@ -201,11 +201,11 @@ public class DFOTests extends TestSuite {
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 		
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(2, dt.components().getChild(1).dfo());
-		assertEquals(5, dt.components().getChild(2).dfo());
-		assertEquals(3, dt.components().getChild(3).dfo());
-		assertEquals(4, dt.components().getChild(4).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(2, dt.blocks().getChild(1).dfo());
+		assertEquals(5, dt.blocks().getChild(2).dfo());
+		assertEquals(3, dt.blocks().getChild(3).dfo());
+		assertEquals(4, dt.blocks().getChild(4).dfo());
 	}
 	@Test
 	public void testDfo13() {
@@ -232,12 +232,12 @@ public class DFOTests extends TestSuite {
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 			
-		assertEquals(1, dt.components().getChild(0).dfo());
-		assertEquals(2, dt.components().getChild(1).dfo());
-		assertEquals(4, dt.components().getChild(2).dfo());
-		assertEquals(3, dt.components().getChild(3).dfo());
-		assertEquals(5, dt.components().getChild(4).dfo());
-		assertEquals(6, dt.components().getChild(5).dfo());
+		assertEquals(1, dt.blocks().getChild(0).dfo());
+		assertEquals(2, dt.blocks().getChild(1).dfo());
+		assertEquals(4, dt.blocks().getChild(2).dfo());
+		assertEquals(3, dt.blocks().getChild(3).dfo());
+		assertEquals(5, dt.blocks().getChild(4).dfo());
+		assertEquals(6, dt.blocks().getChild(5).dfo());
 	}
 	
 	
@@ -264,11 +264,11 @@ public class DFOTests extends TestSuite {
 			"diagramtype T3(Int in1, Int in2, Int in3 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 			
-		assertEquals(1, dt.getComponent(0).dfo());
-		assertEquals(2, dt.getComponent(1).dfo());
-		assertEquals(4, dt.getComponent(2).dfo());
-		assertEquals(5, dt.getComponent(3).dfo());
-		assertEquals(3, dt.getComponent(4).dfo());
+		assertEquals(1, dt.getBlock(0).dfo());
+		assertEquals(2, dt.getBlock(1).dfo());
+		assertEquals(4, dt.getBlock(2).dfo());
+		assertEquals(5, dt.getBlock(3).dfo());
+		assertEquals(3, dt.getBlock(4).dfo());
 	}
 	@Test
 	public void ulf1b() {
@@ -294,12 +294,12 @@ public class DFOTests extends TestSuite {
 			"diagramtype T3(Int in1, Int in2, Int in3 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
 			
-		assertEquals(1, dt.getComponent(0).dfo());
-		assertEquals(2, dt.getComponent(1).dfo());
-		assertEquals(3, dt.getComponent(2).dfo());
-		assertEquals(5, dt.getComponent(3).dfo());
-		assertEquals(6, dt.getComponent(4).dfo());
-		assertEquals(4, dt.getComponent(5).dfo());
+		assertEquals(1, dt.getBlock(0).dfo());
+		assertEquals(2, dt.getBlock(1).dfo());
+		assertEquals(3, dt.getBlock(2).dfo());
+		assertEquals(5, dt.getBlock(3).dfo());
+		assertEquals(6, dt.getBlock(4).dfo());
+		assertEquals(4, dt.getBlock(5).dfo());
 	}
 	@Test
 	public void ulf2a() {
@@ -326,13 +326,13 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}" +
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
-		assertEquals(1, dt.getComponent(0).dfo());
-		assertEquals(2, dt.getComponent(1).dfo());
-		assertEquals(5, dt.getComponent(2).dfo());
-		assertEquals(6, dt.getComponent(3).dfo());
-		assertEquals(3, dt.getComponent(4).dfo());
-		assertEquals(4, dt.getComponent(5).dfo());
-		assertEquals(7, dt.getComponent(6).dfo());
+		assertEquals(1, dt.getBlock(0).dfo());
+		assertEquals(2, dt.getBlock(1).dfo());
+		assertEquals(5, dt.getBlock(2).dfo());
+		assertEquals(6, dt.getBlock(3).dfo());
+		assertEquals(3, dt.getBlock(4).dfo());
+		assertEquals(4, dt.getBlock(5).dfo());
+		assertEquals(7, dt.getBlock(6).dfo());
 	}
 	/** Node F is moved compared to 2a) */
 	@Test
@@ -360,13 +360,13 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}" +
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
-		assertEquals(1, dt.getComponent(0).dfo());
-		assertEquals(2, dt.getComponent(1).dfo());
-		assertEquals(5, dt.getComponent(2).dfo());
-		assertEquals(6, dt.getComponent(3).dfo());
-		assertEquals(3, dt.getComponent(4).dfo());
-		assertEquals(7, dt.getComponent(5).dfo());
-		assertEquals(4, dt.getComponent(6).dfo());
+		assertEquals(1, dt.getBlock(0).dfo());
+		assertEquals(2, dt.getBlock(1).dfo());
+		assertEquals(5, dt.getBlock(2).dfo());
+		assertEquals(6, dt.getBlock(3).dfo());
+		assertEquals(3, dt.getBlock(4).dfo());
+		assertEquals(7, dt.getBlock(5).dfo());
+		assertEquals(4, dt.getBlock(6).dfo());
 	}
 	/** Node A is removed compared to 2b) */
 	@Test
@@ -390,12 +390,12 @@ public class DFOTests extends TestSuite {
 			"diagramtype T(Int in => Int out) {}" +
 			"diagramtype T2(Int in1, Int in2 => Int out) {}";
 		DiagramType dt = parseValidDiagramType(s);
-		assertEquals(1, dt.getComponent(0).dfo());
-		assertEquals(4, dt.getComponent(1).dfo());
-		assertEquals(5, dt.getComponent(2).dfo());
-		assertEquals(2, dt.getComponent(3).dfo());
-		assertEquals(6, dt.getComponent(4).dfo());
-		assertEquals(3, dt.getComponent(5).dfo());
+		assertEquals(1, dt.getBlock(0).dfo());
+		assertEquals(4, dt.getBlock(1).dfo());
+		assertEquals(5, dt.getBlock(2).dfo());
+		assertEquals(2, dt.getBlock(3).dfo());
+		assertEquals(6, dt.getBlock(4).dfo());
+		assertEquals(3, dt.getBlock(5).dfo());
 	}
 	
 	@Test
@@ -413,9 +413,9 @@ public class DFOTests extends TestSuite {
 		Program p = parseProgram(s);
 		DiagramType dt = (DiagramType) p.getCompilationUnit(0).typeDecls().get(0);
 		
-		Component a = dt.getComponent(0);
-		Component b = dt.getComponent(1);
-		Component c = dt.getComponent(2);
+		Block a = dt.getBlock(0);
+		Block b = dt.getBlock(1);
+		Block c = dt.getBlock(2);
 		
 		assertEquals(-1, a.dfo());
 		assertEquals(-1, b.dfo());

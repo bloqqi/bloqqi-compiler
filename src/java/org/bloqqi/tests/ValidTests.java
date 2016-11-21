@@ -24,7 +24,7 @@ public class ValidTests extends TestSuite {
 			"}";
 		DiagramType dt = parseValidDiagramType(str);
 		
-		Component c = dt.components().getChild(0);
+		Block c = dt.blocks().getChild(0);
 		Connection c1 = dt.connections().getChild(0);
 		Connection c2 = dt.connections().getChild(1);
 		

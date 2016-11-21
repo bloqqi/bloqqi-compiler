@@ -1,6 +1,6 @@
 aspect Modifiers {
 	// Synthetical modifier that is created by the parser to represent
-	// components with name like "Add_1".
+	// blocks with name like "Add_1".
 	public static final String ASTNode.MODIFIER_SIMPLE = "simple";
 
 	inh boolean Modifiers.canBeAbstract();
@@ -12,8 +12,8 @@ aspect Modifiers {
 	eq Program.getChild().canBeOnSimpleNameForm() = false;
 	
 	eq DiagramType.getModifiers().canBeAbstract() = true;
-	eq Component.getModifiers().canBeInline() = true;
-	eq Component.getModifiers().canBeOnSimpleNameForm() = true;
+	eq Block.getModifiers().canBeInline() = true;
+	eq Block.getModifiers().canBeOnSimpleNameForm() = true;
 
 	syn boolean Modifiers.isAbstract() = hasModifier("abstract");
 	syn boolean Modifiers.isInline() = hasModifier("inline");
@@ -94,10 +94,10 @@ aspect ModifiersErrors {
 	
 	inh ASTNode Modifiers.context();
 	eq DiagramType.getModifiers().context() = this;
-	eq Component.getModifiers().context() = this;
+	eq Block.getModifiers().context() = this;
 	syn String ASTNode.kindDescription() = "";
 	eq DiagramType.kindDescription() = "Diagram type";
-	eq Component.kindDescription() = "Component";
+	eq Block.kindDescription() = "Block";
 	
 	Modifiers contributes context().error(errorMessage())
 		when !errorMessage().isEmpty()

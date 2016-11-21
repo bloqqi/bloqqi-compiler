@@ -10,15 +10,15 @@ aspect IsParameterExposed {
 					: null;
 		}
 		
-		String pathComponents = path.substring(0, path.lastIndexOf("."));
-		VarDecl vdInnerComp = lookupInnerVarDecl(pathComponents);
+		String pathBlocks = path.substring(0, path.lastIndexOf("."));
+		VarDecl vdInnerComp = lookupInnerVarDecl(pathBlocks);
 		
-		if (!(vdPar instanceof Parameter) || !(vdInnerComp instanceof Component)) {
+		if (!(vdPar instanceof Parameter) || !(vdInnerComp instanceof Block)) {
 			return null;
 		}
 		
 		Parameter par = (Parameter) vdPar;
-		Component innerComp = (Component) vdInnerComp;
+		Block innerComp = (Block) vdInnerComp;
 		if (!innerComp.isEnclosedBy(this)) {
 			return null;
 		}
@@ -29,7 +29,7 @@ aspect IsParameterExposed {
 	/**
 	 * Helper attributes
 	 */
-	syn Parameter DiagramType.isInnerParameterExposed(Component comp, Parameter par) {
+	syn Parameter DiagramType.isInnerParameterExposed(Block comp, Parameter par) {
 		if (this == par.diagramType()) {
 			return par;
 		}
@@ -43,20 +43,20 @@ aspect IsParameterExposed {
 			Connection conn = cp.ingoingConnections().iterator().next();
 			if (conn.getSource().node().isInParameter()) {
 				Parameter p = (Parameter) conn.getSource().node();
-				return isInnerParameterExposed(comp.enclosingComponent(), p.declaredParameter());
+				return isInnerParameterExposed(comp.enclosingBlock(), p.declaredParameter());
 			}
 		} else if (!par.isInParameter() && !cp.outgoingConnections().isEmpty()){
 			Connection conn = cp.outgoingConnections().iterator().next();
 			if (conn.getTarget().node().isOutParameter()) {
 				Parameter p = (Parameter) conn.getTarget().node();
-				return isInnerParameterExposed(comp.enclosingComponent(), p.declaredParameter());
+				return isInnerParameterExposed(comp.enclosingBlock(), p.declaredParameter());
 			}
 		}
 		
 		return null;
 	}
 
-	syn ComponentParameter Component.findComponentParameter(Parameter p) {
+	syn ComponentParameter Block.findComponentParameter(Parameter p) {
 		VarDecl vd = findMember(p.name());
 		if (vd instanceof ComponentParameter) {
 			return (ComponentParameter) vd;
@@ -74,14 +74,14 @@ aspect CanExtractSubType {
 		= getNumLocalInParameter() == 0
 			&& getNumLocalOutParameter() == 0
 			&& getNumLocalVariable() == 0
-			&& getNumLocalComponent() == 0
+			&& getNumLocalBlock() == 0
 			&& getNumFlowDecl() == 0;
 	
 	syn boolean DiagramType.canExtractSubtypeAsBlock() {
-		for (Component c: components()) {
-			if (c.isInherited()
-					&& c.isReachedFromLocalNode()
-					&& c.isReachingLocalNode()) {
+		for (Block b: blocks()) {
+			if (b.isInherited()
+					&& b.isReachedFromLocalNode()
+					&& b.isReachingLocalNode()) {
 				return false;
 			}
 		}
@@ -116,33 +116,33 @@ aspect CanExtractSubType {
 }
 
 aspect ExtractSubType {
-	public Pair<DiagramType, WiredComponent> DiagramType.extractsubTypeAsWiredBlock(String diagramTypeName, String componentName) {
-		SubTypeWrapperCreator creator = new SubTypeWrapperCreator(this, diagramTypeName, componentName);
+	public Pair<DiagramType, WiredBlock> DiagramType.extractsubTypeAsWiredBlock(String diagramTypeName, String blockName) {
+		SubTypeWrapperCreator creator = new SubTypeWrapperCreator(this, diagramTypeName, blockName);
 		creator.create();
-		return new Pair<>(creator.getNewDiagramType(), creator.getNewWiredComponent());
+		return new Pair<>(creator.getNewDiagramType(), creator.getNewWiredBlock());
 	}
 	
 	public class SubTypeWrapperCreator {
 		private final DiagramType subType;
 		private final String newDiagramTypeName;
-		private final String newWiredComponentName;
+		private final String newWiredBlockName;
 		private final DiagramType newDiagramType;
-		private final WiredComponent newWiredComponent;
+		private final WiredBlock newWiredBlock;
 
 		private final Map<FlowDecl, InParameter> toInPar;
 		private final Map<FlowDecl, OutParameter> toOutPar;
 		private final Set<Node> interceptionSourceNodes;
 		
-		public SubTypeWrapperCreator(DiagramType subType, String newDiagramTypeName, String newWiredComponentName) {
+		public SubTypeWrapperCreator(DiagramType subType, String newDiagramTypeName, String newWiredBlockName) {
 			this.subType = subType;
 			this.newDiagramTypeName = newDiagramTypeName;
-			this.newWiredComponentName = newWiredComponentName;
+			this.newWiredBlockName = newWiredBlockName;
 			
 
 			newDiagramType = new DiagramType();
 			newDiagramType.setModifiers(new Modifiers());
-			newWiredComponent = new WiredComponent();
-			newWiredComponent.setModifiers(new Modifiers());
+			newWiredBlock = new WiredBlock();
+			newWiredBlock.setModifiers(new Modifiers());
 			toInPar = new HashMap<>();
 			toOutPar = new HashMap<>();
 			
@@ -161,15 +161,15 @@ aspect ExtractSubType {
 		public void create() {
 			createDiagramTypeContent();
 			createWiring();
-			createWiredComponent();
+			createWiredBlock();
 		}
 		
 		public DiagramType getNewDiagramType() {
 			return newDiagramType;
 		}
 
-		public WiredComponent getNewWiredComponent() {
-			return newWiredComponent;
+		public WiredBlock getNewWiredBlock() {
+			return newWiredBlock;
 		}
 		
 		private void createDiagramTypeContent() {
@@ -193,8 +193,8 @@ aspect ExtractSubType {
 					newDiagramType.addFlowDecl(new Connection(source, target));
 				}
 			}
-			for (Component c: subType.getLocalComponents()) {
-				newDiagramType.addLocalComponent(c.treeCopy());
+			for (Block b: subType.getLocalBlocks()) {
+				newDiagramType.addLocalBlock(b.treeCopy());
 			}
 		}
 
@@ -237,9 +237,9 @@ aspect ExtractSubType {
 			newDiagramType.setLocalWiring(w);
 		}
 
-		private void createWiredComponent() {
-			newWiredComponent.setType(new TypeUse(newDiagramTypeName));
-			newWiredComponent.setName(new IdName(newWiredComponentName));
+		private void createWiredBlock() {
+			newWiredBlock.setType(new TypeUse(newDiagramTypeName));
+			newWiredBlock.setName(new IdName(newWiredBlockName));
 
 			// Handle source nodes with several outgoing connections
 			Set<Node> sourceNodes = new HashSet<>();
@@ -253,7 +253,7 @@ aspect ExtractSubType {
 					if (isCrossing(c.getSource())) {
 						if (c.declaredFlowDecl() instanceof SourceInterception) {
 							Expr source = removeTypedVarUse(c.getSource().treeCopy());
-							newWiredComponent.addWiredComponentParameter(
+							newWiredBlock.addWiredComponentParameter(
 								new WiredComponentParameterVarUse((VarUse) source));
 						} else if (c.declaredFlowDecl() instanceof Connection 
 								&& !sourceNodes.contains(c.getSource().node())) {
@@ -265,7 +265,7 @@ aspect ExtractSubType {
 					if (isCrossing(c.getTarget())) {
 						if (c.declaredFlowDecl() instanceof ConnectionInterception) {
 							VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
-							newWiredComponent.addWiredComponentParameter(
+							newWiredBlock.addWiredComponentParameter(
 								new WiredComponentParameterVarUse(target));
 						} else if (c.declaredFlowDecl() instanceof Connection) {
 							createWiredParameterForTargetConnection(c, outPar);
@@ -366,7 +366,7 @@ aspect ExtractSubType {
 
 		
 		//
-		// Help methods for creating wired component
+		// Help methods for creating wired block
 		//
 		private void createWiredParameterForSourceConnection(Connection c, InParameter inPar) {
 			WiredComponentParameter wiredPar;
@@ -376,7 +376,7 @@ aspect ExtractSubType {
 				VarUse source = (VarUse) removeTypedVarUse(c.getSource().treeCopy());
 				wiredPar = new WiredComponentParameterVarUse(source);
 			}
-			newWiredComponent.addWiredComponentParameter(wiredPar);
+			newWiredBlock.addWiredComponentParameter(wiredPar);
 		}
 		private void createWiredParameterForTargetConnection(Connection c, OutParameter outPar) {
 			WiredComponentParameter wiredPar;
@@ -386,7 +386,7 @@ aspect ExtractSubType {
 				VarUse target = removeTypedVarUse(c.getTarget().treeCopy());
 				wiredPar = new WiredComponentParameterVarUse(target);
 			}
-			newWiredComponent.addWiredComponentParameter(wiredPar);
+			newWiredBlock.addWiredComponentParameter(wiredPar);
 		}
 	}
 }

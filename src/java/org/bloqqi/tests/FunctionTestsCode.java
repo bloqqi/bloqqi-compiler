@@ -13,8 +13,8 @@ public class FunctionTestsCode extends TestSuite{
 		f1.setID("funcName");
 		f1.addInParameter(new InParameter(new TypeUse("Int"), "in1"));
 		f1.addOutParameter(new OutParameter(new TypeUse("Int"), "out"));
-		Block b = new Block();
-		f1.setBlock(b);
+		BlockStmt b = new BlockStmt();
+		f1.setBlockStmt(b);
 		assertEquals(1, f1.getNumInParameter());
 		StringBuilder sb = new StringBuilder();
 		f1.prettyPrint(sb);
@@ -41,9 +41,9 @@ public class FunctionTestsCode extends TestSuite{
 		f1.setID("funcName");
 		f1.addInParameter(new InParameter(new TypeUse("Int"), "in1"));
 		f1.addOutParameter(new OutParameter(new TypeUse("Int"), "out"));
-		Block b =  new Block();
+		BlockStmt b =  new BlockStmt();
 		b.addStmt(new AssignStmt(new IdFExpr("out"), new IdFExpr("in")));
-		f1.setBlock(b);
+		f1.setBlockStmt(b);
 		assertEquals(1, f1.getNumInParameter());
 		StringBuilder sb = new StringBuilder();
 		f1.prettyPrint(sb);
@@ -248,8 +248,8 @@ public class FunctionTestsCode extends TestSuite{
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
-		DeclStmt d = (DeclStmt)f.getBlock().getStmt(0);
-		AssignStmt a = (AssignStmt)f.getBlock().getStmt(1);
+		DeclStmt d = (DeclStmt)f.getBlockStmt().getStmt(0);
+		AssignStmt a = (AssignStmt)f.getBlockStmt().getStmt(1);
 		assertSame(d, a.getLeft().decl());
 		assertEquals("Line 4, column 2: 1001: The declaration of x was not found", cu.errors().iterator().next().toString());
 	}
@@ -262,7 +262,7 @@ public class FunctionTestsCode extends TestSuite{
 				   "}";
 		Program p = parsePrettyPrint(s);
 		Function f = (Function) p.getCompilationUnit(0).typeDecls().get(0);
-		AssignStmt a = (AssignStmt)f.getBlock().getStmt(0);
+		AssignStmt a = (AssignStmt)f.getBlockStmt().getStmt(0);
 		assertNull(a.getLeft().decl());
 	}
 
@@ -279,13 +279,13 @@ public class FunctionTestsCode extends TestSuite{
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
-		DeclStmt d = (DeclStmt)f.getBlock().getStmt(0);
-		IfStmt i = (IfStmt)f.getBlock().getStmt(1);
-		AssignStmt a = (AssignStmt)i.getBlock().getStmt(0);
+		DeclStmt d = (DeclStmt)f.getBlockStmt().getStmt(0);
+		IfStmt i = (IfStmt)f.getBlockStmt().getStmt(1);
+		AssignStmt a = (AssignStmt)i.getBlockStmt().getStmt(0);
 		assertSame(d, a.getLeft().decl());
-		AssignStmt a2 = (AssignStmt)i.getBlock().getStmt(1);
+		AssignStmt a2 = (AssignStmt)i.getBlockStmt().getStmt(1);
 		assertSame(f.getOutParameter(0), a2.getLeft().decl());
-		AssignStmt a3 = (AssignStmt)i.getBlock().getStmt(2);
+		AssignStmt a3 = (AssignStmt)i.getBlockStmt().getStmt(2);
 		assertSame(f.getInParameter(1), a3.getLeft().decl());
 	}
 
@@ -297,7 +297,7 @@ public class FunctionTestsCode extends TestSuite{
 		Program p = parseAndCheck(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
-		AssignStmt a = (AssignStmt)f.getBlock().getStmt(0);
+		AssignStmt a = (AssignStmt)f.getBlockStmt().getStmt(0);
 		FExpr expr = a.getRight(); 
 		assertSame(p.intType(), expr.fType());	
 	}
@@ -310,7 +310,7 @@ public class FunctionTestsCode extends TestSuite{
 		Program p = parseAndCheck(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
-		AssignStmt a = (AssignStmt)f.getBlock().getStmt(0);
+		AssignStmt a = (AssignStmt)f.getBlockStmt().getStmt(0);
 		FExpr expr = a.getRight(); 
 		assertSame(p.boolType(), expr.fType());		
 	}

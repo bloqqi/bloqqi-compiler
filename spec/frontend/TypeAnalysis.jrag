@@ -38,9 +38,9 @@ aspect TypeAnalysis {
 	
 
 	syn lazy TypeDecl VarDecl.type();
-	eq Component.type() = getType().type();
-	eq InheritedComponent.type()
-		= getDeclaredComponent().type();
+	eq Block.type() = getType().type();
+	eq InheritedBlock.type()
+		= getDeclaredBlock().type();
 	eq ComponentParameter.type() = getParameter().type();
 	eq Parameter.type() = getTypeUse().type();
 	eq Variable.type() = getTypeUse().type();
@@ -82,30 +82,30 @@ aspect TypeAnalysis {
 	eq DiagramType.reachable() {
 		Set<TypeDecl> set = new HashSet<>();
 		for (DiagramType superType: superTypesLinearized()) {
-			for (Component c: superType.getLocalComponents()) {
-				if (c.type().isDiagramType()) {
-					set.add(c.type());
-					set.addAll(c.type().reachable());
+			for (Block b: superType.getLocalBlocks()) {
+				if (b.type().isDiagramType()) {
+					set.add(b.type());
+					set.addAll(b.type().reachable());
 				}
 			}
 		}
 		return set;
 	}
 	
-	syn boolean Component.isOnTypeCycle()
+	syn boolean Block.isOnTypeCycle()
 		= type().reachable().contains(diagramType());
 	
 	
-	syn boolean Component.hasAnonymousDiagramType()
+	syn boolean Block.hasAnonymousDiagramType()
 		= getType().hasAnonymousDiagramType();
-	eq InheritedComponent.hasAnonymousDiagramType()
-		= getDeclaredComponent().hasAnonymousDiagramType();
+	eq InheritedBlock.hasAnonymousDiagramType()
+		= getDeclaredBlock().hasAnonymousDiagramType();
 	syn boolean Type.hasAnonymousDiagramType() = false;
 	eq AnonymousType.hasAnonymousDiagramType() = true;
-	syn AnonymousDiagramType Component.anonymousDiagramType()
+	syn AnonymousDiagramType Block.anonymousDiagramType()
 		= getType().anonymousDiagramType();
-	eq InheritedComponent.anonymousDiagramType()
-		= getDeclaredComponent().anonymousDiagramType();
+	eq InheritedBlock.anonymousDiagramType()
+		= getDeclaredBlock().anonymousDiagramType();
 	syn AnonymousDiagramType Type.anonymousDiagramType() = null;
 	eq AnonymousType.anonymousDiagramType() = getAnonymousDiagramType();
 
@@ -169,10 +169,10 @@ aspect TypeAnalysis {
 		to Program.allDiagramTypes();
 
 
-	inh Component DiagramType.enclosingComponent();
-	inh Component Component.enclosingComponent();
-	eq Component.getType().enclosingComponent() = this;
-	eq Program.getChild().enclosingComponent() = null;
+	inh Block DiagramType.enclosingBlock();
+	inh Block Block.enclosingBlock();
+	eq Block.getType().enclosingBlock() = this;
+	eq Program.getChild().enclosingBlock() = null;
 }
 
 aspect IsSubTypeOf {
@@ -217,9 +217,9 @@ aspect AbstractType {
 		}
 		
 		StringJoiner joiner = new StringJoiner(", ");
-		for (Component c: declaredComponentsTransitive()) {
-			if (c.type().isAbstract()) {
-				joiner.add(c.name());
+		for (Block b: declaredBlocksTransitive()) {
+			if (b.type().isAbstract()) {
+				joiner.add(b.name());
 			}
 		}
 		
@@ -227,7 +227,7 @@ aspect AbstractType {
 			return "";
 		} else {
 			return "Diagram type " + name() + " needs to be declared abstract, "
-					+ "since the type of the following components are abstract: "
+					+ "since the type of the following blocks are abstract: "
 					+ joiner.toString();
 		}
 	}

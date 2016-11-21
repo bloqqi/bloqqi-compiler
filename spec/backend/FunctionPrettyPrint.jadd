@@ -2,11 +2,11 @@ aspect FunctionPrettyPrint {
 
 	inh int Stmt.indentLevel();
 	
-	eq Block.getStmt().indentLevel() {
+	eq BlockStmt.getStmt().indentLevel() {
 		return indentLevel() + 1;
 	}
 	
-	eq Function.getBlock().indentLevel() = 0;
+	eq Function.getBlockStmt().indentLevel() = 0;
 	
 	syn int FExpr.precedence() = 0;
 	eq OrFExpr.precedence() = 7;
@@ -42,11 +42,11 @@ aspect FunctionPrettyPrint {
 			}
 		}
 		sb.append(") {\n");
-		getBlock().prettyPrint(sb);
+		getBlockStmt().prettyPrint(sb);
 		sb.append("}\n");		
 	}
 	
-	public void Block.prettyPrint(StringBuilder sb) {
+	public void BlockStmt.prettyPrint(StringBuilder sb) {
 		for (Stmt s: getStmts()) {
 			for (int i = 0; i < s.indentLevel(); i++) {
 				sb.append("\t");
@@ -68,7 +68,7 @@ aspect FunctionPrettyPrint {
 	}
 	public void WhileStmt.prettyPrint(StringBuilder sb) {
 		sb.append("while (" + getFExpr() + ") {\n");
-		getBlock().prettyPrint(sb);
+		getBlockStmt().prettyPrint(sb);
 		for (int i = 0; i < indentLevel(); i++) {
 			sb.append("\t");
 		}
@@ -76,7 +76,7 @@ aspect FunctionPrettyPrint {
 	}
 	public void IfStmt.prettyPrint(StringBuilder sb) {
 		sb.append("if (" + getFExpr() + ") {\n");
-		getBlock().prettyPrint(sb);
+		getBlockStmt().prettyPrint(sb);
 		for (int i = 0; i < indentLevel(); i++) {
 			sb.append("\t");
 		}

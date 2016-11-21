@@ -32,7 +32,7 @@ aspect GenerateCFunction {
 			sb.append("\t" + functionStruct + " _p;\n");
 		}
 		
-		getBlock().generateC(sb);
+		getBlockStmt().generateC(sb);
 		
 		if(getNumOutParameter() > 0) {
 			sb.append("\t" + "return" + " _p;");
@@ -42,7 +42,7 @@ aspect GenerateCFunction {
 	
 	}
 	
-	public void Block.generateC(StringBuilder sb) {
+	public void BlockStmt.generateC(StringBuilder sb) {
 		for (Stmt s: getStmts()) {
 			for (int i = 0; i < s.indentLevel(); i++) {
 				sb.append("\t");
@@ -63,7 +63,7 @@ aspect GenerateCFunction {
 	}
 	public void WhileStmt.generateC(StringBuilder sb) {
 		sb.append("while (" + getFExpr().generateC() + ") {\n");
-		getBlock().generateC(sb);
+		getBlockStmt().generateC(sb);
 		for (int i = 0; i < indentLevel(); i++) {
 			sb.append("\t");
 		}	
@@ -71,7 +71,7 @@ aspect GenerateCFunction {
 	}
 	public void IfStmt.generateC(StringBuilder sb) {
 		sb.append("if (" + getFExpr().generateC() + ") {\n");
-		getBlock().generateC(sb);
+		getBlockStmt().generateC(sb);
 		for (int i = 0; i < indentLevel(); i++) {
 			sb.append("\t");
 		}	

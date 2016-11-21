@@ -20,9 +20,9 @@ aspect SuperAndSubTypes {
 	eq AnonymousDiagramType.directSuperTypes() {
 		if (hasImplicitSuperType()) {
 			LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
-			Component redeclaredComp = enclosingComponent().redeclaredComponent();
-			if (redeclaredComp != null && redeclaredComp.type().isDiagramType()) {
-				linkedSet.add((DiagramType) enclosingComponent().redeclaredComponent().type());
+			Block redeclaredBlock = enclosingBlock().redeclaredBlock();
+			if (redeclaredBlock != null && redeclaredBlock.type().isDiagramType()) {
+				linkedSet.add((DiagramType) enclosingBlock().redeclaredBlock().type());
 			}
 			return linkedSet;
 		} else {
@@ -76,16 +76,16 @@ aspect SuperAndSubTypes {
 }
 
 aspect Inheritance {
-	/** Includes parameters, variables, components and connections from super classes */
+	/** Includes parameters, variables, blocks and connections from super classes */
 	syn List<InheritedInParameter> DiagramType.getInParameterList() {
 		List<InheritedInParameter> list = new List<>();
 		for (DiagramType superType: superTypesLinearized()) {
 			for (InParameter ip: superType.getLocalInParameters()) {
 				list.add(ip.createInheritedInParameter());
 			}
-			// Wiring components may add parameters
-			for (Component c: superType.getLocalComponents()) {
-				for (InParameter ip: c.inParameters()) {
+			// Wiring blocks may add parameters
+			for (Block b: superType.getLocalBlocks()) {
+				for (InParameter ip: b.inParameters()) {
 					list.add(ip.createInheritedInParameter());
 				}
 			}
@@ -100,9 +100,9 @@ aspect Inheritance {
 			for (OutParameter op: superType.getLocalOutParameters()) {
 				list.add(op.createInheritedOutParameter());
 			}
-			// Wiring components may add parameters
-			for (Component c: superType.getLocalComponents()) {
-				for (OutParameter op: c.outParameters()) {
+			// Wiring blocks may add parameters
+			for (Block b: superType.getLocalBlocks()) {
+				for (OutParameter op: b.outParameters()) {
 					list.add(op.createInheritedOutParameter());
 				}
 			}
@@ -119,7 +119,7 @@ aspect Inheritance {
 				list.add(v.createInheritedVariable());
 			}
 		}
-		for (Component comp: declaredComponentsTransitive()) {
+		for (Block comp: declaredBlocksTransitive()) {
 			if (comp.shouldBeInlined()) {
 				list.addAll(comp.createInlinedVariables());
 			}
@@ -127,12 +127,12 @@ aspect Inheritance {
 		return list;
 	}
 
-	syn List<InheritedComponent> DiagramType.components() = getComponentList();
-	syn List<InheritedComponent> DiagramType.getComponentList() {
-		List<InheritedComponent> list = new List<>();
-		Map<Component, InheritedComponent> map = new HashMap<>();
-		for (Component c: declaredComponentsTransitive()) {
-			list.addAll(c.createInheritedComponents());
+	syn List<InheritedBlock> DiagramType.blocks() = getBlockList();
+	syn List<InheritedBlock> DiagramType.getBlockList() {
+		List<InheritedBlock> list = new List<>();
+		Map<Block, InheritedBlock> map = new HashMap<>();
+		for (Block b: declaredBlocksTransitive()) {
+			list.addAll(b.createInheritedBlocks());
 		}
 		return list;
 	}
@@ -153,10 +153,10 @@ aspect Inheritance {
 					list.add(((Connection) fd).createInheritedConnection(this));
 				}
 			}
-			// Wired components may add connections
-			for (Component c: superType.getLocalComponents()) {
-				if (isMostSpecificComponent(c)) {
-					for (FlowDecl fd: c.flowDecls()) {
+			// Wired blocks may add connections
+			for (Block b: superType.getLocalBlocks()) {
+				if (isMostSpecificBlock(b)) {
+					for (FlowDecl fd: b.flowDecls()) {
 						if (fd instanceof Connection) {
 							list.add(((Connection) fd).createInheritedConnection(this));
 						}
@@ -170,10 +170,10 @@ aspect Inheritance {
 			for (FlowDecl fd: superType.getFlowDecls()) {
 				fd.doInterception(this, list);
 			}
-			// Wired components may add interceptions
-			for (Component c: superType.getLocalComponents()) {
-				if (isMostSpecificComponent(c)) {
-					for (FlowDecl fd: c.flowDecls()) {
+			// Wired blocks may add interceptions
+			for (Block b: superType.getLocalBlocks()) {
+				if (isMostSpecificBlock(b)) {
+					for (FlowDecl fd: b.flowDecls()) {
 						fd.doInterception(this, list);
 					}
 				}
@@ -181,44 +181,44 @@ aspect Inheritance {
 		}
 		
 		// Add inlining
-		for (Component comp: declaredComponentsTransitive()) {
-			if (comp.shouldBeInlined()) {
-				addInlinedConnections(list, comp);
+		for (Block block: declaredBlocksTransitive()) {
+			if (block.shouldBeInlined()) {
+				addInlinedConnections(list, block);
 			}
 		}
 
 		return list;
 	}
 	
-	public void DiagramType.addInlinedConnections(List<InheritedConnection> list, Component comp) {
-		DiagramType dt = (DiagramType) comp.type();
-		String fullCompName = comp.diagramType().name() + DECLARED_IN_SEP + comp.name() + ".";
+	public void DiagramType.addInlinedConnections(List<InheritedConnection> list, Block block) {
+		DiagramType dt = (DiagramType) block.type();
+		String fullBlockName = block.diagramType().name() + DECLARED_IN_SEP + block.name() + ".";
 		
-		// Add connections from the type of the component
+		// Add connections from the type of the block
 		ArrayList<InheritedConnection> newConnections = new ArrayList<>();
 		for (InheritedConnection c: dt.connections()) {
 			newConnections.add(
 				new InlinedConnection(
-					c.getSource().copyWithInlinedName(comp.name()),
-					(VarUse) c.getTarget().copyWithInlinedName(comp.name()),
+					c.getSource().copyWithInlinedName(block.name()),
+					(VarUse) c.getTarget().copyWithInlinedName(block.name()),
 					c.getDeclaredFlowDecl(),
-					comp)
+					block)
 			);
 		}
 		
 		// Store input and output parameters in maps for fast access
 		Map<String, InParameter> inParameters = new HashMap<>();
 		for (InheritedInParameter in: dt.getInParameters()) {
-			String name = comp.name() + INLINE_SEP + in.name();
+			String name = block.name() + INLINE_SEP + in.name();
 			inParameters.put(name, in.getDeclaredInParameter());
 		}
 		Map<String, OutParameter> outParameters = new HashMap<>();
 		for (InheritedOutParameter out: dt.getOutParameters()) {
-			String name = comp.name() + INLINE_SEP + out.name();
+			String name = block.name() + INLINE_SEP + out.name();
 			outParameters.put(name, out.getDeclaredOutParameter());
 		}
 		
-		// Replace connections to the input ports on the component
+		// Replace connections to the input ports on the block
 		Map<Parameter, InheritedConnection> toInParameter = new LinkedHashMap<>();
 		MultiMap<Parameter, InheritedConnection> fromInParameter = new MultiMap<>();
 		for (InheritedConnection c: newConnections) {
@@ -228,12 +228,12 @@ aspect Inheritance {
 			}
 		}
 		for (InheritedConnection c: list) {
-			if (c.getTarget().toString().startsWith(fullCompName)) {
-				String parameterName = c.getTarget().toString().substring(fullCompName.length());
+			if (c.getTarget().toString().startsWith(fullBlockName)) {
+				String parameterName = c.getTarget().toString().substring(fullBlockName.length());
 				if (parameterName.indexOf(".") > 0) {
 					parameterName = parameterName.substring(0, parameterName.indexOf("."));
 				}
-				String fullParameterName = comp.name() + INLINE_SEP + parameterName;
+				String fullParameterName = block.name() + INLINE_SEP + parameterName;
 				Parameter p = inParameters.get(fullParameterName);
 				if (p != null) {
 					toInParameter.put(p, c);
@@ -246,7 +246,7 @@ aspect Inheritance {
 					e.getValue().getSource().treeCopy(),
 					fromParConn.getTarget().treeCopy(),
 					e.getValue().getDeclaredFlowDecl(),
-					comp);
+					block);
 				newConnections.add(ic);
 			}
 		}
@@ -259,7 +259,7 @@ aspect Inheritance {
 			}
 		}
 		
-		// Replace connections from the output ports on the component
+		// Replace connections from the output ports on the block
 		Map<Parameter, InheritedConnection> toOutParameter = new LinkedHashMap<>();
 		MultiMap<Parameter, InheritedConnection> fromOutParameter = new MultiMap<>();
 		for (InheritedConnection c: newConnections) {
@@ -270,12 +270,12 @@ aspect Inheritance {
 			
 		}
 		for (InheritedConnection c: list) {
-			if (c.getSource().toString().startsWith(fullCompName)) {
-				String parameterName = c.getSource().toString().substring(fullCompName.length());
+			if (c.getSource().toString().startsWith(fullBlockName)) {
+				String parameterName = c.getSource().toString().substring(fullBlockName.length());
 				if (parameterName.indexOf(".") > 0) {
 					parameterName = parameterName.substring(0, parameterName.indexOf("."));
 				}
-				String fullParameterName = comp.name() + INLINE_SEP + parameterName;
+				String fullParameterName = block.name() + INLINE_SEP + parameterName;
 				Parameter p = outParameters.get(fullParameterName);
 				if (p != null) {
 					fromOutParameter.put(p, c);
@@ -288,7 +288,7 @@ aspect Inheritance {
 					e.getValue().getSource().treeCopy(),
 					fromParConn.getTarget().treeCopy(),
 					fromParConn.getDeclaredFlowDecl(),
-					comp);
+					block);
 				newConnections.add(ic);
 			}
 		}
@@ -317,15 +317,15 @@ aspect Inheritance {
 	
 	public Expr Expr.copyWithInlinedName(String name) {
 		Expr e = treeCopy();
-		e.addInlinedComponentName(name);
+		e.addInlinedBlockName(name);
 		return e;
 	}
-	public void ASTNode.addInlinedComponentName(String name) {
+	public void ASTNode.addInlinedBlockName(String name) {
 		for (ASTNode child: astChildren()) {
-			child.addInlinedComponentName(name);
+			child.addInlinedBlockName(name);
 		}
 	}
-	public void SimpleVarUse.addInlinedComponentName(String name) {
+	public void SimpleVarUse.addInlinedBlockName(String name) {
 		setID(name + INLINE_SEP + getID());
 	}
 	
@@ -392,8 +392,8 @@ aspect Inheritance {
 	}
 	
 	syn DiagramType Node.declaredInDiagramType();
-	eq Component.declaredInDiagramType() = diagramType();
-	eq InheritedComponent.declaredInDiagramType() = getDeclaredComponent().diagramType();
+	eq Block.declaredInDiagramType() = diagramType();
+	eq InheritedBlock.declaredInDiagramType() = getDeclaredBlock().diagramType();
 	eq Parameter.declaredInDiagramType() = diagramType();
 	eq WiringParameter.declaredInDiagramType() = null;
 	eq InheritedInParameter.declaredInDiagramType() = getDeclaredInParameter().diagramType();
@@ -408,8 +408,8 @@ aspect Inheritance {
 	eq Connection.getSource().enclosingConnection() = this;
 	
 	syn boolean Node.isInherited();
-	eq Component.isInherited() = declaredInDiagramType() != diagramType();
-	eq InlinedComponent.isInherited() = false;
+	eq Block.isInherited() = declaredInDiagramType() != diagramType();
+	eq InlinedBlock.isInherited() = false;
 	eq Parameter.isInherited() = declaredInDiagramType() != diagramType();
 	eq WiringParameter.isInherited() = false;
 	eq Variable.isInherited() = declaredInDiagramType() != diagramType();
@@ -420,8 +420,8 @@ aspect Inheritance {
 	syn FlowDecl Connection.declaredFlowDecl() = this;
 	eq InheritedConnection.declaredFlowDecl() = getDeclaredFlowDecl();
 	
-	syn Component Component.declaredComponent() = this;
-	eq InheritedComponent.declaredComponent() = getDeclaredComponent();
+	syn Block Block.declaredBlock() = this;
+	eq InheritedBlock.declaredBlock() = getDeclaredBlock();
 
 	syn Variable Variable.declaredVariable() = this;
 	eq InheritedVariable.declaredVariable() = getDeclaredVariable();
@@ -430,12 +430,12 @@ aspect Inheritance {
 	eq InterceptConnection.isIntercept() = true;
 	
 	syn boolean Node.isNameAmbiguous();
-	eq Component.isNameAmbiguous() = isNameAmbiguous(name());
+	eq Block.isNameAmbiguous() = isNameAmbiguous(name());
 	eq Parameter.isNameAmbiguous() = false;
 	eq WiringParameter.isNameAmbiguous() = false;
 	eq Variable.isNameAmbiguous() = false;
 	eq Literal.isNameAmbiguous() = false;
-	inh boolean Component.isNameAmbiguous(String name);
+	inh boolean Block.isNameAmbiguous(String name);
 }
 
 aspect Factories {
@@ -454,7 +454,7 @@ aspect Factories {
 	public InheritedVariable Variable.createInheritedVariable() {
 		return new InheritedVariable(getTypeUse().treeCopy(), getID(), this);
 	}
-	public Collection<InheritedVariable> Component.createInlinedVariables() {
+	public Collection<InheritedVariable> Block.createInlinedVariables() {
 		ArrayList<InheritedVariable> list = new ArrayList<>();
 		if (shouldBeInlined()) {
 			DiagramType dt = (DiagramType) type();
@@ -470,51 +470,51 @@ aspect Factories {
 		}
 		return list;
 	}
-	public Collection<InheritedComponent> Component.createInheritedComponents() {
-		ArrayList<InheritedComponent> list = new ArrayList<>();
+	public Collection<InheritedBlock> Block.createInheritedBlocks() {
+		ArrayList<InheritedBlock> list = new ArrayList<>();
 		if (shouldBeInlined()) {
 			DiagramType dt = (DiagramType) type();
-			for (InheritedComponent inhComp: dt.components()) {
-				ArrayList<Component> inlinedComps = new ArrayList<>();
-				inlinedComps.add(this);
-				inlinedComps.addAll(inhComp.inlinedComponents());
-				InheritedComponent ic = new InlinedComponent(
-					inhComp.getModifiers().treeCopy(),
-					inhComp.getType().treeCopy(),
-					new InlinedName(new IdName(name()), new IdName(inhComp.name())),
-					inhComp.getDeclaredComponent(),
-					inlinedComps,
-					inhComp.lastDiagramType());
-				list.add(ic);
+			for (InheritedBlock inhBlock: dt.blocks()) {
+				ArrayList<Block> inlinedBlocks = new ArrayList<>();
+				inlinedBlocks.add(this);
+				inlinedBlocks.addAll(inhBlock.inlinedBlocks());
+				InheritedBlock ib = new InlinedBlock(
+					inhBlock.getModifiers().treeCopy(),
+					inhBlock.getType().treeCopy(),
+					new InlinedName(new IdName(name()), new IdName(inhBlock.name())),
+					inhBlock.getDeclaredBlock(),
+					inlinedBlocks,
+					inhBlock.lastDiagramType());
+				list.add(ib);
 			}
 		} else {
-			InheritedComponent ic = new InheritedComponent(
+			InheritedBlock ib = new InheritedBlock(
 				getModifiers().treeCopy(),
 				getType().treeCopy(),
 				getName().treeCopy(),
 				this);
-			list.add(ic);
+			list.add(ib);
 		}
 		return list;
 	}
 
 	/**
 	 * Copy expressions in dataflow statements and add type qualification,
-	 * that is, adds in which diagram type the component is declared in.
+	 * that is, adds in which diagram type the block is declared in.
 	 * For example, connect(t1, t2) => connect(A:t1, B:t2), 
 	 * if t1 is declared in block A and t2 is declared in B.
-	 * If a component has been redeclared, then the diagram type that contains
-	 * the most specific component is used (ie., the "latest" redeclare). 
+	 * If a block has been redeclared, then the diagram type that contains
+	 * the most specific block is used (ie., the "latest" redeclare). 
 	 */
 	public Expr Expr.copyFullQualification(DiagramType contextDt) {
 		return treeCopy();
 	}
 	public abstract VarUse VarUse.copyFullQualification(DiagramType contextDt);
 	public VarUse AbstractSimpleVarUse.copyFullQualification(DiagramType contextDt) {
-		if (!isAmbiguous() && node() instanceof Component) {
-			// Map component to the most specific component (due to redeclare)
-			Component component = contextDt.mostSpecificComponent((Component) node());
-			TypeUse typeUse = new TypeUse(component.diagramType().name());
+		if (!isAmbiguous() && node() instanceof Block) {
+			// Map block to the most specific block (due to redeclare)
+			Block block = contextDt.mostSpecificBlock((Block) node());
+			TypeUse typeUse = new TypeUse(block.diagramType().name());
 			return new TypedSimpleVarUse(typeUse, getID());
 		} else {
 			return treeCopy();
@@ -599,8 +599,8 @@ aspect InheritanceErrorsHelperAttributes {
 		StringBuilder sb = new StringBuilder();
 		HashMap<String, Node> map = new HashMap<>();
 		for (DiagramType superType: superTypesLinearized()) {
-			for (Component c: superType.getLocalComponents()) {
-				map.put(c.name(), c);
+			for (Block b: superType.getLocalBlocks()) {
+				map.put(b.name(), b);
 			}
 		}
 		for (DiagramType superType: superTypesLinearized()) {

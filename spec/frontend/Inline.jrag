@@ -1,60 +1,60 @@
 aspect Inline {
-	syn boolean Component.shouldBeInlined()
+	syn boolean Block.shouldBeInlined()
 		= getModifiers().isInline() && canBeInlined();
-	eq RedeclareComponent.shouldBeInlined() {
+	eq RedeclareBlock.shouldBeInlined() {
 		boolean inline = getModifiers().isInline();
-		if (redeclaredComponent() != null) {
-			inline = inline || redeclaredComponent().shouldBeInlined();
+		if (redeclaredBlock() != null) {
+			inline = inline || redeclaredBlock().shouldBeInlined();
 		}
 		return inline && canBeInlined();
 	}
-	syn boolean Component.canBeInlined()
+	syn boolean Block.canBeInlined()
 		= !isOnTypeCycle() && type().isDiagramType()
-			&& (type().containsComponents() || type().containsVariables());
+			&& (type().containsBlocks() || type().containsVariables());
 
 	syn boolean Node.isInlined();
 	eq Parameter.isInlined() = false;
 	eq WiringParameter.isInlined() = false;
 	eq Variable.isInlined() = false;
-	eq Component.isInlined() = false;
+	eq Block.isInlined() = false;
 	eq Literal.isInlined() = false;
-	eq InlinedComponent.isInlined() = true;
+	eq InlinedBlock.isInlined() = true;
 	eq InlinedVariable.isInlined() = true;
 
-	syn Component Node.inlinedComponent();
-	eq Parameter.inlinedComponent() = null;
-	eq WiringParameter.inlinedComponent() = null;
-	eq Variable.inlinedComponent() = null;
-	eq InlinedVariable.inlinedComponent() = getInlinedComponent();
-	eq Literal.inlinedComponent() = null;
-	eq Component.inlinedComponent() = null;
-	eq InlinedComponent.inlinedComponent()
-		= getInlinedComponents().get(0);
-	syn java.util.List<Component> Component.inlinedComponents()
+	syn Block Node.inlinedBlock();
+	eq Parameter.inlinedBlock() = null;
+	eq WiringParameter.inlinedBlock() = null;
+	eq Variable.inlinedBlock() = null;
+	eq InlinedVariable.inlinedBlock() = getInlinedBlock();
+	eq Literal.inlinedBlock() = null;
+	eq Block.inlinedBlock() = null;
+	eq InlinedBlock.inlinedBlock()
+		= getInlinedBlocks().get(0);
+	syn java.util.List<Block> Block.inlinedBlocks()
 		= Collections.emptyList();
-	eq InlinedComponent.inlinedComponents() = getInlinedComponents();
+	eq InlinedBlock.inlinedBlocks() = getInlinedBlocks();
 
-	syn DiagramType Component.lastDiagramType() = diagramType();
-	eq InlinedComponent.lastDiagramType() = getLastDiagramType();
+	syn DiagramType Block.lastDiagramType() = diagramType();
+	eq InlinedBlock.lastDiagramType() = getLastDiagramType();
 	
 	syn boolean DiagramType.isEnclosedBy(DiagramType dt)
 		= dt == this || isEnclosedByInh(dt);
-	syn boolean Component.isEnclosedBy(DiagramType dt) = isEnclosedByInh(dt);
+	syn boolean Block.isEnclosedBy(DiagramType dt) = isEnclosedByInh(dt);
 	inh boolean DiagramType.isEnclosedByInh(DiagramType dt);
-	inh boolean Component.isEnclosedByInh(DiagramType dt);
+	inh boolean Block.isEnclosedByInh(DiagramType dt);
 	eq DiagramType.getChild().isEnclosedByInh(DiagramType dt)
 		= dt == this || isEnclosedByInh(dt);
 	eq Program.getChild().isEnclosedByInh(DiagramType dt) = false;
 	
-	syn boolean Component.isEnclosedBy(Component c)
-		= c == this || isEnclosedByInh(c);
-	inh boolean Component.isEnclosedByInh(Component c);
-	eq Component.getType().isEnclosedByInh(Component c)
-		= c == this || isEnclosedByInh(c);
-	eq Program.getChild().isEnclosedByInh(Component c) = false;
+	syn boolean Block.isEnclosedBy(Block b)
+		= b == this || isEnclosedByInh(b);
+	inh boolean Block.isEnclosedByInh(Block b);
+	eq Block.getType().isEnclosedByInh(Block b)
+		= b == this || isEnclosedByInh(b);
+	eq Program.getChild().isEnclosedByInh(Block b) = false;
 
-	syn boolean TypeDecl.containsComponents() = false;
-	eq DiagramType.containsComponents() = components().getNumChild() > 0;
+	syn boolean TypeDecl.containsBlocks() = false;
+	eq DiagramType.containsBlocks() = blocks().getNumChild() > 0;
 
 	syn boolean TypeDecl.containsVariables() = false;
 	eq DiagramType.containsVariables() = variables().getNumChild() > 0;
@@ -62,9 +62,9 @@ aspect Inline {
 	syn boolean Connection.isInlined() = false;
 	eq InlinedConnection.isInlined() = true;
 	
-	inh boolean Anchor.belongsToInlinedComponent();
-	eq InlinedComponent.getChild().belongsToInlinedComponent() = true;
-	eq Program.getChild().belongsToInlinedComponent() = false;
+	inh boolean Anchor.belongsToInlinedBlock();
+	eq InlinedBlock.getChild().belongsToInlinedBlock() = true;
+	eq Program.getChild().belongsToInlinedBlock() = false;
 	
 	eq InlinedName.flatName() = getOuter().flatName() + INLINE_SEP + getInner().flatName();
 	eq InlinedName.name() = getOuter().name() + INLINE_SEP + getInner().name();
@@ -73,7 +73,7 @@ aspect Inline {
 }
 
 aspect InlineErrors {
-	Component contributes error("Only components of diagram types can be inlined")
+	Block contributes error("Only blocks of diagram types can be inlined")
 		when getModifiers().isInline() && !type().isUnknown() && !type().isDiagramType()
 		to CompilationUnit.errors();
 }

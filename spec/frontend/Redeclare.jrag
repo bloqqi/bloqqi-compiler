@@ -1,8 +1,8 @@
 aspect Redeclare {
 	syn boolean VarDecl.isRedeclare() = false;
-	eq RedeclareComponent.isRedeclare() = true;
+	eq RedeclareBlock.isRedeclare() = true;
 	
-	syn VarDecl RedeclareComponent.redeclaredDecl() {
+	syn VarDecl RedeclareBlock.redeclaredDecl() {
 		for (DiagramType superDt: diagramType().superTypesLinearizedReversed()) {
 			if (superDt != diagramType()) {
 				VarDecl vd = superDt.localLookup(name());
@@ -11,18 +11,18 @@ aspect Redeclare {
 		}
 		return null;
 	}
-	syn Component Component.redeclaredComponent() = null;
-	eq RedeclareComponent.redeclaredComponent()
-		= redeclaredDecl() instanceof Component ? (Component) redeclaredDecl() : null;
+	syn Block Block.redeclaredBlock() = null;
+	eq RedeclareBlock.redeclaredBlock()
+		= redeclaredDecl() instanceof Block ? (Block) redeclaredDecl() : null;
 
-	syn boolean Component.isLocallyRedeclared() = false;
-	eq RedeclareComponent.isLocallyRedeclared() = true;
-	eq InheritedComponent.isLocallyRedeclared() = !isInherited() && declaredComponent().isRedeclare();
-	eq InlinedComponent.isLocallyRedeclared() = false;
+	syn boolean Block.isLocallyRedeclared() = false;
+	eq RedeclareBlock.isLocallyRedeclared() = true;
+	eq InheritedBlock.isLocallyRedeclared() = !isInherited() && declaredBlock().isRedeclare();
+	eq InlinedBlock.isLocallyRedeclared() = false;
 }
 
 /**
- * Maps component declarations to their most specific component
+ * Maps block declarations to their most specific block
  * due to redeclare in a diagram type.
  *
  * For example,
@@ -32,52 +32,52 @@ aspect Redeclare {
  *   diagramtype B extends A {
  *     redeclare S t;
  *   }
- * In diagram type B, the most specific component for
+ * In diagram type B, the most specific block for
  * both "T t" and "redeclare S t" is "redeclare S t".
  * Here, S is a subtype of T.
  */
-aspect MostSpecificComponent {
-	syn lazy Map<Component, Component> DiagramType.mostSpecificComponentMap() {
-		Map<Component, Component> map = new HashMap<>();
+aspect MostSpecificBlock {
+	syn lazy Map<Block, Block> DiagramType.mostSpecificBlockMap() {
+		Map<Block, Block> map = new HashMap<>();
 		
-		// Add components that are redeclared
+		// Add blocks that are redeclared
 		for (DiagramType dt: superTypesLinearizedReversed()) {
-			for (Component c: dt.getLocalComponents()) {
-				if (c.isRedeclare() && !map.containsKey(c)) {
-					RedeclareComponent mostSpecific = (RedeclareComponent) c;
-					Component component = mostSpecific;
-					while (component != null) {
-						map.put(component, mostSpecific);
-						component = component.redeclaredComponent();
+			for (Block b: dt.getLocalBlocks()) {
+				if (b.isRedeclare() && !map.containsKey(b)) {
+					RedeclareBlock mostSpecific = (RedeclareBlock) b;
+					Block block = mostSpecific;
+					while (block != null) {
+						map.put(block, mostSpecific);
+						block = block.redeclaredBlock();
 					}
 				}
 			}
 		}
 
-		// Add components that are -not- redeclared
+		// Add blocks that are -not- redeclared
 		for (DiagramType dt: superTypesLinearizedReversed()) {
-			for (Component c: dt.getLocalComponents()) {
-				if (!map.containsKey(c)) {
-					map.put(c, c);
+			for (Block b: dt.getLocalBlocks()) {
+				if (!map.containsKey(b)) {
+					map.put(b, b);
 				}
 			}
 		}
 		
 		return map;
 	}
-	syn Component DiagramType.mostSpecificComponent(Component component)
-		= mostSpecificComponentMap().get(component);
+	syn Block DiagramType.mostSpecificBlock(Block block)
+		= mostSpecificBlockMap().get(block);
 	
-	syn boolean DiagramType.isMostSpecificComponent(Component component)
-		= mostSpecificComponent(component) == component;
+	syn boolean DiagramType.isMostSpecificBlock(Block block)
+		= mostSpecificBlock(block) == block;
 	
 	
-	syn java.util.List<Component> DiagramType.declaredComponentsTransitive() {
-		ArrayList<Component> list = new ArrayList<>();
+	syn java.util.List<Block> DiagramType.declaredBlocksTransitive() {
+		ArrayList<Block> list = new ArrayList<>();
 		for (DiagramType superType: superTypesLinearized()) {
-			for (Component comp: superType.getLocalComponents()) {
-				if (isMostSpecificComponent(comp)) {
-					list.add(comp);
+			for (Block block: superType.getLocalBlocks()) {
+				if (isMostSpecificBlock(block)) {
+					list.add(block);
 				}
 			}
 		}
@@ -86,16 +86,16 @@ aspect MostSpecificComponent {
 }
 
 aspect Errors {
-	RedeclareComponent contributes error("Cannot redeclare '" + name() + "', name not found")
+	RedeclareBlock contributes error("Cannot redeclare '" + name() + "', name not found")
 		when redeclaredDecl() == null
 		to CompilationUnit.errors();
 	
-	RedeclareComponent contributes error("Cannot redeclare '" + name() + "', not a component")
-		when redeclaredDecl() != null && !(redeclaredDecl() instanceof Component)
+	RedeclareBlock contributes error("Cannot redeclare '" + name() + "', not a block")
+		when redeclaredDecl() != null && !(redeclaredDecl() instanceof Block)
 		to CompilationUnit.errors();
 	
-	RedeclareComponent contributes error("Cannot redeclare '" + name() + "', '" + type().name()
-			+ "' is not a subtype of '" + redeclaredComponent().type().name() + "'")
-		when redeclaredComponent() != null && !type().isSubTypeOf(redeclaredComponent().type())
+	RedeclareBlock contributes error("Cannot redeclare '" + name() + "', '" + type().name()
+			+ "' is not a subtype of '" + redeclaredBlock().type().name() + "'")
+		when redeclaredBlock() != null && !type().isSubTypeOf(redeclaredBlock().type())
 		to CompilationUnit.errors();
 }

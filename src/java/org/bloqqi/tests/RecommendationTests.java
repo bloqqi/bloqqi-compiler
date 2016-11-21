@@ -51,12 +51,12 @@ public class RecommendationTests extends TestSuite {
 		}
 		
 		DiagramType newDt = conf.newDiagramType("SubA");
-		assertEquals("a", newDt.getLocalComponent(0).name());
-		assertEquals("b", newDt.getLocalComponent(1).name());
-		assertEquals("c", newDt.getLocalComponent(2).name());
-		assertEquals("t3", newDt.getLocalComponent(3).name());
-		assertEquals("t2", newDt.getLocalComponent(4).name());
-		assertEquals("t1", newDt.getLocalComponent(5).name());
+		assertEquals("a", newDt.getLocalBlock(0).name());
+		assertEquals("b", newDt.getLocalBlock(1).name());
+		assertEquals("c", newDt.getLocalBlock(2).name());
+		assertEquals("t3", newDt.getLocalBlock(3).name());
+		assertEquals("t2", newDt.getLocalBlock(4).name());
+		assertEquals("t1", newDt.getLocalBlock(5).name());
 	}
 	
 	
@@ -97,7 +97,7 @@ public class RecommendationTests extends TestSuite {
 		DiagramType newDt = conf.newDiagramType("SubA");
 		dt.program().getCompilationUnit(0).addDeclaration(newDt);
 		dt.program().flushAllAttributes();
-		assertEquals("S", newDt.getLocalComponent(0).type().name());
+		assertEquals("S", newDt.getLocalBlock(0).type().name());
 	}
 
 	@Test
@@ -211,9 +211,9 @@ public class RecommendationTests extends TestSuite {
 		CompilationUnit cu = p.getCompilationUnit(0);
 		
 		// Create new specialization and add them to the program
-		Component comp = conf.newAnonymousComponent("a");
+		Block comp = conf.newAnonymousBlock("a");
 		DiagramType dtMain = (DiagramType) cu.getDeclaration(0);
-		dtMain.addLocalComponent(comp);
+		dtMain.addLocalBlock(comp);
 		p.flushAllAttributes();
 
 		// No errors
@@ -259,8 +259,8 @@ public class RecommendationTests extends TestSuite {
 			opt.setSelected(true);
 		}
 		
-		Component comp = confA.newAnonymousComponent("a");
-		dtMain.addLocalComponent(comp);
+		Block comp = confA.newAnonymousBlock("a");
+		dtMain.addLocalBlock(comp);
 		program.flushAllAttributes();
 		
 		String expectedMain =
@@ -296,7 +296,7 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtA = (DiagramType) program.getCompilationUnit(0).typeDecls().get(1);
 
 		FeatureConfiguration confA = dtA.specialize();
-		Component comp = confA.newAnonymousComponent("a");
+		Block comp = confA.newAnonymousBlock("a");
 		assertFalse(comp.hasAnonymousDiagramType());
 	}
 
@@ -385,7 +385,7 @@ public class RecommendationTests extends TestSuite {
 		opt.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(conf.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(conf.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -438,7 +438,7 @@ public class RecommendationTests extends TestSuite {
 		optB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(confA.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -496,7 +496,7 @@ public class RecommendationTests extends TestSuite {
 		optB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(confA.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -543,7 +543,7 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(expectedSet, conf.getNewInParameters());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(conf.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(conf.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -593,7 +593,7 @@ public class RecommendationTests extends TestSuite {
 		mandatoryB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(confA.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -651,7 +651,7 @@ public class RecommendationTests extends TestSuite {
 		optB.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(confA.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(confA.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +
@@ -700,7 +700,7 @@ public class RecommendationTests extends TestSuite {
 		opt.setSelectedAlternative(itr.next());
 		
 		DiagramType dtMain = (DiagramType) program.getCompilationUnit(0).typeDecls().get(0);
-		dtMain.addLocalComponent(conf.newAnonymousComponent("a"));
+		dtMain.addLocalBlock(conf.newAnonymousBlock("a"));
 		dtMain.flushAllAttributes();
 		String expected =
 			"diagramtype Main {\n" +

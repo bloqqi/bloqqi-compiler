@@ -10,113 +10,113 @@ import java.util.Iterator;
  */
 
 aspect DFO {
-	syn int Component.dfo() = declDfo();
+	syn int Block.dfo() = declDfo();
 
-	syn nta Component DiagramType.startComponent() 
-		= new Component(new Modifiers(), new TypeUse(""), new IdName("<root>"));
+	syn nta Block DiagramType.startBlock() 
+		= new Block(new Modifiers(), new TypeUse(""), new IdName("<root>"));
 
-	inh lazy Set<Component> Component.predP();
-	eq DiagramType.getComponent(int i).predP() {
+	inh lazy Set<Block> Block.predP();
+	eq DiagramType.getBlock(int i).predP() {
 		if (hasDataflowCycles()) {
 			return Collections.emptySet();
 		}
-		Component c = getComponent(i);
-		if (c.predComponents().isEmpty()) {
-			Set<Component> set = new HashSet<Component>();
-			set.add(startComponent());
+		Block b = getBlock(i);
+		if (b.predBlocks().isEmpty()) {
+			Set<Block> set = new HashSet<Block>();
+			set.add(startBlock());
 			return set;
 		} else {
-			return c.predComponents();
+			return b.predBlocks();
 		}
 	}
-	eq DiagramType.startComponent().predP() = new HashSet<Component>();
-	eq DiagramType.getLocalComponent().predP() = new HashSet<Component>();
-	eq Program.getChild().predP() = new HashSet<Component>();
-	inh Set<Component> Component.succP();
-	eq DiagramType.getComponent(int i).succP() {
+	eq DiagramType.startBlock().predP() = new HashSet<Block>();
+	eq DiagramType.getLocalBlock().predP() = new HashSet<Block>();
+	eq Program.getChild().predP() = new HashSet<Block>();
+	inh Set<Block> Block.succP();
+	eq DiagramType.getBlock(int i).succP() {
 		if (hasDataflowCycles()) {
 			return Collections.emptySet();
 		} else {
-			return getComponent(i).succComponents();
+			return getBlock(i).succBlocks();
 		}
 	}
-	eq DiagramType.startComponent().succP() = roots();
-	eq Program.getChild().succP() = new HashSet<Component>();
+	eq DiagramType.startBlock().succP() = roots();
+	eq Program.getChild().succP() = new HashSet<Block>();
 
-	syn boolean Expr.isComponent() = false;
-	eq VarUse.isComponent() = node() instanceof Component;
+	syn boolean Expr.isBlock() = false;
+	eq VarUse.isBlock() = node() instanceof Block;
 	
-	inh Set<Component> Component.roots();
-	eq DiagramType.getComponent().roots() = roots();
-	eq DiagramType.getLocalComponent().roots() = null;
+	inh Set<Block> Block.roots();
+	eq DiagramType.getBlock().roots() = roots();
+	eq DiagramType.getLocalBlock().roots() = null;
 	eq Program.getChild().roots() = null;
-	syn lazy Set<Component> DiagramType.roots() {
-		Set<Component> set = new HashSet<Component>();
-		for (Component c: getComponents()) {
-			if (c.predComponents().isEmpty()) {
-				set.add(c);
+	syn lazy Set<Block> DiagramType.roots() {
+		Set<Block> set = new HashSet<Block>();
+		for (Block b: getBlocks()) {
+			if (b.predBlocks().isEmpty()) {
+				set.add(b);
 			}
 		}
 		return set;
 	}
 	
-	syn lazy Component Component.sinkPred() {
-		Component sinkPred = null;
-		for (Component p: predP()) {
+	syn lazy Block Block.sinkPred() {
+		Block sinkPred = null;
+		for (Block p: predP()) {
 			if (sinkPred == null || sinkPred.compare(p))
 				sinkPred = p;
 		}
 		return sinkPred;
 	}
 
-	syn lazy boolean Component.compare(Component c2) {
-		if (sinkPred() == c2.sinkPred()) 
-			return index() < c2.index();
-		else if (this == c2.sinkPred()) 
+	syn lazy boolean Block.compare(Block b2) {
+		if (sinkPred() == b2.sinkPred()) 
+			return index() < b2.index();
+		else if (this == b2.sinkPred()) 
 			return true;
-		else if (sinkPred() == c2)
+		else if (sinkPred() == b2)
 			return false;
-		else if (depth() == c2.depth()) 
-			return sinkPred().compare(c2.sinkPred());
-		else if (depth() < c2.depth()) 
-			return compare(c2.sinkPred());
+		else if (depth() == b2.depth()) 
+			return sinkPred().compare(b2.sinkPred());
+		else if (depth() < b2.depth()) 
+			return compare(b2.sinkPred());
 		else 
-			return sinkPred().compare(c2);
+			return sinkPred().compare(b2);
 	}
 
 	
-	syn lazy int Component.depth() 
+	syn lazy int Block.depth() 
 		= sinkPred() == null ? 0 : sinkPred().depth() + 1;
 	
 
-	Component implements Comparable<Component>;
-	public int Component.compareTo(Component other) {
+	Block implements Comparable<Block>;
+	public int Block.compareTo(Block other) {
 		return index() - other.index();
 	}
 
-	/*coll TreeSet<Component> Component.children() [new TreeSet<Component>()] with add root DiagramType;
-	Component contributes this
+	/*coll TreeSet<Block> Block.children() [new TreeSet<Block>()] with add root DiagramType;
+	Block contributes this
 		when sinkPred() != null
-		to Component.children() for sinkPred();
+		to Block.children() for sinkPred();
 	*/
 	
-	inh TreeSet<Component> Component.children();
-	eq DiagramType.getComponent(int i).children() {
-		Component parent = getComponent(i);
-		TreeSet<Component> set = new TreeSet<>();
-		for (Component c: getComponents()) {
-			if (parent == c.sinkPred()) {
-				set.add(c);
+	inh TreeSet<Block> Block.children();
+	eq DiagramType.getBlock(int i).children() {
+		Block parent = getBlock(i);
+		TreeSet<Block> set = new TreeSet<>();
+		for (Block b: getBlocks()) {
+			if (parent == b.sinkPred()) {
+				set.add(b);
 			}
 		}
 		return set;
 	}
-	eq DiagramType.startComponent().children() {
-		Component parent = startComponent();
-		TreeSet<Component> set = new TreeSet<>();
-		for (Component c: getComponents()) {
-			if (parent == c.sinkPred()) {
-				set.add(c);
+	eq DiagramType.startBlock().children() {
+		Block parent = startBlock();
+		TreeSet<Block> set = new TreeSet<>();
+		for (Block b: getBlocks()) {
+			if (parent == b.sinkPred()) {
+				set.add(b);
 			}
 		}
 		return set;
@@ -124,26 +124,26 @@ aspect DFO {
 	eq Program.getChild().children() = new TreeSet<>();
 	
 	
-	syn lazy TreeSet<Component> Component.sinkSiblings() {
+	syn lazy TreeSet<Block> Block.sinkSiblings() {
 		if (sinkPred() == null) 
 			return new TreeSet<>();
 		else 
 			return sinkPred().children();
 	}
-	syn lazy int Component.maxDfo() {
+	syn lazy int Block.maxDfo() {
 		if (children().isEmpty()) 
 			return declDfo();
 		else 
 			return children().last().maxDfo();
 	}
-	syn lazy int Component.declDfo() {
+	syn lazy int Block.declDfo() {
 		if (diagramType().hasDataflowCycles()) {
 			return -1;
 		}
 		if (predP().isEmpty()) 
 			return 0;
 		int max = 0;
-		Component siblingBefore = sinkSiblings().lower(this);
+		Block siblingBefore = sinkSiblings().lower(this);
 		if (siblingBefore != null) 
 			max = siblingBefore.maxDfo();
 		else 

@@ -13,7 +13,7 @@ aspect PrintCost {
 		sb.append(name() + ":\n");
 		sb.append("- Local:\n");
 		sb.append("  - parameters: " + parameters + "\n");
-		sb.append("  - blocks: " + getNumLocalComponent() + "\n");
+		sb.append("  - blocks: " + getNumLocalBlock() + "\n");
 		int conn = 0;
 		int intercept = 0;
 		for (FlowDecl fd: getFlowDecls()) {
@@ -24,13 +24,13 @@ aspect PrintCost {
 		sb.append("  - intercept: " + intercept + "\n");
 		sb.append("- Total:\n");
 		sb.append("  - parameters: " + (getNumInParameter() + getNumOutParameter()) + "\n");
-		sb.append("  - block: " + getNumComponent() + "\n");
+		sb.append("  - block: " + getNumBlock() + "\n");
 		sb.append("  - connections: " + getNumConnection() + "\n");
-		int codeCost = parameters + getNumLocalComponent() + conn + intercept;
+		int codeCost = parameters + getNumLocalBlock() + conn + intercept;
 		sb.append("- code cost: " + codeCost + "\n");
 		
 		int runtimeCost = 0;
-		runtimeCost += getNumComponent();
+		runtimeCost += getNumBlock();
 		runtimeCost += getNumConnection();
 		runtimeCost += getNumInParameter();
 		runtimeCost += getNumOutParameter();

@@ -28,7 +28,7 @@ aspect NameErrors {
 		when !diagramType().isSubTypeOf(getTypeUse().type()) && !isInAnnotation()
 		to CompilationUnit.errors();
 
-	Component contributes error("A component is already locally declared as " + name())
+	Block contributes error("A block is already locally declared as " + name())
 		when isAlreadyLocallyDeclared()
 		to CompilationUnit.errors();
 }
@@ -43,7 +43,7 @@ aspect TypeErrors {
 		when !isTypeCompatible()
 		to CompilationUnit.errors();
 	
-	Component contributes error("Only diagram types and functions are allowed as components")
+	Block contributes error("Only diagram types and functions are allowed as blocks")
 		when type().isKnown() 
 			&& (type().isPrimitiveType() || type().isStructType())
 		to CompilationUnit.errors();
@@ -81,8 +81,8 @@ aspect ConnectionErrors {
 		to CompilationUnit.errors();
 
 	DiagramType contributes error("Diagram type " + name()
-			+ " contains dataflow cycles. Involved components: "
-			+ componentsInDataflowCycle())
+			+ " contains dataflow cycles. Involved blocks: "
+			+ blocksInDataflowCycle())
 		when hasDataflowCycles()
 		to CompilationUnit.errors();
 	
@@ -117,10 +117,10 @@ aspect HelperAttributes {
 	eq CompilationUnit.getChild().compUnit() = this;
 	eq Program.getChild().compUnit() = null;
 
-	inh boolean Component.isAlreadyLocallyDeclared();
-	eq DiagramType.getLocalComponent(int i).isAlreadyLocallyDeclared()
-		= localComponentLookup(getLocalComponent(i).name()) != getLocalComponent(i);
-	eq DiagramType.getComponent().isAlreadyLocallyDeclared() = false;
+	inh boolean Block.isAlreadyLocallyDeclared();
+	eq DiagramType.getLocalBlock(int i).isAlreadyLocallyDeclared()
+		= localBlockLookup(getLocalBlock(i).name()) != getLocalBlock(i);
+	eq DiagramType.getBlock().isAlreadyLocallyDeclared() = false;
 	eq Program.getChild().isAlreadyLocallyDeclared() = false;
 	
 	/** Temporary hack, since collection attributes do not traverse NTAs */ 
@@ -138,12 +138,12 @@ aspect HelperAttributes {
 				list.add("Variable '" + v.name() + "' has more than one incoming connection");
 			}
 		}
-		for (Component c: getComponents()) {
-			for (ComponentParameter cp: c.getInParameters()) {
+		for (Block b: getBlocks()) {
+			for (ComponentParameter cp: b.getInParameters()) {
 				int n = cp.ingoingConnections().size();
 				if (n > 1) {
 					String s;
-					s  = "Parameter '" + cp.name() + "' in component '" + c.name() + "' ";
+					s  = "Parameter '" + cp.name() + "' in component '" + b.name() + "' ";
 					s += "has more than one incoming connection";
 					list.add(s);
 				}

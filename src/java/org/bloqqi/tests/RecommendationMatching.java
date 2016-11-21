@@ -2,7 +2,7 @@ package org.bloqqi.tests;
 
 import static org.junit.Assert.assertEquals;
 
-import org.bloqqi.compiler.ast.Component;
+import org.bloqqi.compiler.ast.Block;
 import org.bloqqi.compiler.ast.DiagramType;
 import org.bloqqi.compiler.ast.FeatureConfiguration;
 import org.bloqqi.compiler.ast.Program;
@@ -240,12 +240,12 @@ public class RecommendationMatching extends TestSuite {
 	}
 
 	private void testMatching(DiagramType dtMain) {
-		Component c = dtMain.getLocalComponent(0);
-		DiagramType specType = c.type().directSuperTypes().iterator().next();
+		Block b = dtMain.getLocalBlock(0);
+		DiagramType specType = b.type().directSuperTypes().iterator().next();
 
 		String expected = dtMain.prettyPrint();
-		FeatureConfiguration conf = specType.specialize(c.anonymousDiagramType());
-		dtMain.setLocalComponent(conf.newAnonymousComponent(c.name()), 0);
+		FeatureConfiguration conf = specType.specialize(b.anonymousDiagramType());
+		dtMain.setLocalBlock(conf.newAnonymousBlock(b.name()), 0);
 		dtMain.flushAllAttributes();
 		assertEquals(expected, dtMain.prettyPrint());
 	}

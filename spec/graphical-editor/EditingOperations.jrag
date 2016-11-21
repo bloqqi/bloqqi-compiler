@@ -11,7 +11,7 @@ aspect EditingOperations {
 		}
 		if (getSource().node().isInlined() && getTarget().node().isInlined()) {
 			// Connections between two blocks belonging to two different inlined blocks can be deleted
-			return getSource().node().inlinedComponent() != getTarget().node().inlinedComponent();
+			return getSource().node().inlinedBlock() != getTarget().node().inlinedBlock();
 		} else {
 			return true;
 		}
@@ -59,64 +59,64 @@ aspect EditingOperations {
 
 
 aspect AddParametersAndConnections {
-	public Pair<Component, VarUse> DiagramType.addConnectionsParameters(
+	public Pair<Block, VarUse> DiagramType.addConnectionsParameters(
 			String path, String parameterName) {
 		return addConnectionsParameters(path, false, parameterName);
 	}
 	
 	public VarUse DiagramType.addConnectionsParametersToDiagramType(
 			String path, String parameterName) {
-		Pair<Component, VarUse> p = addConnectionsParameters(path, true, parameterName);
+		Pair<Block, VarUse> p = addConnectionsParameters(path, true, parameterName);
 		return p.second;
 	}
 	
-	public Pair<Component, VarUse> DiagramType.addConnectionsParameters(
+	public Pair<Block, VarUse> DiagramType.addConnectionsParameters(
 			String path, boolean addToDiagramType, String parameterName) {
 		String parts[] = path.split("\\.");
 		if (parts.length < 3 ) {
 			throw new RuntimeException("The path " + path + " needs to have at least 3 parts");
 		}
 		
-		Component current = localComponentLookup(parts[0]);
+		Block current = localBlockLookup(parts[0]);
 		if (current == null) {
-			throw new RuntimeException("Could not find component " + parts[0] + " in " + path);
+			throw new RuntimeException("Could not find block " + parts[0] + " in " + path);
 		}
-		Component outerComponent = current;
+		Block outerBlock = current;
 		for (int i = 1; i < parts.length-2; i++) {
 			if (current.anonymousDiagramType() == null) {
-				throw new RuntimeException("Component " + parts[i] + " in " + path + " needs to have an anonyous type");
+				throw new RuntimeException("Block " + parts[i] + " in " + path + " needs to have an anonyous type");
 			}
-			current = current.anonymousDiagramType().localComponentLookup(parts[i]);
+			current = current.anonymousDiagramType().localBlockLookup(parts[i]);
 			if (current == null) {
-				throw new RuntimeException("Could not find component " + parts[i] + " in " + path);
+				throw new RuntimeException("Could not find block " + parts[i] + " in " + path);
 			}
 		}
-		Component innerComponent = current;
+		Block innerBlock = current;
 		
-		VarDecl vdComp = innerComponent.type().lookup(parts[parts.length-2]);
-		if (!(vdComp instanceof Component)) {
-			throw new RuntimeException("Could not find component " + parts[parts.length-2] + " in " + path);
+		VarDecl vdComp = innerBlock.type().lookup(parts[parts.length-2]);
+		if (!(vdComp instanceof Block)) {
+			throw new RuntimeException("Could not find block " + parts[parts.length-2] + " in " + path);
 		}
-		Component innerInner = (Component) vdComp;
+		Block innerInner = (Block) vdComp;
 		
 		VarDecl vdCp = innerInner.findMember(parts[parts.length-1]);
 		if (!(vdCp instanceof ComponentParameter)) {
-			throw new RuntimeException("Could not find component " + parts[parts.length-1] + " in " + path);
+			throw new RuntimeException("Could not find block " + parts[parts.length-1] + " in " + path);
 		}
 		ComponentParameter cp = (ComponentParameter) vdCp;
 		
 		String componentParameterName = addToDiagramType ? null : parameterName;
-		Pair<Component, VarUse> p = ASTNode.addConnectionsParameters(outerComponent, innerComponent, cp, componentParameterName);
-		Pair<Component, VarUse> result;
+		Pair<Block, VarUse> p = ASTNode.addConnectionsParameters(outerBlock, innerBlock, cp, componentParameterName);
+		Pair<Block, VarUse> result;
 		if (addToDiagramType) {
-			//String parameterName = getUniqueName(outerComponent.name() + cp.name());
+			//String parameterName = getUniqueName(outerBlock.name() + cp.name());
 			addParameter(parameterName, cp);
 			addConnection(new SimpleVarUse(parameterName), p.second, cp.isInParameter());
 			result = new Pair<>(p.first, new SimpleVarUse(parameterName));
 		} else {
 			result = new Pair<>(p.first, p.second);
 		}
-		getLocalComponentList().setChild(p.first, getLocalComponentList().getIndexOfChild(outerComponent));
+		getLocalBlockList().setChild(p.first, getLocalBlockList().getIndexOfChild(outerBlock));
 		program().flushAllAttributes();
 		
 		return result;
@@ -126,80 +126,80 @@ aspect AddParametersAndConnections {
 	 * See test cases for how to use this method
 	 * The parameter outerParameterName can be null, then this name will be computed
 	 */
-	public static Pair<Component, VarUse> ASTNode.addConnectionsParameters(
-			Component outerComponent,
-			Component innerEnclosingComponent,
+	public static Pair<Block, VarUse> ASTNode.addConnectionsParameters(
+			Block outerBlock,
+			Block innerEnclosingBlock,
 			ComponentParameter componentParameter,
 			String outerParameterName) {
-		if (!innerEnclosingComponent.isEnclosedBy(outerComponent)) {
-			throw new RuntimeException("Component " +  innerEnclosingComponent
-					+ " + is not enclosed by component " + outerComponent.name());
+		if (!innerEnclosingBlock.isEnclosedBy(outerBlock)) {
+			throw new RuntimeException("Block " +  innerEnclosingBlock
+					+ " + is not enclosed by block " + outerBlock.name());
 		}
 		// TODO: Do sanity check on componentParameter
 		
-		// Add the related components in list
-		ArrayList<Component> components = new ArrayList<>();
-		components.add(componentParameter.component().declaredComponent());
-		Component current = innerEnclosingComponent;
-		while (current != outerComponent) {
-			components.add(current.declaredComponent());
-			current = current.enclosingComponent();
+		// Add the related blocks in list
+		ArrayList<Block> blocks = new ArrayList<>();
+		blocks.add(componentParameter.block().declaredBlock());
+		Block current = innerEnclosingBlock;
+		while (current != outerBlock) {
+			blocks.add(current.declaredBlock());
+			current = current.enclosingBlock();
 		}
-		components.add(outerComponent.declaredComponent());
+		blocks.add(outerBlock.declaredBlock());
 	
 		
-		// Iterate over the anonymous types/components from inside out
-		// and modify the components by creating a new copy of them.
-		Component lastNewComponent = null;
+		// Iterate over the anonymous types/blocks from inside out
+		// and modify the blocks by creating a new copy of them.
+		Block lastNewBlock = null;
 		int lastIndex = -1;
 		String lastParameterName = componentParameter.name();
 		
-		Iterator<Component> itr = components.iterator();
-		Component component = itr.next();
-		Component enclosingComp = itr.next();
-		while (enclosingComp != null) {
-			Component newComponent = enclosingComp.treeCopy();
+		Iterator<Block> itr = blocks.iterator();
+		Block block = itr.next();
+		Block enclosingBlock = itr.next();
+		while (enclosingBlock != null) {
+			Block newBlock = enclosingBlock.treeCopy();
 			
 			// Parameter name
 			String parameterName;
-			if (outerParameterName != null && enclosingComp == outerComponent.declaredComponent()) {
+			if (outerParameterName != null && enclosingBlock == outerBlock.declaredBlock()) {
 				parameterName = outerParameterName;
 			} else {
-				parameterName = enclosingComp.anonymousDiagramType()
-					.getUniqueName(component.name() + componentParameter.name());
+				parameterName = enclosingBlock.anonymousDiagramType()
+					.getUniqueName(block.name() + componentParameter.name());
 			}
 			
 			// Add new parameter
-			newComponent.anonymousDiagramType().addParameter(parameterName, componentParameter);
+			newBlock.anonymousDiagramType().addParameter(parameterName, componentParameter);
 	
 			// Create connection
-			newComponent.anonymousDiagramType().addConnection(
+			newBlock.anonymousDiagramType().addConnection(
 					new SimpleVarUse(parameterName),
-					new DotVarUse(new SimpleVarUse(component.name()), lastParameterName),
+					new DotVarUse(new SimpleVarUse(block.name()), lastParameterName),
 					componentParameter.isInParameter());
 			
-			// Add previous created component to current component
-			if (lastNewComponent != null) {
-				AnonymousDiagramType adt = newComponent.anonymousDiagramType();
-				adt.setLocalComponent(lastNewComponent, lastIndex);
+			// Add previous created block to current block
+			if (lastNewBlock != null) {
+				AnonymousDiagramType adt = newBlock.anonymousDiagramType();
+				adt.setLocalBlock(lastNewBlock, lastIndex);
 			}
 			
-			lastNewComponent = newComponent;
-			lastIndex = enclosingComp.getParent().getIndexOfChild(enclosingComp);
+			lastNewBlock = newBlock;
+			lastIndex = enclosingBlock.getParent().getIndexOfChild(enclosingBlock);
 			lastParameterName = parameterName;
 			
-			component = enclosingComp;
+			block = enclosingBlock;
 			if (itr.hasNext()) {
-				enclosingComp = itr.next();
+				enclosingBlock = itr.next();
 			} else {
-				enclosingComp = null;
+				enclosingBlock = null;
 			}
 		}
 	
 		VarUse varUse = new DotVarUse(
-				new SimpleVarUse(component.name()),
+				new SimpleVarUse(block.name()),
 				lastParameterName);
-		return new Pair<>(lastNewComponent, varUse);
+		return new Pair<>(lastNewBlock, varUse);
 	}
 	
 	public String DiagramType.getUniqueName(String name) {
@@ -238,100 +238,100 @@ aspect AddParametersAndConnections {
 }
 
 aspect AddAnonymousTypes {
-	public static Component Component.addAnonymousTypesForNestedComponents(Iterable<Component> nestedComponents) {
-		if (!allComponentsNested(nestedComponents)) {
-			throw new RuntimeException("The components " + nestedComponents + " are not nested");
+	public static Block Block.addAnonymousTypesForNestedBlocks(Iterable<Block> nestedBlocks) {
+		if (!allBlocksNested(nestedBlocks)) {
+			throw new RuntimeException("The blocks " + nestedBlocks + " are not nested");
 		}
 		
-		Component newComponent;
-		Component enclosingComponent;
+		Block newBlock;
+		Block enclosingBlock;
 		
-		// Replace the outermost component first
-		Iterator<Component> itr = nestedComponents.iterator();
-		Component firstComponent = itr.next();
-		if (firstComponent.hasAnonymousDiagramType()) {
-			newComponent = firstComponent.treeCopy();
-			enclosingComponent = newComponent;
+		// Replace the outermost block first
+		Iterator<Block> itr = nestedBlocks.iterator();
+		Block firstBlock = itr.next();
+		if (firstBlock.hasAnonymousDiagramType()) {
+			newBlock = firstBlock.treeCopy();
+			enclosingBlock = newBlock;
 		} else {
-			newComponent = firstComponent.createOutermostComponent();
-			enclosingComponent = newComponent;
+			newBlock = firstBlock.createOutermostBlock();
+			enclosingBlock = newBlock;
 		}
 		
-		// Replace the inner components (if needed)
-		// Keep track of the enclosing component
-		DiagramType enclosingType = firstComponent.diagramType();
+		// Replace the inner blocks (if needed)
+		// Keep track of the enclosing block
+		DiagramType enclosingType = firstBlock.diagramType();
 		while (itr.hasNext()) {
-			Component component = itr.next();
-			if (!component.diagramType().isEnclosedBy(enclosingType)) {
-				RedeclareComponent rc = component.createRedeclareComponent();
-				enclosingComponent.anonymousDiagramType().addLocalComponent(rc);
-				enclosingComponent = rc;
+			Block block = itr.next();
+			if (!block.diagramType().isEnclosedBy(enclosingType)) {
+				RedeclareBlock rb = block.createRedeclareBlock();
+				enclosingBlock.anonymousDiagramType().addLocalBlock(rb);
+				enclosingBlock = rb;
 			} else {
-				Component innerComponent = enclosingComponent.anonymousDiagramType()
-						.localComponentLookup(component.name());
-				if (!component.hasAnonymousDiagramType()) {
-					innerComponent.setType(component.createAnonymousType());
+				Block innerBlock = enclosingBlock.anonymousDiagramType()
+						.localBlockLookup(block.name());
+				if (!block.hasAnonymousDiagramType()) {
+					innerBlock.setType(block.createAnonymousType());
 				}
-				enclosingComponent = innerComponent;
+				enclosingBlock = innerBlock;
 			}
 		}
 		
-		return newComponent;
+		return newBlock;
 	}
 	
 	/**
-	 * Check if the components are nested inside each other,
-	 * Thus, the second component should be a member of the first component's type,
-	 *       the third component should be a member of the second component's type, etc.
+	 * Check if the blocks are nested inside each other,
+	 * Thus, the second block should be a member of the first block's type,
+	 *       the third block should be a member of the second block's type, etc.
 	 */
-	protected static boolean Component.allComponentsNested(Iterable<Component> nestedComponents) {
-		Iterator<Component> itr = nestedComponents.iterator();
-		Component enclosingComponent = itr.next();
+	protected static boolean Block.allBlocksNested(Iterable<Block> nestedBlocks) {
+		Iterator<Block> itr = nestedBlocks.iterator();
+		Block enclosingBlock = itr.next();
 		while (itr.hasNext()) {
-			Component currentComponent = itr.next();
-			if (enclosingComponent.type().lookup(currentComponent.name()) == null) {
+			Block currentBlock = itr.next();
+			if (enclosingBlock.type().lookup(currentBlock.name()) == null) {
 				return false;
 			}
-			enclosingComponent = currentComponent;
+			enclosingBlock = currentBlock;
 		}
 		return true;
 	}
 
-	protected RedeclareComponent Component.createRedeclareComponent() {
-		RedeclareComponent rc = new RedeclareComponent();
-		rc.setName(getName().treeCopy());
-		rc.setModifiers(new Modifiers());
+	protected RedeclareBlock Block.createRedeclareBlock() {
+		RedeclareBlock rb = new RedeclareBlock();
+		rb.setName(getName().treeCopy());
+		rb.setModifiers(new Modifiers());
 		AnonymousDiagramType anonDt = new AnonymousDiagramType();
 		anonDt.setModifiers(new Modifiers());
 		AnonymousTypeImplicitSuper anonType = new AnonymousTypeImplicitSuper(anonDt);
-		rc.setType(anonType);
-		return rc;
+		rb.setType(anonType);
+		return rb;
 	}
 
-	protected AnonymousType Component.createAnonymousType() {
+	protected AnonymousType Block.createAnonymousType() {
 		AnonymousDiagramType anonDt = new AnonymousDiagramType();
 		anonDt.setModifiers(new Modifiers());
 		anonDt.addSuperType((TypeUse) getType().treeCopy());
 		return new AnonymousType(anonDt);
 	}
 
-	protected Component Component.createOutermostComponent() {
-		Component newComponent = treeCopy();
-		newComponent.setType(createAnonymousType());
-		return newComponent;
+	protected Block Block.createOutermostBlock() {
+		Block newBlock = treeCopy();
+		newBlock.setType(createAnonymousType());
+		return newBlock;
 	}
 }
 
 aspect UpdateDeclaration {
-	public boolean DiagramType.updateComponentOrder() {
-		/*ArrayList<Component> list = new ArrayList<Component>();
-		for (Component c: getLocalComponents()) {
-			list.add(c);
+	public boolean DiagramType.updateBlockOrder() {
+		/*ArrayList<Block> list = new ArrayList<Block>();
+		for (Block b: getLocalBlocks()) {
+			list.add(b);
 		}
-		Collections.sort(list, new Comparator<Component>() {
-			public int compare(Component c1, Component c2) {
-				double d1 = Math.sqrt(c1.getX()*c1.getX()+c1.getY()*c1.getY());
-				double d2 = Math.sqrt(c2.getX()*c2.getX()+c2.getY()*c2.getY());
+		Collections.sort(list, new Comparator<Block>() {
+			public int compare(Block b1, Block b2) {
+				double d1 = Math.sqrt(b1.getX()*b1.getX()+b1.getY()*b1.getY());
+				double d2 = Math.sqrt(b2.getX()*b2.getX()+b2.getY()*b2.getY());
 				if (d1 < d2) return -1;
 				else if (d1 > d2) return 1;
 				else return c1.getX() - c2.getX();
@@ -339,14 +339,14 @@ aspect UpdateDeclaration {
 		});
 		boolean changed = true;
 		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i) != getLocalComponent(i)) {
+			if (list.get(i) != getLocalBlock(i)) {
 				changed = true;
 				break;
 			}
 		}
 		if (changed) {
 			for (int i = 0; i < list.size(); i++) {
-				setLocalComponent(list.get(i), i);
+				setLocalBlock(list.get(i), i);
 			}
 			program().flushAllAttributes();
 			notifyObservers();

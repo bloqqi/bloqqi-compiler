@@ -2,11 +2,11 @@ import java.util.SortedSet;
 import java.util.Iterator;
 
 aspect Recommendation {
-	syn String RecommendationComponent.name() = getComponent().name();
-	syn TypeDecl RecommendationComponent.componentType() = getComponent().type();
+	syn String RecommendationBlock.name() = getBlock().name();
+	syn TypeDecl RecommendationBlock.blockType() = getBlock().type();
 
 	syn String RecommendationReplaceable.name() = getSimpleVarUse().toString();
-	syn TypeDecl RecommendationReplaceable.componentType() = getSimpleVarUse().type();
+	syn TypeDecl RecommendationReplaceable.blockType() = getSimpleVarUse().type();
 
 	inh DiagramType RecommendationElement.declaredForDiagramType();
 	eq Recommendation.getRecommendationElement().declaredForDiagramType() {
@@ -27,8 +27,8 @@ aspect Recommendation {
 		= getRecommendationElement(i).declaredForDiagramType();
 	eq DiagramType.recommendedElements().diagramType() = this;
 	
-	eq RecommendationComponent.getComponent().isAlreadyLocallyDeclared()
-		= diagramType().localComponentLookup(name()) != null;
+	eq RecommendationBlock.getBlock().isAlreadyLocallyDeclared()
+		= diagramType().localBlockLookup(name()) != null;
 
 	syn nta DiagramType Program.unknownDiagramType() 
 		= new DiagramType("<UnknownDiagramType>", new Modifiers(),
@@ -60,12 +60,12 @@ aspect Recommendation {
 		return list;
 	}
 	syn boolean DiagramType.hasRecommendations() =
-		!recommendedComponents().isEmpty() || !recommendedReplaceables().isEmpty();
+		!recommendedBlocks().isEmpty() || !recommendedReplaceables().isEmpty();
 
-	syn lazy Set<RecommendationComponent> DiagramType.recommendedComponents() {
-		Set<RecommendationComponent> set = new LinkedHashSet<>();
+	syn lazy Set<RecommendationBlock> DiagramType.recommendedBlocks() {
+		Set<RecommendationBlock> set = new LinkedHashSet<>();
 		for (RecommendationElement e: recommendedElements()) {
-			if (e instanceof RecommendationComponent) set.add((RecommendationComponent) e);
+			if (e instanceof RecommendationBlock) set.add((RecommendationBlock) e);
 		}
 		return set;
 	}
@@ -155,10 +155,10 @@ aspect GroupRecommendations {
 	syn List<RecommendationGroup> DiagramType.getRecommendationGroupList() {
 		List<RecommendationGroup> list = new List<>();
 		Set<String> names = new HashSet<>();
-		for (RecommendationComponent rc: recommendedComponents()) {
-			if (!names.contains(rc.name())) {
-				names.add(rc.name());
-				list.add(new RecommendationGroup(rc.name()));
+		for (RecommendationBlock rb: recommendedBlocks()) {
+			if (!names.contains(rb.name())) {
+				names.add(rb.name());
+				list.add(new RecommendationGroup(rb.name()));
 			}
 		}
 		return list;
@@ -167,16 +167,16 @@ aspect GroupRecommendations {
 	inh DiagramType RecommendationGroup.diagramType();
 	eq DiagramType.getRecommendationGroup().diagramType() = this;
 	
-	syn lazy Collection<RecommendationComponent> RecommendationGroup.recommendedComponents() {
-		Collection<RecommendationComponent> col = new ArrayList<>();
-		for (RecommendationComponent rc: diagramType().recommendedComponents()) {
+	syn lazy Collection<RecommendationBlock> RecommendationGroup.recommendedBlocks() {
+		Collection<RecommendationBlock> col = new ArrayList<>();
+		for (RecommendationBlock rc: diagramType().recommendedBlocks()) {
 			if (getName().equals(rc.name())) {
 				col.add(rc);
 			}
 		}
 		return col;
 	}
-	syn lazy RecommendationGroup RecommendationComponent.recommendationGroup() 
+	syn lazy RecommendationGroup RecommendationBlock.recommendationGroup() 
 		= diagramType().lookupRecommendationGroup(name());
 	
 	syn RecommendationGroup DiagramType.lookupRecommendationGroup(String name) {
@@ -188,17 +188,17 @@ aspect GroupRecommendations {
 		return null;
 	}
 	
-	syn RecommendationComponent RecommendationGroup.superType() {
-		RecommendationComponent superType = null;
-		for (RecommendationComponent rc: recommendedComponents()) {
-			if (superType == null || superType.componentType().isSubTypeOf(rc.componentType())) {
-				superType = rc;
+	syn RecommendationBlock RecommendationGroup.superType() {
+		RecommendationBlock superType = null;
+		for (RecommendationBlock rb: recommendedBlocks()) {
+			if (superType == null || superType.blockType().isSubTypeOf(rb.blockType())) {
+				superType = rb;
 			}
 		}
 		return superType;
 	}
 	
-	syn boolean RecommendationComponent.blockNameIsAlreadyDeclared() = false;
+	syn boolean RecommendationBlock.blockNameIsAlreadyDeclared() = false;
 }
 
 aspect BeforeRecommendations {
@@ -229,15 +229,15 @@ aspect BeforeRecommendations {
 		return set; 
 	}
 
-	syn lazy boolean RecommendationComponent.isOrdered(RecommendationComponent other)
+	syn lazy boolean RecommendationBlock.isOrdered(RecommendationBlock other)
 		= recommendationGroup().groupsAfterTransitive().contains(other.recommendationGroup()) 
 			|| other.recommendationGroup().groupsAfterTransitive().contains(recommendationGroup());
 }
 
 aspect ConflictIdentification {
-	syn lazy Set<Anchor> RecommendationComponent.interceptingAnchors() {
+	syn lazy Set<Anchor> RecommendationBlock.interceptingAnchors() {
 		Set<Anchor> set = new HashSet<>();
-		for (FlowDecl fd: getComponent().flowDecls()) {
+		for (FlowDecl fd: getBlock().flowDecls()) {
 			if (fd instanceof Interception) {
 				Interception i = (Interception) fd;
 				Anchor anchor = i.getIntercepted().anchor();
@@ -246,23 +246,23 @@ aspect ConflictIdentification {
 		}
 		return set;
 	}
-	syn lazy Set<RecommendationComponent> RecommendationComponent.conflictingRecommendations() {
-		Set<RecommendationComponent> set = new HashSet<>();
-		for (RecommendationComponent rc: diagramType().recommendedComponents()) {
-			if (!name().equals(rc.name())) {
+	syn lazy Set<RecommendationBlock> RecommendationBlock.conflictingRecommendations() {
+		Set<RecommendationBlock> set = new HashSet<>();
+		for (RecommendationBlock rb: diagramType().recommendedBlocks()) {
+			if (!name().equals(rb.name())) {
 				for (Anchor a: interceptingAnchors()) {
-					if (rc.interceptingAnchors().contains(a) && !isOrdered(rc)) {
-						set.add(rc);
+					if (rb.interceptingAnchors().contains(a) && !isOrdered(rb)) {
+						set.add(rb);
 					}
 				}
 			}
 		}
 		return set;
 	}
-	syn lazy Set<String> RecommendationComponent.conflictingRecommendationsNames() {
+	syn lazy Set<String> RecommendationBlock.conflictingRecommendationsNames() {
 		Set<String> set = new TreeSet<>();
-		for (RecommendationComponent rc: conflictingRecommendations()) {
-			set.add(rc.name());
+		for (RecommendationBlock rb: conflictingRecommendations()) {
+			set.add(rb.name());
 		}
 		return set;
 	}
@@ -300,7 +300,7 @@ aspect RecommendationOrder {
 
 aspect RecommendationErrors {
 	syn boolean RecommendationGroup.hasErrors()
-		= superType() == null || !superType().componentType().isDiagramType();
+		= superType() == null || !superType().blockType().isDiagramType();
 	syn boolean RecommendationReplaceable.hasErrors() = false;
 	
 	Recommendation contributes 
@@ -309,7 +309,7 @@ aspect RecommendationErrors {
 				&& !getDeclaredForType().type().isDiagramType()
 		to CompilationUnit.errors();
 	
-	RecommendationComponent contributes 
+	RecommendationBlock contributes 
 		error("Order conflicts in recommendations, " + name() + " is not ordered with " + conflictingRecommendationsNames())
 		when !conflictingRecommendations().isEmpty()
 		to CompilationUnit.errors();
@@ -323,7 +323,7 @@ aspect RecommendationErrors {
 		to CompilationUnit.errors();
 
 	
-	RecommendationComponent contributes error("The block name is already declared in another recommendation")
+	RecommendationBlock contributes error("The block name is already declared in another recommendation")
 		when blockNameIsAlreadyDeclared()
 		to CompilationUnit.errors();
 
@@ -349,11 +349,11 @@ aspect RecommendationErrors {
 	syn String DiagramType.sameRecommendationNames() {
 		StringBuilder sb = new StringBuilder();
 		for (RecommendationGroup g: getRecommendationGroups()) {
-			for (RecommendationComponent c: g.recommendedComponents()) {
-				if (!c.componentType().isSubTypeOf(g.superType().componentType())) {
+			for (RecommendationBlock b: g.recommendedBlocks()) {
+				if (!b.blockType().isSubTypeOf(g.superType().blockType())) {
 					sb.append("Recommended block \"" + g.name() 
-						+ "\" has unrelated types: " + c.componentType() 
-						+ " is not related to " + g.superType().componentType() + ". ");
+						+ "\" has unrelated types: " + b.blockType() 
+						+ " is not related to " + g.superType().blockType() + ". ");
 				}
 			}
 		}

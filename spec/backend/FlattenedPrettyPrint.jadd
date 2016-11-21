@@ -1,6 +1,6 @@
 aspect FlatName {
 	syn String Node.flatName();
-	eq Component.flatName() {
+	eq Block.flatName() {
 		if (isNameAmbiguous()) {
 			return declaredInDiagramType().name() + "$" + getName().flatName();
 		} else {
@@ -39,8 +39,8 @@ aspect FlattenedPrettyPrint {
 		for (Variable v : variables()) {
 			sb.append("  " + v.prettyPrint() + ";\n");
 		}
-		for (Component c: components()) {
-			sb.append("  " + c.flattenedPrettyPrint() + ";\n");
+		for (Block b: blocks()) {
+			sb.append("  " + b.flattenedPrettyPrint() + ";\n");
 		}
 		for (Connection c: connections()) {
 			sb.append("  " + c.flattenedPrettyPrint() + ";\n");
@@ -51,7 +51,7 @@ aspect FlattenedPrettyPrint {
 		prettyPrint(sb);
 	}
 
-	public String Component.flattenedPrettyPrint() {
+	public String Block.flattenedPrettyPrint() {
 		String inline = getModifiers().isInline() ? "inline " : "";
 		return inline + flatName() + ": " + prettyPrintType();
 	}
