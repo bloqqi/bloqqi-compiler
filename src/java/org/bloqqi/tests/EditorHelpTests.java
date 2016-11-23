@@ -989,8 +989,8 @@ public class EditorHelpTests extends TestSuite {
 		Block a = (Block) dtMain.lookup("a");
 		Block b = (Block) a.type().lookup("b");
 		Block c = (Block) b.type().lookup("c");
-		java.util.List<Block> blockcomponents = Arrays.asList(a, b, c);
-		Block newBlock = Block.addAnonymousTypesForNestedBlocks(blockcomponents);
+		java.util.List<Block> blocks = Arrays.asList(a, b, c);
+		Block newBlock = Block.addAnonymousTypesForNestedBlocks(blocks);
 		dtMain.getLocalBlocks().setChild(newBlock, 0);
 		cu.program().flushAllAttributes();
 		
