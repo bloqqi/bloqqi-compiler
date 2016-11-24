@@ -36,7 +36,7 @@ public class Compiler {
 	protected Collection<String> filenames;
 	protected Collection<String> types;
 	
-	// Enabble DrAST debugging
+	// Enable DrAST debugging
 	public static Object DrAST_root_node;
 
 	protected <OptionType extends Option<?>> OptionType addOption(OptionType option) {

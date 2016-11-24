@@ -34,4 +34,9 @@ public class ValidTests extends TestSuite {
 		assertSame(c, c1.getTarget().node());
 		assertSame(c, c2.getSource().node());
 	}
+	
+	@Test
+	public void rewrireBug() {
+		parseValidProgramFile("valid/RewriteCacheBug.dia");
+	}
 }

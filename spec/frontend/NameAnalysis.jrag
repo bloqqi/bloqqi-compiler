@@ -242,15 +242,22 @@ aspect LookupVariables {
 		}
 		return null;
 	}
-	// Use a collection attribute when searching for blocks to speed
-	// up the search. All blocks names are collected in a map (String->Block).
-	// The map is then used to search for a block name in O(1) time.
+	// Use a map when searching for blocks for efficiency.
 	syn Block DiagramType.localBlockLookup(String name) 
 		= blockMap().get(name);
-	coll NameMap<Block> DiagramType.blockMap() 
-		[new NameMap<Block>()] with add root DiagramType;
-	Block contributes new KeyValue(name(), this)
-		to DiagramType.blockMap() for diagramType();
+	
+	// Efficient implementation of blockMap, which will skip
+	// uninteresting subtrees (compared to a collection attribute).
+	// Using a collection attribute would activate rewrites on
+	// ParseSimpleVarUse nodes during traversal, and rewrites on these
+	// nodes depend on blockMap() again.
+	syn NameMap<Block> DiagramType.blockMap() {
+		NameMap<Block> map = new NameMap<>();
+		for (Block block: getLocalBlocks()) {
+			map.add(new KeyValue(block.name(), block));
+		}
+		return map;
+	}
 }	
 
 aspect Names {
@@ -292,8 +299,8 @@ aspect Names {
 }
 
 aspect RewriteSimplifiedForm {
-	// Rewrite the simplified form connect(a, b) to connect(a.p, b.p) 
-	// if the type of a has only one output parameter called p and 
+	// Rewrite the simplified form connect(a, b) to connect(a.p, b.p)
+	// if the type of a has only one output parameter called p and
 	// if the type of b has only one input parameter called p.
 	// Both a and b are objects of the class ParseSimpleVarUse.
 	rewrite ParseSimpleVarUse {

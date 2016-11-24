@@ -1,0 +1,56 @@
+//
+// This program exposes a cache bug in the old rewrite implementation, 
+// where the attribute localBlockLookup("b3") was cached during a rewrite
+// evaluation that shouldn't been cached. 
+//
+// This bug made the bloqqi compiler print the following error message 
+// for this program:
+//   Errors:
+//     - Line 4, column 3: A block is already locally declared as b3
+//     - Line 5, column 15: The declaration of b3 was not found
+//     - Line 5, column 15: The declaration of b3.in was not found
+//
+//
+// The bug can also be exposed in the compiler by the following code:
+//
+//   program = parseFiles();
+//   DiagramType main = (DiagramType) program.getCompilationUnit(0)
+//                                           .typeDecls().get(0);
+//   System.out.println(main.blockMap().get("b3"));
+//   System.out.println(main.localBlockLookup("b3"));
+//
+// Which resulted in the following output:
+//
+//   Block@512ddf17
+//   null
+//
+// The second line is wrong. It should be Block@512ddf17 instead.
+//
+//
+// To expose the above bug, the attribute blockMap needs to be specified
+// as a collection attribute, like: 
+//
+//   coll NameMap<Block> DiagramType.blockMap() 
+//		[new NameMap<Block>()] with add root DiagramType;
+//   Block contributes new KeyValue(name(), this)
+//      to DiagramType.blockMap() for diagramType();
+// 
+//
+// The solution to this bug is to use the new rewrite implementation:
+// 
+//   rewrite="cnta" safeLazy="true"
+//
+// We also need safeLazy, since it will restrict the caching behavior. 
+//
+
+diagramtype Main(in: Int) {
+  b1: Block[in];
+  b2: Block[in];
+  b3: Block;
+  connect(in, b3.in);
+}
+diagramtype Block(in: Int) {
+}
+wiring Block[v: Int] {
+  connect(v, Block.in);
+}

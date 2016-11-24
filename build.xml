@@ -52,7 +52,7 @@
 	<target name="gen" depends="scanner,parser">
 		<!-- create AST node types and weave aspect modules -->
 		<echo message = "Running JastAdd"/>
-		<jastadd package="${package}" rewrite="true" beaver="true" visitcheck="false"
+		<jastadd package="${package}" rewrite="cnta" safeLazy="true" beaver="true" visitcheck="false"
 				lazyMaps="true" outdir="${gendir}" cache="all" lineColumnNumbers="true">
 			<fileset dir=".">
 				<include name="spec/grammar/*.ast"/>
