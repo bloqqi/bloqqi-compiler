@@ -14,6 +14,8 @@ aspect FlatName {
 
 	syn String Name.flatName();
 	eq IdName.flatName() = name();
+	
+	syn String TypeDecl.flatName() = name();
 }
 
 aspect FlattenedPrettyPrint {
@@ -27,7 +29,7 @@ aspect FlattenedPrettyPrint {
 
 	public void Declaration.flattenedPrettyPrint(StringBuilder sb) {}
 	public void DiagramType.flattenedPrettyPrint(StringBuilder sb) {
-		sb.append("diagramtype " + getID() + "(");
+		sb.append("diagramtype " + flatName() + "(");
 
 		sb.append(inParameters().toString(", "));
 		if (outParameters().getNumChild() > 0) {
@@ -46,6 +48,13 @@ aspect FlattenedPrettyPrint {
 			sb.append("  " + c.flattenedPrettyPrint() + ";\n");
 		}
 		sb.append("}\n");
+		
+		// Generate code for anonymous subtypes
+		for (Block b: getLocalBlocks()) {
+			if (b.hasAnonymousDiagramType()) {
+				b.anonymousDiagramType().flattenedPrettyPrint(sb);
+			}
+		}
 	}
 	public void Function.flattenedPrettyPrint(StringBuilder sb) {
 		prettyPrint(sb);
@@ -53,7 +62,7 @@ aspect FlattenedPrettyPrint {
 
 	public String Block.flattenedPrettyPrint() {
 		String inline = getModifiers().isInline() ? "inline " : "";
-		return inline + flatName() + ": " + prettyPrintType();
+		return inline + flatName() + ": " + type().flatName();
 	}
 	public String Connection.flattenedPrettyPrint() {
 		return "connect(" + getSource().flattenedPrettyPrint()

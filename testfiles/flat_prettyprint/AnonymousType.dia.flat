@@ -1,0 +1,18 @@
+diagramtype Main() {
+}
+diagramtype A() {
+  block: A$block;
+}
+diagramtype A$block() {
+}
+diagramtype B1() {
+  block: A$block;
+}
+diagramtype B2() {
+  block: B2$block;
+}
+diagramtype B2$block() {
+}
+diagramtype Block() {
+}
+
