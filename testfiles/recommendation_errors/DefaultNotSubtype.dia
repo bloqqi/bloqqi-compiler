@@ -1,0 +1,14 @@
+diagramtype A (in: Int => out: Int) {
+	connect(in, out);
+}
+
+abstract diagramtype Block(in: Int => out: Int) {
+}
+wiring Block[=>v: Int] {
+	intercept v with Block.in, Block.out;
+}
+diagramtype AnotherBlock { }
+
+recommendation A {
+	block: Block[out] default AnotherBlock;
+}

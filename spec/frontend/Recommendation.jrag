@@ -327,6 +327,10 @@ aspect RecommendationErrors {
 		when blockNameIsAlreadyDeclared()
 		to CompilationUnit.errors();
 
+	RecommendationBlock contributes error("The default type " + getDefault() + " is not a subtype of " + getBlock().type())
+		when hasDefault() && !getDefault().type().isSubTypeOf(getBlock().type())
+		to CompilationUnit.errors();
+
 
 	// Replace the helper attribute below with real contributions.
 	// However, the contribution is from an NTA...
