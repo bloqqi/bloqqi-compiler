@@ -217,7 +217,7 @@ aspect AbstractType {
 		}
 		
 		StringJoiner joiner = new StringJoiner(", ");
-		for (Block b: declaredBlocksTransitive()) {
+		for (Block b: blocks()) {
 			if (b.type().isAbstract()) {
 				joiner.add(b.name());
 			}

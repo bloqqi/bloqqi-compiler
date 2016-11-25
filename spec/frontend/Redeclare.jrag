@@ -40,7 +40,7 @@ aspect MostSpecificBlock {
 	syn lazy Map<Block, Block> DiagramType.mostSpecificBlockMap() {
 		Map<Block, Block> map = new HashMap<>();
 		
-		// Add blocks that are redeclared
+		// Add most specific redeclare blocks
 		for (DiagramType dt: superTypesLinearizedReversed()) {
 			for (Block b: dt.getLocalBlocks()) {
 				if (b.isRedeclare() && !map.containsKey(b)) {
