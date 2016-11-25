@@ -1,0 +1,12 @@
+diagramtype Main { }
+diagramtype A {
+	block: Block {};
+}
+diagramtype B1 extends A {
+	// Don't generate type for 'block' in B1
+}
+diagramtype B2 extends A {
+	// Generate type for 'block' in B2
+	redeclare block: super { };
+}
+diagramtype Block { }

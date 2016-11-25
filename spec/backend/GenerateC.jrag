@@ -242,7 +242,7 @@ aspect FunctionDefinitions {
 		sb.append("}\n");
 		
 		// Generate code for anonymous subtypes
-		for (Block b: blocks()) {
+		for (Block b: getLocalBlocks()) {
 			if (b.hasAnonymousDiagramType()) {
 				b.anonymousDiagramType().genFunctionDefinitionsC(sb);
 			}
