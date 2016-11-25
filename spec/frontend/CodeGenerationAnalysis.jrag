@@ -38,7 +38,7 @@ aspect DataFlowErrors {
 		}
 		if (!missingConnections.isEmpty()) {
 			return "In type " + name() 
-				+ ", the following have no incoming connection " 
+				+ ", the following have no incoming connection: "
 				+ String.join(", ", missingConnections);
 		} else {
 			return "";
