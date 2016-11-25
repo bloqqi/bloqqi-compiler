@@ -108,7 +108,7 @@ WiringOutParameter : WiringParameter;
 /** Recommendations */
 Recommendation : Declaration ::= DeclaredForType:TypeUse RecommendationElement*;
 abstract RecommendationElement;
-RecommendationBlock : RecommendationElement ::= Block;
+RecommendationBlock : RecommendationElement ::= Block [Default:TypeUse];
 RecommendationBefore : RecommendationElement ::= BeforeVarUse:SimpleVarUse AfterVarUse:SimpleVarUse;
 RecommendationReplaceable : RecommendationElement ::= SimpleVarUse;
 RecommendationExtendsSuper : Declaration ::= DeclaredForType:TypeUse;

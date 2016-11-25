@@ -390,22 +390,28 @@ Declaration recommendation =
 	;
 	
 List recommendation_elems =
-	recommendation_elem.c SCOL								{: return new List().add(c); :}
+	recommendation_elem.c SCOL							{: return new List().add(c); :}
 	| recommendation_elems.l recommendation_elem.c SCOL {: return l.add(c); :}
 	;
 	
 RecommendationElement recommendation_elem =
-	recommendation_block.b
-		{: return new RecommendationBlock(b); :}
-	| modifiers.m recommendation_block.b
-		{: b.setModifiers(new Modifiers(m)); return new RecommendationBlock(b); :}
+	recommendation_block.b recommendation_default.d
+		{: return new RecommendationBlock(b, d); :}
+	| modifiers.m recommendation_block.b recommendation_default.d
+		{: b.setModifiers(new Modifiers(m)); return new RecommendationBlock(b, d); :}
 	| REPLACEABLE simple_var_use.use
 		{: return new RecommendationReplaceable(use); :}
 	| simple_var_use.u1 BEFORE simple_var_use.u2
 		{: return new RecommendationBefore(u1, u2); :}
+	| DEFAULT {: return new RecommendationBlock(null, new Opt()); :}
 	;
 
 Block recommendation_block =
 	wired_block.w					{: return w; :}
 	| ordinary_block.o				{: return o; :}
+	;
+	
+Opt recommendation_default =
+									{: return new Opt(); :}
+	| DEFAULT type_use.t			{: return new Opt(t); :}
 	;

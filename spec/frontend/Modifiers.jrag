@@ -1,5 +1,5 @@
 aspect Modifiers {
-	// Synthetical modifier that is created by the parser to represent
+	// Synthetic modifier that is created by the parser to represent
 	// blocks with name like "Add_1".
 	public static final String ASTNode.MODIFIER_SIMPLE = "simple";
 
@@ -71,6 +71,21 @@ aspect ModifiersOperations {
 			removeModifier(modifierName);
 		}
 	}
+}
+
+aspect PrintModifiers {
+	syn String Modifiers.prettyPrint() {
+		StringJoiner joiner = new StringJoiner(" ", "", " ");
+		joiner.setEmptyValue("");
+		for (Modifier m: getModifiers()) {
+			if (printModifier(m.getName())) {
+				joiner.add(m.getName());
+			}
+		}
+		return joiner.toString();
+	}
+	syn boolean Modifiers.printModifier(String modifier)
+		= !modifier.equals(ASTNode.MODIFIER_SIMPLE);
 }
 
 aspect ModifiersErrors {

@@ -69,6 +69,7 @@ NUM = -?[0-9]+
 	"source"		{ return sym(Terminals.SOURCE); }
 	"wiring"		{ return sym(Terminals.WIRING); }
 	"recommendation" { return sym(Terminals.RECOMMENDATION); }
+	"default"       { return sym(Terminals.DEFAULT); }
 	"before"		{ return sym(Terminals.BEFORE); }
 	"replaceable"	{ return sym(Terminals.REPLACEABLE); }
 	"inline"		{ return sym(Terminals.INLINE); }

@@ -26,7 +26,8 @@ aspect PrettyPrint {
 		return sb.toString();
 	}
 	public void DiagramType.prettyPrint(StringBuilder sb) {
-		sb.append(indent() + "diagramtype " + getID());
+		sb.append(getModifiers().prettyPrint());
+		sb.append("diagramtype " + getID());
 	
 		prettyPrintParameters(sb);
 
@@ -91,7 +92,11 @@ aspect PrettyPrint {
 	}
 	public abstract String RecommendationElement.prettyPrint();
 	public String RecommendationBlock.prettyPrint() {
-		return getBlock().prettyPrint();
+		String str = getBlock().prettyPrint();
+		if (hasDefault()) {
+			str += " default " + getDefault().prettyPrint();
+		}
+		return str;
 	}
 	public String RecommendationBefore.prettyPrint() {
 		return getBeforeVarUse() + " before " + getAfterVarUse();
@@ -144,11 +149,11 @@ aspect PrettyPrint {
 	}
 
 	public String Block.prettyPrint() {
-		String inline = getModifiers().isInline() ? "inline " : "";
+		String str = getModifiers().prettyPrint() + getName().prettyPrint();
 		if (getModifiers().isOnSimpleNameForm() && !hasAnonymousDiagramType()) {
-			return inline + getName().prettyPrint();
+			return str;
 		} else {
-			return inline + getName().prettyPrint() + ": " + prettyPrintType();
+			return str + ": " + prettyPrintType();
 		}
 	}
 	public String RedeclareBlock.prettyPrint() {
