@@ -298,7 +298,26 @@ aspect RecommendationOrder {
 	}
 }
 
+aspect RecommendationDefaults {
+	syn boolean RecommendationGroup.hasMultipleDefaults() {
+		int nbrOfDefaults = 0;
+		for (RecommendationBlock rb: recommendedBlocks()) {
+			if (rb.hasDefault()) {
+				nbrOfDefaults++;
+			}
+			if (nbrOfDefaults > 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 aspect RecommendationErrors {
+	// Include NTAs in collection attribute
+	DiagramType contributes nta getRecommendationGroupList() to CompilationUnit.errors();
+
+
 	syn boolean RecommendationGroup.hasErrors()
 		= superType() == null || !superType().blockType().isDiagramType();
 	syn boolean RecommendationReplaceable.hasErrors() = false;
@@ -318,17 +337,23 @@ aspect RecommendationErrors {
 		when !circularBeforeErrorMessage().isEmpty()
 		to CompilationUnit.errors();
 
-	DiagramType contributes error(sameRecommendationNames())
-		when !sameRecommendationNames().isEmpty()
-		to CompilationUnit.errors();
-
-	
 	RecommendationBlock contributes error("The block name is already declared in another recommendation")
 		when blockNameIsAlreadyDeclared()
 		to CompilationUnit.errors();
 
-	RecommendationBlock contributes error("The default type " + getDefault() + " is not a subtype of " + getBlock().type())
-		when hasDefault() && !getDefault().type().isSubTypeOf(getBlock().type())
+	RecommendationBlock contributes error("The default type " + getDefault() + " is not a subtype of " + blockType())
+		when hasDefault() && !getDefault().type().isSubTypeOf(blockType())
+		to CompilationUnit.errors();
+
+	RecommendationBlock contributes error("Type " + blockType() + " is not a subtype of "
+			+ recommendationGroup().superType().blockType())
+		when recommendationGroup() != null
+			&& !blockType().isSubTypeOf(recommendationGroup().superType().blockType())
+		to CompilationUnit.errors();
+
+	RecommendationGroup contributes diagramType().error("The optional feature '" + name()
+			+ "' for diagram type '" + diagramType().name() + "' has multiple default types")
+		when hasMultipleDefaults()
 		to CompilationUnit.errors();
 
 
@@ -348,19 +373,5 @@ aspect RecommendationErrors {
 				+ " contains circularity in before statements. "
 				+ "Blocks involved:" + sb.toString();
 		}
-	}
-	
-	syn String DiagramType.sameRecommendationNames() {
-		StringBuilder sb = new StringBuilder();
-		for (RecommendationGroup g: getRecommendationGroups()) {
-			for (RecommendationBlock b: g.recommendedBlocks()) {
-				if (!b.blockType().isSubTypeOf(g.superType().blockType())) {
-					sb.append("Recommended block \"" + g.name() 
-						+ "\" has unrelated types: " + b.blockType() 
-						+ " is not related to " + g.superType().blockType() + ". ");
-				}
-			}
-		}
-		return sb.toString();
 	}
 }

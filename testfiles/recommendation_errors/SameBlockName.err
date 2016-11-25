@@ -1,1 +1,1 @@
-Line 1, column 1: Recommended block "block" has unrelated types: S is not related to T. 
+Line 7, column 5: Type S is not a subtype of T
