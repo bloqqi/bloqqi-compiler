@@ -132,6 +132,35 @@ public class RecommendationTests extends TestSuite {
 		assertEquals(0, dtC2.specialize().getOptionalFeatures().size());
 	}
 	
+	@Test
+	public void testDefaultType() {
+		String str =
+			"diagramtype A (in: Int => out: Int) {" +
+			"	connect(in, out);" +
+			"}" +
+			"abstract diagramtype Block(in: Int => out: Int) {" +
+			"}" +
+			"wiring Block[=>v: Int] {" +
+			"	intercept v with Block.in, Block.out;" +
+			"}" +
+			"diagramtype SubBlock extends Block { }" +
+			"recommendation A {" +
+			"	block: Block[out] default SubBlock;" +
+			"}";
+		
+		Program p = parseValidProgram(str);
+		CompilationUnit cu = p.getCompilationUnit(0);
+		
+		DiagramType dtA = (DiagramType) cu.typeDecls().get(0);
+		DiagramType dtSubBlock = (DiagramType) cu.typeDecls().get(2);
+		
+		OptionalFeature optFeature = dtA.specialize().getOptionalFeatures().first();
+		assertSame(dtSubBlock, optFeature.getDefaultType());
+		assertSame(dtSubBlock, optFeature.getAlternatives().last().getType());
+		assertTrue(optFeature.getAlternatives().last().isDefault());
+		assertFalse(optFeature.getAlternatives().first().isDefault());
+	}
+	
 	private Pair<Program, FeatureConfiguration> buildHierarchicalSpecialization() {
 		String str = 
 			"diagramtype Main {" +

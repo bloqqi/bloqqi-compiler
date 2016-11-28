@@ -189,19 +189,17 @@ aspect RecommendationConfiguration {
 	public class OptionalFeature implements Comparable<OptionalFeature> {
 		private final RecommendationGroup group;
 		private final SortedMap<String, OptionalFeatureAlternative> alternatives;
-		private final DiagramType defaultType;
 		
 		private boolean isSelected;
 		private OptionalFeatureAlternative selectedAlternative;
 		
 		public OptionalFeature(RecommendationGroup group) {
 			this.group = group;
-			defaultType = (DiagramType) group.superType().blockType();
 
 			SortedMap<String, OptionalFeatureAlternative> tmpMap = new TreeMap<>();
 			for (RecommendationBlock subRc: group.recommendedBlocks()) {
 				for (DiagramType subType: subRc.blockType().namedSubTypes()) {
-					boolean isDefault = subType == defaultType;
+					boolean isDefault = subType == group.defaultType();
 					OptionalFeatureAlternative alt = new OptionalFeatureAlternative(this, subRc, subType, isDefault);
 					tmpMap.put(subType.name(), alt);
 					if (isDefault) {
@@ -228,7 +226,7 @@ aspect RecommendationConfiguration {
 			return isSelected;
 		}
 		public DiagramType getDefaultType() {
-			return defaultType;
+			return group.defaultType();
 		}
 		public OptionalFeatureAlternative getSelectedAlternative() {
 			return selectedAlternative;

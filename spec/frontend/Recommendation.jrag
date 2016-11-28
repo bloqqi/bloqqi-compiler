@@ -311,6 +311,22 @@ aspect RecommendationDefaults {
 		}
 		return false;
 	}
+	
+	syn DiagramType RecommendationGroup.defaultType() {
+		TypeDecl defaultType = superType().blockType();
+		if (!hasMultipleDefaults()) {
+			for (RecommendationBlock rb: recommendedBlocks()) {
+				if (rb.hasDefault() && rb.defaultIsValidSubType()) {
+					defaultType = rb.getDefault().type();
+					break;
+				}
+			}
+		}
+		return defaultType.isDiagramType() ? (DiagramType) defaultType : null;
+	}
+	
+	syn boolean RecommendationBlock.defaultIsValidSubType()
+		= getDefault().type().isSubTypeOf(recommendationGroup().superType().blockType());
 }
 
 aspect RecommendationErrors {
@@ -342,7 +358,7 @@ aspect RecommendationErrors {
 		to CompilationUnit.errors();
 
 	RecommendationBlock contributes error("The default type " + getDefault() + " is not a subtype of " + blockType())
-		when hasDefault() && !getDefault().type().isSubTypeOf(blockType())
+		when hasDefault() && !defaultIsValidSubType()
 		to CompilationUnit.errors();
 
 	RecommendationBlock contributes error("Type " + blockType() + " is not a subtype of "
