@@ -66,13 +66,26 @@ aspect SuperAndSubTypes {
 	}
 
 	
-	coll Collection<DiagramType> TypeDecl.namedConcreteSubTypes()
+	coll Collection<DiagramType> TypeDecl.namedSubTypes()
 		[new HashSet<DiagramType>()]
 		with add;
 	DiagramType contributes this
 		when !isAnonymousType() && !isAbstract()
-		to TypeDecl.namedConcreteSubTypes()
+		to TypeDecl.namedSubTypes()
 		for each superTypesLinearized();
+
+
+	syn Collection<DiagramType> TypeDecl.namedConcreteSubTypes()
+		= Collections.emptySet();
+	eq DiagramType.namedConcreteSubTypes() {
+		Set<DiagramType> set = new HashSet<DiagramType>();
+		for (DiagramType dt: namedSubTypes()) {
+			if (!dt.isAbstract()) {
+				set.add(dt);
+			}
+		}
+		return set;
+	}
 }
 
 aspect Inheritance {
