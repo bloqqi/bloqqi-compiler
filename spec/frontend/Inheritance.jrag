@@ -66,12 +66,12 @@ aspect SuperAndSubTypes {
 	}
 
 	
-	coll Collection<DiagramType> TypeDecl.namedSubTypes()
+	coll Collection<DiagramType> TypeDecl.namedConcreteSubTypes()
 		[new HashSet<DiagramType>()]
 		with add;
 	DiagramType contributes this
-		when !isAnonymousType()
-		to TypeDecl.namedSubTypes()
+		when !isAnonymousType() && !isAbstract()
+		to TypeDecl.namedConcreteSubTypes()
 		for each superTypesLinearized();
 }
 

@@ -198,7 +198,7 @@ aspect RecommendationConfiguration {
 
 			SortedMap<String, OptionalFeatureAlternative> tmpMap = new TreeMap<>();
 			for (RecommendationBlock subRc: group.recommendedBlocks()) {
-				for (DiagramType subType: subRc.blockType().namedSubTypes()) {
+				for (DiagramType subType: subRc.blockType().namedConcreteSubTypes()) {
 					boolean isDefault = subType == group.defaultType();
 					OptionalFeatureAlternative alt = new OptionalFeatureAlternative(this, subRc, subType, isDefault);
 					tmpMap.put(subType.name(), alt);
@@ -400,7 +400,7 @@ aspect RecommendationConfiguration {
 		public MandatoryFeature(RecommendationReplaceable replaceable) {
 			this.replaceable = replaceable;
 			SortedMap<String, MandatoryFeatureAlternative> tmpMap = new TreeMap<>();
-			for (DiagramType subType: replaceable.blockType().namedSubTypes()) {
+			for (DiagramType subType: replaceable.blockType().namedConcreteSubTypes()) {
 				boolean isDefault = subType == replaceable.blockType();
 				MandatoryFeatureAlternative alt = new MandatoryFeatureAlternative(this, subType, isDefault);
 				if (isDefault) {

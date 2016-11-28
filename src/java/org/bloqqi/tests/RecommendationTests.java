@@ -138,6 +138,36 @@ public class RecommendationTests extends TestSuite {
 			"diagramtype A (in: Int => out: Int) {" +
 			"	connect(in, out);" +
 			"}" +
+			"diagramtype Block(in: Int => out: Int) {" +
+			"}" +
+			"wiring Block[=>v: Int] {" +
+			"	intercept v with Block.in, Block.out;" +
+			"}" +
+			"diagramtype SubBlock extends Block { }" +
+			"recommendation A {" +
+			"	block: Block[out] default SubBlock;" +
+			"}";
+		
+		Program p = parseValidProgram(str);
+		CompilationUnit cu = p.getCompilationUnit(0);
+		
+		DiagramType dtA = (DiagramType) cu.typeDecls().get(0);
+		DiagramType dtSubBlock = (DiagramType) cu.typeDecls().get(2);
+		
+		OptionalFeature optFeature = dtA.specialize().getOptionalFeatures().first();
+		assertEquals(2, optFeature.getAlternatives().size());
+		assertSame(dtSubBlock, optFeature.getDefaultType());
+		assertSame(dtSubBlock, optFeature.getAlternatives().last().getType());
+		assertTrue(optFeature.getAlternatives().last().isDefault());
+		assertFalse(optFeature.getAlternatives().first().isDefault());
+	}
+	
+	@Test
+	public void testDefaultTypeAbstractType() {
+		String str =
+			"diagramtype A (in: Int => out: Int) {" +
+			"	connect(in, out);" +
+			"}" +
 			"abstract diagramtype Block(in: Int => out: Int) {" +
 			"}" +
 			"wiring Block[=>v: Int] {" +
@@ -155,12 +185,12 @@ public class RecommendationTests extends TestSuite {
 		DiagramType dtSubBlock = (DiagramType) cu.typeDecls().get(2);
 		
 		OptionalFeature optFeature = dtA.specialize().getOptionalFeatures().first();
+		assertEquals(1, optFeature.getAlternatives().size());
 		assertSame(dtSubBlock, optFeature.getDefaultType());
-		assertSame(dtSubBlock, optFeature.getAlternatives().last().getType());
-		assertTrue(optFeature.getAlternatives().last().isDefault());
-		assertFalse(optFeature.getAlternatives().first().isDefault());
+		assertSame(dtSubBlock, optFeature.getAlternatives().first().getType());
 	}
-	
+
+
 	private Pair<Program, FeatureConfiguration> buildHierarchicalSpecialization() {
 		String str = 
 			"diagramtype Main {" +

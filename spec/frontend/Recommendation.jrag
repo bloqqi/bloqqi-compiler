@@ -89,7 +89,7 @@ aspect Recommendation {
 	syn lazy Set<DiagramType> TypeDecl.compatibleSubTypes() = new HashSet<DiagramType>();
 	eq DiagramType.compatibleSubTypes() {
 		Set<DiagramType> set = new HashSet<>();
-		for (DiagramType subType: namedSubTypes()) {
+		for (DiagramType subType: namedConcreteSubTypes()) {
 			if (hasSameNbrOfParsAs(subType)) {
 				set.add(subType);
 			}
