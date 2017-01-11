@@ -178,4 +178,8 @@
 			<available file="drast" type="dir" />
 		</condition>
 	</target>
+	<target name="drast-update">
+		<delete dir="drast" />
+		<antcall target="drast-init" />
+	</target>
 </project>
