@@ -75,12 +75,6 @@ aspect NodeFlow {
 	eq Interception.connectedNodes()
 		= Utils.asSet(getIntercepted().node(), getTarget().node(), getSource().node());
 
-	// Edges
-	coll Set<Node> Node.edges() [new HashSet<Node>()] root DiagramType;
-	Connection contributes getTarget().node()
-		when getTarget().node() != null && getSource().node() != null
-		to Node.edges() for getSource().node();	
-	
 	// Collect incoming connections. 
 	// Ignore connections that are connected to a parameter to this diagram type.
 	coll Set<Node> Node.pred() [new HashSet<Node>()] root DiagramType;
