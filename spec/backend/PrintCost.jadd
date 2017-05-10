@@ -37,8 +37,8 @@ aspect PrintCost {
 		sb.append("- runtime cost: " + runtimeCost + "\n");
 	}
 	
-	public int FeatureConfiguration.nbrOfCombinations() {
-		int combinations = 1;
+	public long FeatureConfiguration.nbrOfCombinations() {
+		long combinations = 1;
 		for (OptionalFeature opt: optionals.values()) {
 			combinations *= opt.nbrOfCombinations();
 		}
@@ -47,27 +47,27 @@ aspect PrintCost {
 		}
 		return combinations;
 	}
-	public int OptionalFeature.nbrOfCombinations() {
-		int combinations = 1; // optional feature does not need to be selected
+	public long OptionalFeature.nbrOfCombinations() {
+		long combinations = 1; // optional feature does not need to be selected
 		for (OptionalFeatureAlternative alt: alternatives.values()) {
 			// Use additions since only one alternative can be selected
 			combinations += alt.nbrOfCombinations();
 		}
 		return combinations;
 	}
-	public int OptionalFeatureAlternative.nbrOfCombinations() {
+	public long OptionalFeatureAlternative.nbrOfCombinations() {
 		return specialize().nbrOfCombinations();
 	}
-	public int MandatoryFeature.nbrOfCombinations() {
+	public long MandatoryFeature.nbrOfCombinations() {
 		// mandatory feature need to be selected
-		int combinations = 0;
+		long combinations = 0;
 		for (MandatoryFeatureAlternative alt: alternatives.values()) {
 			// Use additions since only one alternative can be selected
 			combinations += alt.nbrOfCombinations();
 		}
 		return combinations;
 	}
-	public int MandatoryFeatureAlternative.nbrOfCombinations() {
+	public long MandatoryFeatureAlternative.nbrOfCombinations() {
 		return specialize().nbrOfCombinations();
 	}
 }
