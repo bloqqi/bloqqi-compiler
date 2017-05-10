@@ -56,6 +56,7 @@ aspect GenerateFeatureDiagram {
 		sb.append("  splines=false;\n");
 		sb.append("  nodesep=0.1;\n");
 		sb.append("  ranksep=0.35;\n");
+		sb.append("  margin=0.1;\n");
 		
 		asDotDiagram(sb, "", false);
 		sb.append("}\n");
