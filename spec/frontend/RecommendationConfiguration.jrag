@@ -171,6 +171,11 @@ aspect RecommendationConfiguration {
 			return set;
 		}
 		
+		public String getName() {
+			return diagramType.name();
+		}
+
+		
 		public boolean hasFeatures() {
 			return !optionals.isEmpty() || !mandatories.isEmpty();
 		}
@@ -301,6 +306,10 @@ aspect RecommendationConfiguration {
 			return type;
 		}
 		
+		public String getName() {
+			return type.name();
+		}
+		
 		public boolean isDefault() {
 			return isDefault;
 		}
@@ -391,7 +400,7 @@ aspect RecommendationConfiguration {
 		
 		public String toString() {
 			String isDefaultStr = isDefault ? " (default)" : "";
-			return type.name() + isDefaultStr;
+			return getName() + isDefaultStr;
 		}
 	}
 	
@@ -490,6 +499,10 @@ aspect RecommendationConfiguration {
 			return type;
 		}
 		
+		public String getName() {
+			return type.name();
+		}
+		
 		public boolean isDefault() {
 			return isDefault;
 		}
@@ -537,7 +550,7 @@ aspect RecommendationConfiguration {
 		
 		public String toString() {
 			String isDefaultStr = isDefault ? " (default)" : "";
-			return type.name() + isDefaultStr;
+			return getName() + isDefaultStr;
 		}
 	}
 }

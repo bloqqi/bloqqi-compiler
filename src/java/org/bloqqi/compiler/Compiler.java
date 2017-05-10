@@ -29,6 +29,7 @@ public class Compiler {
 	protected StringOption optionOutputFile;
 	protected FlagOption optionDot;
 	protected FlagOption optionRec;
+	protected StringOption optionFeatureDiagram;
 	protected FlagOption optionHelp;
 	protected StringOption optionSrcDir;
 
@@ -76,6 +77,7 @@ public class Compiler {
 		optionOutputFile = addOption(new StringOption("o", "output file"));
 		optionDot = addOption(new FlagOption("dot", "generate DOT visualisation file"));
 		optionRec = addOption(new FlagOption("rec", "display recommendations"));
+		optionFeatureDiagram = addOption(new StringOption("feature-diagram", "generate feature diagram for diagram type"));
 		optionHelp = addOption(new FlagOption("help", "display usage information and exit"));
 		optionSrcDir = addOption(new StringOption("src", "sets the source directory"));
 	}
@@ -195,6 +197,17 @@ public class Compiler {
 			}
 		}
 		
+		if (optionFeatureDiagram.isSet()) {
+			TypeDecl td = p.lookupType(optionFeatureDiagram.getValue());
+			if (td == null || !td.isDiagramType()) {
+				System.out.println("Diagram type \"" + optionFeatureDiagram.getValue() + "\" could not be found");
+			} else {
+				DiagramType dt = (DiagramType) td;
+				System.out.println(dt.specialize().asDotDiagram());
+			}
+		}
+
+		
 		boolean errors = false;
 		for (CompilationUnit cu: p.getCompilationUnits()) {
 			if (!cu.errors().isEmpty()) {
@@ -236,7 +249,8 @@ public class Compiler {
 		return !optionFlat.isSet()
 				&& !optionPrintAst.isSet()
 				&& !optionPrettyPrint.isSet()
-				&& !optionGenerateC.isSet();
+				&& !optionGenerateC.isSet()
+				&& !optionFeatureDiagram.isSet();
 	}
 
 	protected CodeGenerationTarget getCodeGenerationTarget() {

@@ -46,3 +46,67 @@ aspect GenerateDOT {
 	eq DotVarUse.firstName() = getVarUse().firstName();
 
 }
+
+aspect GenerateFeatureDiagram {
+	public String FeatureConfiguration.asDotDiagram() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("digraph G {\n");
+		sb.append("  node [shape=box, margin=0.08 width=0 height=0.25];\n");
+		sb.append("  edge [arrowhead=none];\n");
+		sb.append("  splines=false;\n");
+		sb.append("  nodesep=0.1;\n");
+		sb.append("  ranksep=0.35;\n");
+		
+		asDotDiagram(sb, "", false);
+		sb.append("}\n");
+		return sb.toString();
+	}
+	
+	public void FeatureConfiguration.asDotDiagram(StringBuilder sb, String path, boolean skipNode) {
+		String node;
+		if (skipNode) {
+			node = path.substring(0, path.length()-1);
+		} else {
+			node = path + getName();
+			sb.append("  " + node + " [label=\"" + getName() + "\"];\n");
+		}
+		
+		path = path + getName() + "_";
+		for (OptionalFeature opt: optionals.values()) {
+			sb.append("  " + path + opt.getName() + " [label=\"" + opt.getName() +"\"];\n");
+			sb.append("  " + node + ":s -> " + path + opt.getName() + ":n [arrowhead=odot];\n");
+			opt.asDotDiagram(sb, path);
+		}
+		for (MandatoryFeature m: mandatories.values()) {
+			sb.append("  " + path + m.getName() + " [label=\"" + m.getName() + "\"];\n");
+			sb.append("  " + node + ":s -> " + path + m.getName() + ":n [arrowhead=dot];\n");
+			m.asDotDiagram(sb, path);
+		}
+	}
+	public void OptionalFeature.asDotDiagram(StringBuilder sb, String path) {
+		String node = path + getName();
+		path = path + getName() + "_";
+		for (OptionalFeatureAlternative alt: alternatives.values()) {
+			if (alternatives.size() > 1) {
+				sb.append("  " + path + alt.getName() + " [label=\"" + alt.getName() + "\"];\n");
+				sb.append("  " + node + ":s -> " + path + alt.getName() + ":n [arrowhead=none,style=dashed];\n");
+			}
+			if (alt.specialize().hasFeatures()) {
+				alt.specialize().asDotDiagram(sb, path, alternatives.size() == 1);
+			}
+		}
+	}
+	public void MandatoryFeature.asDotDiagram(StringBuilder sb, String path) {
+		String node = path + getName();
+		path = path + getName() + "_";
+		for (MandatoryFeatureAlternative alt: alternatives.values()) {
+			if (alternatives.size() > 1) {
+				sb.append("  " + path + alt.getName() + " [shape=box, label=\"" + alt.getName() + "\"];\n");
+				sb.append("  " + node + ":s -> " + path + alt.getName() + ":n [arrowhead=none,style=dashed];\n");
+			}
+			if (alt.specialize().hasFeatures()) {
+				alt.specialize().asDotDiagram(sb, path, alternatives.size() == 1);
+			}
+		}
+	}
+}
