@@ -1,0 +1,261 @@
+diagramtype Main {
+  operatorSetPoint: OperatorInt;
+  temperature: OperatorInt;
+  pressure: OperatorInt;
+  valveOpening: ActuatorInt;
+}
+annotation(
+  operatorSetPoint = (20, 10, 91, 20),
+  pressure = (28, 103, 60, 20),
+  temperature = (26, 60, 60, 20),
+  valveOpening = (606, 22, 79, 20)
+)
+diagramtype Loop(r: Int, y: Int, masterKP: Int => u: Int) {
+  inline master: ControllerPart;
+  connect(r, master.r);
+  connect(y, master.y);
+  connect(masterKP, master.kP);
+  connect(master.u, u);
+}
+annotation(
+  masterKP = (12, 124, 60, 20),
+  r = (12, 12, 60, 20),
+  u = (204, 54, 60, 20),
+  y = (12, 68, 60, 20)
+)
+
+
+diagramtype ControllerPart(r: Int, y: Int, kP: Int => u: Int) {
+  controller: P;
+  connect(r, controller.r);
+  connect(y, controller.y);
+  connect(kP, controller.kP);
+  connect(controller.u, u);
+}
+annotation(
+  controller = (108, 56, 60, 44),
+  kP = (12, 124, 60, 20),
+  r = (12, 12, 60, 20),
+  u = (204, 54, 60, 20),
+  y = (12, 68, 60, 20)
+)
+wiring ControllerPart[y: Int, kP: Int, =>u: Int] {
+  connect(y, ControllerPart.y);
+  connect(kP, ControllerPart.kP);
+  intercept u with ControllerPart.r, ControllerPart.u;
+}
+recommendation ControllerPart {
+  filter: Filter[controller.y];
+  replaceable controller;
+}
+
+
+diagramtype P(r: Int, y: Int, kP: Int => u: Int) {
+  e: Sub;
+  Mul_1;
+  connect(r, e.in1);
+  connect(y, e.in2);
+  connect(e.out, Mul_1.in1);
+  connect(Mul_1.out, u);
+  connect(kP, Mul_1.in2);
+}
+annotation(
+  Mul_1 = (163, 60, 49, 30),
+  e = (95, 14, 43, 30),
+  kP = (12, 72, 60, 20),
+  r = (12, 12, 60, 20),
+  u = (363, 58, 54, 20),
+  y = (12, 39, 60, 20)
+)
+diagramtype State(in: Int => out: Int) {
+  var state: Int;
+  connect(in, state);
+  connect(state, out);
+}
+annotation(
+  in = (12, 40, 60, 20),
+  out = (204, 12, 60, 20),
+  state = (108, 40, 60, 20)
+)
+diagramtype Acc(in: Int => out: Int) {
+  var state: Int;
+  add: Add;
+  connect(in, add.in1);
+  connect(state, add.in2);
+  connect(add.out, state);
+  connect(add.out, out);
+}
+annotation(
+  add = (108, 14, 60, 30),
+  in = (12, 12, 60, 20),
+  out = (204, 12, 60, 20),
+  state = (12, 68, 60, 20)
+)
+diagramtype IPart(eout: Int, kI: Int, Mul_1out: Int => u: Int) {
+  oldE: State;
+  Sub_1;
+  Mul_2;
+  Add_1;
+  connect(eout, oldE.in);
+  connect(eout, Sub_1.in1);
+  connect(oldE.out, Sub_1.in2);
+  connect(kI, Mul_2.in2);
+  connect(Sub_1.out, Mul_2.in1);
+  connect(Mul_2.out, Add_1.in1);
+  connect(Mul_1out, Add_1.in2);
+  connect(Add_1.out, u);
+}
+annotation(
+  Add_1 = (396, 14, 60, 30),
+  Mul_1out = (300, 80, 60, 20),
+  Mul_2 = (300, 14, 60, 30),
+  Sub_1 = (204, 14, 60, 30),
+  eout = (12, 12, 60, 20),
+  kI = (204, 80, 60, 20),
+  oldE = (108, 41, 60, 20),
+  u = (492, 12, 60, 20)
+)
+wiring IPart[eout: Int, kI: Int, =>u: Int] {
+  connect(eout, IPart.eout);
+  connect(kI, IPart.kI);
+  intercept u with IPart.Mul_1out, IPart.u;
+}
+recommendation P {
+  integral: IPart[e.out, kI: Int, u];
+}
+diagramtype DPart(eout: Int, kD: Int, Mul_1out: Int => u: Int) {
+  E: Acc;
+  Mul_2;
+  Add_1;
+  connect(eout, E.in);
+  connect(E.out, Mul_2.in1);
+  connect(kD, Mul_2.in2);
+  connect(Mul_2.out, Add_1.in2);
+  connect(Mul_1out, Add_1.in1);
+  connect(Add_1.out, u);
+}
+annotation(
+  Add_1 = (300, 54, 60, 30),
+  E = (108, 24, 60, 20),
+  Mul_1out = (204, 12, 60, 20),
+  Mul_2 = (204, 68, 60, 30),
+  eout = (12, 22, 60, 20),
+  kD = (108, 80, 60, 20),
+  u = (396, 52, 60, 20)
+)
+wiring DPart[eout: Int, kD: Int, =>u: Int] {
+  connect(eout, DPart.eout);
+  connect(kD, DPart.kD);
+  intercept u with DPart.Mul_1out, DPart.u;
+}
+
+
+recommendation P {
+  derivative: DPart[e.out, kD: Int, u];
+}
+recommendation P {
+  derivative before integral;
+}
+
+
+diagramtype FeedForward(in: Int, FFGain: Int, FF: Int => u: Int) {
+  Mul_1;
+  Add_1;
+  connect(in, Add_1.in1);
+  connect(FFGain, Mul_1.in1);
+  connect(FF, Mul_1.in2);
+  connect(Mul_1.out, Add_1.in2);
+  connect(Add_1.out, u);
+}
+wiring FeedForward[=>u: Int, FFGain: Int, FF: Int] {
+  intercept u with FeedForward.in, FeedForward.u;
+  connect(FFGain, FeedForward.FFGain);
+  connect(FF, FeedForward.FF);
+}
+recommendation P {
+  feedForward: FeedForward[u, FFGain: Int, FF: Int];
+  integral before feedForward;
+}
+
+
+recommendation Loop {
+  inline slave: ControllerPart[slaveY: Int, slaveKP: Int, u];
+  replaceable master;
+}
+diagramtype Override(in: Int => out: Int) {
+  Min_1;
+  Add_1;
+  connect(in, Min_1.in1);
+  connect(Min_1.min, out);
+  connect(0, Add_1.in2);
+  connect(50, Add_1.in1);
+  connect(Add_1.out, Min_1.in2);
+}
+annotation(
+  Add_1 = (28, 68, 60, 30),
+  Min_1 = (124, 14, 60, 30),
+  in = (28, 12, 60, 20),
+  out = (220, 12, 60, 20)
+)
+wiring Override[=>u: Int] {
+  intercept u with Override.in, Override.out;
+}
+recommendation Loop {
+  override: Override[u];
+  slave before override;
+}
+diagramtype TunableOverride(limit: Int) extends Override {
+  SelInt_1;
+  connect(limit, SelInt_1.in1);
+  intercept Min_1.in2 with SelInt_1.in2, SelInt_1.out;
+  connect(true, SelInt_1.sel);
+}
+annotation(
+  Override::Add_1 = (135, 96, 60, 30),
+  Override::Min_1 = (343, 54, 60, 30),
+  Override::in = (22, 52, 60, 20),
+  Override::out = (439, 52, 60, 20),
+  SelInt_1 = (247, 68, 60, 44),
+  limit = (22, 80, 60, 20)
+)
+diagramtype OperatorInt( => out: Int) {
+}
+annotation(
+  out = (329, 208, 60, 20)
+)
+diagramtype ActuatorInt(in: Int) {
+}
+annotation(
+  in = (269, 245, 60, 20)
+)
+diagramtype NoiseRemover(in: Int => out: Int) {
+  connect(in, out);
+}
+annotation(
+  in = (12, 12, 60, 20),
+  out = (108, 12, 60, 20)
+)
+diagramtype Filter(in: Int => out: Int) {
+  noiseRemover: NoiseRemover;
+  connect(in, noiseRemover.in);
+  connect(noiseRemover.out, out);
+}
+annotation(
+  in = (12, 12, 60, 20),
+  noiseRemover = (108, 14, 77, 20),
+  out = (254, 12, 60, 20)
+)
+wiring Filter[=>y: Int] {
+  intercept y with Filter.in, Filter.out;
+}
+diagramtype MinZeroFilter extends Filter {
+  Max_1;
+  intercept out with Max_1.in1, Max_1.max;
+  connect(0, Max_1.in2);
+}
+annotation(
+  Filter::in = (12, 12, 60, 20),
+  Filter::noiseRemover = (108, 14, 60, 20),
+  Filter::out = (316, 12, 60, 20),
+  Max_1 = (220, 14, 60, 30)
+)

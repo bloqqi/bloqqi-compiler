@@ -186,7 +186,10 @@ public class Compiler {
 				for (TypeDecl td: u.typeDecls()) {
 					if (td.isDiagramType()) {
 						DiagramType dt = (DiagramType) td;
-						System.out.println(dt.specialize());
+						FeatureConfiguration conf = dt.specialize();
+						if (conf.hasFeatures()) {
+							System.out.println(conf);
+						}
 					}
 				}
 			}

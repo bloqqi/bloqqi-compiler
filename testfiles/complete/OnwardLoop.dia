@@ -1,0 +1,189 @@
+diagramtype Controller(SP: Int, PV: Int => CV: Int) {
+  sub: Sub;
+  connect(SP, sub.in1);
+  connect(PV, sub.in2);
+  connect(sub.out, CV);
+}
+annotation(
+  CV = (314, 14, 60, 28),
+  PV = (20, 44, 60, 28),
+  SP = (20, 14, 60, 28),
+  sub = (120, 20, 60, 28)
+)
+diagramtype FeedForward(In: Int, Gain: Int, FV: Int => Out: Int) {
+  Mul_1;
+  Add_1;
+  connect(In, Add_1.in1);
+  connect(Gain, Mul_1.in1);
+  connect(FV, Mul_1.in2);
+  connect(Mul_1.out, Add_1.in2);
+  connect(Add_1.out, Out);
+}
+annotation(
+  Add_1 = (204, 54, 60, 30),
+  FV = (12, 80, 60, 20),
+  Gain = (12, 24, 60, 20),
+  In = (108, 12, 60, 20),
+  Mul_1 = (108, 68, 60, 30),
+  Out = (300, 52, 60, 20)
+)
+wiring FeedForward[=>I: Int, Gain: Int, FV: Int] {
+  intercept I with FeedForward.In, FeedForward.Out;
+  connect(Gain, FeedForward.Gain);
+  connect(FV, FeedForward.FV);
+}
+diagramtype Gain(Val: Int, Gain: Int => Out: Int) {
+  Mul_1;
+  connect(Gain, Mul_1.in1);
+  connect(Val, Mul_1.in2);
+  connect(Mul_1.out, Out);
+}
+annotation(
+  Gain = (13, 10, 60, 28),
+  Mul_1 = (131, 17, 60, 28),
+  Out = (312, 11, 60, 28),
+  Val = (13, 42, 60, 28)
+)
+wiring Gain[V: Int, GF: Int] {
+  intercept source V with Gain.Val, Gain.Out;
+  connect(GF, Gain.Gain);
+}
+diagramtype Loop(SP: Int, PV: Int => CV: Int) {
+  inline master: ControllerPart;
+  connect(SP, master.SP);
+  connect(PV, master.PV);
+  connect(master.CV, CV);
+}
+annotation(
+  CV = (192, 12, 60, 20),
+  PV = (12, 62, 60, 20),
+  SP = (12, 12, 60, 20),
+  master$controller = (102, 14, 60, 30)
+)
+diagramtype Filter(in: Int => out: Int) {
+  connect(in, out);
+}
+annotation(
+  in = (20, 20, 60, 28),
+  out = (100, 20, 60, 28)
+)
+wiring Filter[=>PV: Int] {
+  intercept PV with Filter.in, Filter.out;
+}
+diagramtype ControllerPart(SP: Int, PV: Int => CV: Int) {
+  controller: Controller;
+  connect(SP, controller.SP);
+  connect(PV, controller.PV);
+  connect(controller.CV, CV);
+}
+annotation(
+  CV = (204, 12, 60, 20),
+  PV = (12, 68, 60, 20),
+  SP = (12, 12, 60, 20),
+  controller = (108, 14, 60, 30)
+)
+wiring ControllerPart[=>CV: Int, PV: Int] {
+  intercept CV with ControllerPart.SP, ControllerPart.CV;
+  connect(PV, ControllerPart.PV);
+}
+diagramtype FixedOverride(in: Int => out: Int) {
+  connect(in, out);
+}
+annotation(
+  in = (20, 20, 60, 28),
+  out = (100, 20, 60, 28)
+)
+wiring FixedOverride[=>in: Int] {
+  intercept in with FixedOverride.in, FixedOverride.out;
+}
+diagramtype TunableOverride(limit: Int) extends FixedOverride {
+}
+annotation(
+  FixedOverride::in = (12, 90, 60, 20),
+  FixedOverride::out = (108, 90, 60, 20),
+  limit = (12, 12, 60, 20)
+)
+diagramtype Sensor( => value: Int) {
+}
+annotation(
+  value = (12, 12, 60, 20)
+)
+diagramtype OperatorValue( => value: Int) {
+}
+annotation(
+  value = (12, 12, 60, 20)
+)
+diagramtype Actuator(value: Int) {
+}
+annotation(
+  value = (12, 12, 60, 18)
+)
+diagramtype Tank {
+  temperature: Sensor;
+  valveOpening: Actuator;
+  operatorSP: OperatorValue;
+  pressure: Sensor;
+  operatorGF: OperatorValue;
+  inline MyLoop_1: MyLoop (masterGF: Int) {
+    redeclare master: super (controllerGF: Int) {
+      connect(controllerGF, controller.GF);
+    };
+    connect(masterGF, master.controllerGF);
+  };
+  connect(operatorSP.value, MyLoop_1.SP);
+  connect(temperature.value, MyLoop_1.PV);
+  connect(operatorGF.value, MyLoop_1.masterGF);
+  connect(pressure.value, MyLoop_1.slavePV);
+  connect(MyLoop_1.CV, valveOpening.value);
+}
+annotation(
+  MyLoop_1$master$controller = (150, 13, 54, 44),
+  MyLoop_1$master$filter = (90, 27, 36, 20),
+  MyLoop_1$override = (307, 13, 50, 20),
+  MyLoop_1$slave$controller = (229, 13, 54, 30),
+  MyLoop_1$slave$filter = (150, 74, 54, 20),
+  operatorGF = (10, 51, 60, 20),
+  operatorSP = (10, 4, 60, 20),
+  pressure = (10, 74, 60, 20),
+  temperature = (10, 27, 60, 20),
+  valveOpening = (379, 13, 69, 20)
+)
+recommendation ControllerPart {
+  filter: Filter[controller.PV];
+  replaceable controller;
+}
+recommendation Loop {
+  inline slave: ControllerPart[CV, slavePV: Int];
+  override: FixedOverride[CV];
+  slave before override;
+  replaceable master;
+}
+recommendation Controller {
+  feedForward: FeedForward[CV, FFGain: Int, FV: Int];
+  gain: Gain[sub.out, GF: Int];
+}
+diagramtype MyLoop extends Loop {
+  inline slave: ControllerPart[CV, slavePV: Int] {
+    filter: Filter[controller.PV];
+  };
+  override: FixedOverride[CV];
+  redeclare master: ControllerPart {
+    filter: Filter[controller.PV];
+    redeclare controller: Controller {
+      gain: Gain[sub.out, GF: Int];
+    };
+  };
+}
+annotation(
+  Loop::CV = (462, 12, 60, 20),
+  Loop::PV = (12, 60, 60, 20),
+  Loop::SP = (102, 12, 60, 20),
+  master$controller = (192, 14, 60, 44),
+  master$filter = (102, 62, 60, 20),
+  override = (372, 14, 60, 20),
+  slave$controller = (282, 14, 60, 30),
+  slave$filter = (192, 114, 60, 20),
+  slavePV = (102, 112, 60, 20)
+)
+diagramtype FilterControllerPart {
+}

@@ -1,0 +1,344 @@
+diagramtype Main {
+  tank: Tank {
+    inline Agitating: AgitationExtension[agitate: Bool, level.out, empty, pump.interlock, =>agitating: Bool];
+    inline Heating: HeatingExtension[heat: Bool, level.out, =>heating: Bool];
+    inline Pump2: PumpExtension[empty2: Bool, Le_2.out, emptying];
+    inline Valve2: ValveExtension[fill2: Bool, Le_1.out, filling] {
+      redeclare valve2: AdvancedValve;
+    };
+    redeclare valve: AdvancedValve;
+  };
+  fill: OperatorBool;
+  empty: OperatorBool;
+  agitate: OperatorBool;
+  heat: OperatorBool;
+  empty2: OperatorBool;
+  fill2: OperatorBool;
+  filling: ActuatorBool;
+  emptying: ActuatorBool;
+  agitating: ActuatorBool;
+  heating: ActuatorBool;
+  tankEmpty: Tank;
+  connect(fill.out, tank.fill);
+  connect(empty.out, tank.empty);
+  connect(agitate.out, tank.agitate);
+  connect(heat.out, tank.heat);
+  connect(empty2.out, tank.empty2);
+  connect(fill2.out, tank.fill2);
+  connect(tank.filling, filling.open);
+  connect(tank.emptying, emptying.open);
+  connect(tank.agitating, agitating.open);
+  connect(tank.heating, heating.open);
+}
+annotation(
+  agitate = (12, 124, 60, 20),
+  agitating = (276, 134, 60, 20),
+  empty = (12, 102, 60, 20),
+  empty2 = (12, 163, 60, 20),
+  emptying = (276, 102, 60, 20),
+  fill = (12, 65, 60, 20),
+  fill2 = (12, 189, 60, 20),
+  filling = (276, 65, 60, 20),
+  heat = (12, 142, 60, 20),
+  heating = (276, 162, 60, 20),
+  tank = (144, 96, 60, 86),
+  tankEmpty = (348, 340, 60, 45)
+)
+diagramtype Tank(fill: Bool, empty: Bool => filling: Bool, emptying: Bool) {
+  level: SensorInt;
+  valve: Valve;
+  pump: Pump;
+  maxLevel: OperatorInt;
+  minLevel: OperatorInt;
+  Le_1;
+  Le_2;
+  connect(valve.status, filling);
+  connect(pump.status, emptying);
+  connect(maxLevel.out, Le_1.in1);
+  connect(level.out, Le_1.in2);
+  connect(Le_1.out, valve.interlock);
+  connect(fill, valve.open);
+  connect(level.out, Le_2.in1);
+  connect(minLevel.out, Le_2.in2);
+  connect(Le_2.out, pump.interlock);
+  connect(empty, pump.open);
+}
+annotation(
+  Le_1 = (102, 62, 60, 30),
+  Le_2 = (102, 172, 60, 30),
+  empty = (102, 122, 60, 20),
+  emptying = (282, 156, 60, 20),
+  fill = (102, 12, 60, 20),
+  filling = (282, 46, 60, 20),
+  level = (12, 76, 60, 20),
+  maxLevel = (12, 26, 60, 20),
+  minLevel = (12, 186, 60, 20),
+  pump = (192, 158, 60, 30),
+  valve = (192, 48, 60, 30)
+)
+diagramtype ProcessObject(open: Bool, interlock: Bool => status: Bool) {
+  actuator: ActuatorBool;
+  sensor: SensorBool;
+  And_1;
+  Not_1;
+  connect(sensor.status, status);
+  connect(open, And_1.in1);
+  connect(interlock, Not_1.in);
+  connect(Not_1.out, And_1.in2);
+  connect(And_1.out, actuator.open);
+}
+diagramtype Valve extends ProcessObject {
+}
+diagramtype AdvancedValve extends Valve {
+  sensor2: SensorBool;
+  And_1;
+  Not_1;
+  connect(sensor2.status, Not_1.in);
+  connect(Not_1.out, And_1.in2);
+  intercept status with And_1.in1, And_1.out;
+}
+diagramtype Pump extends ProcessObject {
+}
+diagramtype Motor extends ProcessObject {
+}
+diagramtype SensorInt( => out: Int) {
+}
+diagramtype SensorBool( => status: Bool) {
+}
+diagramtype ActuatorBool(open: Bool) {
+}
+diagramtype OperatorInt( => out: Int) {
+}
+diagramtype OperatorBool( => out: Bool) {
+}
+diagramtype TankTwo(empty2: Bool, fill2: Bool) extends Tank {
+  valve2: Valve;
+  Or_1;
+  pump2: Pump;
+  Or_2;
+  connect(Tank::Le_1.out, valve2.interlock);
+  connect(fill2, valve2.open);
+  intercept filling with Or_1.in1, Or_1.out;
+  connect(valve2.status, Or_1.in2);
+  intercept emptying with Or_2.in1, Or_2.out;
+  connect(Tank::Le_2.out, pump2.interlock);
+  connect(empty2, pump2.open);
+  connect(pump2.status, Or_2.in2);
+}
+annotation(
+  Or_1 = (282, 110, 60, 30),
+  Or_2 = (282, 270, 60, 30),
+  Tank::Le_1 = (102, 62, 60, 30),
+  Tank::Le_2 = (102, 222, 60, 30),
+  Tank::empty = (102, 172, 60, 20),
+  Tank::emptying = (372, 268, 60, 20),
+  Tank::fill = (102, 12, 60, 20),
+  Tank::filling = (372, 108, 60, 20),
+  Tank::level = (12, 76, 60, 20),
+  Tank::maxLevel = (12, 26, 60, 20),
+  Tank::minLevel = (12, 236, 60, 20),
+  Tank::pump = (192, 208, 60, 30),
+  Tank::valve = (192, 48, 60, 30),
+  empty2 = (102, 282, 60, 20),
+  fill2 = (102, 122, 60, 20),
+  pump2 = (192, 284, 60, 30),
+  valve2 = (192, 124, 60, 30)
+)
+diagramtype TankHeating(heat: Bool => heating: Bool) extends Tank {
+  minLevelHeating: OperatorInt;
+  Le_3;
+  maxTemp: OperatorInt;
+  temp: SensorInt;
+  Le_4;
+  Or_1;
+  heater: Valve;
+  connect(Tank::level.out, Le_3.in1);
+  connect(minLevelHeating.out, Le_3.in2);
+  connect(maxTemp.out, Le_4.in1);
+  connect(temp.out, Le_4.in2);
+  connect(Le_3.out, Or_1.in1);
+  connect(Le_4.out, Or_1.in2);
+  connect(Or_1.out, heater.interlock);
+  connect(heat, heater.open);
+  connect(heater.status, heating);
+}
+annotation(
+  Le_3 = (102, 232, 60, 30),
+  Le_4 = (102, 332, 60, 30),
+  Or_1 = (192, 318, 60, 30),
+  Tank::Le_1 = (102, 62, 60, 30),
+  Tank::Le_2 = (102, 172, 60, 30),
+  Tank::empty = (102, 122, 60, 20),
+  Tank::emptying = (282, 156, 60, 20),
+  Tank::fill = (102, 12, 60, 20),
+  Tank::filling = (282, 46, 60, 20),
+  Tank::level = (12, 76, 60, 20),
+  Tank::maxLevel = (12, 26, 60, 20),
+  Tank::minLevel = (12, 186, 60, 20),
+  Tank::pump = (192, 158, 60, 30),
+  Tank::valve = (192, 48, 60, 30),
+  heat = (192, 268, 60, 20),
+  heater = (282, 304, 60, 30),
+  heating = (372, 302, 60, 20),
+  maxTemp = (12, 296, 60, 20),
+  minLevelHeating = (12, 246, 60, 20),
+  temp = (12, 346, 60, 20)
+)
+diagramtype TankAgitation(agitate: Bool => agitating: Bool) extends Tank {
+  minLevelAgitation: SensorInt;
+  Le_3;
+  agitator: Motor;
+  Or_1;
+  Or_2;
+  connect(Tank::level.out, Le_3.in1);
+  connect(minLevelAgitation.out, Le_3.in2);
+  connect(agitator.status, agitating);
+  connect(agitate, agitator.open);
+  intercept Tank::pump.interlock with Or_1.in1, Or_1.out;
+  connect(Or_2.out, agitator.interlock);
+  connect(Le_3.out, Or_2.in2);
+  connect(agitate, Or_1.in2);
+  connect(empty, Or_2.in1);
+}
+annotation(
+  Le_3 = (102, 282, 60, 30),
+  Or_1 = (207, 122, 60, 30),
+  Or_2 = (207, 268, 60, 30),
+  Tank::Le_1 = (102, 62, 60, 30),
+  Tank::Le_2 = (102, 122, 60, 30),
+  Tank::empty = (102, 182, 60, 20),
+  Tank::emptying = (387, 106, 60, 20),
+  Tank::fill = (102, 12, 60, 20),
+  Tank::filling = (297, 46, 60, 20),
+  Tank::level = (12, 76, 60, 20),
+  Tank::maxLevel = (12, 26, 60, 20),
+  Tank::minLevel = (12, 136, 60, 20),
+  Tank::pump = (297, 108, 60, 30),
+  Tank::valve = (207, 48, 60, 30),
+  agitate = (102, 232, 60, 20),
+  agitating = (387, 252, 60, 20),
+  agitator = (297, 254, 60, 30),
+  minLevelAgitation = (12, 296, 60, 20)
+)
+diagramtype ValveExtension(fill: Bool, interlock: Bool, fillingIn: Bool => fillingOut: Bool) {
+  valve2: Valve;
+  Or_1;
+  connect(interlock, valve2.interlock);
+  connect(fill, valve2.open);
+  connect(valve2.status, Or_1.in2);
+  connect(fillingIn, Or_1.in1);
+  connect(Or_1.out, fillingOut);
+}
+annotation(
+  Or_1 = (192, 48, 60, 30),
+  fill = (12, 24, 60, 20),
+  fillingIn = (102, 12, 60, 20),
+  fillingOut = (282, 46, 60, 20),
+  interlock = (12, 74, 60, 20),
+  valve2 = (102, 62, 60, 30)
+)
+wiring ValveExtension[fill: Bool, interlock: Bool, =>filling: Bool] {
+  connect(fill, ValveExtension.fill);
+  connect(interlock, ValveExtension.interlock);
+  intercept filling with ValveExtension.fillingIn, ValveExtension.fillingOut;
+}
+diagramtype PumpExtension(empty: Bool, interlock: Bool, emptyingIn: Bool => emptyingOut: Bool) {
+  pump2: Pump;
+  Or_2;
+  connect(interlock, pump2.interlock);
+  connect(empty, pump2.open);
+  connect(pump2.status, Or_2.in2);
+  connect(emptyingIn, Or_2.in1);
+  connect(Or_2.out, emptyingOut);
+}
+wiring PumpExtension[empty: Bool, interlock: Bool, =>emptying: Bool] {
+  connect(empty, PumpExtension.empty);
+  connect(interlock, PumpExtension.interlock);
+  intercept emptying with PumpExtension.emptyingIn, PumpExtension.emptyingOut;
+}
+diagramtype HeatingExtension(heat: Bool, level: Int => heating: Bool) {
+  minLevelHeating: OperatorInt;
+  Le_3;
+  maxTemp: OperatorInt;
+  temp: SensorInt;
+  Le_4;
+  Or_1;
+  heater: Valve;
+  connect(level, Le_3.in1);
+  connect(minLevelHeating.out, Le_3.in2);
+  connect(maxTemp.out, Le_4.in1);
+  connect(temp.out, Le_4.in2);
+  connect(Le_3.out, Or_1.in1);
+  connect(Le_4.out, Or_1.in2);
+  connect(Or_1.out, heater.interlock);
+  connect(heat, heater.open);
+  connect(heater.status, heating);
+}
+annotation(
+  Le_3 = (102, 48, 60, 30),
+  Le_4 = (102, 148, 60, 30),
+  Or_1 = (192, 134, 60, 30),
+  heat = (192, 84, 60, 20),
+  heater = (282, 120, 60, 30),
+  heating = (372, 118, 60, 20),
+  level = (12, 12, 60, 20),
+  maxTemp = (12, 112, 60, 20),
+  minLevelHeating = (12, 62, 60, 20),
+  temp = (12, 162, 60, 20)
+)
+wiring HeatingExtension[heat: Bool, level: Int, =>heating: Bool] {
+  connect(heat, HeatingExtension.heat);
+  connect(level, HeatingExtension.level);
+  connect(HeatingExtension.heating, heating);
+}
+diagramtype AgitationExtension(agitate: Bool, level: Int, empty: Bool, pumpInterlockIn: Bool => agitating: Bool, pumpInterlockOut: Bool) {
+  minLevelAgitation: SensorInt;
+  Le_3;
+  agitator: Motor;
+  Or_1;
+  Or_2;
+  connect(level, Le_3.in1);
+  connect(minLevelAgitation.out, Le_3.in2);
+  connect(agitator.status, agitating);
+  connect(agitate, agitator.open);
+  connect(Or_2.out, agitator.interlock);
+  connect(Le_3.out, Or_2.in2);
+  connect(pumpInterlockIn, Or_1.in1);
+  connect(Or_1.out, pumpInterlockOut);
+  connect(agitate, Or_1.in2);
+  connect(empty, Or_2.in1);
+}
+annotation(
+  Le_3 = (102, 138, 60, 30),
+  Or_1 = (282, 50, 60, 30),
+  Or_2 = (192, 124, 60, 30),
+  agitate = (192, 62, 60, 20),
+  agitating = (372, 108, 60, 20),
+  agitator = (282, 110, 60, 30),
+  empty = (102, 88, 60, 20),
+  level = (12, 102, 60, 20),
+  minLevelAgitation = (12, 152, 60, 20),
+  pumpInterlockIn = (192, 12, 60, 20),
+  pumpInterlockOut = (372, 48, 60, 20)
+)
+wiring AgitationExtension[agitate: Bool, level: Int, empty: Bool, =>pumpInterlock: Bool, =>agitating: Bool] {
+  connect(agitate, AgitationExtension.agitate);
+  connect(level, AgitationExtension.level);
+  connect(empty, AgitationExtension.empty);
+  intercept pumpInterlock with AgitationExtension.pumpInterlockIn, AgitationExtension.pumpInterlockOut;
+  connect(AgitationExtension.agitating, agitating);
+}
+recommendation Tank {
+  Valve2: ValveExtension[fill2: Bool, Le_1.out, filling];
+  Pump2: PumpExtension[empty2: Bool, Le_2.out, emptying];
+  Heating: HeatingExtension[heat: Bool, level.out, =>heating: Bool];
+  Agitating: AgitationExtension[agitate: Bool, level.out, empty, pump.interlock, =>agitating: Bool];
+  replaceable valve;
+}
+recommendation ValveExtension {
+  replaceable valve2;
+}
+
+diagramtype TankAll {
+
+}

@@ -170,17 +170,22 @@ aspect RecommendationConfiguration {
 			}
 			return set;
 		}
+		
+		public boolean hasFeatures() {
+			return !optionals.isEmpty() || !mandatories.isEmpty();
+		}
 	
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Diagramtype: " + diagramType.name() + "\n");
-			sb.append("Optional features:\n");
+			sb.append(diagramType.name() + "\n");
+			sb.append("  Combinations: " + nbrOfCombinations() + "\n");
+			sb.append("  Optional features:\n");
 			for (OptionalFeature opt: optionals.values()) {
-				sb.append("- " + opt.toString() + "\n");
+				sb.append("  - " + opt.toString() + "\n");
 			}
-			sb.append("Mandatory features:\n");
+			sb.append("  Mandatory features:\n");
 			for (MandatoryFeature m: mandatories.values()) {
-				sb.append("- " + m.toString() + "\n");
+				sb.append("  - " + m.toString() + "\n");
 			}
 			return sb.toString();
 		}
@@ -268,7 +273,7 @@ aspect RecommendationConfiguration {
 	
 		public String toString() {
 			String selectedStr = isSelected() ? getSelectedAlternative().toString() : "N/A";
-			return selectedStr + " selected of " + alternatives.values();
+			return getName() + ": " + selectedStr + " selected of " + alternatives.values();
 		}
 	}
 	
