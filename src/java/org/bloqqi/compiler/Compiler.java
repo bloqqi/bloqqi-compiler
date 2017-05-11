@@ -198,13 +198,7 @@ public class Compiler {
 		}
 		
 		if (optionFeatureDiagram.isSet()) {
-			TypeDecl td = p.lookupType(optionFeatureDiagram.getValue());
-			if (td == null || !td.isDiagramType()) {
-				System.out.println("Diagram type \"" + optionFeatureDiagram.getValue() + "\" could not be found");
-			} else {
-				DiagramType dt = (DiagramType) td;
-				System.out.println(dt.specialize().asDotDiagram());
-			}
+			printAsFeatureDiagram(p);
 		}
 
 		
@@ -242,6 +236,21 @@ public class Compiler {
 
 		if (errors) {
 			System.exit(1);
+		}
+	}
+
+	private void printAsFeatureDiagram(Program p) {
+		TypeDecl td = p.lookupType(optionFeatureDiagram.getValue());
+		if (td == null || !td.isDiagramType()) {
+			System.out.println("Diagram type \"" + optionFeatureDiagram.getValue() + "\" could not be found");
+		} else {
+			DiagramType dt = (DiagramType) td;
+			try {
+				System.out.println(dt.specialize().asDotDiagram());
+			} catch (Exception e) {
+				System.out.println("Error! Feature diagram for " + dt.name() + " is recursive.");
+				System.exit(1);
+			}
 		}
 	}
 

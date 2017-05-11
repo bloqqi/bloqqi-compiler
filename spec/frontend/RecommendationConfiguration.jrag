@@ -554,3 +554,43 @@ aspect RecommendationConfiguration {
 		}
 	}
 }
+
+aspect RecursiveAnalysis {
+	public boolean FeatureConfiguration.isRecursive() {
+		return isRecursive(new HashSet<DiagramType>());
+	}
+	public boolean FeatureConfiguration.isRecursive(Set<DiagramType> visited) {
+		if (visited.contains(diagramType)) {
+			return true;
+		}
+		visited = new HashSet<>(visited);
+		visited.add(diagramType);
+		for (OptionalFeature opt: optionals.values()) {
+			if (opt.isRecursive(visited)) {
+				return true;
+			}
+		}
+		for (MandatoryFeature m: mandatories.values()) {
+			if (m.isRecursive(visited)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public boolean OptionalFeature.isRecursive(Set<DiagramType> visited) {
+		for (OptionalFeatureAlternative alt: alternatives.values()) {
+			if (alt.specialize().isRecursive(visited)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public boolean MandatoryFeature.isRecursive(Set<DiagramType> visited) {
+		for (MandatoryFeatureAlternative alt: alternatives.values()) {
+			if (alt.specialize().isRecursive(visited)) {
+				return true;
+			}
+		}
+		return false;
+	}
+}

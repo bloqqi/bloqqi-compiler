@@ -48,7 +48,10 @@ aspect GenerateDOT {
 }
 
 aspect GenerateFeatureDiagram {
-	public String FeatureConfiguration.asDotDiagram() {
+	public String FeatureConfiguration.asDotDiagram() throws Exception {
+		if (isRecursive()) {
+			throw new Exception("Error! Feature diagram is recursive");
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("digraph G {\n");
 		sb.append("  node [shape=box, margin=0.08 width=0 height=0.25];\n");

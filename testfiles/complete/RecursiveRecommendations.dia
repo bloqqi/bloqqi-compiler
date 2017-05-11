@@ -1,0 +1,33 @@
+diagramtype Main {
+}
+diagramtype Sensor( => out: Int) {
+}
+diagramtype Actuator(in: Int) {
+}
+diagramtype Loop( => out: Int) {
+}
+diagramtype Part( => out: Int) {
+  controller: Controller {
+  };
+  connect(controller.out, out);
+}
+wiring Part[=>v: Int] {
+  connect(Part.out, v);
+}
+diagramtype OneMorePart extends Part {
+  inline part: Part;
+  combine: Combine;
+  intercept out with combine.in1, combine.out;
+  connect(part.out, combine.in2);
+}
+recommendation OneMorePart {
+  replaceable part;
+}
+diagramtype Controller(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype Combine(in1: Int, in2: Int => out: Int) {
+}
+recommendation Loop {
+  inline part: Part[out];
+}

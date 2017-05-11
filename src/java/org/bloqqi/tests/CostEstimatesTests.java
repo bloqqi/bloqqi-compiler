@@ -41,4 +41,14 @@ public class CostEstimatesTests extends TestSuite {
 		assertEquals(valveExt.specialize().nbrOfCombinations(), 2);
 		assertEquals(tank.specialize().nbrOfCombinations(), 48);
 	}
+	
+	@Test
+	public void combinationsRecursiveRecommendations() {
+		Program program = parseValidProgramFile("complete/RecursiveRecommendations.dia");
+		DiagramType loop = (DiagramType) program.lookupType("Loop");
+		DiagramType oneMorePart = (DiagramType) program.lookupType("OneMorePart");
+		
+		assertEquals(loop.specialize().nbrOfCombinations(), -1);
+		assertEquals(oneMorePart.specialize().nbrOfCombinations(), -1);
+	}
 }

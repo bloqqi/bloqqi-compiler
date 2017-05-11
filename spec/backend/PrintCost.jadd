@@ -38,36 +38,36 @@ aspect PrintCost {
 	}
 	
 	public long FeatureConfiguration.nbrOfCombinations() {
+		if (isRecursive()) {
+			return -1;
+		}
+		return computeNbrOfCombinations();
+	}
+	protected long FeatureConfiguration.computeNbrOfCombinations() {
 		long combinations = 1;
 		for (OptionalFeature opt: optionals.values()) {
-			combinations *= opt.nbrOfCombinations();
+			combinations *= opt.computeNbrOfCombinations();
 		}
 		for (MandatoryFeature m: mandatories.values()) {
-			combinations *= m.nbrOfCombinations();
+			combinations *= m.computeNbrOfCombinations();
 		}
 		return combinations;
 	}
-	public long OptionalFeature.nbrOfCombinations() {
+	protected long OptionalFeature.computeNbrOfCombinations() {
 		long combinations = 1; // optional feature does not need to be selected
 		for (OptionalFeatureAlternative alt: alternatives.values()) {
 			// Use additions since only one alternative can be selected
-			combinations += alt.nbrOfCombinations();
+			combinations += alt.specialize().computeNbrOfCombinations();
 		}
 		return combinations;
 	}
-	public long OptionalFeatureAlternative.nbrOfCombinations() {
-		return specialize().nbrOfCombinations();
-	}
-	public long MandatoryFeature.nbrOfCombinations() {
+	protected long MandatoryFeature.computeNbrOfCombinations() {
 		// mandatory feature need to be selected
 		long combinations = 0;
 		for (MandatoryFeatureAlternative alt: alternatives.values()) {
 			// Use additions since only one alternative can be selected
-			combinations += alt.nbrOfCombinations();
+			combinations += alt.specialize().computeNbrOfCombinations();
 		}
 		return combinations;
-	}
-	public long MandatoryFeatureAlternative.nbrOfCombinations() {
-		return specialize().nbrOfCombinations();
 	}
 }
