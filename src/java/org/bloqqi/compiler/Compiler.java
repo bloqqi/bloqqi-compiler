@@ -29,6 +29,7 @@ public class Compiler {
 	protected StringOption optionOutputFile;
 	protected FlagOption optionDot;
 	protected FlagOption optionRec;
+	protected FlagOption optionCostEstimates;
 	protected StringOption optionFeatureDiagram;
 	protected FlagOption optionHelp;
 	protected StringOption optionSrcDir;
@@ -78,8 +79,9 @@ public class Compiler {
 		optionDot = addOption(new FlagOption("dot", "generate DOT visualisation file"));
 		optionRec = addOption(new FlagOption("rec", "display recommendations"));
 		optionFeatureDiagram = addOption(new StringOption("feature-diagram", "generate feature diagram for diagram type"));
-		optionHelp = addOption(new FlagOption("help", "display usage information and exit"));
 		optionSrcDir = addOption(new StringOption("src", "sets the source directory"));
+		optionHelp = addOption(new FlagOption("help", "display usage information and exit"));
+		optionCostEstimates = addOption(new FlagOption("cost", "print cost estimates"));
 	}
 	
 	protected void parseArguments(String[] args) throws CommandLineException {
@@ -184,16 +186,12 @@ public class Compiler {
 			}
 		}
 		if (optionRec.isSet()) {
+			printRecommendationsInfo(p);
+		}
+		
+		if (optionCostEstimates.isSet()) {
 			for (CompilationUnit u: p.getCompilationUnits()) {
-				for (TypeDecl td: u.typeDecls()) {
-					if (td.isDiagramType()) {
-						DiagramType dt = (DiagramType) td;
-						FeatureConfiguration conf = dt.specialize();
-						if (conf.hasFeatures()) {
-							System.out.println(conf);
-						}
-					}
-				}
+				System.out.println(u.printCost());
 			}
 		}
 		
@@ -201,6 +199,7 @@ public class Compiler {
 			printAsFeatureDiagram(p);
 		}
 
+		
 		
 		boolean errors = false;
 		for (CompilationUnit cu: p.getCompilationUnits()) {
@@ -236,6 +235,20 @@ public class Compiler {
 
 		if (errors) {
 			System.exit(1);
+		}
+	}
+
+	private void printRecommendationsInfo(Program p) {
+		for (CompilationUnit u: p.getCompilationUnits()) {
+			for (TypeDecl td: u.typeDecls()) {
+				if (td.isDiagramType()) {
+					DiagramType dt = (DiagramType) td;
+					FeatureConfiguration conf = dt.specialize();
+					if (conf.hasFeatures()) {
+						System.out.println(conf);
+					}
+				}
+			}
 		}
 	}
 

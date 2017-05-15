@@ -2,40 +2,64 @@ aspect PrintCost {
 	public String CompilationUnit.printCost() {
 		StringBuilder sb = new StringBuilder();
 		for (Declaration d : getDeclarations()) {
-			d.printCost(sb);
+			d.printCost(0, sb);
 		}
 		return sb.toString();
 	}
 
-	public void Declaration.printCost(StringBuilder sb) {}
-	public void DiagramType.printCost(StringBuilder sb) {
-		int parameters = getNumLocalInParameter() + getNumLocalOutParameter();
-		sb.append(name() + ":\n");
-		sb.append("- Local:\n");
-		sb.append("  - parameters: " + parameters + "\n");
-		sb.append("  - blocks: " + getNumLocalBlock() + "\n");
-		int conn = 0;
-		int intercept = 0;
-		for (FlowDecl fd: getFlowDecls()) {
-			if (fd instanceof Connection) conn++;
-			if (fd instanceof Interception) intercept++;
-		}
-		sb.append("  - connections: " + conn + "\n");
-		sb.append("  - intercept: " + intercept + "\n");
-		sb.append("- Total:\n");
-		sb.append("  - parameters: " + (getNumInParameter() + getNumOutParameter()) + "\n");
-		sb.append("  - block: " + getNumBlock() + "\n");
-		sb.append("  - connections: " + getNumConnection() + "\n");
-		int codeCost = parameters + getNumLocalBlock() + conn + intercept;
-		sb.append("- code cost: " + codeCost + "\n");
+	public void Declaration.printCost(int indent, StringBuilder sb) {}
+	public void DiagramType.printCost(int indent, StringBuilder sb) {
+		int parameters = getNumInParameter() + getNumOutParameter();
+		int blocks = getNumBlock();
+		int connections = getNumConnection();
+		int total = parameters + blocks + connections;
+		sb.append(getIndent(indent) + name() + ":\n");
+		sb.append(getIndent(indent) + "- parameters: " + parameters + "\n");
+		sb.append(getIndent(indent) + "- blocks: " + blocks + "\n");
+		sb.append(getIndent(indent) + "- connections: " + connections + "\n");
+		sb.append(getIndent(indent) + "- total: " + total + "\n");
 		
-		int runtimeCost = 0;
-		runtimeCost += getNumBlock();
-		runtimeCost += getNumConnection();
-		runtimeCost += getNumInParameter();
-		runtimeCost += getNumOutParameter();
-		sb.append("- runtime cost: " + runtimeCost + "\n");
+		for (Block b: getBlocks()) {
+			if (b.hasAnonymousDiagramType()) {
+				b.anonymousDiagramType().printCost(indent+1, sb);
+			}
+		}
 	}
+
+
+	//
+	// Cost estimation for VLHCC 2014 paper
+	//
+	//public void Declaration.printCost(StringBuilder sb) {}
+	//public void DiagramType.printCost(StringBuilder sb) {
+	//	int parameters = getNumLocalInParameter() + getNumLocalOutParameter();
+	//	sb.append(name() + ":\n");
+	//	sb.append("- Local:\n");
+	//	sb.append("  - parameters: " + parameters + "\n");
+	//	sb.append("  - blocks: " + getNumLocalBlock() + "\n");
+	//	int conn = 0;
+	//	int intercept = 0;
+	//	for (FlowDecl fd: getFlowDecls()) {
+	//		if (fd instanceof Connection) conn++;
+	//		if (fd instanceof Interception) intercept++;
+	//	}
+	//	sb.append("  - connections: " + conn + "\n");
+	//	sb.append("  - intercept: " + intercept + "\n");
+	//	sb.append("- Total:\n");
+	//	sb.append("  - parameters: " + (getNumInParameter() + getNumOutParameter()) + "\n");
+	//	sb.append("  - block: " + getNumBlock() + "\n");
+	//	sb.append("  - connections: " + getNumConnection() + "\n");
+	//	int codeCost = parameters + getNumLocalBlock() + conn + intercept;
+	//	sb.append("- code cost: " + codeCost + "\n");
+	//	
+	//	int runtimeCost = 0;
+	//	runtimeCost += getNumBlock();
+	//	runtimeCost += getNumConnection();
+	//	runtimeCost += getNumInParameter();
+	//	runtimeCost += getNumOutParameter();
+	//	sb.append("- runtime cost: " + runtimeCost + "\n");
+	//}
+	
 	
 	public long FeatureConfiguration.nbrOfCombinations() {
 		if (isRecursive()) {

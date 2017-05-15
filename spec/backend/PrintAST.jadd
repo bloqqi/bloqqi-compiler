@@ -67,7 +67,7 @@ aspect PrintAST {
 	public String ASTNode.getIndent(int t) {
 		StringBuilder sb = new StringBuilder(t);
 		for (int i = 0; i < t; i++) {
-			sb.append("    ");
+			sb.append("  ");
 		}
 		return sb.toString();
 	}
