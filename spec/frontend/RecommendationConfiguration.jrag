@@ -184,6 +184,9 @@ aspect RecommendationConfiguration {
 			StringBuilder sb = new StringBuilder();
 			sb.append(diagramType.name() + "\n");
 			sb.append("  Combinations: " + nbrOfCombinations() + "\n");
+			sb.append("  Test cases\n");
+			sb.append("  - One for each feature: " + nbrOfTestsEachFeature() + "\n");
+			sb.append("  - Max number of alternatives: " + nbrOfTestsMaxAlternatives() + "\n");
 			sb.append("  Optional features:\n");
 			for (OptionalFeature opt: optionals.values()) {
 				sb.append("  - " + opt.toString() + "\n");

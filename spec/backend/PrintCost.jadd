@@ -95,3 +95,68 @@ aspect PrintCost {
 		return combinations;
 	}
 }
+
+aspect NbrOfTestCases {
+	public int FeatureConfiguration.nbrOfTestsEachFeature() {
+		if (isRecursive()) {
+			return -1;
+		}
+		return computeNbrOfTestsEachFeature();
+	}
+	protected int FeatureConfiguration.computeNbrOfTestsEachFeature() {
+		int tests = 1;  // One test with no optional features
+		for (OptionalFeature opt: optionals.values()) {
+			tests += opt.computeNbrOfTestsEachFeature();
+		}
+		for (MandatoryFeature m: mandatories.values()) {
+			tests += m.computeNbrOfTestsEachFeature();
+		}
+		return tests;
+	}
+	protected int OptionalFeature.computeNbrOfTestsEachFeature() {
+		int tests = 0;
+		for (OptionalFeatureAlternative alt: alternatives.values()) {
+			tests += alt.specialize().computeNbrOfTestsEachFeature();
+		}
+		return tests;
+	}
+	protected int MandatoryFeature.computeNbrOfTestsEachFeature() {
+		int tests = -1;  // Subtract one alternative since this feature is mandatory
+		for (MandatoryFeatureAlternative alt: alternatives.values()) {
+			tests += alt.specialize().computeNbrOfTestsEachFeature();
+		}
+		return tests;
+	}
+	
+	
+	public int FeatureConfiguration.nbrOfTestsMaxAlternatives() {
+		if (isRecursive()) {
+			return -1;
+		}
+		return computeNbrOfTestsMaxAlternatives() + 1;
+	}
+	protected int FeatureConfiguration.computeNbrOfTestsMaxAlternatives() {
+		int max = 0;
+		for (OptionalFeature opt: optionals.values()) {
+			max = Math.max(max, opt.computeNbrOfTestsMaxAlternatives());
+		}
+		for (MandatoryFeature m: mandatories.values()) {
+			max = Math.max(max, m.computeNbrOfTestsMaxAlternatives());
+		}
+		return max;
+	}
+	protected int OptionalFeature.computeNbrOfTestsMaxAlternatives() {
+		int max = alternatives.size();
+		for (OptionalFeatureAlternative alt: alternatives.values()) {
+			max = Math.max(max, alt.specialize().computeNbrOfTestsMaxAlternatives());
+		}
+		return max;
+	}
+	protected int MandatoryFeature.computeNbrOfTestsMaxAlternatives() {
+		int max = alternatives.size();
+		for (MandatoryFeatureAlternative alt: alternatives.values()) {
+			max = Math.max(max, alt.specialize().computeNbrOfTestsMaxAlternatives());
+		}
+		return max;
+	}
+}
