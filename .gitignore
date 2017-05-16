@@ -23,3 +23,5 @@ a.out
 /drast
 /DrAST.cfg
 /filter.fl2
+/Makefile
+/test.dot
