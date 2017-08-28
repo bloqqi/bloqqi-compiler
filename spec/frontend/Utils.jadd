@@ -34,6 +34,14 @@ aspect ASTUtils {
 		}
 	}
 
+	public java.util.List<T> List.asJavaUtilList() {
+		ArrayList<T> list = new ArrayList<T>();
+		for (T e: this) {
+			list.add(e);
+		}
+		return list;
+	}
+
 	public void ASTNode.copyColumnLineFrom(ASTNode other) {
 		setStart(other.getStartLine(), other.getStartColumn());
 		setEnd(other.getEndLine(), other.getEndColumn());
