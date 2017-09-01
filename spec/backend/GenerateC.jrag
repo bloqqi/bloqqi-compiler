@@ -97,6 +97,7 @@ aspect GenerateC {
 		sb.append("// Function declarations\n");
 		sb.append("void bloqqi_main(Main_VARS *vars);\n");
 		sb.append("char *bloqqi_to_json(Main_VARS *vars);\n");
+		sb.append("void bloqqi_set_input_variable(Main_VARS *vars, const char *path, const char *value);\n");
 		genDecls(sb);
 		sb.append("\n");
 	}
@@ -122,6 +123,7 @@ aspect GenerateC {
 			sb.append(Utils.readResource("/c/CCodePostTesting.c")).append("\n");
 		}
 		genStateToJSON(sb);
+		genSetInputVariable(sb);
 	}
 	
 	public void Program.generateStdLibC(StringBuilder sb) {
@@ -550,8 +552,38 @@ aspect JSON {
 				b.type().genStateToJSON(sb, enc);
 			}
 		}
-
 	}
+
+
+	public void Program.genSetInputVariable(StringBuilder sb) {
+		sb.append("void bloqqi_set_input_variable(Main_VARS *vars, const char *path, const char *value) {\n");
+		mainDiagramType().genSetInputVariable(sb, "");
+		sb.append("}\n");
+	}
+	public void TypeDecl.genSetInputVariable(StringBuilder sb, String enclosingPath) {
+	}
+	public void DiagramType.genSetInputVariable(StringBuilder sb, String enclosingPath) {
+		for (Variable v: variables()) {
+			if (v.isInputVariable()) {
+				String convertFunc = "";
+				if (v.type().isInteger()) convertFunc = "atoi";
+				if (v.type().isReal()) convertFunc = "atof";
+
+				String vPath = enclosingPath + v.cNameDeclaration();
+				String access = "vars->" + v.fieldNameInMainStructC() + "." + vPath;
+				sb.append("  if (strcmp(path, \"" + vPath + "\") == 0) {\n");
+				sb.append("    " + access + " = " + convertFunc + "(value);\n");
+				sb.append("  }\n");
+			}
+		}
+		for (Block b: blocks()) {
+			if (b.type().containsInputVariablesTransitive()) {
+				String enc = enclosingPath + b.nameC() + ".";
+				b.type().genSetInputVariable(sb, enc);
+			}
+		}
+	}
+
 }
 
 /**
