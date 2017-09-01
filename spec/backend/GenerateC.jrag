@@ -109,6 +109,7 @@ aspect GenerateC {
 		} else if (codeTarget == CodeGenerationTarget.TESTING) {
 			sb.append(Utils.readResource("/c/CCodePostTesting.c")).append("\n");
 		}
+		genStateToJSON(sb);
 	}
 	
 	public void Program.generateStdLibC(StringBuilder sb) {
@@ -405,6 +406,41 @@ aspect StateStructs {
 	}
 }
 
+
+aspect JSON {
+	public void Program.genStateToJSON(StringBuilder sb) {
+		sb.append("char *to_json(Main_STATE *state) {\n");
+		sb.append("  const int MAX_BUF = 1000;\n");
+		sb.append("  char *c = malloc(MAX_BUF);\n");
+		sb.append("  int len = 0;\n");
+		sb.append("  len += snprintf(c+len, MAX_BUF-len, \"{\");\n");
+
+		mainDiagramType().genStateToJSON(sb, "");
+
+		sb.append("  if (len > 2) {\n");
+		sb.append("    len -= 2; // Remove last comma\n");
+		sb.append("  }\n");
+		sb.append("  len += snprintf(c+len, MAX_BUF-len, \"}\");\n");
+		sb.append("  return c;\n");
+		sb.append("}\n");
+	}
+	public void TypeDecl.genStateToJSON(StringBuilder sb, String enclosingPath) {
+	}
+	public void DiagramType.genStateToJSON(StringBuilder sb, String enclosingPath) {
+		for (Variable v: variables()) {
+			String vPath = enclosingPath + v.cNameDeclaration();
+			String fmt = "\"\\\"" + vPath + "\\\": %d, \"";
+			sb.append("  len += snprintf(c+len, MAX_BUF-len, " + fmt + ", state->" + vPath + ");\n");
+		}
+		for (Block b: blocks()) {
+			if (b.type().containsVariablesTransitive()) {
+				String enc = enclosingPath + b.nameC() + ".";
+				b.type().genStateToJSON(sb, enc);
+			}
+		}
+
+	}
+}
 
 /**
  * Names in C.
