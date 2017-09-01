@@ -10,10 +10,10 @@ static useconds_t useconds() {
 int main() {
   useconds_t extra = 0;
 	
-  Main_STATE state = {};
+  Main_VARS vars = {};
   while(true) {
     useconds_t start = useconds();
-    Main(&state);
+    bloqqi_main(&vars);
     useconds_t end = useconds();
     useconds_t run_time = end - start;
 
