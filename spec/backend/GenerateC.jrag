@@ -523,7 +523,7 @@ aspect VariableStructs {
 aspect JSON {
 	public void Program.genStateToJSON(StringBuilder sb) {
 		sb.append("char *bloqqi_to_json(Main_VARS *vars) {\n");
-		sb.append("  const int MAX_BUF = 1000;\n");
+		sb.append("  const int MAX_BUF = 4096;\n");
 		sb.append("  char *c = malloc(MAX_BUF);\n");
 		sb.append("  int len = 0;\n");
 		sb.append("  len += snprintf(c+len, MAX_BUF-len, \"{\");\n");
@@ -542,7 +542,9 @@ aspect JSON {
 	public void DiagramType.genStateToJSON(StringBuilder sb, String enclosingPath) {
 		for (Variable v: variables()) {
 			String vPath = enclosingPath + v.cNameDeclaration();
-			String fmt = "\"\\\"" + vPath + "\\\": %d, \"";
+			String fmt = "\"\\\"" + vPath + "\\\": "
+				+ "{\\\"value\\\": %d, "
+				+ "\\\"type\\\": \\\"" + v.fieldNameInMainStructC() +"\\\"}, \"";
 			sb.append("  len += snprintf(c+len, MAX_BUF-len, " + fmt
 				+ ", vars->" + v.fieldNameInMainStructC() + "." + vPath + ");\n");
 		}
