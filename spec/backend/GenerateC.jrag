@@ -452,7 +452,7 @@ aspect VariableStructs {
 		StringBuilder sb = new StringBuilder();
 
 		// Generate struct for state variables
-		if (containsStateVariablesTransitive()) {
+		if (containsStateVariablesTransitive() || name().equals("Main")) {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				if (v.isStateVariable()) {
@@ -468,7 +468,7 @@ aspect VariableStructs {
 		}
 
 		// Generate struct for input variables
-		if (containsInputVariablesTransitive()) {
+		if (containsInputVariablesTransitive() || name().equals("Main")) {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				if (v.isInputVariable()) {
@@ -484,7 +484,7 @@ aspect VariableStructs {
 		}
 
 		// Generate struct for output variables
-		if (containsOutputVariablesTransitive()) {
+		if (containsOutputVariablesTransitive() || name().equals("Main")) {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				if (v.isOutputVariable()) {
@@ -506,15 +506,9 @@ aspect VariableStructs {
 
 	public void Program.genMainWrapperStructC(StringBuilder sb) {
 		sb.append("typedef struct {\n");
-		if (mainDiagramType().containsStateVariablesTransitive()) {
-			sb.append("  " + mainDiagramType().stateStructName() + " " + ASTNode.STATE_FIELD + ";\n");
-		}
-		if (mainDiagramType().containsInputVariablesTransitive()) {
-			sb.append("  " + mainDiagramType().inputStructName() + " " + ASTNode.INPUT_FIELD + ";\n");
-		}
-		if (mainDiagramType().containsOutputVariablesTransitive()) {
-			sb.append("  " + mainDiagramType().outputStructName() + " " + ASTNode.OUTPUT_FIELD + ";\n");
-		}
+		sb.append("  " + mainDiagramType().stateStructName() + " " + ASTNode.STATE_FIELD + ";\n");
+		sb.append("  " + mainDiagramType().inputStructName() + " " + ASTNode.INPUT_FIELD + ";\n");
+		sb.append("  " + mainDiagramType().outputStructName() + " " + ASTNode.OUTPUT_FIELD + ";\n");
 		sb.append("} Main_VARS;\n");
 	}
 }
