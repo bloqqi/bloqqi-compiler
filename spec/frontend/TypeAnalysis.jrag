@@ -33,6 +33,8 @@ aspect TypeAnalysis {
 	eq IntType.isInteger() = true;
 	syn boolean TypeDecl.isReal() = false;
 	eq RealType.isReal() = true;
+	syn boolean TypeDecl.isBool() = false;
+	eq BoolType.isBool() = true;
 	syn boolean TypeDecl.isString() = false;
 	eq StringType.isString() = true;
 	

@@ -536,8 +536,11 @@ aspect JSON {
 	public void DiagramType.genStateToJSON(StringBuilder sb, String enclosingPath) {
 		for (Variable v: variables()) {
 			String vPath = enclosingPath + v.cNameDeclaration();
+			String fmtType = "%d";
+			if (v.type().isReal()) fmtType = "%f";
+			else if (v.type().isString()) fmtType = "%s";
 			String fmt = "\"\\\"" + vPath + "\\\": "
-				+ "{\\\"value\\\": %d, "
+				+ "{\\\"value\\\": " + fmtType + ", "
 				+ "\\\"type\\\": \\\"" + v.fieldNameInMainStructC() +"\\\"}, \"";
 			sb.append("  len += snprintf(c+len, MAX_BUF-len, " + fmt
 				+ ", vars->" + v.fieldNameInMainStructC() + "." + vPath + ");\n");
@@ -563,6 +566,7 @@ aspect JSON {
 			if (v.isInputVariable()) {
 				String convertFunc = "";
 				if (v.type().isInteger()) convertFunc = "atoi";
+				if (v.type().isBool()) convertFunc = "atoi";
 				if (v.type().isReal()) convertFunc = "atof";
 
 				String vPath = enclosingPath + v.cNameDeclaration();
