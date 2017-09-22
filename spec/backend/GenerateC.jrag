@@ -272,12 +272,16 @@ aspect FunctionDefinitions {
 	}
 	public void DiagramType.genFunctionDefinitionsC(StringBuilder sb) {
 		sb.append(functionSignature() + " {\n");
+		
 		// Step 1: compute values
 		genBlocksC(sb);
-		// Step 2: update variables
-		genUpdateVariablesC(sb);
-		// Step 3: return value
+		// Step 2: compute return value
 		genReturnValueC(sb);
+		// Step 3: update variables
+		genUpdateVariablesC(sb);
+		// Step 4: add return statement
+		genReturnStatementC(sb);
+
 		sb.append("}\n");
 		
 		// Generate code for anonymous subtypes
@@ -346,10 +350,15 @@ aspect FunctionDefinitions {
 			for (Parameter p: getOutParameters()) {
 			    sb.append("  _result." + p.nameC() + " = " + p.ingoingValueC() + ";\n"); 
 			}
+		}
+	}
+
+	private void DiagramType.genReturnStatementC(StringBuilder sb) {
+		if (!returnTypeC().equals("void")) {
 			sb.append("  return _result;\n");
 		}
 	}
-	
+
 	public String Anchor.ingoingValueC() {
 		if (!ingoingConnections().isEmpty()) {
 			return ingoingConnections().iterator().next().cSourceName();

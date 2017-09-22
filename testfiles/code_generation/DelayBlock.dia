@@ -1,0 +1,14 @@
+external Print(in: Int);
+
+diagramtype Main {
+	print: Print;
+	delay: Delay;
+	connect(1, delay);
+	connect(delay, print);
+}
+
+diagramtype Delay(in: Int => out: Int) {
+	var state: Int;
+	connect(in, state);
+	connect(state, out);
+}
