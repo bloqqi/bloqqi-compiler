@@ -16,6 +16,7 @@ aspect CodeGenerationTarget {
 	public static CodeGenerationTarget CodeGenerationTarget.WITH_DRIVER = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.WITHOUT_DRIVER = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.TESTING = new CodeGenerationTarget();
+	public static CodeGenerationTarget CodeGenerationTarget.FMI = new CodeGenerationTarget();
 }
 
 
@@ -71,7 +72,8 @@ aspect GenerateC {
 	public void Program.generateCPre(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
 				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER ||
-				codeTarget == CodeGenerationTarget.TESTING) {
+				codeTarget == CodeGenerationTarget.TESTING ||
+				codeTarget == CodeGenerationTarget.FMI) {
 			sb.append(Utils.readResource("/c/CCodePre.c")).append("\n");
 		}
 	}
@@ -121,9 +123,14 @@ aspect GenerateC {
 			sb.append(Utils.readResource("/c/CCodePost.c")).append("\n");
 		} else if (codeTarget == CodeGenerationTarget.TESTING) {
 			sb.append(Utils.readResource("/c/CCodePostTesting.c")).append("\n");
+		} else if (codeTarget == CodeGenerationTarget.FMI) {
+			genCForFMI(sb);
 		}
-		genStateToJSON(sb);
-		genSetInputVariable(sb);
+
+		if (codeTarget != CodeGenerationTarget.FMI) {
+			genStateToJSON(sb);
+			genSetInputVariable(sb);
+		}
 	}
 	
 	public void Program.generateStdLibC(StringBuilder sb) {

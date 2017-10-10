@@ -1,0 +1,224 @@
+aspect FMI {
+	/**
+	 * Generate C
+	 */
+
+	class FMIData {
+		int nbrOfReals = 0;
+		int nbrOfInts = 0;
+		int nbrOfBools = 0;
+		int nbrOfStrings = 0;
+	}
+
+	class FMIDataC extends FMIData {
+		// Variable references
+		StringBuilder sbVr = new StringBuilder();
+		// Set start values
+		StringBuilder sbStart = new StringBuilder();
+		// Update input values
+		StringBuilder sbUpdateIn = new StringBuilder();
+		// Update output values
+		StringBuilder sbUpdateOut = new StringBuilder();
+	}
+
+	public void Program.genCForFMI(StringBuilder sb) {
+		FMIDataC fmi = new FMIDataC();
+		mainDiagramType().genCForFMI(fmi, "");
+
+		sb.append("#define MODEL_IDENTIFIER bloqqi\n");
+		sb.append("#define MODEL_GUID \"{23ce3bae-8a59-4b70-b9b5-ec8a74d67181}\"\n");
+
+		sb.append("#define NUMBER_OF_REALS " + fmi.nbrOfReals + "\n");
+		sb.append("#define NUMBER_OF_INTEGERS " + fmi.nbrOfInts + "\n");
+		sb.append("#define NUMBER_OF_BOOLEANS " + fmi.nbrOfBools + "\n");
+		sb.append("#define NUMBER_OF_STRINGS " + fmi.nbrOfStrings + "\n");
+		sb.append("#define NUMBER_OF_STATES 0\n");
+		sb.append("#define NUMBER_OF_EVENT_INDICATORS 0\n");
+		sb.append("#include \"fmuTemplate.h\"\n");
+		sb.append(fmi.sbVr.toString());
+
+		sb.append("Main_VARS vars;\n");
+
+		sb.append("void setStartValues(ModelInstance *comp) {\n");
+		sb.append(fmi.sbStart.toString());
+		sb.append("  vars = (Main_VARS) {0};\n");
+		sb.append("}\n");
+
+		sb.append("void register_time_event(ModelInstance *comp) {\n");
+		sb.append("  comp->eventInfo.nextEventTimeDefined   = fmi2True;\n");
+		sb.append("  comp->eventInfo.nextEventTime          = 1 + comp->time;\n");
+		sb.append("}\n");
+		sb.append("void calculateValues(ModelInstance *comp) {\n");
+		sb.append("  if (comp->state == modelInitializationMode) {\n");
+		sb.append("    register_time_event(comp);\n");
+		sb.append("  }\n");
+		sb.append("}\n");
+
+		sb.append("void eventUpdate(ModelInstance *comp, fmi2EventInfo *eventInfo, int timeEvent) {\n");
+		sb.append("  if (timeEvent) {\n");
+		sb.append(fmi.sbUpdateIn.toString());
+		sb.append("    bloqqi_main(&vars);\n");
+		sb.append(fmi.sbUpdateOut.toString());
+		sb.append("    register_time_event(comp);\n");
+		sb.append("  }\n");
+		sb.append("}\n");
+
+		sb.append("#include \"fmuTemplate.c\"\n");
+	}
+
+	public void TypeDecl.genCForFMI(FMIDataC fmi, String enclosingPath) {
+	}
+	public void DiagramType.genCForFMI(FMIDataC fmi, String enclosingPath) {
+		for (Variable v: variables()) {
+			if (v.isInputVariable() || v.isOutputVariable()) {
+				String type = "";
+				int vrIndex = 0;
+				String startValue = "";
+				if (v.type().isInteger()) {
+					vrIndex = fmi.nbrOfInts;
+					fmi.nbrOfInts++;
+					type = "i";
+					startValue = "0";
+				} else if (v.type().isReal()) {
+					vrIndex = fmi.nbrOfReals;
+					fmi.nbrOfReals++;
+					type = "r";
+					startValue = "0.0";
+				} else if (v.type().isBool()) {
+					vrIndex = fmi.nbrOfBools;
+					fmi.nbrOfBools++;
+					type = "b";
+					startValue = "fmi2False";
+				}
+
+				String varName = enclosingPath + v.name();
+				String cName = varName.replace(".", "_") + "_";
+				fmi.sbVr.append("#define " + cName + " " + vrIndex + "\n");
+				fmi.sbStart.append(String.format("  %s(%s) = %s;\n",
+					type, cName, startValue));
+				if (v.isInputVariable()) {
+					fmi.sbUpdateIn.append(String.format(
+						"    vars.input.%s = %s(%s);\n",
+						varName, type, cName));
+				} else {
+					fmi.sbUpdateOut.append(String.format(
+						"    %s(%s) = vars.output.%s;\n",
+						type, cName, varName));
+				}
+			}
+		}
+		for (Block b: blocks()) {
+			if (b.type().containsInputVariablesTransitive()
+					|| b.type().containsOutputVariablesTransitive()) {
+				String enc = enclosingPath + b.nameC() + ".";
+				b.type().genCForFMI(fmi, enc);
+			}
+		}
+	}
+
+
+	/**
+	 * Generate XML
+	 */
+	class FMIDataXML extends FMIData {
+		int totalVarIndex = 0;
+
+		// Model variables
+		StringBuilder sbMv = new StringBuilder();
+		// Model structure
+		StringBuilder sbMs = new StringBuilder();
+	}
+
+	public void Program.genXMLForFMI(StringBuilder sb) {
+		FMIDataXML fmi = new FMIDataXML();
+		mainDiagramType().genXMLForFMI(fmi, "");
+
+		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
+		sb.append("<fmiModelDescription fmiVersion=\"2.0\"");
+		sb.append(" modelName=\"bloqqi\"");
+		sb.append(" guid=\"{23ce3bae-8a59-4b70-b9b5-ec8a74d67181}\"");
+		sb.append(" numberOfEventIndicators=\"0\">\n");
+
+		sb.append("<CoSimulation ");
+		sb.append(" modelIdentifier=\"bloqqi\"");
+		sb.append(" canHandleVariableCommunicationStepSize=\"true\"/>\n");
+
+		sb.append("<LogCategories>\n");
+		sb.append("  <Category name=\"logAll\"/>\n");
+		sb.append("  <Category name=\"logError\"/>\n");
+		sb.append("  <Category name=\"logFmiCall\"/>\n");
+		sb.append("  <Category name=\"logEvent\"/>\n");
+		sb.append("</LogCategories>\n");
+
+		sb.append("<ModelVariables>\n");
+		sb.append(fmi.sbMv.toString());
+		sb.append("</ModelVariables>\n");
+
+		sb.append("<ModelStructure>\n");
+		sb.append("  <Outputs>\n");
+		sb.append(fmi.sbMs.toString());
+		sb.append("  </Outputs>\n");
+		sb.append("</ModelStructure>\n");
+
+		sb.append("</fmiModelDescription>");
+	}
+
+	public void TypeDecl.genXMLForFMI(FMIDataXML fmi, String enclosingPath) {
+	}
+	public void DiagramType.genXMLForFMI(FMIDataXML fmi, String enclosingPath) {
+		for (Variable v: variables()) {
+			if (v.isInputVariable() || v.isOutputVariable()) {
+				int vrIndex = 0;
+				String startValue = "";
+				String type = "";
+				if (v.type().isInteger()) {
+					vrIndex = fmi.nbrOfInts;
+					fmi.nbrOfInts++;
+					startValue = "0";
+					type = "Integer";
+				} else if (v.type().isReal()) {
+					vrIndex = fmi.nbrOfReals;
+					fmi.nbrOfReals++;
+					startValue = "0.0";
+					type = "Real";
+				} else if (v.type().isBool()) {
+					vrIndex = fmi.nbrOfBools;
+					fmi.nbrOfBools++;
+					startValue = "false";
+					type = "Boolean";
+				}
+				fmi.totalVarIndex++;
+
+				String extra = "";
+				String causality = "";
+				if (v.isOutputVariable()) {
+					extra = "initial=\"exact\"";
+					causality = "output";
+				} else {
+					causality = "input";
+				}
+
+				String name = enclosingPath + v.name();
+				fmi.sbMv.append(String.format(
+					"  <ScalarVariable name=\"%s\" valueReference=\"%d\"" +
+					" causality=\"%s\" variability=\"discrete\" %s>\n" +
+					"    <%s start=\"%s\"/>\n" +
+					"  </ScalarVariable>\n",
+					name, vrIndex, causality, extra, type, startValue));
+
+				if (v.isOutputVariable()) {
+					fmi.sbMs.append(String.format(
+						"    <Unknown index=\"%d\" />\n",
+						fmi.totalVarIndex));
+				}
+			}
+		}
+		for (Block b: blocks()) {
+			if (b.type().containsInputVariablesTransitive()
+					|| b.type().containsOutputVariablesTransitive()) {
+				String enc = enclosingPath + b.nameC() + "_";
+				b.type().genXMLForFMI(fmi, enc);
+			}
+		}
+	}
+}
