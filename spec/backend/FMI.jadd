@@ -1,3 +1,7 @@
+/**
+ * Generate C and XML for FMI that will be used together with fmusdk2.
+ */
+ 
 aspect FMI {
 	/**
 	 * Generate C
