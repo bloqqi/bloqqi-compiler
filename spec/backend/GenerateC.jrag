@@ -81,7 +81,7 @@ aspect GenerateC {
 	public void Program.generateCDeclarations(StringBuilder sb) {
 		sb.append("// Typedefs\n");
 		sb.append("#include <stdbool.h>\n");
-		sb.append("typedef float Real;\n");
+		sb.append("typedef double Real;\n");
 		sb.append("typedef int Int;\n");
 		sb.append("typedef bool Bool;\n");
 		sb.append("typedef const char* String;\n");
