@@ -9,6 +9,7 @@ a.out
 /*.dia
 /*.c
 /*.h
+/*.xml
 /bin/
 /ant-bin/
 /test.c
