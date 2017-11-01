@@ -2,6 +2,8 @@
  * Generate C and XML for FMI that will be used together with fmusdk2.
  */
 aspect FMI {
+	public static String ASTNode.FMI_DEFAULT_SAMPLING_TIME = "1.0";
+
 	class FMIData {
 		int nbrOfReals = 0;
 		int nbrOfInts = 0;
@@ -29,6 +31,10 @@ aspect FMI {
 		FMIDataC fmi = new FMIDataC();
 		mainDiagramType().genCForFMI(fmi, "");
 
+		int vrSamplingPeriod = fmi.nbrOfReals;
+		String nameSamplingPeriod = "sampling_period_";
+		fmi.nbrOfReals++;
+
 		sb.append("#define MODEL_IDENTIFIER bloqqi\n");
 		sb.append("#define MODEL_GUID \"{23ce3bae-8a59-4b70-b9b5-ec8a74d67181}\"\n");
 
@@ -40,18 +46,20 @@ aspect FMI {
 		sb.append("#define NUMBER_OF_EVENT_INDICATORS 0\n");
 		sb.append("#include \"fmuTemplate.h\"\n");
 		sb.append(fmi.sbVr.toString());
+		sb.append("#define " + nameSamplingPeriod + " " + vrSamplingPeriod + "\n");
 		sb.append("#define STATES { }\n\n");
 
 		sb.append("Main_VARS vars;\n\n");
 
 		sb.append("void setStartValues(ModelInstance *comp) {\n");
 		sb.append(fmi.sbStart.toString());
+		sb.append("  r(" + nameSamplingPeriod + ") = " + ASTNode.FMI_DEFAULT_SAMPLING_TIME + ";\n");
 		sb.append("  vars = (Main_VARS) {0};\n");
 		sb.append("}\n\n");
 
 		sb.append("void register_time_event(ModelInstance *comp) {\n");
 		sb.append("  comp->eventInfo.nextEventTimeDefined   = fmi2True;\n");
-		sb.append("  comp->eventInfo.nextEventTime          = 1 + comp->time;\n");
+		sb.append("  comp->eventInfo.nextEventTime          = r(" + nameSamplingPeriod + ") + comp->time;\n");
 		sb.append("}\n\n");
 		sb.append("void calculateValues(ModelInstance *comp) {\n");
 		sb.append("  if (comp->state == modelInitializationMode) {\n");
@@ -154,6 +162,9 @@ aspect FMI {
 		FMIDataXML fmi = new FMIDataXML();
 		mainDiagramType().genXMLForFMI(fmi, "");
 
+		int vrSamplingPeriod = fmi.nbrOfReals;
+		fmi.nbrOfReals++;
+
 		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
 		sb.append("<fmiModelDescription fmiVersion=\"2.0\"");
 		sb.append(" modelName=\"bloqqi\"");
@@ -173,6 +184,10 @@ aspect FMI {
 
 		sb.append("<ModelVariables>\n");
 		sb.append(fmi.sbMv.toString());
+		sb.append("  <ScalarVariable name=\"sampling-period\" valueReference=\"" + vrSamplingPeriod + "\"");
+		sb.append(" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">\n");
+		sb.append("    <Real start=\"1.0\"/>\n");
+		sb.append("  </ScalarVariable>\n");
 		sb.append("</ModelVariables>\n");
 
 		sb.append("<ModelStructure>\n");
