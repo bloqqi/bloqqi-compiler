@@ -115,6 +115,11 @@ public class Compiler {
 				+ ") needs to be specified when using option " + optionFMI);
 		}
 		
+		if (optionFMI.isSet() && optionGenerateC.isSet()) {
+			throw new CommandLineException("The options " + optionFMI
+				+ " and " + optionGenerateC + " cannot be used together.");
+		}
+
 		if (optionHelp.isSet() || commandLine.getArguments().isEmpty()) {
 			showUsageAndExit();
 		}
