@@ -27,7 +27,7 @@ aspect FMI {
 		StringBuilder sbUpdateOut = new StringBuilder();
 	}
 
-	public void Program.genCForFMI(StringBuilder sb) {
+	public void Program.genCForFMI(StringBuilder sb, CodeGenerationData data) {
 		FMIDataC fmi = new FMIDataC();
 		mainDiagramType().genCForFMI(fmi, "");
 
@@ -35,8 +35,8 @@ aspect FMI {
 		String nameSamplingPeriod = "sampling_period_";
 		fmi.nbrOfReals++;
 
-		sb.append("#define MODEL_IDENTIFIER bloqqi\n");
-		sb.append("#define MODEL_GUID \"{23ce3bae-8a59-4b70-b9b5-ec8a74d67181}\"\n");
+		sb.append("#define MODEL_IDENTIFIER " + data.getName() + "\n");
+		sb.append("#define MODEL_GUID \"{" + data.getUUID() +"}\"\n");
 
 		sb.append("#define NUMBER_OF_REALS " + fmi.nbrOfReals + "\n");
 		sb.append("#define NUMBER_OF_INTEGERS " + fmi.nbrOfInts + "\n");
@@ -158,7 +158,7 @@ aspect FMI {
 		StringBuilder sbMs = new StringBuilder();
 	}
 
-	public void Program.genXMLForFMI(StringBuilder sb) {
+	public void Program.genXMLForFMI(StringBuilder sb, CodeGenerationData data) {
 		FMIDataXML fmi = new FMIDataXML();
 		mainDiagramType().genXMLForFMI(fmi, "");
 
@@ -167,12 +167,12 @@ aspect FMI {
 
 		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
 		sb.append("<fmiModelDescription fmiVersion=\"2.0\"");
-		sb.append(" modelName=\"bloqqi\"");
-		sb.append(" guid=\"{23ce3bae-8a59-4b70-b9b5-ec8a74d67181}\"");
+		sb.append(" modelName=\"" + data.getName() + "\"");
+		sb.append(" guid=\"{" + data.getUUID() + "}\"");
 		sb.append(" numberOfEventIndicators=\"0\">\n");
 
 		sb.append("<CoSimulation ");
-		sb.append(" modelIdentifier=\"bloqqi\"");
+		sb.append(" modelIdentifier=\"" + data.getName() + "\"");
 		sb.append(" canHandleVariableCommunicationStepSize=\"true\"/>\n");
 
 		sb.append("<LogCategories>\n");

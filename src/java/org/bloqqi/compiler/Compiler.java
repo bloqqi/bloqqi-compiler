@@ -300,8 +300,17 @@ public class Compiler {
 		return CodeGenerationTarget.WITH_DRIVER;
 	}
 
+	protected CodeGenerationData getCodeGenerationData() {
+		String name = new File(optionOutputFile.getValue()).getName();
+		name = name.substring(0, name.lastIndexOf('.'));
+		return new CodeGenerationData(name);
+	}
+
+
 	protected void generateC(Program p) {
 		CodeGenerationTarget target = getCodeGenerationTarget();
+		CodeGenerationData data = getCodeGenerationData();
+
 		if (optionOutputFile.isSet()) {
 			File cFile = new File(optionOutputFile.getValue());
 			String headerFilename;
@@ -311,24 +320,28 @@ public class Compiler {
 
 			StringBuilder sbHeader = new StringBuilder();
 			StringBuilder sbC = new StringBuilder();
-			p.generateCSeparateFiles(headerFilename, sbHeader, sbC, target);
+			p.generateCSeparateFiles(headerFilename, sbHeader, sbC, target, data);
 			writeToFile(headerFile, sbHeader.toString());
 			writeToFile(cFile, sbC.toString());
 		} else {
-			System.out.println(p.generateC(target));
+			System.out.println(p.generateC(target, data));
 		}
 	}
 
 	protected void generateCForFMI(Program p) {
+		CodeGenerationData data = getCodeGenerationData();
+
+		System.out.println(data.getName());
+
 		File cFile = new File(optionOutputFile.getValue());
-		writeToFile(cFile, p.generateC(CodeGenerationTarget.FMI));
+		writeToFile(cFile, p.generateC(CodeGenerationTarget.FMI, data));
 		
 		String xmlFilename;
 		xmlFilename = cFile.getName().substring(0, cFile.getName().lastIndexOf('.'));
 		xmlFilename = xmlFilename + ".xml";
 		File xmlFile = new File(cFile.getParent(), xmlFilename);
 		StringBuilder sbXml = new StringBuilder();
-		p.genXMLForFMI(sbXml);
+		p.genXMLForFMI(sbXml, data);
 		writeToFile(xmlFile, sbXml.toString());
 	}
 
