@@ -331,8 +331,6 @@ public class Compiler {
 	protected void generateCForFMI(Program p) {
 		CodeGenerationData data = getCodeGenerationData();
 
-		System.out.println(data.getName());
-
 		File cFile = new File(optionOutputFile.getValue());
 		writeToFile(cFile, p.generateC(CodeGenerationTarget.FMI, data));
 		
