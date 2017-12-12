@@ -301,9 +301,13 @@ public class Compiler {
 	}
 
 	protected CodeGenerationData getCodeGenerationData() {
-		String name = new File(optionOutputFile.getValue()).getName();
-		name = name.substring(0, name.lastIndexOf('.'));
-		return new CodeGenerationData(name);
+		if (optionOutputFile.isSet()) {
+			String name = new File(optionOutputFile.getValue()).getName();
+			name = name.substring(0, name.lastIndexOf('.'));
+			return new CodeGenerationData(name);
+		} else {
+			return new CodeGenerationData();
+		}
 	}
 
 
