@@ -110,8 +110,7 @@ aspect GenerateC {
 	public void Program.generateCPre(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
 				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER ||
-				codeTarget == CodeGenerationTarget.TESTING ||
-				codeTarget == CodeGenerationTarget.FMI) {
+				codeTarget == CodeGenerationTarget.TESTING) {
 			sb.append(Utils.readResource("/c/CCodePre.c")).append("\n");
 		}
 	}
