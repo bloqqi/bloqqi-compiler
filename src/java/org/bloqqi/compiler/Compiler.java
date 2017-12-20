@@ -74,7 +74,7 @@ public class Compiler {
 			new EnumOption(
 				"c",
 				"generate C code",
-				Arrays.asList("with-driver", "without-driver"),
+				Arrays.asList("with-driver", "without-driver", "minimal"),
 				"with-driver"));
 		optionFMI = addOption(new FlagOption("fmi", "generate C for FMI"));
 		optionOutputFile = addOption(new StringOption("o", "output file"));
@@ -296,6 +296,8 @@ public class Compiler {
 				return CodeGenerationTarget.WITH_DRIVER;
 			case "without-driver":
 				return CodeGenerationTarget.WITHOUT_DRIVER;
+			case "minimal":
+				return CodeGenerationTarget.MINIMAL;
 		}
 		return CodeGenerationTarget.WITH_DRIVER;
 	}

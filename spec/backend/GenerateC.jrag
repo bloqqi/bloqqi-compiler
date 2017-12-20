@@ -15,6 +15,7 @@ aspect CodeGenerationTarget {
 	}
 	public static CodeGenerationTarget CodeGenerationTarget.WITH_DRIVER = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.WITHOUT_DRIVER = new CodeGenerationTarget();
+	public static CodeGenerationTarget CodeGenerationTarget.MINIMAL = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.TESTING = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.FMI = new CodeGenerationTarget();
 
@@ -78,7 +79,7 @@ aspect GenerateC {
 			CodeGenerationData data) {
 		sb.append(ASTNode.GENERATED_C_INFO + "\n");
 		generateCPre(sb, codeTarget);
-		generateCDeclarations(sb);
+		generateCDeclarations(sb, codeTarget);
 		generateCDefinitions(sb);
 		generateCPost(sb, codeTarget, data);
 	}
@@ -95,7 +96,7 @@ aspect GenerateC {
 		sbHeader.append(ASTNode.GENERATED_C_INFO + "\n");
 		sbHeader.append("#ifndef " + headerGuard + "\n");
 		sbHeader.append("#define " + headerGuard + "\n\n");
-		generateCDeclarations(sbHeader);
+		generateCDeclarations(sbHeader, codeTarget);
 		sbHeader.append("#endif");
 
 		// C file
@@ -115,7 +116,7 @@ aspect GenerateC {
 		}
 	}
 	
-	public void Program.generateCDeclarations(StringBuilder sb) {
+	public void Program.generateCDeclarations(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		sb.append("// Typedefs\n");
 		sb.append("#include <stdbool.h>\n");
 		sb.append("typedef double Real;\n");
@@ -135,8 +136,11 @@ aspect GenerateC {
 		
 		sb.append("// Function declarations\n");
 		sb.append("void bloqqi_main(Main_VARS *vars);\n");
-		sb.append("char *bloqqi_to_json(Main_VARS *vars);\n");
-		sb.append("void bloqqi_set_input_variable(Main_VARS *vars, const char *path, const char *value);\n");
+		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
+				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER) {
+			sb.append("char *bloqqi_to_json(Main_VARS *vars);\n");
+			sb.append("void bloqqi_set_input_variable(Main_VARS *vars, const char *path, const char *value);\n");
+		}
 		genDecls(sb);
 		sb.append("\n");
 	}
@@ -166,7 +170,8 @@ aspect GenerateC {
 			genCForFMI(sb, data);
 		}
 
-		if (codeTarget != CodeGenerationTarget.FMI) {
+		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
+				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER) {
 			genStateToJSON(sb);
 			genSetInputVariable(sb);
 		}
