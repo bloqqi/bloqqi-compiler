@@ -512,7 +512,7 @@ aspect VariableStructs {
 		StringBuilder sb = new StringBuilder();
 
 		// Generate struct for state variables
-		if (containsStateVariablesTransitive() || name().equals("Main")) {
+		if (containsStateVariablesTransitive()) {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				if (v.isStateVariable()) {
@@ -528,7 +528,7 @@ aspect VariableStructs {
 		}
 
 		// Generate struct for input variables
-		if (containsInputVariablesTransitive() || name().equals("Main")) {
+		if (containsInputVariablesTransitive()) {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				if (v.isInputVariable()) {
@@ -544,7 +544,7 @@ aspect VariableStructs {
 		}
 
 		// Generate struct for output variables
-		if (containsOutputVariablesTransitive() || name().equals("Main")) {
+		if (containsOutputVariablesTransitive()) {
 			sb.append("typedef struct {\n");
 			for (Variable v: variables()) {
 				if (v.isOutputVariable()) {
@@ -566,9 +566,22 @@ aspect VariableStructs {
 
 	public void Program.genMainWrapperStructC(StringBuilder sb) {
 		sb.append("typedef struct {\n");
-		sb.append("  " + mainDiagramType().stateStructName() + " " + ASTNode.STATE_FIELD + ";\n");
-		sb.append("  " + mainDiagramType().inputStructName() + " " + ASTNode.INPUT_FIELD + ";\n");
-		sb.append("  " + mainDiagramType().outputStructName() + " " + ASTNode.OUTPUT_FIELD + ";\n");
+		boolean needsDummyField = true;
+		if (mainDiagramType().containsStateVariablesTransitive()) {
+			sb.append("  " + mainDiagramType().stateStructName() + " " + ASTNode.STATE_FIELD + ";\n");
+			needsDummyField = false;
+		}
+		if (mainDiagramType().containsInputVariablesTransitive()) {
+			sb.append("  " + mainDiagramType().inputStructName() + " " + ASTNode.INPUT_FIELD + ";\n");
+			needsDummyField = false;
+		}
+		if (mainDiagramType().containsOutputVariablesTransitive()) {
+			sb.append("  " + mainDiagramType().outputStructName() + " " + ASTNode.OUTPUT_FIELD + ";\n");
+			needsDummyField = false;
+		}
+		if (needsDummyField) {
+			sb.append("  bool DUMMY_FIELD; /* generated since empty structs are not allowed */\n");
+		}
 		sb.append("} Main_VARS;\n");
 	}
 }
