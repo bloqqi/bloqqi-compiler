@@ -56,6 +56,7 @@ public class CodeGeneration extends DynamicTestSuite {
 		cmd.add("gcc");
 		cmd.add("-std=c99");
 		cmd.add("-pedantic");
+		cmd.add("-Werror");
 		cmd.add(cFile);
 		cmd.add(PRINT_FUNCTION_PATH);
 		if (new File(externalCFile).exists()) {
