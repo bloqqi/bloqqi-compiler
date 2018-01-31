@@ -63,7 +63,8 @@ aspect FMI {
 		sb.append("}\n\n");
 		sb.append("void calculateValues(ModelInstance *comp) {\n");
 		sb.append("  if (comp->state == modelInitializationMode) {\n");
-		sb.append("    register_time_event(comp);\n");
+		sb.append("    comp->eventInfo.nextEventTimeDefined   = fmi2True;\n");
+		sb.append("    comp->eventInfo.nextEventTime          = comp->time;\n");
 		sb.append("  }\n");
 		sb.append("}\n\n");
 
