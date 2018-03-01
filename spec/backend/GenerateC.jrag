@@ -201,14 +201,14 @@ aspect Structs {
 		}
 	}
 	public void DiagramType.genStructs(StringBuilder sb) {
-		if (getNumOutParameter() > 0) {
+		if (!isAbstract() && getNumOutParameter() > 0) {
 			sb.append("typedef struct {\n");
 			for (OutParameter op: getOutParameters()) {
 				sb.append("  " + op.type().nameC() + " " + op.nameC() + ";\n");
 			}
 			sb.append("} " + returnTypeC() + ";\n");
 		}
-		for (Block b: blocks()) {
+		for (Block b: getLocalBlocks()) {
 			if (b.hasAnonymousDiagramType()) {
 				b.anonymousDiagramType().genStructs(sb);
 			}
@@ -233,10 +233,12 @@ aspect FunctionDeclarations {
 		}
 	}
 	public void DiagramType.genDecls(StringBuilder sb) {
-		sb.append(functionSignature() + ";\n");
-		
+		if (!isAbstract()) {
+			sb.append(functionSignature() + ";\n");
+		}
+
 		// Generate declarations for anonymous subtypes too
-		for (Block b: blocks()) {
+		for (Block b: getLocalBlocks()) {
 			if (b.hasAnonymousDiagramType()) {
 				b.anonymousDiagramType().genDecls(sb);
 			}
@@ -321,19 +323,21 @@ aspect FunctionDefinitions {
 	public void TypeDecl.genFunctionDefinitionsC(StringBuilder sb) {
 	}
 	public void DiagramType.genFunctionDefinitionsC(StringBuilder sb) {
-		sb.append(functionSignature() + " {\n");
+		if (!isAbstract()) {
+			sb.append(functionSignature() + " {\n");
 		
-		// Step 1: compute values
-		genBlocksC(sb);
-		// Step 2: compute return value
-		genReturnValueC(sb);
-		// Step 3: update variables
-		genUpdateVariablesC(sb);
-		// Step 4: add return statement
-		genReturnStatementC(sb);
+			// Step 1: compute values
+			genBlocksC(sb);
+			// Step 2: compute return value
+			genReturnValueC(sb);
+			// Step 3: update variables
+			genUpdateVariablesC(sb);
+			// Step 4: add return statement
+			genReturnStatementC(sb);
 
-		sb.append("}\n");
-		
+			sb.append("}\n");
+		}
+
 		// Generate code for anonymous subtypes
 		for (Block b: getLocalBlocks()) {
 			if (b.hasAnonymousDiagramType()) {

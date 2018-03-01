@@ -1,0 +1,20 @@
+external Print(in: Int);
+
+diagramtype Main {
+	b: B;
+	print: Print;
+	connect(b, print);
+}
+
+// Don't generate code for abstract diagramtypes
+abstract diagramtype A(=> out: Int) {
+	inner: Inner (=> out: Int) {
+		connect(5, out);
+	};
+}
+
+diagramtype B extends A {
+	connect(inner, out);
+}
+
+diagramtype Inner { }

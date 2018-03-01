@@ -1,23 +1,50 @@
 external Print(in: Int);
+external PrintBool(in: Bool);
 external PrintStrInt(String str, Int n);
 external PrintStrBool(String str, Bool b);
 
 diagramtype Main() {
-	block: Block;
+	intBlock: IntBlock;
+	outIntBlock: OutIntBlock;
+
+	boolBlock: BoolBlock;
+	outBoolBlock: OutBoolBlock;
+
 	print: Print;
-	print2: PrintStrInt;
-	print3: PrintStrBool;
+	print2: Print;
+	PrintBool_1;
+	PrintBool_2;
+	PrintStrInt_1;
+	PrintStrBool_1;
 	
-	connect(1, block.in);
-	connect(block.out, print.in);
+	connect(1, intBlock.in);
+	connect(intBlock.out, print.in);
+	connect(outIntBlock, print2);
+
+	connect(true, boolBlock);
+	connect(boolBlock, PrintBool_1);
+	connect(outBoolBlock, PrintBool_2);
+
+	connect("1 = ", PrintStrInt_1.str);
+	connect(1, PrintStrInt_1.n);
 	
-	connect("1 = ", print2.str);
-	connect(1, print2.n);
-	
-	connect("true = ", print3.str);
-	connect(true, print3.b);
+	connect("true = ", PrintStrBool_1.str);
+	connect(true, PrintStrBool_1.b);
 	
 }
-diagramtype Block(in: Int => out: Int) {
+
+diagramtype IntBlock(in: Int => out: Int) {
 	connect(in, out);
+}
+
+diagramtype OutIntBlock(=> out: Int) {
+	connect(2, out);
+}
+
+diagramtype BoolBlock(in: Bool => out: Bool) {
+	connect(in, out);
+}
+
+diagramtype OutBoolBlock(=> out: Bool) {
+	connect(true, out);
 }
