@@ -17,7 +17,7 @@ aspect CodeGenerationErrors {
 
 aspect DataFlowErrors {
 	DiagramType contributes error(missingIncomingConnections())
-		when !missingIncomingConnections().isEmpty()
+		when !isAbstract() && !missingIncomingConnections().isEmpty()
 		to CompilationUnit.codeGenerationErrors();
 		
 	syn String DiagramType.missingIncomingConnections() {

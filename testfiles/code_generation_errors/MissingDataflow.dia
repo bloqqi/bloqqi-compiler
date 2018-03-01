@@ -1,0 +1,10 @@
+diagramtype Main {
+}
+diagramtype A {
+	Add_1;
+}
+
+// Don't report dataflow errors for abstract diagramtypes
+abstract diagramtype B {
+	Add_1;
+}
