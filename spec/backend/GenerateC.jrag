@@ -593,7 +593,7 @@ aspect VariableStructs {
 aspect JSON {
 	public void Program.genStateToJSON(StringBuilder sb) {
 		sb.append("char *bloqqi_to_json(Main_VARS *vars) {\n");
-		sb.append("  const int MAX_BUF = 4096;\n");
+		sb.append("  const int MAX_BUF = 8192;\n");
 		sb.append("  char *c = malloc(MAX_BUF);\n");
 		sb.append("  int len = 0;\n");
 		sb.append("  len += snprintf(c+len, MAX_BUF-len, \"{\");\n");
