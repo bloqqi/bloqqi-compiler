@@ -137,7 +137,8 @@ aspect GenerateC {
 		sb.append("void bloqqi_main(Main_VARS *vars);\n");
 		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
 				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER) {
-			sb.append("char *bloqqi_to_json(Main_VARS *vars);\n");
+			sb.append("char *bloqqi_all_vars_to_json(Main_VARS *vars);\n");
+			sb.append("char *bloqqi_io_vars_to_json(Main_VARS *vars);\n");
 			sb.append("void bloqqi_set_input_variable(Main_VARS *vars, const char *path, const char *value);\n");
 		}
 		genDecls(sb);
@@ -592,13 +593,18 @@ aspect VariableStructs {
 
 aspect JSON {
 	public void Program.genStateToJSON(StringBuilder sb) {
-		sb.append("char *bloqqi_to_json(Main_VARS *vars) {\n");
+		genStateToJSON(sb, "bloqqi_all_vars_to_json", true);
+		genStateToJSON(sb, "bloqqi_io_vars_to_json", false);
+	}
+
+	public void Program.genStateToJSON(StringBuilder sb, String name, boolean includeStateVars) {
+		sb.append("char *" + name + "(Main_VARS *vars) {\n");
 		sb.append("  const int MAX_BUF = 8192;\n");
 		sb.append("  char *c = malloc(MAX_BUF);\n");
 		sb.append("  int len = 0;\n");
 		sb.append("  len += snprintf(c+len, MAX_BUF-len, \"{\");\n");
 
-		mainDiagramType().genStateToJSON(sb, "");
+		mainDiagramType().genStateToJSON(sb, "", includeStateVars);
 
 		sb.append("  if (len > 2) {\n");
 		sb.append("    len -= 2; /* Remove last comma */\n");
@@ -607,24 +613,26 @@ aspect JSON {
 		sb.append("  return c;\n");
 		sb.append("}\n");
 	}
-	public void TypeDecl.genStateToJSON(StringBuilder sb, String enclosingPath) {
+	public void TypeDecl.genStateToJSON(StringBuilder sb, String enclosingPath, boolean includeStateVars) {
 	}
-	public void DiagramType.genStateToJSON(StringBuilder sb, String enclosingPath) {
+	public void DiagramType.genStateToJSON(StringBuilder sb, String enclosingPath, boolean includeStateVars) {
 		for (Variable v: variables()) {
-			String vPath = enclosingPath + v.cNameDeclaration();
-			String fmtType = "%d";
-			if (v.type().isReal()) fmtType = "%f";
-			else if (v.type().isString()) fmtType = "%s";
-			String fmt = "\"\\\"" + vPath + "\\\": "
-				+ "{\\\"value\\\": " + fmtType + ", "
-				+ "\\\"type\\\": \\\"" + v.fieldNameInMainStructC() +"\\\"}, \"";
-			sb.append("  len += snprintf(c+len, MAX_BUF-len, " + fmt
-				+ ", vars->" + v.fieldNameInMainStructC() + "." + vPath + ");\n");
+			if (!v.isStateVariable() || (v.isStateVariable() && includeStateVars)) {
+				String vPath = enclosingPath + v.cNameDeclaration();
+				String fmtType = "%d";
+				if (v.type().isReal()) fmtType = "%f";
+				else if (v.type().isString()) fmtType = "%s";
+				String fmt = "\"\\\"" + vPath + "\\\": "
+					+ "{\\\"value\\\": " + fmtType + ", "
+					+ "\\\"type\\\": \\\"" + v.fieldNameInMainStructC() +"\\\"}, \"";
+				sb.append("  len += snprintf(c+len, MAX_BUF-len, " + fmt
+					+ ", vars->" + v.fieldNameInMainStructC() + "." + vPath + ");\n");
+			}
 		}
 		for (Block b: blocks()) {
 			if (b.type().containsVariablesTransitive()) {
 				String enc = enclosingPath + b.nameC() + ".";
-				b.type().genStateToJSON(sb, enc);
+				b.type().genStateToJSON(sb, enc, includeStateVars);
 			}
 		}
 	}
