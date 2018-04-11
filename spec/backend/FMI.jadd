@@ -34,6 +34,10 @@ aspect FMI {
 		int vrSamplingPeriod = fmi.nbrOfReals;
 		String nameSamplingPeriod = "sampling_period_";
 		fmi.nbrOfReals++;
+		int vrExecutionTime = fmi.nbrOfReals;
+		String nameExecutionTime = "execution_time_";
+		fmi.nbrOfReals++;
+
 
 		sb.append("#define MODEL_IDENTIFIER " + data.getName() + "\n");
 		sb.append("#define MODEL_GUID \"{" + data.getUUID() +"}\"\n");
@@ -47,6 +51,7 @@ aspect FMI {
 		sb.append("#include \"fmuTemplate.h\"\n");
 		sb.append(fmi.sbVr.toString());
 		sb.append("#define " + nameSamplingPeriod + " " + vrSamplingPeriod + "\n");
+		sb.append("#define " + nameExecutionTime + " " + vrExecutionTime + "\n");
 		sb.append("#define STATES { }\n\n");
 
 		sb.append("Main_VARS vars;\n\n");
@@ -54,18 +59,13 @@ aspect FMI {
 		sb.append("void setStartValues(ModelInstance *comp) {\n");
 		sb.append(fmi.sbStart.toString());
 		sb.append("  r(" + nameSamplingPeriod + ") = " + ASTNode.FMI_DEFAULT_SAMPLING_TIME + ";\n");
+		sb.append("  comp->bloqqiBegin.nextEventTime = 0.0;\n");
+		sb.append("  comp->bloqqiBegin.nextEventTimeDefined = true;\n");
+		sb.append("  comp->bloqqiComputed.nextEventTimeDefined = false;\n");
 		sb.append("  vars = (Main_VARS) {0};\n");
 		sb.append("}\n\n");
 
-		sb.append("void register_time_event(ModelInstance *comp) {\n");
-		sb.append("  comp->eventInfo.nextEventTimeDefined   = fmi2True;\n");
-		sb.append("  comp->eventInfo.nextEventTime          = r(" + nameSamplingPeriod + ") + comp->time;\n");
-		sb.append("}\n\n");
 		sb.append("void calculateValues(ModelInstance *comp) {\n");
-		sb.append("  if (comp->state == modelInitializationMode) {\n");
-		sb.append("    comp->eventInfo.nextEventTimeDefined   = fmi2True;\n");
-		sb.append("    comp->eventInfo.nextEventTime          = comp->time;\n");
-		sb.append("  }\n");
 		sb.append("}\n\n");
 
 		sb.append("fmi2Real getReal(ModelInstance* comp, fmi2ValueReference vr){\n");
@@ -75,13 +75,12 @@ aspect FMI {
 		sb.append("  }\n");
 		sb.append("}\n\n");
 
-		sb.append("void eventUpdate(ModelInstance *comp, fmi2EventInfo *eventInfo, int timeEvent) {\n");
-		sb.append("  if (timeEvent) {\n");
+		sb.append("void setBloqqiInputs(ModelInstance *comp) {\n");
 		sb.append(fmi.sbUpdateIn.toString());
-		sb.append("    bloqqi_main(&vars);\n");
+		sb.append("}\n\n");
+
+		sb.append("void getBloqqiOutputs(ModelInstance *comp) {\n");
 		sb.append(fmi.sbUpdateOut.toString());
-		sb.append("    register_time_event(comp);\n");
-		sb.append("  }\n");
 		sb.append("}\n\n");
 
 		sb.append("#include \"fmuTemplate.c\"\n");
@@ -134,11 +133,11 @@ aspect FMI {
 
 		if (isInputVariable()) {
 			fmi.sbUpdateIn.append(String.format(
-				"    vars.input.%s = %s(%s);\n",
+				"  vars.input.%s = %s(%s);\n",
 				varName, type, cName));
 		} else {
 			fmi.sbUpdateOut.append(String.format(
-				"    %s(%s) = vars.output.%s;\n",
+				"  %s(%s) = vars.output.%s;\n",
 				type, cName, varName));
 			fmi.sbGetReal.append(String.format(
 				"    case %s: return r(%s);\n",
@@ -165,6 +164,8 @@ aspect FMI {
 
 		int vrSamplingPeriod = fmi.nbrOfReals;
 		fmi.nbrOfReals++;
+		int vrExecutionTime = fmi.nbrOfReals;
+		fmi.nbrOfReals++;
 
 		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
 		sb.append("<fmiModelDescription fmiVersion=\"2.0\"");
@@ -188,6 +189,10 @@ aspect FMI {
 		sb.append("  <ScalarVariable name=\"sampling-period\" valueReference=\"" + vrSamplingPeriod + "\"");
 		sb.append(" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">\n");
 		sb.append("    <Real start=\"1.0\"/>\n");
+		sb.append("  </ScalarVariable>\n");
+		sb.append("  <ScalarVariable name=\"execution-time\" valueReference=\"" + vrExecutionTime + "\"");
+		sb.append(" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">\n");
+		sb.append("    <Real start=\"0.0\"/>\n");
 		sb.append("  </ScalarVariable>\n");
 		sb.append("</ModelVariables>\n");
 
