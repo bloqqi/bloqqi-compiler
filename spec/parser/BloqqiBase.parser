@@ -152,6 +152,7 @@ Block block2 =
 	| simple_block.s				{: return s; :}
 	| redeclare_block.r				{: return r; :}
 	| wired_block.w					{: return w; :}
+	| dynamic_block.d				{: return d; :}
 	;
 
 Block ordinary_block = 
@@ -225,10 +226,25 @@ WiredBlockParameter wired_comp_par =
 	| var_use.u                     {: return new WiredBlockParameterVarUse(u); :}
 	;
 
+DynamicBlock dynamic_block =
+	name.n COL type.t DYNAMIC REDECLARE LPAR block_bindings.b RPAR
+	{: return new DynamicBlock(new Modifiers(), t, n, b); :}
+	;
+
+List block_bindings =
+	block_binding.b					{: return new List().add(b); :}
+	| block_bindings.l COMMA block_binding.b {: return l.add(b); :}
+	;
+
+
+BlockBinding block_binding =
+	int_lit.i ARROW type.t			{: return new BlockBinding(i, t); :}
+	;
+
 Connection connection =
-	  CONNECT LPAR 
-	  expr.e COMMA var_use.u 
-	  RPAR  						{: return new Connection(e, u); :}
+	  CONNECT LPAR
+	  expr.e COMMA var_use.u
+	  RPAR							{: return new Connection(e, u); :}
 	;
 
 Interception interception =
@@ -320,6 +336,7 @@ StringLiteral string_lit =
 VarUse var_use =
 	type_use.t DOUBLECOL ID.id		{: return new ParseTypedSimpleVarUse(t, id); :}
 	| var_use.u DOT ID.id			{: return new DotVarUse(u, id); :}
+	| var_use.u DOT DYNAMIC			{: return new DotVarUse(u, "dynamic"); :}
 	| ID.id							{: return new ParseSimpleVarUse(id); :}
 	;
 

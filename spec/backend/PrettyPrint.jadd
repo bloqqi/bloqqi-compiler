@@ -3,9 +3,18 @@ aspect PrettyPrint {
 	eq Program.getChild().indentLevel() = 0;
 	eq DiagramType.getChild().indentLevel() = indentLevel()+1;
 
-	syn String ASTNode.indent() {
+	public String ASTNode.indent() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < indentLevel(); i++) {
+			sb.append("  ");
+		}
+		return sb.toString();
+	}
+
+	public String ASTNode.indent(int extra) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(indent());
+		for (int i = 0; i < extra; i++) {
 			sb.append("  ");
 		}
 		return sb.toString();
@@ -187,6 +196,27 @@ aspect PrettyPrint {
 	}
 	public String WiredBlockParameterOutParameter.toString() {
 		return "=>" + getOutParameter().toString();
+	}
+	public String DynamicBlock.prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName().prettyPrint());
+		sb.append(": ");
+		sb.append(getType().prettyPrint());
+		sb.append(" dynamic redeclare (\n");
+		int i = 1;
+		for (BlockBinding b: getBlockBindings()) {
+			sb.append(indent(1));
+			sb.append(b);
+			if (i++ < getNumBlockBinding()) {
+				sb.append(",");
+			}
+			sb.append("\n");
+		}
+		sb.append(indent()).append(")");
+		return sb.toString();
+	}
+	public String BlockBinding.toString() {
+		return getIntLiteral() + " => " + getType();
 	}
 
 	public abstract String FlowDecl.prettyPrint();
