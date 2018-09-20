@@ -1,0 +1,57 @@
+external Print(in: Int);
+
+diagramtype Main() {
+	output out: Int;
+	a: A dynamic redeclare (
+		1 => B,
+		2 => C
+	);
+	acc: Acc;
+	mod: Mod;
+	print: Print;
+	connect(1, acc);
+	connect(acc, mod.a);
+	connect(3, mod.n);
+
+	connect(1, a.in);
+	connect(mod, a.dynamic);
+	connect(a, print);
+}
+
+diagramtype A(in: Int => out: Int) {
+	Acc_1;
+	connect(in, Acc_1);
+	connect(Acc_1, out);
+}
+diagramtype B extends A {
+	Add_1;
+	intercept out with Add_1.in1, Add_1;
+	connect(10, Add_1.in2);
+}
+diagramtype C extends A {
+	Mul_1;
+	intercept out with Mul_1.in1, Mul_1;
+	connect(2, Mul_1.in2);
+}
+
+diagramtype Acc(in: Int => out: Int) {
+  var state: Int;
+  add: Add;
+  connect(in, add.in1);
+  connect(state, add.in2);
+  connect(add.out, out);
+  connect(add.out, state);
+}
+
+diagramtype Mod(a:Int, n: Int => out: Int) {
+	Div_1;
+	Mul_1;
+	Sub_1;
+	connect(a, Div_1.in1);
+	connect(n, Div_1.in2);
+	connect(Div_1, Mul_1.in1);
+	connect(n, Mul_1.in2);
+	connect(a, Sub_1.in1);
+	connect(Mul_1, Sub_1.in2);
+	connect(Sub_1, out);
+}
