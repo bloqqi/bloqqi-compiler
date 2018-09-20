@@ -1,0 +1,5 @@
+Line 1, column 1: Port 'dynamic' on block 'a' has more than one incoming connection
+Line 7, column 3: Type B needs to be a subtype of A
+Line 9, column 2: Type Add needs to be a diagramtype
+Line 14, column 2: Incompatible types, String and Int
+Line 16, column 10: Expected a source port, 'a.dynamic' is a target port

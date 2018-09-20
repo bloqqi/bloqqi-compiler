@@ -65,7 +65,17 @@ aspect TypeErrors {
 	Connection contributes error("The source/target type of a connection should be a primitive type or a struct type")
 		when hasTypeKindErrors()
 		to CompilationUnit.errors();
-	
+
+	DynamicBlock contributes error("Type " + getType() + " needs to be a diagramtype")
+		when !type().isDiagramType()
+		to CompilationUnit.errors();
+
+	BlockBinding contributes error("Type " + getType()
+			+ " needs to be a subtype of " + dynamicBlock().type())
+		when dynamicBlock().type().isDiagramType()
+			&& !getType().type().isSubTypeOf(dynamicBlock().type())
+		to CompilationUnit.errors();
+
 	syn boolean Connection.hasTypeKindErrors() =
 			(getSource().type().isKnown()
 				&& !getSource().type().isPrimitiveType()
@@ -73,6 +83,9 @@ aspect TypeErrors {
 			|| (getTarget().type().isKnown()
 				&& !getTarget().type().isPrimitiveType()
 				&& !getTarget().type().isStructType());
+
+	inh DynamicBlock BlockBinding.dynamicBlock();
+	eq DynamicBlock.getChild().dynamicBlock() = this;
 }
 
 aspect ConnectionErrors {
@@ -144,6 +157,15 @@ aspect HelperAttributes {
 				if (n > 1) {
 					String s;
 					s  = "Parameter '" + p.name() + "' in block '" + b.name() + "' ";
+					s += "has more than one incoming connection";
+					list.add(s);
+				}
+			}
+			if (b.isDynamic()) {
+				int n = b.dynamicInPort().ingoingConnections().size();
+				if (n > 1) {
+					String s;
+					s  = "Port 'dynamic' on block '" + b.name() + "' ";
 					s += "has more than one incoming connection";
 					list.add(s);
 				}

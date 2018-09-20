@@ -1,0 +1,11 @@
+diagramtype Main() {
+	a: A dynamic redeclare (
+		1 => B
+	);
+}
+
+diagramtype A(in: Int => out: Int) {
+	connect(in, out);
+}
+diagramtype B extends A {
+}

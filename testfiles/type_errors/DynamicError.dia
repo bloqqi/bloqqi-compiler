@@ -1,0 +1,24 @@
+diagramtype Main() {
+	input in: Int;
+	input dyn: Int;
+	output out: Int;
+	output out2: Int;
+	a: A dynamic redeclare (
+		1 => B
+	);
+	b: Add dynamic redeclare (
+		1 => Add
+	);
+	connect(in, a.in);
+	connect(dyn, a.dynamic);
+	connect("1", a.dynamic);
+	connect(a, out);
+	connect(a.dynamic, out2);
+}
+
+diagramtype A(in: Int => out: Int) {
+	connect(in, out);
+}
+diagramtype B(in: Int => out: Int) {
+	connect(in, out);
+}

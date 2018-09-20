@@ -24,14 +24,17 @@ aspect DataFlowErrors {
 		ArrayList<String> missingConnections = new ArrayList<>();
 		for (Block b: blocks()) {
 			for (Port p: b.getInPorts()) {
-				int n = p.ingoingConnections().size(); // + p.ingoingLiterals().size();
+				int n = p.ingoingConnections().size();
 				if (n == 0) {
 					missingConnections.add(b.name() + "." + p.name());
 				}
 			}
+			if (b.isDynamic() && b.dynamicInPort().ingoingConnections().isEmpty()) {
+				missingConnections.add(b.name() + ".dynamic");
+			}
 		}
 		for (OutParameter out: outParameters()) {
-			int n = out.ingoingConnections().size(); // + out.ingoingLiterals().size();
+			int n = out.ingoingConnections().size();
 			if (n == 0) {
 				missingConnections.add(out.name());
 			}
