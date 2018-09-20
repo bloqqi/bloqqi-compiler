@@ -519,7 +519,7 @@ aspect DynamicBlock {
 		}
 		sb.append("else {\n");
 		sb.append("    ");
-		sb.append(b.name() + " = ");
+		sb.append(b.nameC() + " = ");
 		b.genNormalBlock(sb, false);
 		sb.append("  }\n");
 	}
