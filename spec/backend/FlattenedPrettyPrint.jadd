@@ -61,12 +61,39 @@ aspect FlattenedPrettyPrint {
 	}
 
 	public String Block.flattenedPrettyPrint() {
-		String inline = getModifiers().isInline() ? "inline " : "";
-		return inline + flatName() + ": " + type().flatName();
+		if (isDynamic()) {
+			return dynamicFlattenedPrettyPrint();
+		} else {
+			String inline = getModifiers().isInline() ? "inline " : "";
+			return inline + flatName() + ": " + type().flatName();
+		}
 	}
-	public String DynamicBlock.flattenedPrettyPrint() {
-		return flatName() + ": " + type().flatName();
+
+	public String Block.dynamicFlattenedPrettyPrint() { return ""; }
+	public String InheritedBlock.dynamicFlattenedPrettyPrint() {
+		DynamicBlock d = (DynamicBlock) getDeclaredBlock();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(flatName());
+		sb.append(": ");
+		sb.append(type().flatName());
+		sb.append(" dynamic redeclare (\n");
+		int i = 1;
+		for (BlockBinding b: d.getBlockBindings()) {
+			sb.append(indent(1));
+			sb.append(b.flattenedPrettyPrint());
+			if (i++ < d.getNumBlockBinding()) {
+				sb.append(",");
+			}
+			sb.append("\n");
+		}
+		sb.append(indent()).append(")");
+		return sb.toString();
 	}
+	public String BlockBinding.flattenedPrettyPrint() {
+		return getIntLiteral() + " => " + getType().type().flatName();
+	}
+
 	public String Connection.flattenedPrettyPrint() {
 		return "connect(" + getSource().flattenedPrettyPrint()
 			+ ", " + getTarget().flattenedPrettyPrint() + ")";
