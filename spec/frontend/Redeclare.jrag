@@ -19,6 +19,11 @@ aspect Redeclare {
 	eq RedeclareBlock.isLocallyRedeclared() = true;
 	eq InheritedBlock.isLocallyRedeclared() = !isInherited() && declaredBlock().isRedeclare();
 	eq InlinedBlock.isLocallyRedeclared() = false;
+
+	// Dynamic redeclare
+	syn boolean Block.isDynamic() = false;
+	eq DynamicBlock.isDynamic() = true;
+	eq InheritedBlock.isDynamic() = getDeclaredBlock().isDynamic();
 }
 
 /**

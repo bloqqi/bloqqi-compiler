@@ -64,6 +64,9 @@ aspect FlattenedPrettyPrint {
 		String inline = getModifiers().isInline() ? "inline " : "";
 		return inline + flatName() + ": " + type().flatName();
 	}
+	public String DynamicBlock.flattenedPrettyPrint() {
+		return flatName() + ": " + type().flatName();
+	}
 	public String Connection.flattenedPrettyPrint() {
 		return "connect(" + getSource().flattenedPrettyPrint()
 			+ ", " + getTarget().flattenedPrettyPrint() + ")";

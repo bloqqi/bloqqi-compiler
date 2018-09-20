@@ -152,4 +152,15 @@ aspect Ports {
 		}
 		return list;
 	}
+
+	/*
+	 * Dynamic blocks have an implicit inparameter, which
+	 * is declared on Block to make InheritedBlocks also
+	 * have the parameter.
+	 */
+	syn nta Port Block.dynamicInPort()
+		= new Port(dynamicInParameter());
+	syn nta InParameter Block.dynamicInParameter()
+		= new InParameter(new TypeUse("Int"), "dynamic");
+
 }

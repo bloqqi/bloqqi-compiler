@@ -181,6 +181,9 @@ aspect LookupVariables {
 				return out;
 			}
 		}
+		if (isDynamic() && name.equals("dynamic")) {
+			return dynamicInPort();
+		}
 		return null;
 	}
 	eq Port.findMember(String name) = type().lookupField(name);

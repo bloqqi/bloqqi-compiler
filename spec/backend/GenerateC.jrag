@@ -360,36 +360,47 @@ aspect FunctionDefinitions {
 		});
 		
 		for(Block b: list) {
-			sb.append("  ");
-			if (!b.type().returnTypeC().equals("void")) {
-				sb.append(b.type().returnTypeC() + " " + b.nameC() + " = ");
+			if (b.isDynamic()) {
+				genDynamicBlock(sb, b);
+			} else {
+				b.genNormalBlock(sb, true);
 			}
-			// Pass parameters
-			sb.append(b.type().nameC() + "(");
-			int i = 0;
-			for (Port in: b.getInPortList()) {
-				if (i++ > 0) sb.append(", ");
-				sb.append(in.ingoingValueC());
-			}
-			// Pass state variable
-			if (b.type().containsStateVariablesTransitive()) {
-				if (i++ > 0) sb.append(", ");
-				sb.append("&" + ASTNode.STATE_VAR + "->" + b.nameC());
-			}
-			// Pass input variable
-			if (b.type().containsInputVariablesTransitive()) {
-				if (i++ > 0) sb.append(", ");
-				sb.append("&" + ASTNode.INPUT_VAR + "->" + b.nameC());
-			}
-			// Pass output variable
-			if (b.type().containsOutputVariablesTransitive()) {
-				if (i++ > 0) sb.append(", ");
-				sb.append("&" + ASTNode.OUTPUT_VAR + "->" + b.nameC());
-			}
-			sb.append(");\n");
 		}
 	}
-	
+
+	protected void Block.genNormalBlock(StringBuilder sb, boolean includeDeclaration) {
+		if (includeDeclaration) {
+			sb.append("  ");
+			if (!type().returnTypeC().equals("void")) {
+				sb.append(type().returnTypeC() + " " + nameC() + " = ");
+			}
+		}
+
+		// Pass parameters
+		sb.append(type().nameC() + "(");
+		int i = 0;
+		for (Port in: getInPortList()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append(in.ingoingValueC());
+		}
+		// Pass state variable
+		if (type().containsStateVariablesTransitive()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append("&" + ASTNode.STATE_VAR + "->" + nameC());
+		}
+		// Pass input variable
+		if (type().containsInputVariablesTransitive()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append("&" + ASTNode.INPUT_VAR + "->" + nameC());
+		}
+		// Pass output variable
+		if (type().containsOutputVariablesTransitive()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append("&" + ASTNode.OUTPUT_VAR + "->" + nameC());
+		}
+		sb.append(");\n");
+	}
+
 	private void DiagramType.genUpdateVariablesC(StringBuilder sb) {
 		for (Variable v: variables()) {
 			if (!v.ingoingValueC().isEmpty()) {
@@ -440,6 +451,77 @@ aspect FunctionDefinitions {
 	}
 	public String AbstractSimpleVarUse.cCode() {
 		return decl().nameC();
+	}
+}
+
+aspect DynamicBlock {
+	protected void Block.genDynamicCall(StringBuilder sb, TypeDecl type) {
+		sb.append("    ");
+		if (!type.returnTypeC().equals("void")) {
+			sb.append(type.returnTypeC() + " __res = ");
+		}
+
+		sb.append(type.nameC() + "(");
+		int i = 0;
+		for (Port in: getInPortList()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append(in.ingoingValueC());
+		}
+
+		// Pass state variable
+		if (type.containsStateVariablesTransitive()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append("(" + type.stateStructName() + "*) ");
+			sb.append("&" + ASTNode.STATE_VAR + "->" + nameC());
+		}
+		// Pass input variable
+		if (type.containsInputVariablesTransitive()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append("(" + type.inputStructName() + "*) ");
+			sb.append("&" + ASTNode.INPUT_VAR + "->" + nameC());
+		}
+		// Pass output variable
+		if (type.containsOutputVariablesTransitive()) {
+			if (i++ > 0) sb.append(", ");
+			sb.append("(" + type.outputStructName() + "*) ");
+			sb.append("&" + ASTNode.OUTPUT_VAR + "->" + nameC());
+		}
+		sb.append(");\n");
+	}
+
+	private void DiagramType.genDynamicBlock(StringBuilder sb, Block b) {
+		DynamicBlock d = (DynamicBlock) b.declaredBlock();
+
+		boolean returnsValue = !b.type().returnTypeC().equals("void");
+
+		if (returnsValue) {
+			sb.append("  ");
+			sb.append(b.type().returnTypeC() + " " + b.nameC());
+			sb.append(";\n");
+		}
+
+		boolean first = true;
+		String dynValue = b.dynamicInPort().ingoingValueC();
+		for (BlockBinding binding: d.getBlockBindings()) {
+			String ifStmt = first ? "  if" : "else if";
+			sb.append(ifStmt + " (" + dynValue + " == " + binding.getIntLiteral() + ") {\n");
+			b.genDynamicCall(sb, binding.getType().type());
+			if (returnsValue) {
+				String fromType = binding.getType().type().returnTypeC();
+				String toType = b.type().returnTypeC();
+				sb.append("    ");
+				sb.append(b.nameC());
+				// Use type punning
+				sb.append(" = *((" + toType + "*) &__res);\n");
+			}
+			sb.append("  } ");
+			first = false;
+		}
+		sb.append("else {\n");
+		sb.append("    ");
+		sb.append(b.name() + " = ");
+		b.genNormalBlock(sb, false);
+		sb.append("  }\n");
 	}
 }
 
