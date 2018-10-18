@@ -490,6 +490,7 @@ aspect DynamicBlock {
 	}
 
 	private void DiagramType.genDynamicBlock(StringBuilder sb, Block b) {
+		// use union instead: https://www.cocoawithlove.com/2008/04/using-pointers-to-recast-in-c-is-bad.html
 		DynamicBlock d = (DynamicBlock) b.declaredBlock();
 
 		boolean returnsValue = !b.type().returnTypeC().equals("void");
