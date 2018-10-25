@@ -99,23 +99,24 @@ aspect FunctionPrettyPrint {
 		sb.append("return;\n");
 	}
 	
-	public String BinFExpr.getOpString() { return "";	}
-	public String AddFExpr.getOpString() { return "+";	}
-	public String SubFExpr.getOpString() { return "-";	}
-	public String MulFExpr.getOpString() { return "*";	}
-	public String DivFExpr.getOpString() { return "/";	}
-	public String GEFExpr.getOpString() { return ">=";	}
-	public String LTFExpr.getOpString() { return "<";	}
-	public String GTFExpr.getOpString() { return ">";	}
-	public String EqFExpr.getOpString() { return "==";	}
-	public String LEFExpr.getOpString() { return "<=";	}
-	public String NEqFExpr.getOpString() { return "!=";	}
-	public String OrFExpr.getOpString() { return "||";	}
-	public String AndFExpr.getOpString() { return "&&";	}
-	public String UnaryFExpr.getOpString() { return "";	}
+	public String BinFExpr.getOpString() { return ""; }
+	public String AddFExpr.getOpString() { return "+"; }
+	public String SubFExpr.getOpString() { return "-"; }
+	public String MulFExpr.getOpString() { return "*"; }
+	public String DivFExpr.getOpString() { return "/"; }
+	public String ModFExpr.getOpString() { return "%"; }
+	public String GEFExpr.getOpString() { return ">="; }
+	public String LTFExpr.getOpString() { return "<"; }
+	public String GTFExpr.getOpString() { return ">"; }
+	public String EqFExpr.getOpString() { return "=="; }
+	public String LEFExpr.getOpString() { return "<="; }
+	public String NEqFExpr.getOpString() { return "!="; }
+	public String OrFExpr.getOpString() { return "||"; }
+	public String AndFExpr.getOpString() { return "&&"; }
+	public String UnaryFExpr.getOpString() { return ""; }
 	public String NotFExpr.getOpString() { return "!"; }
 	public String MinusFExpr.getOpString() { return "-"; }
-	
+
 	public String BinFExpr.toString() {
 		StringBuilder sb = new StringBuilder();
 		if (precedence() < getLeft().precedence()) {

@@ -42,6 +42,11 @@ function Neg(Int in => Int out)
   out = 0-in;
 }
 
+function Mod(Int in1, Int in2 => Int out)
+{
+  out = in1 % in2;
+}
+
 
 //
 // Arithmetic for Real (not tested yet)

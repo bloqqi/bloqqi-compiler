@@ -92,6 +92,7 @@ NUM = -?[0-9]+
 	"+"				{ return sym(Terminals.PLUS); }
 	"-"				{ return sym(Terminals.MINUS); }
 	"*"				{ return sym(Terminals.ASTERIX); }
+	"%"				{ return sym(Terminals.MOD); }
 	"/"				{ return sym(Terminals.SLASH); }
 	">"				{ return sym(Terminals.GT); }
 	"<"				{ return sym(Terminals.LT); }
