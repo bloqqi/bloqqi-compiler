@@ -23,6 +23,7 @@ AddFExpr : IntBinFExpr;
 SubFExpr : IntBinFExpr;
 MulFExpr : IntBinFExpr;
 DivFExpr : IntBinFExpr;
+ModFExpr : IntBinFExpr;
 GEFExpr	 : BoolBinFExpr;
 GTFExpr  : BoolBinFExpr;
 LEFExpr  : BoolBinFExpr;

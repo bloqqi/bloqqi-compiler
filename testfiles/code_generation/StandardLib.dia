@@ -17,6 +17,7 @@ diagramtype TestArithmetic {
 	TestDiv_1;
 	TestMul_1;
 	TestNeg_1;
+	TestMod_1;
 }
 
 diagramtype TestBoolean {
@@ -103,6 +104,24 @@ diagramtype TestNeg {
     connect(3, Neg_1.in);
     connect("-3 = ", p.str);
     connect(Neg_1, p.in);
+}
+
+diagramtype TestMod {
+	Mod_1;
+	p1: PrintStrInt;
+    
+	Mod_2;
+	p2: PrintStrInt;
+
+    connect(4, Mod_1.in1);
+    connect(2, Mod_1.in2);
+    connect("4%2 = ", p1.str);
+    connect(Mod_1, p1.in);
+
+	connect(5, Mod_2.in1);
+	connect(2, Mod_2.in2);
+	connect("5%2 = ", p2.str);
+	connect(Mod_2, p2.in);
 }
 
 

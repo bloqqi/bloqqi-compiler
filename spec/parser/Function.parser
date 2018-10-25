@@ -87,9 +87,10 @@ FExpr fexpr5 =
 	|	term.t						{: return t; :}
 	;
 		
-FExpr term = 
+FExpr term =
 	term.t ASTERIX factor.f 			{: return new MulFExpr(t,f); :}
-	| term.t SLASH factor.f				{: return new DivFExpr(t,f); :} 
+	| term.t SLASH factor.f				{: return new DivFExpr(t,f); :}
+	| term.t MOD factor.f				{: return new ModFExpr(t,f); :}
 	| factor.f							{: return f; :}
 	;
 
