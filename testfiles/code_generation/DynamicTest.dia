@@ -10,8 +10,8 @@ diagramtype Main() {
 	mod: Mod;
 	print: Print;
 	connect(1, acc);
-	connect(acc, mod.a);
-	connect(3, mod.n);
+	connect(acc, mod.in1);
+	connect(3, mod.in2);
 
 	connect(1, a.in);
 	connect(mod, a.dynamic);
@@ -41,17 +41,4 @@ diagramtype Acc(in: Int => out: Int) {
   connect(state, add.in2);
   connect(add.out, out);
   connect(add.out, state);
-}
-
-diagramtype Mod(a:Int, n: Int => out: Int) {
-	Div_1;
-	Mul_1;
-	Sub_1;
-	connect(a, Div_1.in1);
-	connect(n, Div_1.in2);
-	connect(Div_1, Mul_1.in1);
-	connect(n, Mul_1.in2);
-	connect(a, Sub_1.in1);
-	connect(Mul_1, Sub_1.in2);
-	connect(Sub_1, out);
 }
