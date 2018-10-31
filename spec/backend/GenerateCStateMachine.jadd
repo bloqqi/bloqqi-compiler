@@ -20,10 +20,8 @@ aspect StateMachinesGenStructs {
 	/** Function signature */
 	public String StateMachine.functionSignature() {
 		String inPars = "";
-		for (int i = 0; i < getNumInParameter(); i++) {
-			InParameter in = getInParameter(i);
-			inPars += in.type().nameC() + " " + in.nameC();
-			inPars += ", ";
+		for (InParameter in: getInParameters()) {
+			inPars += in.type().nameC() + " " + in.nameC() + ", ";
 		}
 		inPars += stateStructName() + "* " + ASTNode.STATE_VAR;
 		return returnTypeC() + " " + nameC() + "(" + inPars + ")";
