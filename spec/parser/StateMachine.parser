@@ -1,0 +1,35 @@
+Declaration declaration =
+	  state_machine.sm				{: return sm; :}
+	;
+
+
+StateMachine state_machine =
+		STATEMACHINE ID LPAR in_pars.in? out_pars.out RPAR LBRA
+		state_list.s
+		transition_list.t
+		RBRA
+		{: return new StateMachine(ID, in, out, s, t); :}
+	;
+
+List state_list =
+	state.s							{: return new List().add(s); :}
+	| state_list.l state.s			{: return l.add(s); :}
+	;
+
+State state =
+	ID LBRA assign_list.l RBRA		{: return new State(ID, l); :}
+	;
+
+List assign_list =
+	/* empty */						{: return new List(); :}
+	| assign_list.l assignStmt.a	{: return l.add(a); :}
+	;
+
+List transition_list =
+	transition.t					{: return new List().add(t); :}
+	| transition_list.l transition.t {: return l.add(t); :}
+	;
+
+Transition transition =
+	ID.f ARROW ID.t COL fexpr SCOL	{: return new Transition(f, t, fexpr); :}
+	;

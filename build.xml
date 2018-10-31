@@ -83,6 +83,7 @@
 				<file name="Preamble.parser"/>
 				<file name="BloqqiBase.parser"/>
 				<file name="Function.parser"/>
+				<file name="StateMachine.parser"/>
 			</filelist>
 		</concat>
 

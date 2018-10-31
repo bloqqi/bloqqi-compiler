@@ -1,0 +1,4 @@
+StateMachine : UserDefType ::= InParameter* OutParameter* State* Transition*;
+
+State ::= <ID> AssignStmt*;
+Transition ::= <FromID> <ToID> FExpr;

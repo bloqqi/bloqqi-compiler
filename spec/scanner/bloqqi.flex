@@ -83,6 +83,7 @@ NUM = -?[0-9]+
 	"true"			{ return sym(Terminals.TRUE); }
 	"package"		{ return sym(Terminals.PACKAGE); }
 	"import"		{ return sym(Terminals.IMPORT); }
+	"statemachine"	{ return sym(Terminals.STATEMACHINE); }
 
 	// Operators
 	"&&"			{ return sym(Terminals.AND); }

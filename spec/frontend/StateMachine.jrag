@@ -1,0 +1,3 @@
+aspect NameAnalysis {
+	eq StateMachine.getChild().lookupId(String id) = null;
+}
