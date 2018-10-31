@@ -1,0 +1,35 @@
+external PrintIntInt(Int n1, Int n2);
+
+diagramtype Main {
+  acc1: Acc;
+  acc2: Acc;
+  s1: S;
+  s2: S;
+  print: PrintIntInt;
+  connect(1, acc1);
+  connect(2, acc2);
+  connect(acc1, s1);
+  connect(acc2, s2);
+  connect(s1, print.n1);
+  connect(s2, print.n2);
+}
+
+statemachine S(Int in => Int out) {
+  A {
+    out = in;
+  }
+  B {
+    out = in*2;
+  }
+  A => B: in > 10;
+  B => A: in > 20 || in <= 10;
+}
+
+diagramtype Acc(in: Int => out: Int) {
+  var state: Int;
+  add: Add;
+  connect(in, add.in1);
+  connect(state, add.in2);
+  connect(add.out, out);
+  connect(add.out, state);
+}
