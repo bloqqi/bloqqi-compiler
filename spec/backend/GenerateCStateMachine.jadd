@@ -1,0 +1,107 @@
+aspect StateMachinesGenStructs {
+	eq StateMachine.returnTypeC() = getNumOutParameter() > 0 ? nameC() + "_RES" : "void";
+
+	/** Generate struct for return value */
+	public void StateMachine.genStructs(StringBuilder sb) {
+		if (getNumOutParameter() > 0) {
+			sb.append("typedef struct {\n");
+			for (OutParameter op: getOutParameters()) {
+				sb.append("  " + op.type().nameC() + " " + op.nameC() + ";\n");
+			}
+			sb.append("} " + returnTypeC() + ";\n");
+		}
+	}
+
+	/** Function declaration */
+	public void StateMachine.genDecls(StringBuilder sb) {
+		sb.append(functionSignature() + ";\n");
+	}
+
+	/** Function signature */
+	public String StateMachine.functionSignature() {
+		String inPars = "";
+		for (int i = 0; i < getNumInParameter(); i++) {
+			InParameter in = getInParameter(i);
+			inPars += in.type().nameC() + " " + in.nameC();
+			inPars += ", ";
+		}
+		inPars += stateStructName() + "* " + ASTNode.STATE_VAR;
+		return returnTypeC() + " " + nameC() + "(" + inPars + ")";
+	}
+
+
+	/** Function definition */
+	public void StateMachine.genFunctionDefinitionsC(StringBuilder sb) {
+		sb.append(functionSignature() + " {\n");
+
+		genTransitionPartC(sb);
+		genActionPartC(sb);
+
+		sb.append("}\n");
+	}
+
+	public String StateMachine.currentState() {
+		return ASTNode.STATE_VAR + "->_currentState";
+	}
+
+	public void StateMachine.genTransitionPartC(StringBuilder sb) {
+		sb.append("  switch(" + currentState() +") {\n");
+		for (State s: getStates()) {
+			sb.append("  case " + s.getID() + ":\n");
+			boolean first = true;
+			for (Transition t: getTransitions()) {
+				if (s == t.fromState()) {
+					sb.append("    ");
+					sb.append("if (" + t.getFExpr().generateC() + ") ");
+					sb.append(currentState() + " = " + t.getToID() + ";\n");
+				}
+			}
+			sb.append("    break;\n");
+		}
+		sb.append("  }\n");
+	}
+
+	public void StateMachine.genActionPartC(StringBuilder sb) {
+		if(getNumOutParameter() > 0) {
+			sb.append("  " + returnTypeC() + " _p = {0};\n");
+		}
+
+		sb.append("  switch(" + currentState() + ") {\n");
+		for (State s: getStates()) {
+			sb.append("  case " + s.getID() + ":\n");
+			for (AssignStmt asg: s.getAssignStmts()) {
+				sb.append("    ");
+				asg.generateC(sb);
+			}
+			sb.append("    break;\n");
+		}
+		sb.append("  }\n");
+
+		if(getNumOutParameter() > 0) {
+			sb.append("  " + "return" + " _p;\n");
+		}
+	}
+
+
+	/** State variable */
+	eq StateMachine.containsStateVariablesTransitive() = true;
+	eq StateMachine.containsVariablesTransitive() = true;
+	eq StateMachine.stateStructName() = nameC() + "_STATE";
+
+	public void StateMachine.genVariableStructsC(Map<TypeDecl, String> structs) {
+		StringBuilder sb = new StringBuilder();
+
+		/** Generate enum for state */
+		StringJoiner states = new StringJoiner(", ");
+		for (State s: getStates()) {
+			states.add(s.getID());
+		}
+		sb.append("enum " + nameC() + "_ENUM {" + states.toString() + "};\n");
+
+		sb.append("typedef struct {\n");
+		sb.append("  enum " + nameC() + "_ENUM _currentState;\n");
+		sb.append("} " + stateStructName() + ";\n");
+
+		structs.put(this, sb.toString());
+	}
+}

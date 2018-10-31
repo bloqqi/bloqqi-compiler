@@ -165,12 +165,6 @@ aspect TypeAnalysis {
 	syn boolean TypeDecl.isAnonymousType() = false;
 	eq AnonymousDiagramType.isAnonymousType() = true;
 	
-	coll Set<DiagramType> Program.allDiagramTypes()
-		[new LinkedHashSet<>()] root Program;
-	DiagramType contributes this
-		to Program.allDiagramTypes();
-
-
 	inh Block DiagramType.enclosingBlock();
 	inh Block Block.enclosingBlock();
 	eq Block.getType().enclosingBlock() = this;

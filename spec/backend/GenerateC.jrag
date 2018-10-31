@@ -481,13 +481,11 @@ aspect VariableStructs {
 	public void Program.genVariableStructsC(StringBuilder sb) {
 		// Create structs for all diagram types
 		Map<TypeDecl, String> structs = new HashMap<>();
-		for (DiagramType dt: allDiagramTypes()) {
-			dt.genVariableStructsC(structs);
-		}
+		genVariableStructsC(structs);
 		
 		// Toplogical sort over types based on type reachability
 		java.util.List<TypeDecl> list = Utils.topologicalSort(
-			allDiagramTypes(),
+			structs.keySet(),
 			new SuccessorFunction<TypeDecl>() {
 				public Collection<TypeDecl> successors(TypeDecl td) {
 					return td.reachable();
@@ -505,13 +503,20 @@ aspect VariableStructs {
 		
 		// Write structs in reverse toplogical order
 		Collections.reverse(list);
+
 		if (!list.isEmpty()) {
 			for (TypeDecl td: list) {
 				sb.append(structs.get(td));
 			}
 		}
 	}
-	
+
+	public void ASTNode.genVariableStructsC(Map<TypeDecl, String> structs) {
+		for(ASTNode child: astChildren()) {
+			child.genVariableStructsC(structs);
+		}
+	}
+
 	public void DiagramType.genVariableStructsC(Map<TypeDecl, String> structs) {
 		StringBuilder sb = new StringBuilder();
 
@@ -566,6 +571,9 @@ aspect VariableStructs {
 		if (sb.length() > 0) {
 			structs.put(this, sb.toString());
 		}
+
+		// Include anonymous diagramtypes too
+		super.genVariableStructsC(structs);
 	}
 
 	public void Program.genMainWrapperStructC(StringBuilder sb) {
