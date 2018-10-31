@@ -1,0 +1,42 @@
+aspect StateMachinePrettyPrint {
+	public void StateMachine.prettyPrint(StringBuilder sb) {
+		sb.append("statemachine " + getID() + "(");
+		for (int i = 0; i < getNumInParameter(); i++) {
+			sb.append(getInParameter(i));
+			if (i < getNumInParameter()-1) {
+				sb.append(", ");
+			}
+		}
+		if (getNumOutParameter() > 0){
+			sb.append(" => ");
+			for (int i = 0; i < getNumOutParameter(); i++) {
+				sb.append(getOutParameter(i));
+				if (i < getNumOutParameter()-1) {
+					sb.append(", ");
+				}
+			}
+		}
+		sb.append(") {\n");
+		for (State s: getStates()) {
+			s.prettyPrint(sb);
+		}
+		for (Transition t: getTransitions()) {
+			t.prettyPrint(sb);
+		}
+		sb.append("}\n");
+	}
+
+	public void State.prettyPrint(StringBuilder sb) {
+		sb.append("  " + getID() + " {\n");
+		for (AssignStmt asg: getAssignStmts()) {
+			sb.append("    ");
+			asg.prettyPrint(sb);
+		}
+		sb.append("  }\n");
+	}
+
+	public void Transition.prettyPrint(StringBuilder sb) {
+		sb.append("  " + getFromID() + " => " + getToID());
+		sb.append(": " + getFExpr().toString() + "\n");
+	}
+}
