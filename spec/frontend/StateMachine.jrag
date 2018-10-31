@@ -1,3 +1,45 @@
 aspect StateMachineNameAnalysis {
-	eq StateMachine.getChild().lookupId(String id) = null;
+	eq StateMachine.getChild().lookupId(String id) {
+		for (InParameter in: getInParameters()) {
+			if (in.name().equals(id)) {
+				return in;
+			}
+		}
+		for (OutParameter out: getOutParameters()) {
+			if (out.name().equals(id)) {
+				return out;
+			}
+		}
+		return null;
+	}
+
+	syn State Transition.fromState() = lookupState(getFromID());
+	syn State Transition.toState() = lookupState(getToID());
+	inh State Transition.lookupState(String name);
+	inh State State.lookupState(String name);
+	eq StateMachine.getChild().lookupState(String name) {
+		for (State s: getStates()) {
+			if (s.getID().equals(name)) {
+				return s;
+			}
+		}
+		return null;
+	}
+}
+
+aspect StateMachineErrors {
+	Transition contributes error("Transitions are required to have a boolean condition")
+		when !getFExpr().fType().isBool()
+		to CompilationUnit.errors();
+
+	Transition contributes error("State " + getFromID() + " not declared")
+		when fromState() == null
+		to CompilationUnit.errors();
+	Transition contributes error("State " + getToID() + " not declared")
+		when toState() == null
+		to CompilationUnit.errors();
+
+	State contributes error("State " + getID() + " already declared")
+		when lookupState(getID()) != this
+		to CompilationUnit.errors();
 }
