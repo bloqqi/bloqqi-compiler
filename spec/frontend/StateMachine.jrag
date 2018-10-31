@@ -27,6 +27,16 @@ aspect StateMachineNameAnalysis {
 	}
 }
 
+aspect StateMachinePorts {
+	protected List<Port> StateMachine.createInPortList() {
+		return createPortList(getInParameters());
+	}
+
+	protected List<Port> StateMachine.createOutPortList() {
+		return createPortList(getOutParameters());
+	}
+}
+
 aspect StateMachineErrors {
 	Transition contributes error("Transitions are required to have a boolean condition")
 		when !getFExpr().fType().isBool()

@@ -106,37 +106,28 @@ aspect Ports {
 	protected List<Port> TypeDecl.createInPortList() {
 		return new List<>();
 	}
-	protected List<Port> DiagramType.createInPortList() {
+	protected List<Port> TypeDecl.createPortList(List<? extends Parameter> parameters) {
 		List<Port> list = new List<>();
-		for (InParameter p: getInParameters()) {
+		for (Parameter p: parameters) {
 			list.add(new Port(p));
 		}
 		return list;
+	}
+	protected List<Port> DiagramType.createInPortList() {
+		return createPortList(getInParameters());
 	}
 	protected List<Port> ExternalFunction.createInPortList() {
-		List<Port> list = new List<>();
-		for (InParameter p: getInParameters()) {
-			list.add(new Port(p));
-		}
-		return list;
+		return createPortList(getInParameters());
 	}
 	protected List<Port> Function.createInPortList() {
-		List<Port> list = new List<>();
-		for (InParameter p: getInParameters()) {
-			list.add(new Port(p));
-		}
-		return list;
+		return createPortList(getInParameters());
 	}
 	
 	protected List<Port> TypeDecl.createOutPortList() {
 		return new List<>();
 	}
 	protected List<Port> DiagramType.createOutPortList() {
-		List<Port> list = new List<>();
-		for (OutParameter p: getOutParameters()) {
-			list.add(new Port(p));
-		}
-		return list;
+		return createPortList(getOutParameters());
 	}
 	protected List<Port> ExternalFunction.createOutPortList() {
 		List<Port> list = new List<>();
@@ -146,10 +137,6 @@ aspect Ports {
 		return list;
 	}
 	protected List<Port> Function.createOutPortList() {
-		List<Port> list = new List<>();
-		for (OutParameter p: getOutParameters()) {
-			list.add(new Port(p));
-		}
-		return list;
+		return createPortList(getOutParameters());
 	}
 }
