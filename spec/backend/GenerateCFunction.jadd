@@ -29,13 +29,13 @@ aspect GenerateCFunction {
 		sb.append("){\n");
 		
 		if(getNumOutParameter() > 0) {
-			sb.append("\t" + functionStruct + " _p;\n");
+			sb.append("\t" + functionStruct + " " + ASTNode.RESULT_VAR + ";\n");
 		}
 		
 		getBlockStmt().generateC(sb);
 		
 		if(getNumOutParameter() > 0) {
-			sb.append("\t" + "return" + " _p;");
+			sb.append("\t" + "return" + " " + ASTNode.RESULT_VAR + ";");
 		}
 		
 		sb.append("\n}\n");
@@ -90,7 +90,7 @@ aspect GenerateCFunction {
 		}
 	}
 	public void ReturnStmt.generateC(StringBuilder sb) {
-		sb.append("return _p;\n");
+		sb.append("return " + ASTNode.RESULT_VAR + ";\n");
 	}
 	
 	public String FExpr.generateC() {
@@ -133,7 +133,7 @@ aspect GenerateCFunction {
 	
 	public String IdFExpr.generateC() {
 		if (decl().isOutParameter()) {
-			return "_p." + getID();
+			return ASTNode.RESULT_VAR + "." + getID();
 		}
 		return getID();
 	}

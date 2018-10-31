@@ -61,7 +61,7 @@ aspect StateMachinesGenStructs {
 
 	public void StateMachine.genActionPartC(StringBuilder sb) {
 		if(getNumOutParameter() > 0) {
-			sb.append("  " + returnTypeC() + " _p = {0};\n");
+			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + " = {0};\n");
 		}
 
 		sb.append("  switch(" + currentState() + ") {\n");
@@ -76,7 +76,7 @@ aspect StateMachinesGenStructs {
 		sb.append("  }\n");
 
 		if(getNumOutParameter() > 0) {
-			sb.append("  " + "return" + " _p;\n");
+			sb.append("  " + "return" + " " + ASTNode.RESULT_VAR + ";\n");
 		}
 	}
 

@@ -49,6 +49,8 @@ aspect GenerateC {
 	protected final static String ASTNode.INPUT_VAR = "_input";
 	protected final static String ASTNode.OUTPUT_VAR = "_output";
 
+	protected final static String ASTNode.RESULT_VAR = "_result";
+
 	protected final static String ASTNode.STATE_FIELD = "state";
 	protected final static String ASTNode.INPUT_FIELD = "input";
 	protected final static String ASTNode.OUTPUT_FIELD = "output";
@@ -401,16 +403,17 @@ aspect FunctionDefinitions {
 	
 	private void DiagramType.genReturnValueC(StringBuilder sb) {
 		if (!returnTypeC().equals("void")) {
-			sb.append("  " + returnTypeC() + " _result;\n");
+			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + ";\n");
 			for (Parameter p: getOutParameters()) {
-			    sb.append("  _result." + p.nameC() + " = " + p.ingoingValueC() + ";\n"); 
+			    sb.append("  " + ASTNode.RESULT_VAR + ".");
+			    sb.append(p.nameC() + " = " + p.ingoingValueC() + ";\n");
 			}
 		}
 	}
 
 	private void DiagramType.genReturnStatementC(StringBuilder sb) {
 		if (!returnTypeC().equals("void")) {
-			sb.append("  return _result;\n");
+			sb.append("  return " + ASTNode.RESULT_VAR + ";\n");
 		}
 	}
 

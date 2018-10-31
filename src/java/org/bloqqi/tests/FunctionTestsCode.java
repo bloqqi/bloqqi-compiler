@@ -370,9 +370,9 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tbool out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(bool in1, bool in2, bool in3, bool in4){\n" +
-						  "\tparfunc_RES _p;\n" +
-						  "\t_p.out = (in1 || in2) && in3 || in4;\n" +
-                          "\treturn _p;\n" +
+						  "\tparfunc_RES _result;\n" +
+						  "\t_result.out = (in1 || in2) && in3 || in4;\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -393,11 +393,11 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tbool out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(bool in1, bool in2){\n" +
-						  "\tparfunc_RES _p;\n" +
+						  "\tparfunc_RES _result;\n" +
 						  "\tif (in1 > in2) {\n" +
-                          "\t\treturn _p;\n" +
+                          "\t\treturn _result;\n" +
 						  "\t}\n" +
-                          "\treturn _p;\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -416,9 +416,9 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tbool out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(bool in1, bool in2){\n" +
-						  "\tparfunc_RES _p;\n" +
-						  "\t_p.out = !(!(in1 || in2));\n" +
-                          "\treturn _p;\n" +
+						  "\tparfunc_RES _result;\n" +
+						  "\t_result.out = !(!(in1 || in2));\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -439,11 +439,11 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tbool out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(bool in1, bool in2){\n" +
-						  "\tparfunc_RES _p;\n" +
+						  "\tparfunc_RES _result;\n" +
 						  "\twhile (in1 > in2) {\n" +
                           "\t\tin2 = in2 + 1;\n" +
 						  "\t}\n" +
-                          "\treturn _p;\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -463,10 +463,10 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tint out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(int in1){\n" +
-						  "\tparfunc_RES _p;\n" +
+						  "\tparfunc_RES _result;\n" +
 						  "\tint var1 = 3;\n" +
-						  "\t_p.out = in1 + var1;\n" +
-                          "\treturn _p;\n" +
+						  "\t_result.out = in1 + var1;\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -486,10 +486,10 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tint out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(int in1){\n" +
-						  "\tparfunc_RES _p;\n" +
+						  "\tparfunc_RES _result;\n" +
 						  "\tint var1 = in1 * in1 + 3;\n" +
-						  "\t_p.out = in1 + var1;\n" +
-                          "\treturn _p;\n" +
+						  "\t_result.out = in1 + var1;\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -508,10 +508,10 @@ public class FunctionTestsCode extends TestSuite{
 						  "\tfloat out;\n" +
 				          "} parfunc_RES;\n" +
 						  "parfunc_RES parfunc(float in1){\n" +
-						  "\tparfunc_RES _p;\n" +
+						  "\tparfunc_RES _result;\n" +
 						  "\tfloat var1 = in1 * in1 + 3.2;\n" +
-						  "\t_p.out = in1 + var1;\n" +
-                          "\treturn _p;\n" +
+						  "\t_result.out = in1 + var1;\n" +
+                          "\treturn _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
