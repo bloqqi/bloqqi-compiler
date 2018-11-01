@@ -367,9 +367,9 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tbool out;\n" +
+						  "\tBool out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(bool in1, bool in2, bool in3, bool in4){\n" +
+						  "parfunc_RES parfunc(Bool in1, Bool in2, Bool in3, Bool in4){\n" +
 						  "\tparfunc_RES _result;\n" +
 						  "\t_result.out = (in1 || in2) && in3 || in4;\n" +
                           "\treturn _result;\n" +
@@ -390,9 +390,9 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tbool out;\n" +
+						  "\tBool out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(bool in1, bool in2){\n" +
+						  "parfunc_RES parfunc(Bool in1, Bool in2){\n" +
 						  "\tparfunc_RES _result;\n" +
 						  "\tif (in1 > in2) {\n" +
                           "\t\treturn _result;\n" +
@@ -413,9 +413,9 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tbool out;\n" +
+						  "\tBool out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(bool in1, bool in2){\n" +
+						  "parfunc_RES parfunc(Bool in1, Bool in2){\n" +
 						  "\tparfunc_RES _result;\n" +
 						  "\t_result.out = !(!(in1 || in2));\n" +
                           "\treturn _result;\n" +
@@ -436,9 +436,9 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tbool out;\n" +
+						  "\tBool out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(bool in1, bool in2){\n" +
+						  "parfunc_RES parfunc(Bool in1, Bool in2){\n" +
 						  "\tparfunc_RES _result;\n" +
 						  "\twhile (in1 > in2) {\n" +
                           "\t\tin2 = in2 + 1;\n" +
@@ -460,11 +460,11 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tint out;\n" +
+						  "\tInt out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(int in1){\n" +
+						  "parfunc_RES parfunc(Int in1){\n" +
 						  "\tparfunc_RES _result;\n" +
-						  "\tint var1 = 3;\n" +
+						  "\tInt var1 = 3;\n" +
 						  "\t_result.out = in1 + var1;\n" +
                           "\treturn _result;\n" +
 						  "}\n";
@@ -483,11 +483,11 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tint out;\n" +
+						  "\tInt out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(int in1){\n" +
+						  "parfunc_RES parfunc(Int in1){\n" +
 						  "\tparfunc_RES _result;\n" +
-						  "\tint var1 = in1 * in1 + 3;\n" +
+						  "\tInt var1 = in1 * in1 + 3;\n" +
 						  "\t_result.out = in1 + var1;\n" +
                           "\treturn _result;\n" +
 						  "}\n";
@@ -505,11 +505,11 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.generateC(sb);
 		String expected = "typedef struct {\n" +
-						  "\tfloat out;\n" +
+						  "\tReal out;\n" +
 				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(float in1){\n" +
+						  "parfunc_RES parfunc(Real in1){\n" +
 						  "\tparfunc_RES _result;\n" +
-						  "\tfloat var1 = in1 * in1 + 3.2;\n" +
+						  "\tReal var1 = in1 * in1 + 3.2;\n" +
 						  "\t_result.out = in1 + var1;\n" +
                           "\treturn _result;\n" +
 						  "}\n";

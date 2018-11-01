@@ -4,11 +4,14 @@ aspect FunctionNameAnalysis {
 	 
 	public interface FunctionVarDecl {
 		boolean isOutParameter();
+		boolean isStateVariable();
 	}
 	DeclStmt implements FunctionVarDecl;
 	Parameter implements FunctionVarDecl;
 	
 	syn boolean DeclStmt.isOutParameter() = false;
+	syn boolean DeclStmt.isStateVariable() = false;
+	syn boolean Parameter.isStateVariable() = false;
 
 	syn FunctionVarDecl IdFExpr.decl() = lookupId(getID());
 	

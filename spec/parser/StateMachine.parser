@@ -4,11 +4,18 @@ Declaration declaration =
 
 
 StateMachine state_machine =
-		STATEMACHINE ID LPAR in_pars.in? out_pars.out RPAR LBRA
-		state_list.s
-		transition_list.t
+		STATEMACHINE ID LPAR in_pars.in? out_pars.out RPAR
+		LBRA
+			state_vars.v
+			state_list.s
+			transition_list.t
 		RBRA
-		{: return new StateMachine(ID, in, out, s, t); :}
+		{: return new StateMachine(ID, in, out, v, s, t); :}
+	;
+
+List state_vars =
+	/* empty */						{: return new List(); :}
+	| state_vars.l state_var.v SCOL	{: return l.add(v); :}
 	;
 
 List state_list =

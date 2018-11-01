@@ -1,9 +1,6 @@
 aspect GenerateCFunction {
 	public String TypeUse.fcCode() { return type().fcCode(); }
-	public String TypeDecl.fcCode() { return ""; }
-	public String IntType.fcCode() { return "int"; }
-	public String BoolType.fcCode() { return "bool"; }
-	public String RealType.fcCode() { return "float"; }
+	public String TypeDecl.fcCode() { return nameC(); }
 	
 	public void Function.generateC(StringBuilder sb) {
 		String functionStruct = getID() + "_RES";
@@ -134,6 +131,8 @@ aspect GenerateCFunction {
 	public String IdFExpr.generateC() {
 		if (decl().isOutParameter()) {
 			return ASTNode.RESULT_VAR + "." + getID();
+		} else if (decl().isStateVariable()) {
+			return ASTNode.STATE_VAR + "->" + getID();
 		}
 		return getID();
 	}

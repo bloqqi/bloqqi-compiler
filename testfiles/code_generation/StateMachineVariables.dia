@@ -1,0 +1,32 @@
+external PrintBool(in: Bool);
+
+diagramtype Main {
+  s: Switching;
+  p: PrintBool;
+  connect(3, s);
+  connect(s, p);
+}
+
+statemachine Switching(Int k => Bool out) {
+  var i: Int;
+  FtoT {
+    out = true;
+    i = 1;
+  }
+  T {
+    out = true;
+    i = i + 1;
+  }
+  TtoF {
+    out = false;
+    i = 1;
+  }
+  F {
+    out = false;
+    i = i + 1;
+  }
+  T => TtoF: i >= k;
+  TtoF => F: true;
+  F => FtoT : i >= k;
+  FtoT => T: true;
+}

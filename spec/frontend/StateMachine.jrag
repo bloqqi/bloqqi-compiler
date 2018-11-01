@@ -10,8 +10,16 @@ aspect StateMachineNameAnalysis {
 				return out;
 			}
 		}
+		for (StateVariable v: getStateVariables()) {
+			if (v.name().equals(id)) {
+				return v;
+			}
+		}
 		return null;
 	}
+	StateVariable implements FunctionVarDecl;
+	eq StateVariable.fType() = type();
+
 
 	syn State Transition.fromState() = lookupState(getFromID());
 	syn State Transition.toState() = lookupState(getToID());

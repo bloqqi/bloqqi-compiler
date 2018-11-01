@@ -1,4 +1,6 @@
 aspect StateMachinesGenStructs {
+	protected final static String ASTNode.STATEMACHINE_UNINITIALIZED = "_UNINITIALIZED";
+
 	eq StateMachine.returnTypeC() = getNumOutParameter() > 0 ? nameC() + "_RES" : "void";
 
 	/** Generate struct for return value */
@@ -44,6 +46,13 @@ aspect StateMachinesGenStructs {
 
 	public void StateMachine.genTransitionPartC(StringBuilder sb) {
 		sb.append("  switch(" + currentState() +") {\n");
+
+		/** UNINITIALIZED -> start state (first state) */
+		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED + ":\n");
+		String startState = getStateList().getChild(0).getID();
+		sb.append("    " + currentState() + " = " + startState + ";\n");
+		sb.append("    break;\n");
+
 		for (State s: getStates()) {
 			sb.append("  case " + s.getID() + ":\n");
 			boolean first = true;
@@ -56,6 +65,7 @@ aspect StateMachinesGenStructs {
 			}
 			sb.append("    break;\n");
 		}
+
 		sb.append("  }\n");
 	}
 
@@ -65,6 +75,9 @@ aspect StateMachinesGenStructs {
 		}
 
 		sb.append("  switch(" + currentState() + ") {\n");
+		// Silent C compiler
+		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED + ":\n");
+		sb.append("    break;\n");
 		for (State s: getStates()) {
 			sb.append("  case " + s.getID() + ":\n");
 			for (AssignStmt asg: s.getAssignStmts()) {
@@ -82,8 +95,8 @@ aspect StateMachinesGenStructs {
 
 
 	/** State variable */
-	eq StateMachine.containsStateVariablesTransitive() = true;
-	eq StateMachine.containsVariablesTransitive() = true;
+	eq StateMachine.containsVariablesTransitive(Class<? extends Variable> clazz)
+		= clazz == StateVariable.class || clazz == Variable.class;
 	eq StateMachine.stateStructName() = nameC() + "_STATE";
 
 	public void StateMachine.genVariableStructsC(Map<TypeDecl, String> structs) {
@@ -91,12 +104,16 @@ aspect StateMachinesGenStructs {
 
 		/** Generate enum for state */
 		StringJoiner states = new StringJoiner(", ");
+		states.add(ASTNode.STATEMACHINE_UNINITIALIZED);
 		for (State s: getStates()) {
 			states.add(s.getID());
 		}
 		sb.append("enum " + nameC() + "_ENUM {" + states.toString() + "};\n");
 
 		sb.append("typedef struct {\n");
+		for (StateVariable v: getStateVariables()) {
+			sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
+		}
 		sb.append("  enum " + nameC() + "_ENUM _currentState;\n");
 		sb.append("} " + stateStructName() + ";\n");
 

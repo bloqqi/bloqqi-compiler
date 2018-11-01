@@ -17,6 +17,9 @@ aspect StateMachinePrettyPrint {
 			}
 		}
 		sb.append(") {\n");
+		for (StateVariable v: getStateVariables()) {
+			sb.append("  " + v.prettyPrint() + ";\n");
+		}
 		for (State s: getStates()) {
 			s.prettyPrint(sb);
 		}
