@@ -1,22 +1,22 @@
 aspect FunctionNameAnalysis {
 	syn boolean TypeDecl.isFunction() = false;
 	eq Function.isFunction() = true;
-	 
+
 	public interface FunctionVarDecl {
 		boolean isOutParameter();
 		boolean isStateVariable();
 	}
 	DeclStmt implements FunctionVarDecl;
 	Parameter implements FunctionVarDecl;
-	
+
 	syn boolean DeclStmt.isOutParameter() = false;
 	syn boolean DeclStmt.isStateVariable() = false;
 	syn boolean Parameter.isStateVariable() = false;
 
 	syn FunctionVarDecl IdFExpr.decl() = lookupId(getID());
-	
+
 	inh FunctionVarDecl IdFExpr.lookupId(String id);
-	
+
 	eq Function.getBlockStmt().lookupId(String id) {
 		for (InParameter ip : getInParameters()) {
 			if (ip.name().equals(id)) {
@@ -30,15 +30,15 @@ aspect FunctionNameAnalysis {
 		}
 		return null;
 	}
-	
+
 	inh FunctionVarDecl BlockStmt.lookupId(String id);
-	
+
 	eq BlockStmt.getStmt(int index).lookupId(String id) {
 		for (int i = 0; i < index; i++) {
 			FunctionVarDecl d = getStmt(i).localLookupId(id);
 			if (d != null) {
 				return d;
-			}		
+			}
 		}
 		return lookupId(id);
 	}
@@ -69,8 +69,8 @@ aspect FunctionTypeAnalysis {
 	eq IntLiteralFExpr.fType() = program().intType();
 	eq RealLiteralFExpr.fType() = program().realType();
 	eq IntBinFExpr.fType() {
-		if (getLeft().fType() == program().realType() || 
-		    getRight().fType() == program().realType()) {
+		if (getLeft().fType() == program().realType() ||
+			getRight().fType() == program().realType()) {
 			return program().realType();
 		}
 		else {
@@ -84,19 +84,19 @@ aspect FunctionTypeAnalysis {
 	eq MinusFExpr.fType() = getFExpr().fType();
 
 	syn TypeDecl FExpr.fExpectedType() = fType();
-	eq AddFExpr.fExpectedType() = program().realType(); 
-    eq SubFExpr.fExpectedType() = program().realType();
-    eq MulFExpr.fExpectedType() = program().realType();
-    eq DivFExpr.fExpectedType() = program().realType();
-    eq GEFExpr.fExpectedType() = program().realType();
-    eq GTFExpr.fExpectedType() = program().realType();
-    eq LEFExpr.fExpectedType() = program().realType();
-    eq LTFExpr.fExpectedType() = program().realType();
-    eq EqFExpr.fExpectedType() = program().unknownType();
-    eq NEqFExpr.fExpectedType() = program().unknownType();
-    eq AndFExpr.fExpectedType() = program().boolType();
-    eq OrFExpr.fExpectedType() = program().boolType();
-    eq MinusFExpr.fExpectedType() = program().realType();
+	eq AddFExpr.fExpectedType() = program().realType();
+	eq SubFExpr.fExpectedType() = program().realType();
+	eq MulFExpr.fExpectedType() = program().realType();
+	eq DivFExpr.fExpectedType() = program().realType();
+	eq GEFExpr.fExpectedType() = program().realType();
+	eq GTFExpr.fExpectedType() = program().realType();
+	eq LEFExpr.fExpectedType() = program().realType();
+	eq LTFExpr.fExpectedType() = program().realType();
+	eq EqFExpr.fExpectedType() = program().unknownType();
+	eq NEqFExpr.fExpectedType() = program().unknownType();
+	eq AndFExpr.fExpectedType() = program().boolType();
+	eq OrFExpr.fExpectedType() = program().boolType();
+	eq MinusFExpr.fExpectedType() = program().realType();
 	
 	syn boolean BinFExpr.isCompatibleLeftType() = getLeft().fType().compatibleWith(fExpectedType());
 	eq EqFExpr.isCompatibleLeftType() = true;
@@ -104,22 +104,22 @@ aspect FunctionTypeAnalysis {
 	syn boolean BinFExpr.isCompatibleOperands() = true;
 	eq EqFExpr.isCompatibleOperands() =  getLeft().fType().compatibleWith(getRight().fType());
 	eq NEqFExpr.isCompatibleOperands() =  getLeft().fType().compatibleWith(getRight().fType());
-	
+
 	syn boolean BinFExpr.isCompatibleRightType() = getRight().fType().compatibleWith(fExpectedType());
 	eq EqFExpr.isCompatibleRightType() = true;
 	eq NEqFExpr.isCompatibleRightType() = true;
-	
+
 	syn boolean UnaryFExpr.isCompatibleOperand() = true;
 	eq MinusFExpr.isCompatibleOperand() = getFExpr().fType().compatibleWith(fExpectedType());
 		   
 	syn boolean Stmt.isCompatibleType() = true;
-	
+
 	eq AssignStmt.isCompatibleType() = getLeft().fType().compatibleWith(getRight().fType());
-	
+
 	eq IfStmt.isCompatibleType() = getFExpr().fType().compatibleWith(program().boolType());
-	
+
 	eq WhileStmt.isCompatibleType() = getFExpr().fType().compatibleWith(program().boolType());
-	
+
 	eq DeclStmt.isCompatibleType() = hasFExpr()? getFExpr().fType().compatibleWith(fType()) : true;
 }
 
