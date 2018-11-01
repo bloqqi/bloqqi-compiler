@@ -1,0 +1,14 @@
+statemachine S(Int in => Int out) {
+  A {
+    out = 1;
+  }
+  B {
+    out = 2;
+  }
+  B {
+    out = 2;
+  }
+  A => B: in > 10;
+  B => A: in > 20 || in <= 10;
+  C => D: 10;
+}

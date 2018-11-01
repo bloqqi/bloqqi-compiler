@@ -1,0 +1,3 @@
+Line 6, column 3: Undefined output parameters in state B: [out]
+Line 7, column 5: Cannot assign a value to an input parameter ('in')
+Line 8, column 9: Cannot read an output parameter ('out')

@@ -1,0 +1,4 @@
+Line 8, column 3: State B already declared
+Line 13, column 3: State C not declared
+Line 13, column 3: State D not declared
+Line 13, column 3: Transitions are required to have a boolean condition

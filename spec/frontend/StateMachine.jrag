@@ -60,4 +60,49 @@ aspect StateMachineErrors {
 	State contributes error("State " + getID() + " already declared")
 		when lookupState(getID()) != this
 		to CompilationUnit.errors();
+
+	IdFExpr contributes error("Cannot read an output parameter ('" + getID() + "')")
+		when isInStateMachine() && decl() != null
+			&& isVariableRead() && decl().isOutParameter()
+		to CompilationUnit.errors();
+
+	AssignStmt contributes error("Cannot assign a value to an input parameter ('"
+			+ getLeft() + "')")
+		when isInStateMachine() && getLeft().decl() != null
+			&& getLeft().decl().isInParameter()
+		to CompilationUnit.errors();
+
+	State contributes error("Undefined output parameters in state " + getID()
+			+ ": " + undefinedOutputs())
+		when !undefinedOutputs().isEmpty()
+		to CompilationUnit.errors();
+}
+
+aspect StateMachineErrorAnalysis {
+	inh StateMachine State.stateMachine();
+	eq StateMachine.getChild().stateMachine() = this;
+
+	inh boolean IdFExpr.isVariableRead();
+	eq Program.getChild().isVariableRead() = true;
+	eq AssignStmt.getLeft().isVariableRead() = false;
+
+	inh boolean IdFExpr.isInStateMachine();
+	inh boolean AssignStmt.isInStateMachine();
+	eq Program.getChild().isInStateMachine() = false;
+	eq StateMachine.getChild().isInStateMachine() = true;
+
+	syn Set<String> StateMachine.outputs() {
+		Set<String> set = new HashSet<>();
+		for (OutParameter p: getOutParameters()) {
+			set.add(p.getID());
+		}
+		return set;
+	}
+	syn Set<String> State.undefinedOutputs() {
+		Set<String> outputs = new HashSet<>(stateMachine().outputs());
+		for (AssignStmt asg: getAssignStmts()) {
+			outputs.remove(asg.getLeft().getID());
+		}
+		return outputs;
+	}
 }

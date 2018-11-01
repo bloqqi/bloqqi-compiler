@@ -1,0 +1,16 @@
+statemachine S(Int in => Int out) {
+  var x: Int;
+  A {
+    out = 1;
+  }
+  B {
+    in = 1;
+    x = out;
+  }
+  C {
+    x = 10;
+    out = x;
+  }
+  A => B: true;
+  B => A: true;
+}
