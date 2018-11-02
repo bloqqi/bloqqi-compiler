@@ -33,6 +33,11 @@ aspect StateMachineNameAnalysis {
 		}
 		return null;
 	}
+
+	coll Set<Transition> State.transitions() [new HashSet<>()] root StateMachine;
+	Transition contributes this
+		when fromState() != null
+		to State.transitions() for fromState();
 }
 
 aspect StateMachinePorts {

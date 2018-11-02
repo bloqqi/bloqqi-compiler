@@ -56,12 +56,12 @@ aspect StateMachinesGenStructs {
 		for (State s: getStates()) {
 			sb.append("  case " + s.getID() + ":\n");
 			boolean first = true;
-			for (Transition t: getTransitions()) {
-				if (s == t.fromState()) {
-					sb.append("    ");
-					sb.append("if (" + t.getFExpr().generateC() + ") ");
-					sb.append(currentState() + " = " + t.getToID() + ";\n");
-				}
+			for (Transition t: s.transitions()) {
+				sb.append("    ");
+				sb.append(first ? "if" : "else if");
+				sb.append(" (" + t.getFExpr().generateC() + ") ");
+				sb.append(currentState() + " = " + t.getToID() + ";\n");
+				first = false;
 			}
 			sb.append("    break;\n");
 		}
@@ -75,9 +75,6 @@ aspect StateMachinesGenStructs {
 		}
 
 		sb.append("  switch(" + currentState() + ") {\n");
-		// Silent C compiler
-		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED + ":\n");
-		sb.append("    break;\n");
 		for (State s: getStates()) {
 			sb.append("  case " + s.getID() + ":\n");
 			for (AssignStmt asg: s.getAssignStmts()) {
@@ -86,6 +83,8 @@ aspect StateMachinesGenStructs {
 			}
 			sb.append("    break;\n");
 		}
+		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED + ":\n");
+		sb.append("    break;\n");
 		sb.append("  }\n");
 
 		if(getNumOutParameter() > 0) {
