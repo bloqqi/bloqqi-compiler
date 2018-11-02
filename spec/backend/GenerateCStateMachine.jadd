@@ -1,5 +1,8 @@
 aspect StateMachinesGenStructs {
-	protected final static String ASTNode.STATEMACHINE_UNINITIALIZED = "_UNINITIALIZED";
+	protected final static String ASTNode.STATEMACHINE_UNINITIALIZED_STATE = "_UNINITIALIZED";
+	protected final static String ASTNode.STATEMACHINE_CURRENT_STATE_NAME = "_currentState";
+	protected final static String ASTNode.STATEMACHINE_CURRENT_STATE
+		= ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_CURRENT_STATE_NAME;
 
 	eq StateMachine.returnTypeC() = getNumOutParameter() > 0 ? nameC() + "_RES" : "void";
 
@@ -40,17 +43,13 @@ aspect StateMachinesGenStructs {
 		sb.append("}\n");
 	}
 
-	public String StateMachine.currentState() {
-		return ASTNode.STATE_VAR + "->_currentState";
-	}
-
 	public void StateMachine.genTransitionPartC(StringBuilder sb) {
-		sb.append("  switch(" + currentState() +") {\n");
+		sb.append("  switch(" + ASTNode.STATEMACHINE_CURRENT_STATE +") {\n");
 
 		/** UNINITIALIZED -> start state (first state) */
-		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED + ":\n");
+		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED_STATE + ":\n");
 		String startState = getStateList().getChild(0).getID();
-		sb.append("    " + currentState() + " = " + startState + ";\n");
+		sb.append("    " + ASTNode.STATEMACHINE_CURRENT_STATE + " = " + startState + ";\n");
 		sb.append("    break;\n");
 
 		for (State s: getStates()) {
@@ -60,7 +59,7 @@ aspect StateMachinesGenStructs {
 				sb.append("    ");
 				sb.append(first ? "if" : "else if");
 				sb.append(" (" + t.getFExpr().generateC() + ") ");
-				sb.append(currentState() + " = " + t.getToID() + ";\n");
+				sb.append(ASTNode.STATEMACHINE_CURRENT_STATE + " = " + t.getToID() + ";\n");
 				first = false;
 			}
 			sb.append("    break;\n");
@@ -74,7 +73,7 @@ aspect StateMachinesGenStructs {
 			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + " = {0};\n");
 		}
 
-		sb.append("  switch(" + currentState() + ") {\n");
+		sb.append("  switch(" + ASTNode.STATEMACHINE_CURRENT_STATE + ") {\n");
 		for (State s: getStates()) {
 			sb.append("  case " + s.getID() + ":\n");
 			for (AssignStmt asg: s.getAssignStmts()) {
@@ -83,7 +82,7 @@ aspect StateMachinesGenStructs {
 			}
 			sb.append("    break;\n");
 		}
-		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED + ":\n");
+		sb.append("  case " + ASTNode.STATEMACHINE_UNINITIALIZED_STATE + ":\n");
 		sb.append("    break;\n");
 		sb.append("  }\n");
 
@@ -103,17 +102,18 @@ aspect StateMachinesGenStructs {
 
 		/** Generate enum for state */
 		StringJoiner states = new StringJoiner(", ");
-		states.add(ASTNode.STATEMACHINE_UNINITIALIZED);
+		states.add(ASTNode.STATEMACHINE_UNINITIALIZED_STATE);
 		for (State s: getStates()) {
 			states.add(s.getID());
 		}
 		sb.append("enum " + nameC() + "_ENUM {" + states.toString() + "};\n");
 
+		/** Generate state struct */
 		sb.append("typedef struct {\n");
 		for (StateVariable v: getStateVariables()) {
 			sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
 		}
-		sb.append("  enum " + nameC() + "_ENUM _currentState;\n");
+		sb.append("  enum " + nameC() + "_ENUM " + ASTNode.STATEMACHINE_CURRENT_STATE_NAME + ";\n");
 		sb.append("} " + stateStructName() + ";\n");
 
 		structs.put(this, sb.toString());
