@@ -1,1 +1,1 @@
-Line 2, column 9: 1012: Incompatible type on operand, Bool
+Line 2, column 11: Type error. Expected type: Real, got type: Bool

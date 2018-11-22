@@ -251,7 +251,7 @@ public class FunctionTestsCode extends TestSuite{
 		DeclStmt d = (DeclStmt)f.getBlockStmt().getStmt(0);
 		AssignStmt a = (AssignStmt)f.getBlockStmt().getStmt(1);
 		assertSame(d, a.getLeft().decl());
-		assertEquals("Line 4, column 2: 1001: The declaration of x was not found", cu.errors().iterator().next().toString());
+		assertEquals("Line 4, column 2: The declaration of x was not found", cu.errors().iterator().next().toString());
 	}
 
 	@Test
@@ -365,14 +365,11 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tBool out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Bool in1, Bool in2, Bool in3, Bool in4){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\t_result.out = (in1 || in2) && in3 || in4;\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Bool in1, Bool in2, Bool in3, Bool in4) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  _result.out = (in1 || in2) && in3 || in4;\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -388,16 +385,13 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tBool out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Bool in1, Bool in2){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\tif (in1 > in2) {\n" +
-                          "\t\treturn _result;\n" +
-						  "\t}\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Bool in1, Bool in2) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  if (in1 > in2) {\n" +
+                          "    return _result;\n" +
+						  "  }\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -411,14 +405,11 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tBool out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Bool in1, Bool in2){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\t_result.out = !(!(in1 || in2));\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Bool in1, Bool in2) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  _result.out = !(!(in1 || in2));\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -434,16 +425,13 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tBool out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Bool in1, Bool in2){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\twhile (in1 > in2) {\n" +
-                          "\t\tin2 = in2 + 1;\n" +
-						  "\t}\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Bool in1, Bool in2) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  while (in1 > in2) {\n" +
+                          "    in2 = in2 + 1;\n" +
+						  "  }\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -458,15 +446,12 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tInt out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Int in1){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\tInt var1 = 3;\n" +
-						  "\t_result.out = in1 + var1;\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Int in1) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  Int var1 = 3;\n" +
+						  "  _result.out = in1 + var1;\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -481,15 +466,12 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tInt out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Int in1){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\tInt var1 = in1 * in1 + 3;\n" +
-						  "\t_result.out = in1 + var1;\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Int in1) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  Int var1 = in1 * in1 + 3;\n" +
+						  "  _result.out = in1 + var1;\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}
@@ -503,15 +485,12 @@ public class FunctionTestsCode extends TestSuite{
 		CompilationUnit cu = p.getCompilationUnit(0);
 		Function f = (Function) cu.typeDecls().get(0);
 		StringBuilder sb = new StringBuilder();
-		f.generateC(sb);
-		String expected = "typedef struct {\n" +
-						  "\tReal out;\n" +
-				          "} parfunc_RES;\n" +
-						  "parfunc_RES parfunc(Real in1){\n" +
-						  "\tparfunc_RES _result;\n" +
-						  "\tReal var1 = in1 * in1 + 3.2;\n" +
-						  "\t_result.out = in1 + var1;\n" +
-                          "\treturn _result;\n" +
+		f.genFunctionDefinitionsC(sb);
+		String expected = "parfunc_RES parfunc(Real in1) {\n" +
+						  "  parfunc_RES _result;\n" +
+						  "  Real var1 = in1 * in1 + 3.2;\n" +
+						  "  _result.out = in1 + var1;\n" +
+                          "  return _result;\n" +
 						  "}\n";
 		assertEquals(expected, sb.toString());
 	}

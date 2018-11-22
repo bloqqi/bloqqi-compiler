@@ -10,6 +10,7 @@ ReturnStmt : Stmt;
 
 abstract FExpr;
 IdFExpr : FExpr ::= <ID>;
+FunctionCallFExpr : FExpr ::= <ID> FExpr*;
 abstract UnaryFExpr : FExpr ::= FExpr;
 NotFExpr : UnaryFExpr ::= FExpr;
 MinusFExpr : UnaryFExpr ::= FExpr;

@@ -18,6 +18,8 @@ aspect FunctionNameAnalysis {
 	syn FunctionVarDecl IdFExpr.decl() = lookupId(getID());
 
 	inh FunctionVarDecl IdFExpr.lookupId(String id);
+	inh FunctionVarDecl DeclStmt.lookupId(String id);
+	inh FunctionVarDecl BlockStmt.lookupId(String id);
 
 	eq Function.getBlockStmt().lookupId(String id) {
 		for (InParameter ip : getInParameters()) {
@@ -32,9 +34,6 @@ aspect FunctionNameAnalysis {
 		}
 		return null;
 	}
-
-	inh FunctionVarDecl BlockStmt.lookupId(String id);
-
 	eq BlockStmt.getStmt(int index).lookupId(String id) {
 		for (int i = 0; i < index; i++) {
 			FunctionVarDecl d = getStmt(i).localLookupId(id);
@@ -44,85 +43,91 @@ aspect FunctionNameAnalysis {
 		}
 		return lookupId(id);
 	}
-	
-	inh FunctionVarDecl DeclStmt.lookupId(String id);
-	
 	syn FunctionVarDecl Stmt.localLookupId(String id) = null;
-	
 	eq DeclStmt.localLookupId(String id) {
 		if (getID().equals(id)) {
 			return this;
 		}
 		return null;
 	}
-	
+
 	syn boolean DeclStmt.isMultipleDeclared() = lookupId(getID()) != null;
-	
+
+	// Use normal type lookup for function calls
+	syn TypeDecl FunctionCallFExpr.decl() = lookupType(getID());
+	inh TypeDecl FunctionCallFExpr.lookupType(String name);
 }
 
 aspect FunctionTypeAnalysis {
-
 	syn TypeDecl FunctionVarDecl.fType();
 	eq DeclStmt.fType() = getTypeUse().type();
 	eq Parameter.fType() = getTypeUse().type();
 	syn TypeDecl FExpr.fType();
 	eq IdFExpr.fType() = decl() != null ? decl().fType() : program().unknownType();
-	
+	eq FunctionCallFExpr.fType() {
+		if (!isBoundToFunction()) {
+			return program().unknownType();
+		}
+		Function f = function();
+		if (f.getNumOutParameter() != 1) {
+			return program().unknownType();
+		}
+		return f.getOutParameter(0).type();
+	}
+
 	eq IntLiteralFExpr.fType() = program().intType();
 	eq RealLiteralFExpr.fType() = program().realType();
 	eq IntBinFExpr.fType() {
 		if (getLeft().fType() == program().realType() ||
 			getRight().fType() == program().realType()) {
 			return program().realType();
-		}
-		else {
-			return 	program().intType();
+		} else {
+			return program().intType();
 		}
 	}
+
+	syn boolean FunctionCallFExpr.isBoundToFunction()
+		= decl() != null && decl().isFunction();
+	syn Function FunctionCallFExpr.function() =
+		isBoundToFunction() ? (Function) decl() : null;
 
 	eq BoolLiteralFExpr.fType() = program().boolType();
 	eq BoolBinFExpr.fType() = program().boolType();
 	eq NotFExpr.fType() = program().boolType();
 	eq MinusFExpr.fType() = getFExpr().fType();
 
-	syn TypeDecl FExpr.fExpectedType() = fType();
-	eq AddFExpr.fExpectedType() = program().realType();
-	eq SubFExpr.fExpectedType() = program().realType();
-	eq MulFExpr.fExpectedType() = program().realType();
-	eq DivFExpr.fExpectedType() = program().realType();
-	eq GEFExpr.fExpectedType() = program().realType();
-	eq GTFExpr.fExpectedType() = program().realType();
-	eq LEFExpr.fExpectedType() = program().realType();
-	eq LTFExpr.fExpectedType() = program().realType();
-	eq EqFExpr.fExpectedType() = program().unknownType();
-	eq NEqFExpr.fExpectedType() = program().unknownType();
-	eq AndFExpr.fExpectedType() = program().boolType();
-	eq OrFExpr.fExpectedType() = program().boolType();
-	eq MinusFExpr.fExpectedType() = program().realType();
-	
-	syn boolean BinFExpr.isCompatibleLeftType() = getLeft().fType().compatibleWith(fExpectedType());
-	eq EqFExpr.isCompatibleLeftType() = true;
-	eq NEqFExpr.isCompatibleLeftType() = true;
-	syn boolean BinFExpr.isCompatibleOperands() = true;
-	eq EqFExpr.isCompatibleOperands() =  getLeft().fType().compatibleWith(getRight().fType());
-	eq NEqFExpr.isCompatibleOperands() =  getLeft().fType().compatibleWith(getRight().fType());
+	inh TypeDecl FExpr.fExpectedType();
+	eq AddFExpr.getChild().fExpectedType() = program().realType();
+	eq SubFExpr.getChild().fExpectedType() = program().realType();
+	eq MulFExpr.getChild().fExpectedType() = program().realType();
+	eq DivFExpr.getChild().fExpectedType() = program().realType();
+	eq GEFExpr.getChild().fExpectedType() = program().realType();
+	eq GTFExpr.getChild().fExpectedType() = program().realType();
+	eq LEFExpr.getChild().fExpectedType() = program().realType();
+	eq LTFExpr.getChild().fExpectedType() = program().realType();
+	eq EqFExpr.getChild().fExpectedType() = getLeft().fType();
+	eq NEqFExpr.getChild().fExpectedType() = getLeft().fType();
+	eq AndFExpr.getChild().fExpectedType() = program().boolType();
+	eq OrFExpr.getChild().fExpectedType() = program().boolType();
+	eq MinusFExpr.getChild().fExpectedType() = program().realType();
 
-	syn boolean BinFExpr.isCompatibleRightType() = getRight().fType().compatibleWith(fExpectedType());
-	eq EqFExpr.isCompatibleRightType() = true;
-	eq NEqFExpr.isCompatibleRightType() = true;
+	eq DeclStmt.getFExpr().fExpectedType() = fType();
+	eq AssignStmt.getLeft().fExpectedType() = program().unknownType();
+	eq AssignStmt.getRight().fExpectedType() = getLeft().fType();
+	eq IfStmt.getFExpr().fExpectedType() = program().boolType();
+	eq WhileStmt.getFExpr().fExpectedType() = program().boolType();
 
-	syn boolean UnaryFExpr.isCompatibleOperand() = true;
-	eq MinusFExpr.isCompatibleOperand() = getFExpr().fType().compatibleWith(fExpectedType());
-		   
-	syn boolean Stmt.isCompatibleType() = true;
-
-	eq AssignStmt.isCompatibleType() = getLeft().fType().compatibleWith(getRight().fType());
-
-	eq IfStmt.isCompatibleType() = getFExpr().fType().compatibleWith(program().boolType());
-
-	eq WhileStmt.isCompatibleType() = getFExpr().fType().compatibleWith(program().boolType());
-
-	eq DeclStmt.isCompatibleType() = hasFExpr()? getFExpr().fType().compatibleWith(fType()) : true;
+	eq FunctionCallFExpr.getFExpr(int i).fExpectedType() {
+		if (!isBoundToFunction()) {
+			return program().unknownType();
+		}
+		Function f = function();
+		if (i < f.getNumOutParameter()) {
+			return f.getOutParameter(i).type();
+		} else {
+			return program().unknownType();
+		}
+	}
 }
 
 aspect StatementAnalys {
@@ -131,60 +136,47 @@ aspect StatementAnalys {
 	eq IfStmt.getBlockStmt().isReturnInAllowedContext() = true;
 	eq IfStmt.getElse().isReturnInAllowedContext() = true;
 	eq WhileStmt.getBlockStmt().isReturnInAllowedContext() = true;
-	
+
 	inh boolean ReturnStmt.existStmtsAfterReturn();
-	eq BlockStmt.getStmt(int index).existStmtsAfterReturn() {
-		return (getNumStmt() > index+1);
-	}
+	eq BlockStmt.getStmt(int index).existStmtsAfterReturn() = getNumStmt() > index+1;
 }
 
 aspect FunctionErrors {
-
-	IdFExpr contributes error("1001: The declaration of " + toString() + " was not found")
+	IdFExpr contributes error("The declaration of " + toString() + " was not found")
 		when decl() == null
 		to CompilationUnit.errors();
-	
-	DeclStmt contributes error("1002: " + getID() + " is already declared")
+
+	DeclStmt contributes error("Variable " + getID() + " is already declared")
 		when isMultipleDeclared()
 		to CompilationUnit.errors();
 
-	BinFExpr contributes error("1003: " + fExpectedType().toString() + " is expected, but " + getLeft() + " is " + getLeft().fType().toString() )
-		when !(isCompatibleLeftType())
+	FExpr contributes error("Type error. Expected type: "
+			+ fExpectedType() + ", got type: " + fType())
+		when !fType().compatibleWith(fExpectedType())
 		to CompilationUnit.errors();
-		
-	BinFExpr contributes error("1004: " + fExpectedType().toString() + " is expected, but " + getRight() + " is " + getRight().fType().toString() )
-		when !(isCompatibleRightType())
-		to CompilationUnit.errors();
-		
-	IfStmt contributes error("1005: Boolean condition expected, but is " + getFExpr().fType().toString() )
-		when  !(isCompatibleType())
-		to CompilationUnit.errors();
-		
-	WhileStmt contributes error("1006: Boolean condition expected, but is " + getFExpr().fType().toString() )
-		when  !(isCompatibleType())
-		to CompilationUnit.errors();
-		
-	AssignStmt contributes error("1007: Incorrect type, expected type is " + getLeft().fType().toString() + " but actual type is " + getRight().fType().toString() )
-		when  !(isCompatibleType())
-		to CompilationUnit.errors();
-		
-	ReturnStmt contributes error("1008: Incorrect placement of return statement.")
+
+	ReturnStmt contributes error("Incorrect placement of return statement.")
 		when !(isReturnInAllowedContext())
 		to CompilationUnit.errors();
-	
-	ReturnStmt contributes error("1009: Statements not allowed after return.")
+
+	ReturnStmt contributes error("Statements not allowed after return.")
 		when existStmtsAfterReturn()
 		to CompilationUnit.errors();
-		
-	DeclStmt contributes error("1010: Incorrect type, expected type is " + getTypeUse() + " but is " + getFExpr().fType().toString() )
-		when !(isCompatibleType())
+
+	FunctionCallFExpr contributes error("Mismatch between the number of arguments and parameters in the call to " + getID() )
+		when isBoundToFunction()
+			&& function().getNumInParameter() != getNumFExpr()
 		to CompilationUnit.errors();
-		
-	BinFExpr contributes error("1011: Incompatible types on operands, " + getLeft().fType().toString() + " and " + getRight().fType().toString())
-		when !(isCompatibleOperands())
+
+	FunctionCallFExpr contributes error("Only functions are allowed to be called (" + getID() + ")")
+		when decl() != null && !decl().isFunction()
 		to CompilationUnit.errors();
-	
-	UnaryFExpr contributes error("1012: Incompatible type on operand, " + getFExpr().fType().toString())
-		when !(isCompatibleOperand())
+
+	FunctionCallFExpr contributes error("Cannot find function " + getID())
+		when decl() == null
+		to CompilationUnit.errors();
+
+	FunctionCallFExpr contributes error("Only functions with exactly one output parameter can be called (" + getID() + ")")
+		when isBoundToFunction() && function().getNumOutParameter() != 1
 		to CompilationUnit.errors();
 }

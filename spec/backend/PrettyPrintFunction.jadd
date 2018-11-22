@@ -1,13 +1,13 @@
 aspect FunctionPrettyPrint {
 
 	inh int Stmt.indentLevel();
-	
+
 	eq BlockStmt.getStmt().indentLevel() {
 		return indentLevel() + 1;
 	}
-	
+
 	eq Function.getBlockStmt().indentLevel() = 0;
-	
+
 	syn int FExpr.precedence() = 0;
 	eq OrFExpr.precedence() = 7;
 	eq AndFExpr.precedence() = 6;
@@ -43,9 +43,9 @@ aspect FunctionPrettyPrint {
 		}
 		sb.append(") {\n");
 		getBlockStmt().prettyPrint(sb);
-		sb.append("}\n");		
+		sb.append("}\n");
 	}
-	
+
 	public void BlockStmt.prettyPrint(StringBuilder sb) {
 		for (Stmt s: getStmts()) {
 			for (int i = 0; i < s.indentLevel(); i++) {
@@ -54,7 +54,7 @@ aspect FunctionPrettyPrint {
 			s.prettyPrint(sb);
 		}
 	}
-	public void Stmt.prettyPrint(StringBuilder sb) {	
+	public void Stmt.prettyPrint(StringBuilder sb) {
 	}
 	public void DeclStmt.prettyPrint(StringBuilder sb) {
 		sb.append(getID() + ": " + getTypeUse());
@@ -91,14 +91,14 @@ aspect FunctionPrettyPrint {
 			for (int i = 0; i < indentLevel(); i++) {
 				sb.append("\t");
 			}
-			sb.append("}\n");			
+			sb.append("}\n");
 		}
 	}
-	
+
 	public void ReturnStmt.prettyPrint(StringBuilder sb) {
 		sb.append("return;\n");
 	}
-	
+
 	public String BinFExpr.getOpString() { return ""; }
 	public String AddFExpr.getOpString() { return "+"; }
 	public String SubFExpr.getOpString() { return "-"; }
@@ -134,9 +134,9 @@ aspect FunctionPrettyPrint {
 		if (precedence() <= getRight().precedence()) {
 			sb.append(")");
 		}
-		return sb.toString();		
+		return sb.toString();
 	}
-	
+
 	public String UnaryFExpr.toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getOpString());
@@ -149,15 +149,22 @@ aspect FunctionPrettyPrint {
 		}
 		return sb.toString();
 	}
-		
+
 	public String IdFExpr.toString() {
-		return getID();	
+		return getID();
+	}
+	public String FunctionCallFExpr.toString() {
+		StringJoiner joiner = new StringJoiner(", ");
+		for (FExpr e: getFExprs()) {
+			joiner.add(e.toString());
+		}
+		return getID() + "(" + joiner + ")";
 	}
 	public String IntLiteralFExpr.toString() {
-		return getNum();	
+		return getNum();
 	}
 	public String RealLiteralFExpr.toString() {
-		return getFloat();	
+		return getFloat();
 	}
 	public String BoolLiteralFExpr.toString() {
 		if (getValue()) {

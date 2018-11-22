@@ -5,7 +5,7 @@ aspect LookupTypes {
 	syn lazy TypeDecl TypeUse.decl() = lookupType(getID());
 	inh TypeDecl TypeUse.lookupType(String name);
 	inh TypeDecl TypeDecl.lookupType(String name);
-	
+
 	eq Program.getChild().lookupType(String name) = lookupType(name);
 	syn TypeDecl Program.lookupType(String name) {
 		TypeDecl typeDecl = lookupPredefinedTypes(name);
@@ -18,9 +18,9 @@ aspect LookupTypes {
 		}
 		return null;
 	}
-	syn boolean Program.isTypeDeclared(String name) 
+	syn boolean Program.isTypeDeclared(String name)
 		= lookupType(name) != null;
-	
+
 	syn TypeDecl CompilationUnit.localLookupType(String name) {
 		for (TypeDecl td: typeDecls()) {
 			if (td.name().equals(name)) {
@@ -29,10 +29,10 @@ aspect LookupTypes {
 		}
 		return null;
 	}
-	
+
 	syn TypeDecl Program.lookupStandardLibrary(String name) {
 		if (hasStandardLibrary()) {
-			return getStandardLibrary().localLookupType(name);	
+			return getStandardLibrary().localLookupType(name);
 		}
 		return null;
 	}
@@ -50,9 +50,9 @@ aspect LookupTypes {
 aspect LookupVariables {
 	/**
 	 * Lookup for VarUses
-	 * 
+	 *
 	 * Simplification:
-	 *   If Sub has only one output parameter and Neg has only one input parameter, then 
+	 *   If Sub has only one output parameter and Neg has only one input parameter, then
 	 *   connect(Sub_1, Neg) is interpreted as connect(Sub_1.out, Neg.in)
 	 *   For more details, see rewrite below (SimpleVarUse -> DotVarUse).
 	 */
@@ -60,8 +60,8 @@ aspect LookupVariables {
 	eq AbstractSimpleVarUse.decl() = lookup(getID());
 	eq TypedSimpleVarUse.decl() = lookup(getTypeUse().getID(), getID());
 	eq DotVarUse.decl()
-		= getVarUse().decl() == null 
-		? null 
+		= getVarUse().decl() == null
+		? null
 		: getVarUse().decl().findMember(getID());
 
 	inh VarDecl VarUse.lookup(String name);
@@ -82,7 +82,7 @@ aspect LookupVariables {
 
 	/**
 	 * Lookup with a type
-	 * 
+	 *
 	 * A subtype can inherit two blocks from two different supertypes
 	 * with the same name. To distinguish between these two blocks in the
 	 * subtype, the name of the block can be prefixed with the supertype
@@ -97,9 +97,9 @@ aspect LookupVariables {
 		if (td == null) return null;
 		return td.localLookup(name);
 	}
-	eq DiagramType.getConnection().lookup(String type, String name) 
+	eq DiagramType.getConnection().lookup(String type, String name)
 		= inheritedLookup(type, name);
-	eq DiagramType.getAnnotation().lookup(String type, String name) 
+	eq DiagramType.getAnnotation().lookup(String type, String name)
 		= inheritedLookup(type, name);
 
 	syn VarDecl TypeDecl.localLookup(String name) = null;
@@ -108,8 +108,8 @@ aspect LookupVariables {
 		if (decl == null) decl = localBlockLookup(name);
 		return decl;
 	}
-	
-	/** 
+
+	/**
 	 * Search for a name declaration, if multiply declarations exists,
 	 * the most local declaration is returned.
 	 */
@@ -131,17 +131,17 @@ aspect LookupVariables {
 		return list;
 	}
 
-	/** 
+	/**
 	 * Search for a name in the NTAs representing all parameters, variables
-	 * and blocks (both inherited and local). If multiply declarations exists, 
+	 * and blocks (both inherited and local). If multiply declarations exists,
 	 * then return the most local declaration.
 	 */
-	syn VarDecl DiagramType.inheritedLookup(String name) 
+	syn VarDecl DiagramType.inheritedLookup(String name)
 		= inheritedLookup("", name);
 	syn VarDecl DiagramType.inheritedLookup(String type, String name) {
 		ArrayList<VarDecl> list = inheritedLookupAsList(type, name);
 		return !list.isEmpty() ? list.get(list.size()-1) : null;
-	}	
+	}
 	syn ArrayList<VarDecl> DiagramType.inheritedLookupAsList(String type, String name) {
 		ArrayList<VarDecl> list = new ArrayList<>();
 		for (InParameter ip: getInParameters()) {
@@ -158,7 +158,7 @@ aspect LookupVariables {
 			if (v.name().equals(name)) {
 				list.add(v);
 			}
-		} 
+		}
 		for (InheritedBlock b: getBlocks()) {
 			String dtName = b.getDeclaredBlock().diagramType().name();
 			if (b.name().equals(name) && (type.isEmpty() || dtName.equals(type))) {
@@ -167,9 +167,9 @@ aspect LookupVariables {
 		}
 		return list;
 	}
-	
 
-	syn VarDecl VarDecl.findMember(String name);	
+
+	syn VarDecl VarDecl.findMember(String name);
 	eq Block.findMember(String name) {
 		for (Port in: getInPorts()) {
 			if (in.name().equals(name)) {
@@ -187,7 +187,7 @@ aspect LookupVariables {
 	eq Parameter.findMember(String name) = type().lookupField(name);
 	eq Variable.findMember(String name) = type().lookupField(name);
 	eq StructField.findMember(String name) = type().lookupField(name);
-	
+
 	syn VarDecl TypeDecl.lookupField(String name) = null;
 	eq Struct.lookupField(String name) {
 		for (StructField f: getStructFields()) {
@@ -197,7 +197,7 @@ aspect LookupVariables {
 		}
 		return null;
 	}
-	
+
 	syn Parameter DiagramType.localParameterLookup(String name) {
 		for (InParameter p: getLocalInParameters()) {
 			if (p.name().equals(name)) {
@@ -243,9 +243,9 @@ aspect LookupVariables {
 		return null;
 	}
 	// Use a map when searching for blocks for efficiency.
-	syn Block DiagramType.localBlockLookup(String name) 
+	syn Block DiagramType.localBlockLookup(String name)
 		= blockMap().get(name);
-	
+
 	// Efficient implementation of blockMap, which will skip
 	// uninteresting subtrees (compared to a collection attribute).
 	// Using a collection attribute would activate rewrites on
@@ -258,7 +258,7 @@ aspect LookupVariables {
 		}
 		return map;
 	}
-}	
+}
 
 aspect Names {
 	syn String TypeDecl.name();
@@ -277,7 +277,7 @@ aspect Names {
 	eq Port.name() = getParameter().name();
 	eq StructField.name() = getID();
 	syn String Literal.name() = "<unknown name>";
-	
+
 	syn String Name.name();
 	eq IdName.name() = getID();
 
@@ -321,7 +321,7 @@ aspect RewriteSimplifiedForm {
 	}
 	public VarUse ParseSimpleVarUse.newSimpleVarUse() {
 		VarUse u;
-		
+
 		VarDecl vd = decl();
 		// Fully qualify accesses to blocks declared in supertype
 		if (vd instanceof Block
@@ -333,7 +333,7 @@ aspect RewriteSimplifiedForm {
 		} else {
 			u = new SimpleVarUse(getID());
 		}
-		
+
 		u.copyColumnLineFrom(this);
 		return u;
 	}

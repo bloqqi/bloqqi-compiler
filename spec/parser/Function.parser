@@ -8,16 +8,16 @@ Function function =
 		block_stmt
 		RBRA						{: return new Function(ID, in, out, block_stmt); :}
 	;
-	
-BlockStmt block_stmt = 
+
+BlockStmt block_stmt =
 	  stmts.s?						{: return new BlockStmt(s); :}
 	;
-	
-List stmts = 
+
+List stmts =
 	  stmt.s						{: return new List().add(s); :}
 	| stmts.l stmt.s				{: return l.add(s); :}
 	;
-	
+
 Stmt stmt =
 		assignStmt.a					{: return a; :}
 	|   declStmt.d						{: return d; :}
@@ -31,28 +31,28 @@ DeclStmt declStmt =
 	| type_use ID ASSIGN fexpr.a SCOL		{: return new DeclStmt(type_use, ID, new Opt(a)); :}
 	| ID COL type_use SCOL 					{: return new DeclStmt(type_use, ID, new Opt()); :}
 	| ID COL type_use ASSIGN fexpr.a SCOL	{: return new DeclStmt(type_use, ID, new Opt(a)); :}
-	;	
+	;
 
-AssignStmt assignStmt = 
+AssignStmt assignStmt =
 		id_fexpr ASSIGN fexpr SCOL			{: return new AssignStmt(id_fexpr, fexpr); :}
 	;
-	
-WhileStmt whileStmt = 
+
+WhileStmt whileStmt =
 		WHILE LPAR fexpr RPAR LBRA block_stmt RBRA		{: return new WhileStmt(fexpr, block_stmt); :}
 	;
-	
+
 IfStmt ifStmt =
-		IF LPAR fexpr RPAR LBRA 
+		IF LPAR fexpr RPAR LBRA
 		block_stmt
 		RBRA 								{: return new IfStmt(fexpr, block_stmt, new Opt()); :}
-	|	IF LPAR fexpr RPAR LBRA 
+	|	IF LPAR fexpr RPAR LBRA
 		block_stmt
 		RBRA
 		ELSE LBRA
 		block_stmt.e
 		RBRA 								{: return new IfStmt(fexpr, block_stmt, new Opt(e)); :}
 	;
-	
+
 ReturnStmt returnStmt =
 		RETURN	SCOL						{: return new ReturnStmt(); :}
 	;
@@ -66,13 +66,13 @@ FExpr fexpr2 =
 		fexpr2.f AND fexpr3.e				{: return new AndFExpr(f, e); :}
 	|	fexpr3.e							{: return e; :}
 	;
-		
+
 FExpr fexpr3 =
 		fexpr4.f EQ fexpr4.e				{: return new EqFExpr(f, e); :}
-	|	fexpr4.f NEQ fexpr4.e				{: return new NEqFExpr(f, e); :}	
+	|	fexpr4.f NEQ fexpr4.e				{: return new NEqFExpr(f, e); :}
 	|	fexpr4.e							{: return e; :}
 	;
-	
+
 FExpr fexpr4 =
 		fexpr5.f GT fexpr5.e				{: return new GTFExpr(f, e); :}
 	|	fexpr5.f LT fexpr5.e				{: return new LTFExpr(f, e); :}
@@ -80,13 +80,13 @@ FExpr fexpr4 =
 	|	fexpr5.f LE fexpr5.e				{: return new LEFExpr(f, e); :}
 	|	fexpr5.e							{: return e; :}
 	;
-		
+
 FExpr fexpr5 =
 		fexpr5.l PLUS term.t			{: return new AddFExpr(l,t); :}
 	|	fexpr5.l MINUS term.t		{: return new SubFExpr(l,t); :}
 	|	term.t						{: return t; :}
 	;
-		
+
 FExpr term =
 	term.t ASTERIX factor.f 			{: return new MulFExpr(t,f); :}
 	| term.t SLASH factor.f				{: return new DivFExpr(t,f); :}
@@ -98,7 +98,7 @@ FExpr factor =
 	NOT factor.f						{: return new NotFExpr(f); :}
 	| MINUS factor.f					{: return new MinusFExpr(f); :}
 	| factor2.f							{: return f; :}
-	; 
+	;
 
 FExpr factor2 =
    id_fexpr.i                           {: return i; :}
@@ -107,8 +107,14 @@ FExpr factor2 =
    | LPAR fexpr.f RPAR					{: return f; :}
    | TRUE								{: return new BoolLiteralFExpr(true); :}
    | FALSE								{: return new BoolLiteralFExpr(false); :}
+   | ID LPAR fexprs.e RPAR				{: return new FunctionCallFExpr(ID, e); :}
    ;
-   
+
+List fexprs =
+	fexpr.e								{: return new List().add(e); :}
+	| fexprs.l COMMA fexpr.e			{: return l.add(e); :}
+	;
+
 IdFExpr id_fexpr =
 		ID							{: return new IdFExpr(ID); :}
-	;		
+	;

@@ -1,0 +1,30 @@
+external Print(n: Int);
+
+diagramtype Main {
+	s: S;
+	print: Print;
+	connect(s, print);
+}
+
+statemachine S(=> Int out) {
+	s1 {
+		out = Fib(1);
+	}
+	s2 {
+		out = Fib(6);
+	}
+	s3 {
+		out = Fib(12);
+	}
+	s1 => s2: true;
+	s2 => s3: true;
+	s3 => s1: true;
+}
+
+function Fib(Int n => Int out) {
+	if (n <= 1) {
+		out = n;
+	} else {
+		out = Fib(n - 1) + Fib(n - 2);
+	}
+}

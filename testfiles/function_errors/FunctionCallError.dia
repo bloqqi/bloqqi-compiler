@@ -1,0 +1,18 @@
+diagramtype Main {
+  output out: Int;
+  f: F;
+  connect(5, f);
+  connect(f, out);
+}
+
+function F(Int in => Int out)
+{
+  x1: Bool = Neg(in);
+  x2: Bool = Neg(in) && true;
+  x3: Int = Neg(true);
+  x4: Int = Neg(1, 2, 3) + Mod(2);
+  x5: Int = Neg(in) + Mod(in, false);
+  x6: Int = Main(10);
+  x7: Int = G(10);
+  x8: Int = Max(10, 20);
+}

@@ -1,2 +1,2 @@
-Line 2, column 8: 1011: Incompatible types on operands, Int and Bool
-Line 3, column 8: 1011: Incompatible types on operands, Int and Bool
+Line 2, column 15: Type error. Expected type: Int, got type: Bool
+Line 3, column 15: Type error. Expected type: Int, got type: Bool

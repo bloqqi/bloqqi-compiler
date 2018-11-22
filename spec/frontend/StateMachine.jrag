@@ -19,7 +19,7 @@ aspect StateMachineNameAnalysis {
 	}
 	StateVariable implements FunctionVarDecl;
 	eq StateVariable.fType() = type();
-
+	eq Transition.getFExpr().fExpectedType() = program().boolType();
 
 	syn State Transition.fromState() = lookupState(getFromID());
 	syn State Transition.toState() = lookupState(getToID());
@@ -51,10 +51,6 @@ aspect StateMachinePorts {
 }
 
 aspect StateMachineErrors {
-	Transition contributes error("Transitions are required to have a boolean condition")
-		when !getFExpr().fType().isBool()
-		to CompilationUnit.errors();
-
 	Transition contributes error("State " + getFromID() + " not declared")
 		when fromState() == null
 		to CompilationUnit.errors();

@@ -75,7 +75,7 @@ aspect GenerateC {
 		generateCForOneFile(sb, codeTarget, data);
 		return sb.toString();
 	}
-	
+
 	public void Program.generateCForOneFile(StringBuilder sb,
 			CodeGenerationTarget codeTarget,
 			CodeGenerationData data) {
@@ -116,7 +116,7 @@ aspect GenerateC {
 			sb.append(Utils.readResource("/c/CCodePre.c")).append("\n");
 		}
 	}
-	
+
 	public void Program.generateCDeclarations(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		sb.append("/* Typedefs */\n");
 		sb.append("#include <stdbool.h>\n");
@@ -134,7 +134,7 @@ aspect GenerateC {
 		sb.append("/* Structs representing return values */\n");
 		genStructs(sb);
 		sb.append("\n");
-		
+
 		sb.append("/* Function declarations */\n");
 		sb.append("void bloqqi_main(Main_VARS *vars);\n");
 		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
@@ -178,23 +178,23 @@ aspect GenerateC {
 			genSetInputVariable(sb);
 		}
 	}
-	
+
 	public void Program.generateStdLibC(StringBuilder sb) {
 		for (Declaration decl : getStandardLibrary().getDeclarations()) {
 			decl.generateStdLibC(sb);
 		}
 	}
-	
+
 	public void Declaration.generateStdLibC(StringBuilder sb) {
 	}
-	
+
 	public void Function.generateStdLibC(StringBuilder sb) {
-	    generateC(sb);
+		genFunctionDefinitionsC(sb);
 	}
 }
 
 
-/** 
+/**
  * Generate structs, including struct for return values
  */
 aspect Structs {
@@ -226,7 +226,7 @@ aspect Structs {
 	}
 }
 
-/** 
+/**
  * Generate function declarations
  */
 aspect FunctionDeclarations {
@@ -250,11 +250,10 @@ aspect FunctionDeclarations {
 	public void ExternalFunction.genDecls(StringBuilder sb) {
 		sb.append(functionSignature() + ";\n");
 	}
-	
-	
+
+
 	syn String TypeDecl.returnTypeC() = "<undefined>";
 	eq DiagramType.returnTypeC() = getNumOutParameter() > 0 ? nameC() + "_RES" : "void";
-	eq Function.returnTypeC() = getNumOutParameter() > 0 ? nameC() + "_RES" : "void";
 	eq ExternalFunction.returnTypeC() {
 		if (hasOutParameter()) {
 			return getOutParameter().getTypeUse().type().nameC();
@@ -297,7 +296,7 @@ aspect FunctionDeclarations {
 
 
 /**
- * Generate function implementations 
+ * Generate function implementations
  */
 aspect FunctionDefinitions {
 	public void Program.genMainWrapperDefinitionC(StringBuilder sb) {
@@ -328,7 +327,7 @@ aspect FunctionDefinitions {
 	public void DiagramType.genFunctionDefinitionsC(StringBuilder sb) {
 		if (!isAbstract()) {
 			sb.append(functionSignature() + " {\n");
-		
+
 			// Step 1: compute values
 			genBlocksC(sb);
 			// Step 2: compute return value
@@ -348,7 +347,7 @@ aspect FunctionDefinitions {
 			}
 		}
 	}
-	
+
 	private void DiagramType.genBlocksC(StringBuilder sb) {
 		// Sort blocks according to their data-flow order (DFO)
 		ArrayList<Block> list = new ArrayList<Block>();
@@ -360,7 +359,7 @@ aspect FunctionDefinitions {
 				return b1.dfo() - b2.dfo();
 			}
 		});
-		
+
 		for(Block b: list) {
 			sb.append("  ");
 			if (!b.type().returnTypeC().equals("void")) {
@@ -391,7 +390,7 @@ aspect FunctionDefinitions {
 			sb.append(");\n");
 		}
 	}
-	
+
 	private void DiagramType.genUpdateVariablesC(StringBuilder sb) {
 		for (Variable v: variables()) {
 			if (!v.ingoingValueC().isEmpty()) {
@@ -400,7 +399,7 @@ aspect FunctionDefinitions {
 			}
 		}
 	}
-	
+
 	private void DiagramType.genReturnValueC(StringBuilder sb) {
 		if (!returnTypeC().equals("void")) {
 			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + ";\n");
@@ -424,7 +423,7 @@ aspect FunctionDefinitions {
 			return ""; // may only happen for variables
 		}
 	}
-	
+
 	public String Connection.cSourceName() {
 		return getSource().cCode();
 	}
@@ -433,7 +432,7 @@ aspect FunctionDefinitions {
 	public String Literal.cCode() {
 		return toString();
 	}
-	
+
 	public String DotVarUse.cCode() {
 		if (getVarUse().type().isExternalFunction()) {
 			return getVarUse().cCode();
@@ -485,7 +484,7 @@ aspect VariableStructs {
 		// Create structs for all diagram types
 		Map<TypeDecl, String> structs = new HashMap<>();
 		genVariableStructsC(structs);
-		
+
 		// Toplogical sort over types based on type reachability
 		java.util.List<TypeDecl> list = Utils.topologicalSort(
 			structs.keySet(),
@@ -500,10 +499,10 @@ aspect VariableStructs {
 				}
 			}
 		);
-		
+
 		// Keep only types that have states (transitively)
 		list.retainAll(structs.keySet());
-		
+
 		// Write structs in reverse toplogical order
 		Collections.reverse(list);
 
@@ -705,15 +704,15 @@ aspect CNames {
 	eq WiringOutParameter.nameC() = "<undefined>";
 	eq RecommendationGroup.nameC() = "<undefined>";
 	syn String Variable.cNameDeclaration() = ASTNode.filterCName(name());
-	
+
 	syn String TypeDecl.nameC() = ASTNode.filterCName(name());
-	
+
 	coll Set<String> Program.declaredCNames() [new HashSet<String>()] with add;
 	TypeDecl contributes nameC()
 		to Program.declaredCNames() for program();
 	syn boolean Program.isCNameDeclared(String name)
 		= declaredCNames().contains(name);
-	
+
 	syn String VarDecl.nameCFiltered() {
 		String name = ASTNode.filterCName(name());
 		if (program().isCNameDeclared(name)) {
@@ -738,7 +737,7 @@ aspect CNames {
 	}
 	public static void ASTNode.initReservedCNames() {
 		reservedCNames = new HashSet<String>();
-		
+
 		// Keywords
 		reservedCNames.add("auto");
 		reservedCNames.add("_Bool");
@@ -777,7 +776,7 @@ aspect CNames {
 		reservedCNames.add("void");
 		reservedCNames.add("volatile");
 		reservedCNames.add("while");
-		
+
 		// Other
 		reservedCNames.add("bool");
 		reservedCNames.add("printf");

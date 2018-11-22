@@ -1,1 +1,1 @@
-Line 2, column 2: 1010: Incorrect type, expected type is Int but is Bool
+Line 2, column 13: Type error. Expected type: Int, got type: Bool

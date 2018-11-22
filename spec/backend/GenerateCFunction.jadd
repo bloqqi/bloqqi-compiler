@@ -1,52 +1,70 @@
 aspect GenerateCFunction {
 	public String TypeUse.fcCode() { return type().fcCode(); }
 	public String TypeDecl.fcCode() { return nameC(); }
-	
-	public void Function.generateC(StringBuilder sb) {
-		String functionStruct = getID() + "_RES";
+
+	eq Function.returnTypeC() = getNumOutParameter() > 0 ? nameC() + "_RES" : "void";
+
+	/** Generate struct for return value */
+	public void Function.genStructs(StringBuilder sb) {
 		if(getNumOutParameter() > 0) {
 			sb.append("typedef struct {\n");
-			for (int i = 0; i < getNumOutParameter(); i++) {
-				sb.append("\t" + getOutParameter(i).getTypeUse().fcCode() + " " + getOutParameter(i).getID() + ";\n");
+			for (OutParameter op: getOutParameters()) {
+				sb.append("  " + op.getTypeUse().fcCode() + " " + op.getID() + ";\n");
 			}
-			sb.append("} " + functionStruct + ";\n");	
-			sb.append(functionStruct);
+			sb.append("} " + returnTypeC() + ";\n");
 		}
-		else{
-			sb.append("void");
-		}
-		sb.append(" " + getID() + "(");
-		
+	}
+
+	/** Function declaration */
+	public void Function.genDecls(StringBuilder sb) {
+		sb.append(functionSignature() + ";\n");
+	}
+
+	/** Function signature */
+	public String Function.functionSignature() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(returnTypeC());
+		sb.append(" ");
+		sb.append(nameC());
+		sb.append("(");
 		for (int i = 0; i < getNumInParameter(); i++) {
-			sb.append(getInParameter(i).getTypeUse().fcCode() + " " + getInParameter(i).getID());
+			InParameter in = getInParameter(i);
+			sb.append(in.getTypeUse().fcCode() + " " + in.getID());
 			if (i < getNumInParameter()-1) {
 				sb.append(", ");
 			}
 		}
-		sb.append("){\n");
-		
-		if(getNumOutParameter() > 0) {
-			sb.append("\t" + functionStruct + " " + ASTNode.RESULT_VAR + ";\n");
-		}
-		
-		getBlockStmt().generateC(sb);
-		
-		if(getNumOutParameter() > 0) {
-			sb.append("\t" + "return" + " " + ASTNode.RESULT_VAR + ";");
-		}
-		
-		sb.append("\n}\n");
-	
+		sb.append(")");
+		return sb.toString();
 	}
-	
+
+	/** Function definition */
+	public void Function.genFunctionDefinitionsC(StringBuilder sb) {
+		sb.append(functionSignature() + " {\n");
+
+		if(getNumOutParameter() > 0) {
+			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + ";\n");
+		}
+
+		getBlockStmt().generateC(sb);
+
+		if(getNumOutParameter() > 0) {
+			sb.append("  " + "return" + " " + ASTNode.RESULT_VAR + ";\n");
+		}
+
+		sb.append("}\n");
+
+	}
+
 	public void BlockStmt.generateC(StringBuilder sb) {
 		for (Stmt s: getStmts()) {
 			for (int i = 0; i < s.indentLevel(); i++) {
-				sb.append("\t");
+				sb.append("  ");
 			}
 			s.generateC(sb);
 		}
-	}public void Stmt.generateC(StringBuilder sb) {	
+	}
+	public void Stmt.generateC(StringBuilder sb) {
 	}
 	public void DeclStmt.generateC(StringBuilder sb) {
 		sb.append(getTypeUse().fcCode() + " " + getID());
@@ -62,38 +80,38 @@ aspect GenerateCFunction {
 		sb.append("while (" + getFExpr().generateC() + ") {\n");
 		getBlockStmt().generateC(sb);
 		for (int i = 0; i < indentLevel(); i++) {
-			sb.append("\t");
-		}	
+			sb.append("  ");
+		}
 		sb.append("}\n");
 	}
 	public void IfStmt.generateC(StringBuilder sb) {
 		sb.append("if (" + getFExpr().generateC() + ") {\n");
 		getBlockStmt().generateC(sb);
 		for (int i = 0; i < indentLevel(); i++) {
-			sb.append("\t");
-		}	
+			sb.append("  ");
+		}
 		sb.append("}\n");
 		if (hasElse())
 		{
 			for (int i = 0; i < indentLevel(); i++) {
-				sb.append("\t");
-			}	
+				sb.append("  ");
+			}
 			sb.append("else {\n");
 			getElse().generateC(sb);
 			for (int i = 0; i < indentLevel(); i++) {
-				sb.append("\t");
-			}	
-			sb.append("}\n");			
+				sb.append("  ");
+			}
+			sb.append("}\n");
 		}
 	}
 	public void ReturnStmt.generateC(StringBuilder sb) {
 		sb.append("return " + ASTNode.RESULT_VAR + ";\n");
 	}
-	
+
 	public String FExpr.generateC() {
 		return toString();
 	}
-		
+
 	public String BinFExpr.generateC() {
 		StringBuilder sb = new StringBuilder();
 		if (precedence() < getLeft().precedence()) {
@@ -111,9 +129,9 @@ aspect GenerateCFunction {
 		if (precedence() <= getRight().precedence()) {
 			sb.append(")");
 		}
-		return sb.toString();		
+		return sb.toString();
 	}
-	
+
 	public String UnaryFExpr.generateC() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getOpString());
@@ -126,8 +144,8 @@ aspect GenerateCFunction {
 		}
 		return sb.toString();
 	}
-	
-	
+
+
 	public String IdFExpr.generateC() {
 		if (decl().isOutParameter()) {
 			return ASTNode.RESULT_VAR + "." + getID();
@@ -136,4 +154,15 @@ aspect GenerateCFunction {
 		}
 		return getID();
 	}
+
+	public String FunctionCallFExpr.generateC() {
+		StringJoiner joiner = new StringJoiner(", ");
+		for (FExpr e: getFExprs()) {
+			joiner.add(e.generateC());
+		}
+		Function f = (Function) decl();
+		String outName = f.getOutParameter(0).nameC();
+		return decl().nameC() + "(" + joiner + ")." + outName;
+	}
+
 }
