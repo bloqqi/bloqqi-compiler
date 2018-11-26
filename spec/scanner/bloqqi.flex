@@ -9,8 +9,8 @@ import org.bloqqi.compiler.ast.BloqqiParser.Terminals;
 %class BloqqiScanner
 %extends beaver.Scanner
 
-%type beaver.Symbol 
-%function nextToken 
+%type beaver.Symbol
+%function nextToken
 %yylexthrow beaver.Scanner.Exception
 %scanerror BloqqiScanner.ScannerError
 
@@ -18,7 +18,7 @@ import org.bloqqi.compiler.ast.BloqqiParser.Terminals;
 %column
 %{
   private StringBuilder stringLitSb = new StringBuilder();
-  
+
   private beaver.Symbol sym(short id) {
     return new beaver.Symbol(id, yyline + 1, yycolumn + 1, yylength(), yytext());
   }
@@ -27,12 +27,12 @@ import org.bloqqi.compiler.ast.BloqqiParser.Terminals;
     return new beaver.Symbol(id, yyline + 1, yycolumn + 1, yylength(), text);
   }
 
-  
+
   public static class ScannerError extends Error {
   	public ScannerError(String message) {
   		super(message);
   	}
-  } 
+  }
 %}
 
 WhiteSpace = [ ] | \t | \f | \n | \r | \r\n

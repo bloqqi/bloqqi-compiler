@@ -1,4 +1,4 @@
-CompilationUnit goal = 
+CompilationUnit goal =
 	PACKAGE package_name.p SCOL
 	import_decls.i?
 	declarations.d? 				{: return new CompilationUnit(p.toString(), i, d); :}
@@ -38,7 +38,7 @@ DiagramType diagram_type =
 	modifiers.m?
 	DIAGRAMTYPE ID diagram_type_parameters.dt super_types
 	LBRA
-		vars.v? 
+		vars.v?
 		block_list.c?
 		flow_decls.fd?
 	RBRA
@@ -56,7 +56,7 @@ DiagramType diagram_type =
 		return dt;
 	:}
 	;
-	
+
 List modifiers =
 	modifier.m					{: return new List().add(m); :}
 	| modifiers.l modifier.m	{: return l.add(m); :}
@@ -66,10 +66,10 @@ Modifier modifier =
 	ABSTRACT					{: return new Modifier("abstract"); :}
 	| INLINE					{: return new Modifier("inline"); :}
 	;
-	
+
 DiagramType diagram_type_parameters =
 	LPAR in_pars.in? out_pars.out RPAR
-	{: 
+	{:
 		DiagramType dt = new DiagramType();
 		dt.setLocalInParameterList(in);
 		dt.setLocalOutParameterList(out);
@@ -92,7 +92,7 @@ List vars =
 	  var.v SCOL                    {: return new List().add(v); :}
 	| vars.l var.v SCOL				{: return l.add(v); :}
 	;
-	
+
 Variable var =
 	state_var.v						{: return v; :}
 	| INPUT type_use.t ID.id		{: return new InputVariable(t, id); :}
@@ -150,7 +150,7 @@ Block block =
 		return b;
 	:}
 	;
-	
+
 Block block2 =
 	ordinary_block.o				{: return o; :}
 	| simple_block.s				{: return s; :}
@@ -158,7 +158,7 @@ Block block2 =
 	| wired_block.w					{: return w; :}
 	;
 
-Block ordinary_block = 
+Block ordinary_block =
 	type.t name.n   {: return new Block(new Modifiers(), t, n); :}
 	| name.n COL type.t {: return new Block(new Modifiers(), t, n); :}
 	;
@@ -180,7 +180,7 @@ Block simple_block =
 				// fall through
 			}
 		}
-		String errorMessage = 
+		String errorMessage =
 			"Cannot parse simple block \"" + id + "\". " +
 			"Correct syntax: TypeName_Index, where Index is a number";
 		throw new BloqqiScanner.ScannerError(errorMessage);
@@ -230,8 +230,8 @@ WiredBlockParameter wired_comp_par =
 	;
 
 Connection connection =
-	  CONNECT LPAR 
-	  expr.e COMMA var_use.u 
+	  CONNECT LPAR
+	  expr.e COMMA var_use.u
 	  RPAR  						{: return new Connection(e, u); :}
 	;
 
@@ -242,7 +242,7 @@ Interception interception =
 									{: return new SourceInterception(i, t, s); :}
 	;
 
-Struct struct = 
+Struct struct =
 	  STRUCT ID LBRA
 	  fields.l?
 	  RBRA							{: return new Struct(ID, l); :}
@@ -307,7 +307,7 @@ Expr expr =
 IntLiteral int_lit =
 	  NUM.n							{: return new IntLiteral(Integer.valueOf(n)); :}
 	;
-	
+
 RealLiteral real_lit =
 	  FLOAT.f			    	    {: return new RealLiteral(Float.valueOf(f)); :}
 	;
@@ -342,7 +342,7 @@ Opt external_function_output =
 	|								{: return new Opt(); :}
 	;
 
-List annotations = 
+List annotations =
 	  ANNOTATION LPAR
 	  	annotation_list.l? COMMA?
 	  RPAR							{: return l; :}
@@ -357,15 +357,15 @@ Annotation annotation =
 	  	NUM.y COMMA
 	  	NUM.w COMMA
 	  	NUM.h
-	  RPAR	
+	  RPAR
 	  {: int xi = Integer.valueOf(x);
 	  	 int yi = Integer.valueOf(y);
 	  	 int wi = Integer.valueOf(w);
 	  	 int hi = Integer.valueOf(h);
-	 	 return new Annotation(v, xi, yi, wi, hi); 
+		 return new Annotation(v, xi, yi, wi, hi);
 	  :}
 	;
-	
+
 Wiring wiring =
 	WIRING type_use.t LSQUAREBRA wiring_par_list.p RSQUAREBRA LBRA
 		flow_decls.fd
@@ -392,12 +392,12 @@ Declaration recommendation =
 	| RECOMMENDATION type_use.t EXTENDS SUPER SCOL
 		{: return new RecommendationExtendsSuper(t); :}
 	;
-	
+
 List recommendation_elems =
 	recommendation_elem.c SCOL							{: return new List().add(c); :}
 	| recommendation_elems.l recommendation_elem.c SCOL {: return l.add(c); :}
 	;
-	
+
 RecommendationElement recommendation_elem =
 	recommendation_block.b recommendation_default.d
 		{: return new RecommendationBlock(b, d); :}
@@ -414,7 +414,7 @@ Block recommendation_block =
 	wired_block.w					{: return w; :}
 	| ordinary_block.o				{: return o; :}
 	;
-	
+
 Opt recommendation_default =
 									{: return new Opt(); :}
 	| DEFAULT type_use.t			{: return new Opt(t); :}
