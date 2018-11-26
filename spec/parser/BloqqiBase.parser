@@ -306,11 +306,14 @@ Expr expr =
 
 IntLiteral int_lit =
 	  NUM.n							{: return new IntLiteral(Integer.valueOf(n)); :}
+	| MINUS NUM.n					{: return new IntLiteral(-Integer.valueOf(n)); :}
 	;
 
 RealLiteral real_lit =
-	  FLOAT.f			    	    {: return new RealLiteral(Float.valueOf(f)); :}
+	  FLOAT.f						{: return new RealLiteral(Float.valueOf(f)); :}
+	| MINUS FLOAT.f					{: return new RealLiteral(-Float.valueOf(f)); :}
 	;
+
 
 BoolLiteral bool_lit =
 	TRUE							{: return new BoolLiteral(true); :}

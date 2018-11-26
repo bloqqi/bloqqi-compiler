@@ -1,0 +1,10 @@
+diagramtype Main {
+  f: F;
+  connect(-10, f.x);
+}
+function F(x: Int => out: Int) {
+  y1: Int = x - 10;
+  y2: Int = x - -10;
+  y3: Int = -x;
+}
+

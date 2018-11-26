@@ -41,9 +41,9 @@ EndOfLineComment = "//" [^\n|\r|\r\n]*
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 ID = [a-zA-Z$][a-zA-Z0-9$_]*
-FLOAT  = -?[0-9]+ \. [0-9]+ {Exponent}?
+FLOAT  = [0-9]+ \. [0-9]+ {Exponent}?
 Exponent = [eE] [+-]? [0-9]+
-NUM = -?[0-9]+
+NUM = [0-9]+
 
 %state STRING
 
