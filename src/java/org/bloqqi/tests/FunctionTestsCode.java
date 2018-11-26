@@ -49,15 +49,15 @@ public class FunctionTestsCode extends TestSuite{
 		f1.prettyPrint(sb);
 		String s = 
 				"function funcName(in1: Int => out: Int) {\n" +
-				"\tout = in;\n" +
+				"  out = in;\n" +
 				"}\n";
 		assertEquals(s, sb.toString());
 	}
 	@Test
 	public void testFunction5() {
 		String s = "function Add2(in1: Int, in2: Int => out: Int, out2: Int) {\n" +
-	               "\tout = -in1;\n" +
-	               "\tout2 = in2;\n" +
+	               "  out = -in1;\n" +
+	               "  out2 = in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -69,7 +69,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionAdd1() {
 		String s = "function Add2(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 + in2;\n" +
+	               "  out = in1 + in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -77,30 +77,30 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionAdd2() {
 		String s = "function Add2(in1: Int, in2: Int, in3: Int => out: Int) {\n" +
-	               "\tv1: Int;\n" +   
-				   "\tv1 = in1 + in2;\n" +
-	               "\tout = v1 + in3;\n" +
+	               "  v1: Int;\n" +
+				   "  v1 = in1 + in2;\n" +
+	               "  out = v1 + in3;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionAdd3() {
 		String s = "function Add2(in1: Real, in2: Real => out: Real) {\n" +
-	               "\tout = in1 + in2;\n" +
+	               "  out = in1 + in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionSub1() {
 		String s = "function Sub2(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 - in2;\n" +
+	               "  out = in1 - in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionSub2() {
 		String s = "function Sub2(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 - in2 - 1 + 3 - 2;\n" +
+	               "  out = in1 - in2 - 1 + 3 - 2;\n" +
 				   "}";
 //		Program p = parseProgram(s);
 //	    p.printAST();
@@ -109,28 +109,28 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionMul1() {
 		String s = "function Mul2(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 * in2;\n" +
+	               "  out = in1 * in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionMul2() {
 		String s = "function Mul2(in1: Int, in2: Int, in3: Int => out: Int) {\n" +
-	               "\tout = in1 * in2 * in3;\n" +
+	               "  out = in1 * in2 * in3;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionDiv1() {
 		String s = "function Div2(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 / in2;\n" +
+	               "  out = in1 / in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionBinExpr1() {
 		String s = "function fexpr(in1: Int, in2: Int, in3: Int, in4: Int => out: Int) {\n" +
-	               "\tout = in1 / in2 + in3 * in4;\n" +
+	               "  out = in1 / in2 + in3 * in4;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -138,11 +138,11 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionBinComparisons() {
 		String s = "function ge(in1: Int, in2: Int => out: Bool) {\n" +
-	               "\tout = in1 > 3;\n" +
-	               "\tout = in1 < in2;\n" +
-	               "\tout = in1 <= 2;\n" +
-	               "\tout = in1 != in2;\n" +
-	               "\tout = !out;\n" +
+	               "  out = in1 > 3;\n" +
+	               "  out = in1 < in2;\n" +
+	               "  out = in1 <= 2;\n" +
+	               "  out = in1 != in2;\n" +
+	               "  out = !out;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -150,10 +150,10 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionWhileStmt() {
 		String s = "function whileStmt(in1: Int => out: Int) {\n" +
-		           "\tout = 0;\n" +
-	               "\twhile (out < in1) {\n" +
-	               "\t\tout = out + 1;\n" +
-	               "\t}\n" +
+		           "  out = 0;\n" +
+	               "  while (out < in1) {\n" +
+	               "    out = out + 1;\n" +
+	               "  }\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -161,9 +161,9 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionIfStatements() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Bool) {\n" +
-	               "\tif (in1 < in2) {" + "\n" +
-	               "\t\tout = in1 < in2;\n" +
-				   "\t}\n" +
+	               "  if (in1 < in2) {" + "\n" +
+	               "    out = in1 < in2;\n" +
+				   "  }\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -171,12 +171,12 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionIfElseStatements() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Bool) {\n" +
-	               "\tif (in1 < in2) {" + "\n" +
-	               "\t\tout = in1 < in2;\n" +
-				   "\t}\n" +
-	               "\telse {\n" +
-	               "\t\tout = in2 != in1;\n" +
-				   "\t}\n" +
+	               "  if (in1 < in2) {" + "\n" +
+	               "    out = in1 < in2;\n" +
+				   "  }\n" +
+	               "  else {\n" +
+	               "    out = in2 != in1;\n" +
+				   "  }\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -184,14 +184,14 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionIfElseIfStatements() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Bool) {\n" +
-	               "\tif (in1 < in2) {" + "\n" +
-	               "\t\tout = in1 < in2;\n" +
-				   "\t}\n" +
-	               "\telse {\n" +
-	               "\t\tif (in1 == in2) {\n" +
-	               "\t\t\tout = in2 != in1;\n" +
-				   "\t\t}\n" +
-				   "\t}\n" +
+	               "  if (in1 < in2) {" + "\n" +
+	               "    out = in1 < in2;\n" +
+				   "  }\n" +
+	               "  else {\n" +
+	               "    if (in1 == in2) {\n" +
+	               "      out = in2 != in1;\n" +
+				   "    }\n" +
+				   "  }\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -199,9 +199,9 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionAndOrStatements() {
 		String s = "function ifFunc(in1: Bool, in2: Bool, in3: Bool => out: Bool) {\n" +
-	               "\tif (in1 && in2 || in3) {" + "\n" +
-	               "\t\tout = in1 || in2;\n" +
-				   "\t}\n" +
+	               "  if (in1 && in2 || in3) {" + "\n" +
+	               "    out = in1 || in2;\n" +
+				   "  }\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -209,7 +209,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionExprPar() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 + 2 + in2;\n" +
+	               "  out = in1 + 2 + in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -231,9 +231,9 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionReturn() {
 		String s = "function getFunc( => out1: Int, out2: Int) {\n" +
-				   "\tif (true) {\n" +
-					"\t\treturn;\n" +
-				   "\t}\n" +
+				   "  if (true) {\n" +
+					"    return;\n" +
+				   "  }\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -241,9 +241,9 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionNameAnalysis() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Int) {\n" +
-	               "\ti: Int;\n" +
-				   "\ti = 4;\n" +
-				   "\tx = 4;\n" +
+	               "  i: Int;\n" +
+				   "  i = 4;\n" +
+				   "  x = 4;\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -251,14 +251,14 @@ public class FunctionTestsCode extends TestSuite{
 		DeclStmt d = (DeclStmt)f.getBlockStmt().getStmt(0);
 		AssignStmt a = (AssignStmt)f.getBlockStmt().getStmt(1);
 		assertSame(d, a.getLeft().decl());
-		assertEquals("Line 4, column 2: The declaration of x was not found", cu.errors().iterator().next().toString());
+		assertEquals("Line 4, column 3: The declaration of x was not found", cu.errors().iterator().next().toString());
 	}
 
 	@Test
 	public void testFunctionNameAnalysis1() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Int) {\n" +
-				   "\ti = 4;\n" +
-	               "\ti: Int;\n" +
+				   "  i = 4;\n" +
+	               "  i: Int;\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		Function f = (Function) p.getCompilationUnit(0).typeDecls().get(0);
@@ -269,12 +269,12 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionNameAnalysis2() {
 		String s = "function ifFunc(in1: Int, in2: Int => out: Int) {\n" +
-	               "\ti: Int;\n" +
-	               "\tif (true) {\n" +
-				   "\t\ti = 4;\n" +
-				   "\t\tout = 4;\n" +
-				   "\t\tin2 = 5;\n" +
-				   "\t}\n" + 
+	               "  i: Int;\n" +
+	               "  if (true) {\n" +
+				   "    i = 4;\n" +
+				   "    out = 4;\n" +
+				   "    in2 = 5;\n" +
+				   "  }\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -292,7 +292,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionTypeAnalysis1() {
 		String s = "function iffunc(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = in1 + 2;\n" +
+	               "  out = in1 + 2;\n" +
 				   "}";
 		Program p = parseAndCheck(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -305,7 +305,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionTypeAnalysis2() {
 		String s = "function iffunc(in1: Bool, in2: Int => out: Bool) {\n" +
-	               "\tout = in1 || false;\n" +
+	               "  out = in1 || false;\n" +
 				   "}";
 		Program p = parseAndCheck(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -318,8 +318,8 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionTypeAnalysis3() {
 		String s = "function EqNewfunc(in1: Bool, in2: Bool => out: Bool) {\n" +
-	               "\tout = in1 == in2;\n" +
-	               "\tout = in1 != in2;\n" +
+	               "  out = in1 == in2;\n" +
+	               "  out = in1 != in2;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -327,7 +327,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionParanthesis1() {
 		String s = "function parfunc(in1: Int, in2: Int, in3: Int => out: Int) {\n" +
-	               "\tout = (in1 + in2) * in3;\n" +
+	               "  out = (in1 + in2) * in3;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -335,7 +335,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionParanthesis2() {
 		String s = "function parfunc(in1: Bool, in2: Bool, in3: Bool, in4: Bool => out: Bool) {\n" +
-	               "\tout = (in1 || in2) && in3 || in4;\n" +
+	               "  out = (in1 || in2) && in3 || in4;\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -343,7 +343,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionParanthesis3() {
 		String s = "function parfunc(in1: Int, in2: Int, in3: Int => out: Int) {\n" +
-	               "\tout = in1 - (in2 - in3);\n" +
+	               "  out = in1 - (in2 - in3);\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -351,7 +351,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionParanthesis4() {
 		String s = "function parfunc(in1: Int, in2: Int, in3: Int, in4: Int => out: Int) {\n" +
-	               "\tout = (in1 + in2) * (in3 - in4);\n" +
+	               "  out = (in1 + in2) * (in3 - in4);\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -359,7 +359,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC1() {
 		String s = "function parfunc(in1: Bool, in2: Bool, in3: Bool, in4: Bool => out: Bool) {\n" +
-	               "\tout = (in1 || in2) && in3 || in4;\n" +
+	               "  out = (in1 || in2) && in3 || in4;\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -377,9 +377,9 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC2() {
 		String s = "function parfunc(in1: Bool, in2: Bool => out: Bool) {\n" +
-				   "\tif (in1 > in2) {\n" +
-				   "\t\treturn;\n" +
-				   "\t}\n" +
+				   "  if (in1 > in2) {\n" +
+				   "    return;\n" +
+				   "  }\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -399,7 +399,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC3() {
 		String s = "function parfunc(in1: Bool, in2: Bool => out: Bool) {\n" +
-	               "\tout = !(!(in1 || in2));\n" +
+	               "  out = !(!(in1 || in2));\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -417,9 +417,9 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC4() {
 		String s = "function parfunc(in1: Bool, in2: Bool => out: Bool) {\n" +
-				   "\twhile (in1 > in2) {\n" +
-				   "\t\tin2 = in2 + 1;\n" +
-				   "\t}\n" +
+				   "  while (in1 > in2) {\n" +
+				   "    in2 = in2 + 1;\n" +
+				   "  }\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -439,8 +439,8 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC5() {
 		String s = "function parfunc(in1: Int => out: Int) {\n" +
-				   "\tvar1: Int = 3;\n" +
-	               "\tout = in1 + var1;\n" +
+				   "  var1: Int = 3;\n" +
+	               "  out = in1 + var1;\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -459,8 +459,8 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC6() {
 		String s = "function parfunc(in1: Int => out: Int) {\n" +
-				   "\tvar1: Int = in1 * in1 + 3;\n" +
-	               "\tout = in1 + var1;\n" +
+				   "  var1: Int = in1 * in1 + 3;\n" +
+	               "  out = in1 + var1;\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -478,8 +478,8 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionGenerateC7() {
 		String s = "function parfunc(in1: Real => out: Real) {\n" +
-				   "\tvar1: Real = in1 * in1 + 3.2;\n" +
-	               "\tout = in1 + var1;\n" +
+				   "  var1: Real = in1 * in1 + 3.2;\n" +
+	               "  out = in1 + var1;\n" +
 				   "}";
 		Program p = parsePrettyPrint(s);
 		CompilationUnit cu = p.getCompilationUnit(0);
@@ -497,14 +497,14 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionRealValues() {
 		String s = "function Add2(in1: Real, in2: Real => out: Real) {\n" +
-	               "\tout = -(in1 + 25.12 - 2.123e-2);\n" +
+	               "  out = -(in1 + 25.12 - 2.123e-2);\n" +
 				   "}";
 		parseAndCheck(s);
 	}
 	@Test
 	public void testFunctionUnaryMinus() {
 		String s = "function Add2(in1: Int, in2: Int => out: Int) {\n" +
-	               "\tout = -(in1 + in2);\n" +
+	               "  out = -(in1 + in2);\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -512,7 +512,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionUnaryNot() {
 		String s = "function Add2(in1: Int, in2: Int => out: Bool) {\n" +
-	               "\tout = !(in1 >= in2);\n" +
+	               "  out = !(in1 >= in2);\n" +
 				   "}";
 		parseAndCheck(s);
 	}
@@ -520,7 +520,7 @@ public class FunctionTestsCode extends TestSuite{
 	@Test
 	public void testFunctionUnaryNot2() {
 		String s = "function Add2(in1: Int, in2: Int => out: Bool) {\n" +
-	               "\tout = !(!(in1 >= in2));\n" +
+	               "  out = !(!(in1 >= in2));\n" +
 				   "}";
 		parseAndCheck(s);
 	}

@@ -49,7 +49,7 @@ aspect FunctionPrettyPrint {
 	public void BlockStmt.prettyPrint(StringBuilder sb) {
 		for (Stmt s: getStmts()) {
 			for (int i = 0; i < s.indentLevel(); i++) {
-				sb.append("\t");
+				sb.append("  ");
 			}
 			s.prettyPrint(sb);
 		}
@@ -70,7 +70,7 @@ aspect FunctionPrettyPrint {
 		sb.append("while (" + getFExpr() + ") {\n");
 		getBlockStmt().prettyPrint(sb);
 		for (int i = 0; i < indentLevel(); i++) {
-			sb.append("\t");
+			sb.append("  ");
 		}
 		sb.append("}\n");
 	}
@@ -78,18 +78,18 @@ aspect FunctionPrettyPrint {
 		sb.append("if (" + getFExpr() + ") {\n");
 		getBlockStmt().prettyPrint(sb);
 		for (int i = 0; i < indentLevel(); i++) {
-			sb.append("\t");
+			sb.append("  ");
 		}
 		sb.append("}\n");
 		if (hasElse())
 		{
 			for (int i = 0; i < indentLevel(); i++) {
-				sb.append("\t");
+				sb.append("  ");
 			}
 			sb.append("else {\n");
 			getElse().prettyPrint(sb);
 			for (int i = 0; i < indentLevel(); i++) {
-				sb.append("\t");
+				sb.append("  ");
 			}
 			sb.append("}\n");
 		}
