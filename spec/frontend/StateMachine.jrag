@@ -1,4 +1,7 @@
 aspect StateMachineNameAnalysis {
+	syn boolean TypeDecl.isStateMachine() = false;
+	eq StateMachine.isStateMachine() = true;
+
 	eq StateMachine.getChild().lookupId(String id) {
 		for (InParameter in: getInParameters()) {
 			if (in.name().equals(id)) {
