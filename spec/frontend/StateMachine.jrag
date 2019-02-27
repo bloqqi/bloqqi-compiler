@@ -2,13 +2,21 @@ aspect StateMachineNameAnalysis {
 	syn boolean TypeDecl.isStateMachine() = false;
 	eq StateMachine.isStateMachine() = true;
 
+	syn nta OutParameter State.outParameter() {
+		if (getIsPublic()) {
+			return new OutParameter(new TypeUse("Bool"), getID());
+		} else {
+			return null;
+		}
+	}
+
 	eq StateMachine.getChild().lookupId(String id) {
 		for (InParameter in: getInParameters()) {
 			if (in.name().equals(id)) {
 				return in;
 			}
 		}
-		for (OutParameter out: getOutParameters()) {
+		for (OutParameter out: allOutParameters()) {
 			if (out.name().equals(id)) {
 				return out;
 			}
@@ -37,6 +45,19 @@ aspect StateMachineNameAnalysis {
 		return null;
 	}
 
+	syn java.util.List<OutParameter> StateMachine.allOutParameters() {
+		ArrayList<OutParameter> list = new ArrayList<>();
+		for (OutParameter p: getOutParameters()) {
+			list.add(p);
+		}
+		for (State s: getStates()) {
+			if (s.getIsPublic()) {
+				list.add(s.outParameter());
+			}
+		}
+		return list;
+	}
+
 	coll Set<Transition> State.transitions() [new HashSet<>()] root StateMachine;
 	Transition contributes this
 		when fromState() != null
@@ -49,7 +70,11 @@ aspect StateMachinePorts {
 	}
 
 	protected List<Port> StateMachine.createOutPortList() {
-		return createPortList(getOutParameters());
+		List<Port> ports = new List<>();
+		for (OutParameter out: allOutParameters()) {
+			ports.add(new Port(out));
+		}
+		return ports;
 	}
 }
 

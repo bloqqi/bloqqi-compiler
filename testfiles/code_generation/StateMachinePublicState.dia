@@ -1,0 +1,42 @@
+external PrintStrBool(String str, Bool b);
+
+statemachine SR(S: Bool, R: Bool => Q: Bool) {
+  F {
+    Q = false;
+  }
+  T {
+    Q = true;
+  }
+  F => T: S;
+  T => F: R;
+}
+
+statemachine SRPublic(S: Bool, R: Bool) {
+  NotQ { }
+  public Q { }
+  NotQ => Q: S;
+  Q => NotQ: R;
+}
+
+diagramtype Main {
+  var q: Bool;
+  sr1: SR;
+  sr2: SRPublic;
+
+  prQ: PrintStrBool;
+  prSr1Q: PrintStrBool;
+  prSr2Q: PrintStrBool;
+
+  connect(true, sr1.S);
+  connect(q, sr1.R);
+  connect(true, sr2.S);
+  connect(q, sr2.R);
+  connect(sr1.Q, q);
+
+  connect("q=", prQ.str);
+  connect(q, prQ.b);
+  connect("sr1.Q=", prSr1Q.str);
+  connect(sr1.Q, prSr1Q.b);
+  connect("sr2.Q=", prSr2Q.str);
+  connect(sr2.Q, prSr2Q.b);
+}

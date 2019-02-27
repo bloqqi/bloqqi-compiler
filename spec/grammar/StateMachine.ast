@@ -1,4 +1,4 @@
 StateMachine : UserDefType ::= InParameter* OutParameter* StateVariable* State* Transition*;
 
-State ::= <ID> AssignStmt*;
+State ::= <IsPublic:boolean> <ID> AssignStmt*;
 Transition ::= <FromID> <ToID> FExpr;

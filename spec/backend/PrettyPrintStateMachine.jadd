@@ -30,7 +30,11 @@ aspect StateMachinePrettyPrint {
 	}
 
 	public void State.prettyPrint(StringBuilder sb) {
-		sb.append("  " + getID() + " {\n");
+		sb.append("  ");
+		if (getIsPublic()) {
+			sb.append("public ");
+		}
+		sb.append(getID() + " {\n");
 		for (AssignStmt asg: getAssignStmts()) {
 			sb.append("    ");
 			asg.prettyPrint(sb);

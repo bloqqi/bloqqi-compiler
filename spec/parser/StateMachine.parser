@@ -24,7 +24,8 @@ List state_list =
 	;
 
 State state =
-	ID LBRA assign_list.l RBRA		{: return new State(ID, l); :}
+	ID LBRA assign_list.l RBRA		{: return new State(false, ID, l); :}
+	| PUBLIC ID LBRA assign_list.l RBRA {: return new State(true, ID, l); :}
 	;
 
 List assign_list =
