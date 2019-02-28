@@ -120,7 +120,7 @@ aspect StateMachineErrorAnalysis {
 	eq Program.getChild().isInStateMachine() = false;
 	eq StateMachine.getChild().isInStateMachine() = true;
 
-	syn Set<String> StateMachine.outputs() {
+	syn Set<String> StateMachine.explicitOutputs() {
 		Set<String> set = new HashSet<>();
 		for (OutParameter p: getOutParameters()) {
 			set.add(p.getID());
@@ -128,7 +128,7 @@ aspect StateMachineErrorAnalysis {
 		return set;
 	}
 	syn Set<String> State.undefinedOutputs() {
-		Set<String> outputs = new HashSet<>(stateMachine().outputs());
+		Set<String> outputs = new HashSet<>(stateMachine().explicitOutputs());
 		for (AssignStmt asg: getAssignStmts()) {
 			outputs.remove(asg.getLeft().getID());
 		}
