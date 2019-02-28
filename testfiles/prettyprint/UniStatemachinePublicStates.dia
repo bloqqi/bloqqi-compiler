@@ -1,0 +1,37 @@
+statemachine Uni(Cmd1: Bool, Cmd0: Bool, Interlock1: Bool, Interlock0: Bool, Fb1: Bool, Fb0: Bool => ObjectError: Bool) {
+  public Object0 {
+    ObjectError = !Fb0 || Fb1;
+  }
+  public Object1 {
+    ObjectError = Fb0 || !Fb1;
+  }
+  public Changing0to1 {
+    ObjectError = Fb0 || Fb1;
+  }
+  public Changing1to0 {
+    ObjectError = Fb0 || Fb1;
+  }
+  Object0 => Changing0to1: Cmd1 && !Interlock1;
+  Object1 => Changing1to0: Cmd0 && !Interlock0;
+  Changing0to1 => Changing1to0: Cmd0 && !Interlock0;
+  Changing0to1 => Object1: Fb1 && !Fb0;
+  Changing1to0 => Object0: Fb0 && !Fb1;
+}
+diagramtype Main {
+  output Object0: Bool;
+  output Changing0to1: Bool;
+  output Object1: Bool;
+  output Changing1to0: Bool;
+  uni: Uni;
+  connect(false, uni.Cmd1);
+  connect(false, uni.Cmd0);
+  connect(false, uni.Interlock1);
+  connect(false, uni.Interlock0);
+  connect(false, uni.Fb0);
+  connect(false, uni.Fb1);
+  connect(uni.Object0, Object0);
+  connect(uni.Changing0to1, Changing0to1);
+  connect(uni.Object1, Object1);
+  connect(uni.Changing1to0, Changing1to0);
+}
+
