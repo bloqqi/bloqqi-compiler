@@ -299,17 +299,22 @@ aspect PrettyPrint {
 		return String.valueOf(getValue());
 	}
 	public String StringLiteral.toString() {
+		return "\"" + getContent() + "\"";
+	}
+	public String StringLiteral.getContent() {
 		String s = getValue();
 		s = s.replace("\t", "\\t");
 		s = s.replace("\n", "\\n");
 		s = s.replace("\r", "\\r");
 		s = s.replace("\"", "\\\"");
-		return "\"" + s + "\"";
+		return s;
 	}
 
 	public String MultiLineStringLiteral.toString() {
-		String s = getValue();
-		return "\"\"\"" + s + "\"\"\"";
+		return "\"\"\"" + getValue() + "\"\"\"";
+	}
+	public String MultiLineStringLiteral.getContent() {
+		return getValue();
 	}
 	public String DocString.toString() {
 		return getDoc().toString();
