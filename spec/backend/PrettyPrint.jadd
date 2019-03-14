@@ -14,11 +14,20 @@ aspect PrettyPrint {
 	public String CompilationUnit.prettyPrint() {
 		StringBuilder sb = new StringBuilder();
 		for (Declaration d: getDeclarations()) {
-			d.prettyPrint(sb);
+			d.prettyPrintWithDocString(sb);
 		}
 		return sb.toString();
 	}
 
+	public void Declaration.prettyPrintWithDocString(StringBuilder sb) {
+		prettyPrint(sb);
+	}
+	public void UserDefType.prettyPrintWithDocString(StringBuilder sb) {
+		if (hasDocString()) {
+			sb.append(getDocString()).append("\n");
+		}
+		prettyPrint(sb);
+	}
 	public void Declaration.prettyPrint(StringBuilder sb) {}
 	public String Declaration.prettyPrint() {
 		StringBuilder sb = new StringBuilder();
@@ -296,6 +305,14 @@ aspect PrettyPrint {
 		s = s.replace("\r", "\\r");
 		s = s.replace("\"", "\\\"");
 		return "\"" + s + "\"";
+	}
+
+	public String MultiLineStringLiteral.toString() {
+		String s = getValue();
+		return "\"\"\"" + s + "\"\"\"";
+	}
+	public String DocString.toString() {
+		return getDoc().toString();
 	}
 
 	public String AbstractSimpleVarUse.toString() {

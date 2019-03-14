@@ -419,6 +419,7 @@ aspect Inheritance {
 	
 	inh Connection Literal.enclosingConnection();
 	eq Connection.getSource().enclosingConnection() = this;
+	eq DocString.getDoc().enclosingConnection() = null;
 	
 	syn boolean Node.isInherited();
 	eq Block.isInherited() = declaredInDiagramType() != diagramType();

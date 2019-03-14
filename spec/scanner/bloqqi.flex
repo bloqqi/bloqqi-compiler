@@ -27,7 +27,6 @@ import org.bloqqi.compiler.ast.BloqqiParser.Terminals;
     return new beaver.Symbol(id, yyline + 1, yycolumn + 1, yylength(), text);
   }
 
-
   public static class ScannerError extends Error {
   	public ScannerError(String message) {
   		super(message);
@@ -45,7 +44,7 @@ FLOAT  = [0-9]+ \. [0-9]+ {Exponent}?
 Exponent = [eE] [+-]? [0-9]+
 NUM = [0-9]+
 
-%state STRING
+%state STRING MULTILINE_STRING
 
 %%
 <YYINITIAL> {
@@ -123,17 +122,32 @@ NUM = [0-9]+
 	// Literals
 	{FLOAT}         { return sym(Terminals.FLOAT); }
 	{NUM}			{ return sym(Terminals.NUM); }
+	\"\"\"			{ stringLitSb.setLength(0); yybegin(MULTILINE_STRING); }
 	\"				{ stringLitSb.setLength(0); yybegin(STRING); }
 	<<EOF>> 		{ return sym(Terminals.EOF); }
 }
 
+/**
+ * String literal (newlines are disallowed)
+ */
 <STRING> {
 	\"				{ yybegin(YYINITIAL); return sym(Terminals.STRING_LITERAL, stringLitSb.toString()); }
-	[^\n\r\"\\]+	{ stringLitSb.append( yytext() ); }
+	[^\n\r\"\\]+	{ stringLitSb.append(yytext()); }
 	\\t				{ stringLitSb.append('\t'); }
 	\\n				{ stringLitSb.append('\n'); }
 	\\r				{ stringLitSb.append('\r'); }
 	\\\"			{ stringLitSb.append('\"'); }
+	\\				{ stringLitSb.append('\\'); }
+}
+
+
+/**
+ * Multi-line string literal (make sure to correctly escape escaped characters)
+ */
+<MULTILINE_STRING> {
+	\"\"\"			{ yybegin(YYINITIAL); return sym(Terminals.MULTILINE_STRING_LITERAL, stringLitSb.toString()); }
+	\"				{ stringLitSb.append('"'); }
+	[^\"\\]+		{ stringLitSb.append(yytext()); }
 	\\				{ stringLitSb.append('\\'); }
 }
 

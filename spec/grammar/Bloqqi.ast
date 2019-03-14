@@ -8,7 +8,7 @@ abstract VarDecl;
 /** Declarations */
 abstract Declaration;
 abstract TypeDecl : Declaration;
-abstract UserDefType : TypeDecl ::= <ID>;
+abstract UserDefType : TypeDecl ::= [DocString] <ID>;
 DiagramType : UserDefType ::= 
 	Modifiers
 	LocalInParameter:InParameter* LocalOutParameter:OutParameter* SuperType:TypeUse*
@@ -29,6 +29,7 @@ BoolType : PrimitiveType;
 StringType : PrimitiveType;
 UnknownType : TypeDecl;
 
+DocString ::= Doc:StringLiteral;
 
 /** Types */
 abstract Type;
@@ -91,6 +92,7 @@ IntLiteral : Literal ::= <Value:int>;
 RealLiteral : Literal ::= <Value:float>;
 BoolLiteral : Literal ::= <Value:boolean>;
 StringLiteral : Literal ::= <Value>;
+MultiLineStringLiteral : StringLiteral;
 abstract VarUse : Expr;
 abstract AbstractSimpleVarUse : VarUse ::= <ID>;
 ParseSimpleVarUse : AbstractSimpleVarUse;

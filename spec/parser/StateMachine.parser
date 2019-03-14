@@ -1,4 +1,4 @@
-Declaration declaration =
+UserDefType user_def_type =
 	  state_machine.sm				{: return sm; :}
 	;
 
@@ -10,7 +10,7 @@ StateMachine state_machine =
 			state_list.s
 			transition_list.t
 		RBRA
-		{: return new StateMachine(ID, in, out, v, s, t); :}
+		{: return new StateMachine(new Opt(), ID, in, out, v, s, t); :}
 	;
 
 List state_vars =

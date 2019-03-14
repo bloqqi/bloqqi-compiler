@@ -1,4 +1,4 @@
-Declaration declaration =
+UserDefType user_def_type =
 	  function.f					{: return f; :}
 	;
 
@@ -6,7 +6,7 @@ Declaration declaration =
 Function function =
 		FUNCTION ID LPAR in_pars.in? out_pars.out RPAR LBRA
 		block_stmt
-		RBRA						{: return new Function(ID, in, out, block_stmt); :}
+		RBRA						{: return new Function(new Opt(), ID, in, out, block_stmt); :}
 	;
 
 BlockStmt block_stmt =

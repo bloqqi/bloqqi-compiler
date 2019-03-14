@@ -1,0 +1,26 @@
+"""
+A description for "D"
+"""
+diagramtype D {
+}
+"""
+A description for \"S\"
+"""
+struct S {
+}
+"""
+A \t\rdescription for EF\n\n
+"""
+external EF(in: Int);
+"""
+A description for F
+"""
+function F( => out: Int) {
+  out = 1;
+}
+"""A description for SM"""
+statemachine SM() {
+  S1 {
+  }
+  S1 => S1: false;
+}
