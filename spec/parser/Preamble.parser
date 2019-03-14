@@ -1,5 +1,5 @@
 %header {:
-	package org.bloqqi.compiler.ast;
+    package org.bloqqi.compiler.ast;
 :};
 
 %goal goal;

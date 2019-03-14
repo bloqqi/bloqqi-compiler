@@ -1,445 +1,445 @@
 CompilationUnit goal =
-	PACKAGE package_name.p SCOL
-	import_decls.i?
-	declarations.d? 				{: return new CompilationUnit(p.toString(), i, d); :}
-	| import_decls.i?
-	declarations.d? 				{: return new CompilationUnit("", i, d); :}
-	;
+    PACKAGE package_name.p SCOL
+    import_decls.i?
+    declarations.d?                 {: return new CompilationUnit(p.toString(), i, d); :}
+    | import_decls.i?
+    declarations.d?                 {: return new CompilationUnit("", i, d); :}
+    ;
 
 
 VarUse package_name =
-	simple_var_use.u				{: return u; :}
-	| package_name.p DOT ID.id		{: return new DotVarUse(p, id); :}
-	;
+    simple_var_use.u                {: return u; :}
+    | package_name.p DOT ID.id      {: return new DotVarUse(p, id); :}
+    ;
 
 List import_decls =
-	import_decl.d					{: return new List().add(d); :}
-	| import_decls.l import_decl.d	{: return l.add(d); :}
-	;
+    import_decl.d                   {: return new List().add(d); :}
+    | import_decls.l import_decl.d  {: return l.add(d); :}
+    ;
 
 ImportDecl import_decl =
-	IMPORT package_name.p DOT type_use.t SCOL
-		{: return new ImportDecl(p.toString(), t); :}
-	;
+    IMPORT package_name.p DOT type_use.t SCOL
+        {: return new ImportDecl(p.toString(), t); :}
+    ;
 
 List declarations =
-	  declaration.d					{: return new List().add(d); :}
-	| declarations.l declaration.d	{: return l.add(d); :}
-	;
+      declaration.d                 {: return new List().add(d); :}
+    | declarations.l declaration.d  {: return l.add(d); :}
+    ;
 
 Declaration declaration =
-	recommendation.r				{: return r; :}
-	| user_def_type_with_doc.u		{: return u; :}
-	;
+    recommendation.r                {: return r; :}
+    | user_def_type_with_doc.u      {: return u; :}
+    ;
 
 UserDefType user_def_type_with_doc =
-	user_def_type.u					{: return u; :}
-	| doc_string.d user_def_type.u
-	{:
-		u.setDocString(d);
-		return u;
-	:}
-	;
+    user_def_type.u                 {: return u; :}
+    | doc_string.d user_def_type.u
+    {:
+        u.setDocString(d);
+        return u;
+    :}
+    ;
 
 
 UserDefType user_def_type =
-	  diagram_type.dt				{: return dt; :}
-	| struct.s						{: return s; :}
-	| external_function.e			{: return e; :}
-	;
+      diagram_type.dt               {: return dt; :}
+    | struct.s                      {: return s; :}
+    | external_function.e           {: return e; :}
+    ;
 
 
 DocString doc_string =
-	string_lit.s 					{: return new DocString(s); :}
-	;
+    string_lit.s                    {: return new DocString(s); :}
+    ;
 
 DiagramType diagram_type =
-	modifiers.m?
-	DIAGRAMTYPE ID diagram_type_parameters.dt super_types
-	LBRA
-		vars.v?
-		block_list.c?
-		flow_decls.fd?
-	RBRA
-	annotations.a?
-	wiring.w?
-	{:
-		dt.setID(ID);
-		dt.setModifiers(new Modifiers(m));
-		dt.setSuperTypeList(super_types);
-		dt.setLocalVariableList(v);
-		dt.setLocalBlockList(c);
-		dt.setFlowDeclList(fd);
-		dt.setAnnotationList(a);
-		dt.setLocalWiringOpt(w);
-		return dt;
-	:}
-	;
+    modifiers.m?
+    DIAGRAMTYPE ID diagram_type_parameters.dt super_types
+    LBRA
+        vars.v?
+        block_list.c?
+        flow_decls.fd?
+    RBRA
+    annotations.a?
+    wiring.w?
+    {:
+        dt.setID(ID);
+        dt.setModifiers(new Modifiers(m));
+        dt.setSuperTypeList(super_types);
+        dt.setLocalVariableList(v);
+        dt.setLocalBlockList(c);
+        dt.setFlowDeclList(fd);
+        dt.setAnnotationList(a);
+        dt.setLocalWiringOpt(w);
+        return dt;
+    :}
+    ;
 
 List modifiers =
-	modifier.m					{: return new List().add(m); :}
-	| modifiers.l modifier.m	{: return l.add(m); :}
-	;
+    modifier.m                  {: return new List().add(m); :}
+    | modifiers.l modifier.m    {: return l.add(m); :}
+    ;
 
 Modifier modifier =
-	ABSTRACT					{: return new Modifier("abstract"); :}
-	| INLINE					{: return new Modifier("inline"); :}
-	;
+    ABSTRACT                    {: return new Modifier("abstract"); :}
+    | INLINE                    {: return new Modifier("inline"); :}
+    ;
 
 DiagramType diagram_type_parameters =
-	LPAR in_pars.in? out_pars.out RPAR
-	{:
-		DiagramType dt = new DiagramType();
-		dt.setLocalInParameterList(in);
-		dt.setLocalOutParameterList(out);
-		return dt;
-	:}
-	| /* epsilon */		{: return new DiagramType(); :}
-	;
+    LPAR in_pars.in? out_pars.out RPAR
+    {:
+        DiagramType dt = new DiagramType();
+        dt.setLocalInParameterList(in);
+        dt.setLocalOutParameterList(out);
+        return dt;
+    :}
+    | /* epsilon */     {: return new DiagramType(); :}
+    ;
 
 List super_types =
-									{: return new List(); :}
-	| EXTENDS super_type_list.l		{: return l; :}
-	;
+                                    {: return new List(); :}
+    | EXTENDS super_type_list.l     {: return l; :}
+    ;
 
 List super_type_list =
-	  type_use.t					{: return new List().add(t); :}
-	| super_type_list.l COMMA type_use.t {: return l.add(t); :}
-	;
+      type_use.t                    {: return new List().add(t); :}
+    | super_type_list.l COMMA type_use.t {: return l.add(t); :}
+    ;
 
 List vars =
-	  var.v SCOL                    {: return new List().add(v); :}
-	| vars.l var.v SCOL				{: return l.add(v); :}
-	;
+      var.v SCOL                    {: return new List().add(v); :}
+    | vars.l var.v SCOL             {: return l.add(v); :}
+    ;
 
 Variable var =
-	state_var.v						{: return v; :}
-	| INPUT type_use.t ID.id		{: return new InputVariable(t, id); :}
-	| INPUT ID.id COL type_use.t	{: return new InputVariable(t, id); :}
-	| OUTPUT type_use.t ID.id		{: return new OutputVariable(t, id); :}
-	| OUTPUT ID.id COL type_use.t	{: return new OutputVariable(t, id); :}
-	;
+    state_var.v                     {: return v; :}
+    | INPUT type_use.t ID.id        {: return new InputVariable(t, id); :}
+    | INPUT ID.id COL type_use.t    {: return new InputVariable(t, id); :}
+    | OUTPUT type_use.t ID.id       {: return new OutputVariable(t, id); :}
+    | OUTPUT ID.id COL type_use.t   {: return new OutputVariable(t, id); :}
+    ;
 
 StateVariable state_var =
-	VARIABLE type_use.t ID.id		{: return new StateVariable(t, id); :}
-	| VARIABLE ID.id COL type_use.t	{: return new StateVariable(t, id); :}
-	;
+    VARIABLE type_use.t ID.id       {: return new StateVariable(t, id); :}
+    | VARIABLE ID.id COL type_use.t {: return new StateVariable(t, id); :}
+    ;
 
 List in_pars =
-	  in_par.p						{: return new List().add(p); :}
-	| in_pars.l COMMA in_par.p		{: return l.add(p); :}
-	;
+      in_par.p                      {: return new List().add(p); :}
+    | in_pars.l COMMA in_par.p      {: return l.add(p); :}
+    ;
 InParameter in_par =
-	type_use.t ID.id				{: return new InParameter(t, id); :}
-	| ID.id COL type_use.t			{: return new InParameter(t, id); :}
-	;
+    type_use.t ID.id                {: return new InParameter(t, id); :}
+    | ID.id COL type_use.t          {: return new InParameter(t, id); :}
+    ;
 
 List out_pars =
-	  ARROW out_parlist.out			{: return out; :}
-	|								{: return new List(); :}
-	;
+      ARROW out_parlist.out         {: return out; :}
+    |                               {: return new List(); :}
+    ;
 
 List out_parlist =
-	  out_par.p						{: return new List().add(p); :}
-	| out_parlist.l COMMA out_par.p	{: return l.add(p); :}
-	;
+      out_par.p                     {: return new List().add(p); :}
+    | out_parlist.l COMMA out_par.p {: return l.add(p); :}
+    ;
 OutParameter out_par =
-	type_use.t ID.id				{: return new OutParameter(t, id); :}
-	| ID.id COL type_use.t			{: return new OutParameter(t, id); :}
-	;
+    type_use.t ID.id                {: return new OutParameter(t, id); :}
+    | ID.id COL type_use.t          {: return new OutParameter(t, id); :}
+    ;
 
 List block_list =
-	  block.b SCOL				{: return new List().add(b); :}
-	| block_list.l block.b SCOL {: return l.add(b); :}
-	;
+      block.b SCOL              {: return new List().add(b); :}
+    | block_list.l block.b SCOL {: return l.add(b); :}
+    ;
 
 List flow_decls =
-	  flow_decl.f					{: return new List().add(f); :}
-	| flow_decls.l flow_decl.f		{: return l.add(f); :}
-	;
+      flow_decl.f                   {: return new List().add(f); :}
+    | flow_decls.l flow_decl.f      {: return l.add(f); :}
+    ;
 
 FlowDecl flow_decl =
-	  connection.c SCOL				{: return c; :}
-	| interception.i SCOL			{: return i; :}
-	;
+      connection.c SCOL             {: return c; :}
+    | interception.i SCOL           {: return i; :}
+    ;
 
 Block block =
-	modifiers.m? block2.b {:
-		b.getModifiers().getModifierList().addAll(m);
-		return b;
-	:}
-	;
+    modifiers.m? block2.b {:
+        b.getModifiers().getModifierList().addAll(m);
+        return b;
+    :}
+    ;
 
 Block block2 =
-	ordinary_block.o				{: return o; :}
-	| simple_block.s				{: return s; :}
-	| redeclare_block.r				{: return r; :}
-	| wired_block.w					{: return w; :}
-	;
+    ordinary_block.o                {: return o; :}
+    | simple_block.s                {: return s; :}
+    | redeclare_block.r             {: return r; :}
+    | wired_block.w                 {: return w; :}
+    ;
 
 Block ordinary_block =
-	type.t name.n   {: return new Block(new Modifiers(), t, n); :}
-	| name.n COL type.t {: return new Block(new Modifiers(), t, n); :}
-	;
+    type.t name.n   {: return new Block(new Modifiers(), t, n); :}
+    | name.n COL type.t {: return new Block(new Modifiers(), t, n); :}
+    ;
 
 Block simple_block =
-	ID.id
-	{:
-		int index = id.lastIndexOf('_');
-		if (index > 0) {
-			TypeUse t = new TypeUse(id.substring(0, index));
-			Name n = new IdName(id);
-			try {
-				String i = id.substring(index+1);
-				Integer.parseInt(i);
-				Modifiers m = new Modifiers();
-				m.addModifier(new Modifier(ASTNode.MODIFIER_SIMPLE));
-				return new Block(m, t, n);
-			} catch (NumberFormatException e) {
-				// fall through
-			}
-		}
-		String errorMessage =
-			"Cannot parse simple block \"" + id + "\". " +
-			"Correct syntax: TypeName_Index, where Index is a number";
-		throw new BloqqiScanner.ScannerError(errorMessage);
-	:}
-	;
+    ID.id
+    {:
+        int index = id.lastIndexOf('_');
+        if (index > 0) {
+            TypeUse t = new TypeUse(id.substring(0, index));
+            Name n = new IdName(id);
+            try {
+                String i = id.substring(index+1);
+                Integer.parseInt(i);
+                Modifiers m = new Modifiers();
+                m.addModifier(new Modifier(ASTNode.MODIFIER_SIMPLE));
+                return new Block(m, t, n);
+            } catch (NumberFormatException e) {
+                // fall through
+            }
+        }
+        String errorMessage =
+            "Cannot parse simple block \"" + id + "\". " +
+            "Correct syntax: TypeName_Index, where Index is a number";
+        throw new BloqqiScanner.ScannerError(errorMessage);
+    :}
+    ;
 
 
 Name name =
-	ID.id							{: return new IdName(id); :}
-	;
+    ID.id                           {: return new IdName(id); :}
+    ;
 
 RedeclareBlock redeclare_block =
-	REDECLARE type.t name.n
-	  {: return new RedeclareBlock(new Modifiers(), t, n); :}
-	| REDECLARE name.n COL type.t
-	  {: return new RedeclareBlock(new Modifiers(), t, n); :}
-	| REDECLARE name.n COL SUPER anon_dt_body.a
-	  {: return new RedeclareBlock(new Modifiers(), new AnonymousTypeImplicitSuper(a), n); :}
-	;
+    REDECLARE type.t name.n
+      {: return new RedeclareBlock(new Modifiers(), t, n); :}
+    | REDECLARE name.n COL type.t
+      {: return new RedeclareBlock(new Modifiers(), t, n); :}
+    | REDECLARE name.n COL SUPER anon_dt_body.a
+      {: return new RedeclareBlock(new Modifiers(), new AnonymousTypeImplicitSuper(a), n); :}
+    ;
 
 WiredBlock wired_block =
-	type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA name.n
-	  {: return new WiredBlock(new Modifiers(), t, n, p); :}
-	| type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA anon_dt_body.b name.n
-	  {:
-		b.addSuperType(t);
-		return new WiredBlock(new Modifiers(), new AnonymousType(b), n, p);
-	  :}
-	| name.n COL type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA
-	  {: return new WiredBlock(new Modifiers(), t, n, p); :}
-	| name.n COL type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA anon_dt_body.b
-	  {:
-		b.addSuperType(t);
-		return new WiredBlock(new Modifiers(), new AnonymousType(b), n, p);
-	  :}
-	;
+    type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA name.n
+      {: return new WiredBlock(new Modifiers(), t, n, p); :}
+    | type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA anon_dt_body.b name.n
+      {:
+        b.addSuperType(t);
+        return new WiredBlock(new Modifiers(), new AnonymousType(b), n, p);
+      :}
+    | name.n COL type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA
+      {: return new WiredBlock(new Modifiers(), t, n, p); :}
+    | name.n COL type_use.t LSQUAREBRA wired_comp_pars.p RSQUAREBRA anon_dt_body.b
+      {:
+        b.addSuperType(t);
+        return new WiredBlock(new Modifiers(), new AnonymousType(b), n, p);
+      :}
+    ;
 
 List wired_comp_pars =
-	wired_comp_par.p               {: return new List().add(p); :}
-	| wired_comp_pars.l COMMA wired_comp_par.p {: return l.add(p); :}
-	;
+    wired_comp_par.p               {: return new List().add(p); :}
+    | wired_comp_pars.l COMMA wired_comp_par.p {: return l.add(p); :}
+    ;
 
 WiredBlockParameter wired_comp_par =
-	in_par.in	                    {: return new WiredBlockParameterInParameter(in); :}
-	| ARROW out_par.out             {: return new WiredBlockParameterOutParameter(out); :}
-	| var_use.u                     {: return new WiredBlockParameterVarUse(u); :}
-	;
+    in_par.in                       {: return new WiredBlockParameterInParameter(in); :}
+    | ARROW out_par.out             {: return new WiredBlockParameterOutParameter(out); :}
+    | var_use.u                     {: return new WiredBlockParameterVarUse(u); :}
+    ;
 
 Connection connection =
-	  CONNECT LPAR
-	  expr.e COMMA var_use.u
-	  RPAR  						{: return new Connection(e, u); :}
-	;
+      CONNECT LPAR
+      expr.e COMMA var_use.u
+      RPAR                          {: return new Connection(e, u); :}
+    ;
 
 Interception interception =
-	  INTERCEPT var_use.i WITH var_use.t COMMA var_use.s
-									{: return new ConnectionInterception(i, t, s); :}
-	| INTERCEPT SOURCE var_use.i WITH var_use.t COMMA var_use.s
-									{: return new SourceInterception(i, t, s); :}
-	;
+      INTERCEPT var_use.i WITH var_use.t COMMA var_use.s
+                                    {: return new ConnectionInterception(i, t, s); :}
+    | INTERCEPT SOURCE var_use.i WITH var_use.t COMMA var_use.s
+                                    {: return new SourceInterception(i, t, s); :}
+    ;
 
 Struct struct =
-	  STRUCT ID LBRA
-	  fields.l?
-	  RBRA							{: return new Struct(new Opt(), ID, l); :}
-	;
+      STRUCT ID LBRA
+      fields.l?
+      RBRA                          {: return new Struct(new Opt(), ID, l); :}
+    ;
 
 List fields =
-	  field.f SCOL					{: return new List().add(f); :}
-	| fields.l field.f SCOL			{: return l.add(f); :}
-	;
+      field.f SCOL                  {: return new List().add(f); :}
+    | fields.l field.f SCOL         {: return l.add(f); :}
+    ;
 
 StructField field =
-	  type_use.t ID					{: return new StructField(t, ID); :}
-	| ID COL type_use.t 			{: return new StructField(t, ID); :}
-	;
+      type_use.t ID                 {: return new StructField(t, ID); :}
+    | ID COL type_use.t             {: return new StructField(t, ID); :}
+    ;
 
 Type type =
-	type_use.u						{: return u; :}
-	| anon_dt.a						{: return new AnonymousType(a); :}
-	;
+    type_use.u                      {: return u; :}
+    | anon_dt.a                     {: return new AnonymousType(a); :}
+    ;
 
 TypeUse type_use =
-	  ID							{: return new TypeUse(ID); :}
-	;
+      ID                            {: return new TypeUse(ID); :}
+    ;
 
 AnonymousDiagramType anon_dt =
-	type_use.t anon_dt_body.a
-	{:
-		a.addSuperType(t);
-		return a;
-	:}
-	;
+    type_use.t anon_dt_body.a
+    {:
+        a.addSuperType(t);
+        return a;
+    :}
+    ;
 
 AnonymousDiagramType anon_dt_body =
-	diagram_type_parameters.dt
-	LBRA
-		vars.v?
-		block_list.b?
-		flow_decls.fd?
-	RBRA
-	{:
-		AnonymousDiagramType adt = new AnonymousDiagramType();
-		adt.setLocalInParameterList(dt.getLocalInParameterList());
-		adt.setLocalOutParameterList(dt.getLocalOutParameterList());
-		adt.setID("<anonymous>");
-		adt.setModifiers(new Modifiers());
-		adt.setLocalVariableList(v);
-		adt.setLocalBlockList(b);
-		adt.setFlowDeclList(fd);
-		return adt;
-	:}
-	;
+    diagram_type_parameters.dt
+    LBRA
+        vars.v?
+        block_list.b?
+        flow_decls.fd?
+    RBRA
+    {:
+        AnonymousDiagramType adt = new AnonymousDiagramType();
+        adt.setLocalInParameterList(dt.getLocalInParameterList());
+        adt.setLocalOutParameterList(dt.getLocalOutParameterList());
+        adt.setID("<anonymous>");
+        adt.setModifiers(new Modifiers());
+        adt.setLocalVariableList(v);
+        adt.setLocalBlockList(b);
+        adt.setFlowDeclList(fd);
+        return adt;
+    :}
+    ;
 
 
 Expr expr =
-	  var_use.u						{: return u; :}
-	| real_lit.r					{: return r; :}
-	| int_lit.i						{: return i; :}
-	| bool_lit.b					{: return b; :}
-	| string_lit.s					{: return s; :}
-	;
+      var_use.u                     {: return u; :}
+    | real_lit.r                    {: return r; :}
+    | int_lit.i                     {: return i; :}
+    | bool_lit.b                    {: return b; :}
+    | string_lit.s                  {: return s; :}
+    ;
 
 IntLiteral int_lit =
-	  NUM.n							{: return new IntLiteral(Integer.valueOf(n)); :}
-	| MINUS NUM.n					{: return new IntLiteral(-Integer.valueOf(n)); :}
-	;
+      NUM.n                         {: return new IntLiteral(Integer.valueOf(n)); :}
+    | MINUS NUM.n                   {: return new IntLiteral(-Integer.valueOf(n)); :}
+    ;
 
 RealLiteral real_lit =
-	  FLOAT.f						{: return new RealLiteral(Float.valueOf(f)); :}
-	| MINUS FLOAT.f					{: return new RealLiteral(-Float.valueOf(f)); :}
-	;
+      FLOAT.f                       {: return new RealLiteral(Float.valueOf(f)); :}
+    | MINUS FLOAT.f                 {: return new RealLiteral(-Float.valueOf(f)); :}
+    ;
 
 
 BoolLiteral bool_lit =
-	TRUE							{: return new BoolLiteral(true); :}
-	| FALSE							{: return new BoolLiteral(false); :}
-	;
+    TRUE                            {: return new BoolLiteral(true); :}
+    | FALSE                         {: return new BoolLiteral(false); :}
+    ;
 
 StringLiteral string_lit =
-	STRING_LITERAL.s				{: return new StringLiteral(s); :}
-	| MULTILINE_STRING_LITERAL.s	{: return new MultiLineStringLiteral(s); :}
-	;
+    STRING_LITERAL.s                {: return new StringLiteral(s); :}
+    | MULTILINE_STRING_LITERAL.s    {: return new MultiLineStringLiteral(s); :}
+    ;
 
 VarUse var_use =
-	type_use.t DOUBLECOL ID.id		{: return new ParseTypedSimpleVarUse(t, id); :}
-	| var_use.u DOT ID.id			{: return new DotVarUse(u, id); :}
-	| ID.id							{: return new ParseSimpleVarUse(id); :}
-	;
+    type_use.t DOUBLECOL ID.id      {: return new ParseTypedSimpleVarUse(t, id); :}
+    | var_use.u DOT ID.id           {: return new DotVarUse(u, id); :}
+    | ID.id                         {: return new ParseSimpleVarUse(id); :}
+    ;
 
 SimpleVarUse simple_var_use =
-	  ID.id							{: return new SimpleVarUse(id); :}
-	;
+      ID.id                         {: return new SimpleVarUse(id); :}
+    ;
 
 
 ExternalFunction external_function =
-	  
-	EXTERNAL ID LPAR in_pars.in? external_function_output.out RPAR SCOL
-	  								{: return new ExternalFunction(new Opt(), ID, in, out); :}
-	;
+
+    EXTERNAL ID LPAR in_pars.in? external_function_output.out RPAR SCOL
+                                    {: return new ExternalFunction(new Opt(), ID, in, out); :}
+    ;
 
 Opt external_function_output =
-	  ARROW out_par.out				{: return new Opt(out); :}
-	|								{: return new Opt(); :}
-	;
+      ARROW out_par.out             {: return new Opt(out); :}
+    |                               {: return new Opt(); :}
+    ;
 
 List annotations =
-	  ANNOTATION LPAR
-	  	annotation_list.l? COMMA?
-	  RPAR							{: return l; :}
-	;
+      ANNOTATION LPAR
+        annotation_list.l? COMMA?
+      RPAR                          {: return l; :}
+    ;
 List annotation_list =
-	  annotation.a 					{: return new List().add(a); :}
-	| annotation_list.l COMMA annotation.a {: return l.add(a); :}
-	;
+      annotation.a                  {: return new List().add(a); :}
+    | annotation_list.l COMMA annotation.a {: return l.add(a); :}
+    ;
 Annotation annotation =
-	  var_use.v ASSIGN LPAR
-	  	NUM.x COMMA
-	  	NUM.y COMMA
-	  	NUM.w COMMA
-	  	NUM.h
-	  RPAR
-	  {: int xi = Integer.valueOf(x);
-	  	 int yi = Integer.valueOf(y);
-	  	 int wi = Integer.valueOf(w);
-	  	 int hi = Integer.valueOf(h);
-		 return new Annotation(v, xi, yi, wi, hi);
-	  :}
-	;
+      var_use.v ASSIGN LPAR
+        NUM.x COMMA
+        NUM.y COMMA
+        NUM.w COMMA
+        NUM.h
+      RPAR
+      {: int xi = Integer.valueOf(x);
+         int yi = Integer.valueOf(y);
+         int wi = Integer.valueOf(w);
+         int hi = Integer.valueOf(h);
+         return new Annotation(v, xi, yi, wi, hi);
+      :}
+    ;
 
 Wiring wiring =
-	WIRING type_use.t LSQUAREBRA wiring_par_list.p RSQUAREBRA LBRA
-		flow_decls.fd
-	RBRA
+    WIRING type_use.t LSQUAREBRA wiring_par_list.p RSQUAREBRA LBRA
+        flow_decls.fd
+    RBRA
     {: return new Wiring(t, p, fd); :}
-	;
+    ;
 
 List wiring_par_list =
-	wiring_par.p                   {: return new List().add(p); :}
-	| wiring_par_list.l COMMA wiring_par.p {: return l.add(p); :}
-	;
+    wiring_par.p                   {: return new List().add(p); :}
+    | wiring_par_list.l COMMA wiring_par.p {: return l.add(p); :}
+    ;
 WiringParameter wiring_par =
-	type_use.u ID                   {: return new WiringInParameter(u, ID); :}
-	| ARROW type_use.u ID           {: return new WiringOutParameter(u, ID); :}
-	| ID COL type_use.u             {: return new WiringInParameter(u, ID); :}
-	| ARROW ID COL type_use.u       {: return new WiringOutParameter(u, ID); :}
-	;
+    type_use.u ID                   {: return new WiringInParameter(u, ID); :}
+    | ARROW type_use.u ID           {: return new WiringOutParameter(u, ID); :}
+    | ID COL type_use.u             {: return new WiringInParameter(u, ID); :}
+    | ARROW ID COL type_use.u       {: return new WiringOutParameter(u, ID); :}
+    ;
 
 Declaration recommendation =
-	RECOMMENDATION type_use.t LBRA
-		recommendation_elems.l?
-	RBRA
-		{: return new Recommendation(t, l); :}
-	| RECOMMENDATION type_use.t EXTENDS SUPER SCOL
-		{: return new RecommendationExtendsSuper(t); :}
-	;
+    RECOMMENDATION type_use.t LBRA
+        recommendation_elems.l?
+    RBRA
+        {: return new Recommendation(t, l); :}
+    | RECOMMENDATION type_use.t EXTENDS SUPER SCOL
+        {: return new RecommendationExtendsSuper(t); :}
+    ;
 
 List recommendation_elems =
-	recommendation_elem.c SCOL							{: return new List().add(c); :}
-	| recommendation_elems.l recommendation_elem.c SCOL {: return l.add(c); :}
-	;
+    recommendation_elem.c SCOL                          {: return new List().add(c); :}
+    | recommendation_elems.l recommendation_elem.c SCOL {: return l.add(c); :}
+    ;
 
 RecommendationElement recommendation_elem =
-	recommendation_block.b recommendation_default.d
-		{: return new RecommendationBlock(b, d); :}
-	| modifiers.m recommendation_block.b recommendation_default.d
-		{: b.setModifiers(new Modifiers(m)); return new RecommendationBlock(b, d); :}
-	| REPLACEABLE simple_var_use.use
-		{: return new RecommendationReplaceable(use); :}
-	| simple_var_use.u1 BEFORE simple_var_use.u2
-		{: return new RecommendationBefore(u1, u2); :}
-	| DEFAULT {: return new RecommendationBlock(null, new Opt()); :}
-	;
+    recommendation_block.b recommendation_default.d
+        {: return new RecommendationBlock(b, d); :}
+    | modifiers.m recommendation_block.b recommendation_default.d
+        {: b.setModifiers(new Modifiers(m)); return new RecommendationBlock(b, d); :}
+    | REPLACEABLE simple_var_use.use
+        {: return new RecommendationReplaceable(use); :}
+    | simple_var_use.u1 BEFORE simple_var_use.u2
+        {: return new RecommendationBefore(u1, u2); :}
+    | DEFAULT {: return new RecommendationBlock(null, new Opt()); :}
+    ;
 
 Block recommendation_block =
-	wired_block.w					{: return w; :}
-	| ordinary_block.o				{: return o; :}
-	;
+    wired_block.w                   {: return w; :}
+    | ordinary_block.o              {: return o; :}
+    ;
 
 Opt recommendation_default =
-									{: return new Opt(); :}
-	| DEFAULT type_use.t			{: return new Opt(t); :}
-	;
+                                    {: return new Opt(); :}
+    | DEFAULT type_use.t            {: return new Opt(t); :}
+    ;
