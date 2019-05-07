@@ -15,6 +15,7 @@ aspect CodeGenerationTarget {
 	}
 	public static CodeGenerationTarget CodeGenerationTarget.WITH_DRIVER = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.WITHOUT_DRIVER = new CodeGenerationTarget();
+	public static CodeGenerationTarget CodeGenerationTarget.CONFIGURATION = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.MINIMAL = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.TESTING = new CodeGenerationTarget();
 	public static CodeGenerationTarget CodeGenerationTarget.FMI = new CodeGenerationTarget();
@@ -82,7 +83,7 @@ aspect GenerateC {
 		sb.append(ASTNode.GENERATED_C_INFO + "\n");
 		generateCPre(sb, codeTarget);
 		generateCDeclarations(sb, codeTarget);
-		generateCDefinitions(sb);
+		generateCDefinitions(sb, codeTarget);
 		generateCPost(sb, codeTarget, data);
 	}
 
@@ -105,7 +106,7 @@ aspect GenerateC {
 		sbC.append(ASTNode.GENERATED_C_INFO + "\n");
 		sbC.append("#include \"" + headerFilename + "\"\n");
 		generateCPre(sbC, codeTarget);
-		generateCDefinitions(sbC);
+		generateCDefinitions(sbC, codeTarget);
 		generateCPost(sbC, codeTarget, data);
 	}
 
@@ -114,6 +115,8 @@ aspect GenerateC {
 				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER ||
 				codeTarget == CodeGenerationTarget.TESTING) {
 			sb.append(Utils.readResource("/c/CCodePre.c")).append("\n");
+		} else if (codeTarget == CodeGenerationTarget.CONFIGURATION) {
+			sb.append(Utils.readResource("/c/CCodePreConfiguration.c")).append("\n");
 		}
 	}
 
@@ -129,14 +132,22 @@ aspect GenerateC {
 		sb.append("/* Structs representing variables (state, input, output) */\n");
 		genVariableStructsC(sb);
 		sb.append("\n");
-		genMainWrapperStructC(sb);
+		if (codeTarget == CodeGenerationTarget.CONFIGURATION) {
+			genConfWrapperStructsC(sb);
+		} else {
+			genMainWrapperStructC(sb);
+		}
 
 		sb.append("/* Structs representing return values */\n");
 		genStructs(sb);
 		sb.append("\n");
 
 		sb.append("/* Function declarations */\n");
-		sb.append("void bloqqi_main(Main_VARS *vars);\n");
+		if (codeTarget == CodeGenerationTarget.CONFIGURATION) {
+			genConfWrapperDeclarationsC(sb);
+		} else {
+			sb.append("void bloqqi_main(Main_VARS *vars);\n");
+		}
 		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
 				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER) {
 			sb.append("char *bloqqi_all_vars_to_json(Main_VARS *vars);\n");
@@ -147,7 +158,7 @@ aspect GenerateC {
 		sb.append("\n");
 	}
 
-	public void Program.generateCDefinitions(StringBuilder sb) {
+	public void Program.generateCDefinitions(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		sb.append("/* Standard functions */\n");
 		generateStdLibC(sb);
 		sb.append("\n");
@@ -158,7 +169,11 @@ aspect GenerateC {
 		}
 		sb.append("\n");
 
-		genMainWrapperDefinitionC(sb);
+		if (codeTarget == CodeGenerationTarget.CONFIGURATION) {
+			genConfWrapperDefinitionsC(sb);
+		} else {
+			genMainWrapperDefinitionC(sb);
+		}
 	}
 
 	public void Program.generateCPost(StringBuilder sb,
@@ -170,6 +185,8 @@ aspect GenerateC {
 			sb.append(Utils.readResource("/c/CCodePostTesting.c")).append("\n");
 		} else if (codeTarget == CodeGenerationTarget.FMI) {
 			genCForFMI(sb, data);
+		} else if (codeTarget == CodeGenerationTarget.CONFIGURATION) {
+			genCForConfiguration(sb);
 		}
 
 		if (codeTarget == CodeGenerationTarget.WITH_DRIVER ||
@@ -300,20 +317,24 @@ aspect FunctionDeclarations {
  */
 aspect FunctionDefinitions {
 	public void Program.genMainWrapperDefinitionC(StringBuilder sb) {
-		sb.append("void bloqqi_main(Main_VARS *vars) {\n");
+		genWrapperDefinitionC(sb, mainDiagramType(), "bloqqi_main");
+	}
+
+	public void Program.genWrapperDefinitionC(StringBuilder sb, DiagramType dt, String functionName) {
+		sb.append("void " + functionName + "(" + dt.nameC() + "_VARS *vars) {\n");
 		String pars = "";
-		if (mainDiagramType().containsStateVariablesTransitive()) {
+		if (dt.containsStateVariablesTransitive()) {
 			pars += "&vars->" + ASTNode.STATE_FIELD;
 		}
-		if (mainDiagramType().containsInputVariablesTransitive()) {
+		if (dt.containsInputVariablesTransitive()) {
 			if (!pars.isEmpty()) pars += ", ";
 			pars += "&vars->" + ASTNode.INPUT_FIELD;
 		}
-		if (mainDiagramType().containsOutputVariablesTransitive()) {
+		if (dt.containsOutputVariablesTransitive()) {
 			if (!pars.isEmpty()) pars += ", ";
 			pars += "&vars->" + ASTNode.OUTPUT_FIELD;
 		}
-		sb.append("  Main(" + pars + ");\n");
+		sb.append("  " + dt.nameC() + "(" + pars + ");\n");
 		sb.append("}\n");
 	}
 
@@ -579,24 +600,28 @@ aspect VariableStructs {
 	}
 
 	public void Program.genMainWrapperStructC(StringBuilder sb) {
+		genWrapperStructC(sb, mainDiagramType());
+	}
+
+	public void Program.genWrapperStructC(StringBuilder sb, DiagramType dt) {
 		sb.append("typedef struct {\n");
 		boolean needsDummyField = true;
-		if (mainDiagramType().containsStateVariablesTransitive()) {
-			sb.append("  " + mainDiagramType().stateStructName() + " " + ASTNode.STATE_FIELD + ";\n");
+		if (dt.containsStateVariablesTransitive()) {
+			sb.append("  " + dt.stateStructName() + " " + ASTNode.STATE_FIELD + ";\n");
 			needsDummyField = false;
 		}
-		if (mainDiagramType().containsInputVariablesTransitive()) {
-			sb.append("  " + mainDiagramType().inputStructName() + " " + ASTNode.INPUT_FIELD + ";\n");
+		if (dt.containsInputVariablesTransitive()) {
+			sb.append("  " + dt.inputStructName() + " " + ASTNode.INPUT_FIELD + ";\n");
 			needsDummyField = false;
 		}
-		if (mainDiagramType().containsOutputVariablesTransitive()) {
-			sb.append("  " + mainDiagramType().outputStructName() + " " + ASTNode.OUTPUT_FIELD + ";\n");
+		if (dt.containsOutputVariablesTransitive()) {
+			sb.append("  " + dt.outputStructName() + " " + ASTNode.OUTPUT_FIELD + ";\n");
 			needsDummyField = false;
 		}
 		if (needsDummyField) {
-			sb.append("  bool DUMMY_FIELD; /* generated since empty structs are not allowed */\n");
+			sb.append("  bool DUMMY_FIELD; // generated since empty structs are not allowed\n");
 		}
-		sb.append("} Main_VARS;\n");
+		sb.append("} " + dt.nameC() + "_VARS;\n");
 	}
 }
 

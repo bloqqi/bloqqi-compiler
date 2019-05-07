@@ -1,0 +1,125 @@
+aspect Configuration {
+	syn ConfBlock ConfUse.blockDecl() = confLookup(getBlockUse());
+	syn VarPort ConfUse.varPortDecl()
+		= blockDecl() != null
+		? blockDecl().lookupVarPort(getVariableUse())
+		: null;
+
+	inh ConfBlock ConfUse.confLookup(String name);
+	eq Configuration.getChild().confLookup(String name) {
+		for (ConfBlock b: getConfBlocks()) {
+			if (b.name().equals(name)) {
+				return b;
+			}
+		}
+		return null;
+	}
+
+	syn VarPort ConfBlock.lookupVarPort(String name) {
+		for (VarPort in: getInVarPorts()) {
+			if (in.name().equals(name)) {
+				return in;
+			}
+		}
+		for (VarPort out: getOutVarPorts()) {
+			if (out.name().equals(name)) {
+				return out;
+			}
+		}
+		return null;
+	}
+
+	coll Set<Configuration> Program.configurations() [new HashSet<>()];
+	Configuration contributes this to Program.configurations();
+
+	syn Configuration Program.configuration()
+		= configurations().isEmpty() ? null : configurations().iterator().next();
+
+	coll Set<DiagramType> Configuration.diagramTypes() [new HashSet<>()] root Configuration;
+	ConfBlock contributes ((DiagramType) type())
+		when type().isDiagramType()
+		to Configuration.diagramTypes();
+
+
+	syn Map<String, Variable> DiagramType.allInputVariables() {
+		Map<String, Variable> map = new TreeMap<>();
+		computeAllIOVariables(map, "", true);
+		return map;
+	}
+	syn Map<String, Variable> DiagramType.allOutputVariables() {
+		Map<String, Variable> map = new TreeMap<>();
+		computeAllIOVariables(map, "", false);
+		return map;
+	}
+	protected void TypeDecl.computeAllIOVariables(Map<String, Variable> map, String enclosingPath, boolean inputVariables) {
+	}
+	protected void DiagramType.computeAllIOVariables(Map<String, Variable> map, String enclosingPath, boolean inputVariables) {
+		for (Variable v: variables()) {
+			if ((inputVariables && v.isInputVariable())
+					|| (!inputVariables && v.isOutputVariable())) {
+				String vPath = enclosingPath + v.cNameDeclaration();
+				map.put(vPath, v);
+			}
+		}
+		for (Block b: blocks()) {
+			if (b.type().containsVariablesTransitive()) {
+				String enc = enclosingPath + b.nameC() + ".";
+				b.type().computeAllIOVariables(map, enc, inputVariables);
+			}
+		}
+	}
+
+
+	syn lazy List<VarPort> ConfBlock.getInVarPortList() {
+		List<VarPort> list = new List<VarPort>();
+		if (type().isDiagramType()) {
+			DiagramType dt = (DiagramType) type();
+			for (Map.Entry<String, Variable> e: dt.allInputVariables().entrySet()) {
+				list.add(new VarPort(e.getKey(), e.getValue()));
+			}
+		}
+		return list;
+	}
+
+	syn lazy List<VarPort> ConfBlock.getOutVarPortList() {
+		List<VarPort> list = new List<VarPort>();
+		if (type().isDiagramType()) {
+			DiagramType dt = (DiagramType) type();
+			for (Map.Entry<String, Variable> e: dt.allOutputVariables().entrySet()) {
+				list.add(new VarPort(e.getKey(), e.getValue()));
+			}
+		}
+		return list;
+	}
+
+	coll Set<ConfConnection> VarPort.incoming()
+		[new HashSet<>()] root Configuration;
+	ConfConnection contributes this
+		when getSource().varPortDecl() != null
+			&& getTarget().varPortDecl() != null
+		to VarPort.incoming() for getTarget().varPortDecl();
+
+	coll Set<ConfConnection> VarPort.outgoing()
+		[new HashSet<>()] root Configuration;
+	ConfConnection contributes this
+		when getSource().varPortDecl() != null
+			&& getTarget().varPortDecl() != null
+		to VarPort.outgoing() for getSource().varPortDecl();
+
+	eq VarPort.findMember(String name) = null;
+	eq VarPort.name() = getID();
+	eq VarPort.type() = getVariable().type();
+	eq VarPort.declaredParameter() = null;
+}
+
+aspect ConfigurationErrors {
+	ConfUse contributes error("The declaration of " + toString() + " was not found")
+		when blockDecl() == null
+		to CompilationUnit.errors();
+}
+
+aspect PrettyPrint {
+	public String ConfUse.toString() {
+		return getBlockUse() + "." + getVariableUse();
+	}
+}

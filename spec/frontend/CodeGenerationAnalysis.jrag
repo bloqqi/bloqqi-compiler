@@ -1,15 +1,11 @@
 /**
  * This aspect is used to collect compile-time errors that are not interested
- * during editing. One example is missing incoming data on a port, 
- * then this should not be reported in the editor, since during 
- * editing, the normal case is that there are missing incoming connections. 
+ * during editing. One example is missing incoming data on a port,
+ * then this should not be reported in the editor, since during
+ * editing, the normal case is that there are missing incoming connections.
  * However, when generating code, the data flow should be checked.
  */
 aspect CodeGenerationErrors {
-	coll Set<ErrorMessage> Program.codeGenerationErrors()
-		[new TreeSet<ErrorMessage>()]
-		root Program;
-	
 	coll Set<ErrorMessage> CompilationUnit.codeGenerationErrors()
 		[new TreeSet<ErrorMessage>()]
 		root CompilationUnit;
@@ -19,7 +15,7 @@ aspect DataFlowErrors {
 	DiagramType contributes error(missingIncomingConnections())
 		when !isAbstract() && !missingIncomingConnections().isEmpty()
 		to CompilationUnit.codeGenerationErrors();
-		
+
 	syn String DiagramType.missingIncomingConnections() {
 		ArrayList<String> missingConnections = new ArrayList<>();
 		for (Block b: blocks()) {
@@ -37,16 +33,20 @@ aspect DataFlowErrors {
 			}
 		}
 		if (!missingConnections.isEmpty()) {
-			return "In type " + name() 
+			return "In type " + name()
 				+ ", the following have no incoming connection: "
 				+ String.join(", ", missingConnections);
 		} else {
 			return "";
 		}
-	} 
+	}
 }
 
 aspect CheckMain {
+	coll Set<ErrorMessage> Program.mainDiagramErrors()
+		[new TreeSet<ErrorMessage>()]
+		root Program;
+
 	syn DiagramType Program.mainDiagramType() {
 		TypeDecl td = lookupType("Main");
 		return td != null && td.isDiagramType() ? (DiagramType) td : null;
@@ -54,9 +54,9 @@ aspect CheckMain {
 
 	Program contributes error("A diagram type Main is missing")
 		when mainDiagramType() == null
-		to Program.codeGenerationErrors();
+		to Program.mainDiagramErrors();
 
 	DiagramType contributes error("The diagram type Main cannot have parameters")
 		when name().equals("Main") && numberOfParameters() > 0
-		to Program.codeGenerationErrors();
+		to Program.mainDiagramErrors();
 }

@@ -38,7 +38,7 @@ public class Compiler {
 	protected CommandLine commandLine;
 	protected Collection<String> filenames;
 	protected Collection<String> types;
-	
+
 	// Enable DrAST debugging
 	public static Object DrAST_root_node;
 
@@ -46,7 +46,7 @@ public class Compiler {
 		options.add(option);
 		return option;
 	}
-	
+
 	public Compiler(String args[]) throws CommandLineException {
 		options = new ArrayList<>();
 		addOptions();
@@ -74,7 +74,7 @@ public class Compiler {
 			new EnumOption(
 				"c",
 				"generate C code",
-				Arrays.asList("with-driver", "without-driver", "minimal"),
+				Arrays.asList("with-driver", "without-driver", "minimal", "configuration"),
 				"with-driver"));
 		optionFMI = addOption(new FlagOption("fmi", "generate C for FMI"));
 		optionOutputFile = addOption(new StringOption("o", "output file"));
@@ -85,14 +85,14 @@ public class Compiler {
 		optionHelp = addOption(new FlagOption("help", "display usage information and exit"));
 		optionCostEstimates = addOption(new FlagOption("cost", "print cost estimates"));
 	}
-	
+
 	protected void parseArguments(String[] args) throws CommandLineException {
 		if (args.length == 0) {
 			showUsageAndExit();
 		}
 
 		commandLine.parse(args);
-		
+
 		if (optionOutputFile.isSet()) {
 			if (!optionGenerateC.isSet() && !optionFMI.isSet()) {
 				throw new CommandLineException("Option " + optionOutputFile
@@ -114,7 +114,7 @@ public class Compiler {
 			throw new CommandLineException("Output file (" + optionOutputFile
 				+ ") needs to be specified when using option " + optionFMI);
 		}
-		
+
 		if (optionFMI.isSet() && optionGenerateC.isSet()) {
 			throw new CommandLineException("The options " + optionFMI
 				+ " and " + optionGenerateC + " cannot be used together.");
@@ -123,8 +123,8 @@ public class Compiler {
 		if (optionHelp.isSet() || commandLine.getArguments().isEmpty()) {
 			showUsageAndExit();
 		}
-		
-		
+
+
 		filenames = filterToList(commandLine.getArguments(), s -> s.endsWith(".dia"));
 		types = filterToList(commandLine.getArguments(), s -> !s.endsWith(".dia"));
 
@@ -155,7 +155,7 @@ public class Compiler {
 		} else {
 			srcDir = new File(".");
 		}
-		
+
 		Pattern pattern = Pattern.compile("\\w+(\\.\\w+)*");
 		for (String type: types) {
 			if (!pattern.matcher(type).matches()) {
@@ -175,11 +175,11 @@ public class Compiler {
 			if (!packageDir.isDirectory()) {
 				throw new CommandLineException("The package " + packageName + " does not exist");
 			}
-			
+
 			System.out.println(packageName + " -- " + typeName);
 			//System.out.println(type.replaceAll("\\.+", File.separator));
 		}
-		
+
 		return p;
 	}
 
@@ -200,19 +200,19 @@ public class Compiler {
 		if (optionRec.isSet()) {
 			printRecommendationsInfo(p);
 		}
-		
+
 		if (optionCostEstimates.isSet()) {
 			for (CompilationUnit u: p.getCompilationUnits()) {
 				System.out.println(u.printCost());
 			}
 		}
-		
+
 		if (optionFeatureDiagram.isSet()) {
 			printAsFeatureDiagram(p);
 		}
 
-		
-		
+
+
 		boolean errors = false;
 		for (CompilationUnit cu: p.getCompilationUnits()) {
 			if (!cu.errors().isEmpty()) {
@@ -230,7 +230,7 @@ public class Compiler {
 			}
 			errors = true;
 		}
-		
+
 		if (!errors && p.getNumCompilationUnit() > 0) {
 			if (optionGenerateC.isSet() || optionFMI.isSet()) {
 				if (hasCodeGenerationErrors(p)) {
@@ -298,6 +298,8 @@ public class Compiler {
 				return CodeGenerationTarget.WITHOUT_DRIVER;
 			case "minimal":
 				return CodeGenerationTarget.MINIMAL;
+			case "configuration":
+				return CodeGenerationTarget.CONFIGURATION;
 		}
 		return CodeGenerationTarget.WITH_DRIVER;
 	}
@@ -339,7 +341,7 @@ public class Compiler {
 
 		File cFile = new File(optionOutputFile.getValue());
 		writeToFile(cFile, p.generateC(CodeGenerationTarget.FMI, data));
-		
+
 		String xmlFilename;
 		xmlFilename = cFile.getName().substring(0, cFile.getName().lastIndexOf('.'));
 		xmlFilename = xmlFilename + ".xml";
@@ -351,12 +353,16 @@ public class Compiler {
 
 	private boolean hasCodeGenerationErrors(Program p) {
 		boolean errors = false;
-		if (!p.codeGenerationErrors().isEmpty()) {
-			System.out.println("Code generation errors:");
-			for (ErrorMessage e: p.codeGenerationErrors()) {
-				System.out.println("- " + e);
+
+		// Configurations don't need a main diagram type
+		if (!optionGenerateC.getValue().equals("configuration")) {
+			if (!p.mainDiagramErrors().isEmpty()) {
+				System.out.println("Code generation errors:");
+				for (ErrorMessage e: p.mainDiagramErrors()) {
+					System.out.println("- " + e);
+				}
+				errors = true;
 			}
-			errors = true;
 		}
 		for (CompilationUnit cu: p.getCompilationUnits()) {
 			if (!cu.codeGenerationErrors().isEmpty()) {
@@ -379,7 +385,7 @@ public class Compiler {
 		}
 		return null;
 	}
-	
+
 	private CompilationUnit parseFile(String file) {
 		FileReader reader = null;
 		try {
@@ -435,7 +441,7 @@ public class Compiler {
 			System.exit(1);
 		} finally {
 			if (fw != null) { try { fw.close(); } catch (Exception e) {} }
-		}		
+		}
 	}
 
 	private static void writeToDOT(Program p, String filename) {
@@ -445,7 +451,7 @@ public class Compiler {
 			System.out.println(((DiagramType) td).generateDOT());
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 			new Compiler(args);

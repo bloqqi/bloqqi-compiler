@@ -1,15 +1,15 @@
 /**
- * This module defines anchors and dataflow between anchors. 
+ * This module defines anchors and dataflow between anchors.
  * A connection is between two anchors.
- * 
- * The dataflow between anchors is used, for example, to 
- * identify anchors that have more than one incoming connection. 
- * 
- * The dataflow is defined between all anchors, both inherited and local. 
+ *
+ * The dataflow between anchors is used, for example, to
+ * identify anchors that have more than one incoming connection.
+ *
+ * The dataflow is defined between all anchors, both inherited and local.
  */
 
 aspect AnchorFlow {
-	public interface Anchor { 
+	public interface Anchor {
 		DiagramType diagramType();
 		TypeDecl type();
 	}
@@ -22,12 +22,12 @@ aspect AnchorFlow {
 	eq AbstractSimpleVarUse.anchor() = declAnchor();
 	eq DotVarUse.anchor() = declAnchor() != null ? declAnchor() : getVarUse().anchor();
 	eq Literal.anchor() = this;
-	
+
 	syn Anchor Expr.declAnchor() = null;
 	eq AbstractSimpleVarUse.declAnchor() = decl() instanceof Anchor ? (Anchor) decl() : null;
 	eq DotVarUse.declAnchor() = decl() instanceof Anchor ? (Anchor) decl() : null;
 	eq Literal.declAnchor() = this;
-	
+
 	coll Set<Connection> Anchor.outgoingConnections() [new HashSet<Connection>()] root DiagramType;
 	Connection contributes this
 		when getSource().anchor() != null
@@ -35,7 +35,7 @@ aspect AnchorFlow {
 		to Anchor.outgoingConnections() for getSource().anchor();
 	// Include nta connections() in collection attribute
 	DiagramType contributes nta connections() to Anchor.outgoingConnections();
-	
+
 	coll Set<Connection> Anchor.ingoingConnections() [new HashSet<Connection>()] root DiagramType;
 	Connection contributes this
 		when getSource().anchor() != null
@@ -43,7 +43,7 @@ aspect AnchorFlow {
 		to Anchor.ingoingConnections() for getTarget().anchor();
 	// Include nta connections() in collection attribute
 	DiagramType contributes nta connections() to Anchor.ingoingConnections();
-	
+
 	syn boolean Anchor.isInParameter();
 	eq Port.isInParameter() = getParameter().isInParameter();
 	eq Parameter.isInParameter() = false;
@@ -63,13 +63,13 @@ aspect AnchorFlow {
 	inh int Port.index();
 	eq Block.getInPort(int index).index() = index;
 	eq Block.getOutPort(int index).index() = index;
-	
+
 	syn Node Anchor.node();
 	eq Port.node() = block();
 	eq Parameter.node() = this;
 	eq Variable.node() = this;
 	eq Literal.node() = this;
-	
+
 	syn Set<Anchor> FlowDecl.connectedAnchors();
 	eq Connection.connectedAnchors() = Utils.asSet(getSource().anchor(), getTarget().anchor());
 	eq Interception.connectedAnchors()
@@ -90,18 +90,18 @@ aspect AnchorFlow {
 }
 
 /**
- * A block has a type and the type defines the parameters 
+ * A block has a type and the type defines the parameters
  * of the block. The graphical editor wants an object representing
  * each parameter of the block, which is called port.
  * A Port refer to the corresponding Parameter in the type.
  */
 aspect Ports {
-	syn lazy List<Port> Block.getInPortList() 
+	syn lazy List<Port> Block.getInPortList()
 		= type().createInPortList();
 
-	syn lazy List<Port> Block.getOutPortList() 
+	syn lazy List<Port> Block.getOutPortList()
 		= type().createOutPortList();
-	
+
 
 	protected List<Port> TypeDecl.createInPortList() {
 		return new List<>();
@@ -122,7 +122,7 @@ aspect Ports {
 	protected List<Port> Function.createInPortList() {
 		return createPortList(getInParameters());
 	}
-	
+
 	protected List<Port> TypeDecl.createOutPortList() {
 		return new List<>();
 	}

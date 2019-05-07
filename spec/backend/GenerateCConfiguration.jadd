@@ -1,0 +1,116 @@
+aspect GenerateCConfiguration {
+	public void Program.genConfWrapperDeclarationsC(StringBuilder sb) {
+		for (DiagramType dt: configuration().diagramTypes()) {
+			sb.append("void bloqqi_" + dt.nameC() +"(" + dt.nameC() + "_VARS *vars);\n");
+		}
+	}
+
+	public void Program.genConfWrapperDefinitionsC(StringBuilder sb) {
+		for (DiagramType dt: configuration().diagramTypes()) {
+			genWrapperDefinitionC(sb, dt, "bloqqi_" + dt.nameC());
+		}
+	}
+
+	public void Program.genConfWrapperStructsC(StringBuilder sb) {
+		for (DiagramType dt: configuration().diagramTypes()) {
+			genWrapperStructC(sb, dt);
+		}
+	}
+
+	public void Program.genCForConfiguration(StringBuilder sb) {
+		sb.append(Utils.readResource("/c/CCodePostConfiguration.c")).append("\n");
+		genConfInputFunctions(sb);
+		genConfThreads(sb);
+		genConfStartThreads(sb);
+		genConfMain(sb);
+	}
+
+	public void Program.genConfInputFunctions(StringBuilder sb) {
+		for (ConfBlock b: configuration().getConfBlocks()) {
+			b.genConfInputFunctions(sb);
+		}
+	}
+	public void ConfBlock.genConfInputFunctions(StringBuilder sb) {
+		String inputType = type().inputStructName();
+		String inputVar = nameC() + "_input";
+		String mutex = nameC() + "_input_lock";
+
+		sb.append(inputType + " " + inputVar + ";\n");
+		sb.append("pthread_mutex_t " + mutex + " = PTHREAD_MUTEX_INITIALIZER;\n");
+
+		sb.append(inputType + " " + nameC() + "_get_input() {\n");
+		sb.append("  pthread_mutex_lock(&" + mutex + ");\n");
+		sb.append("  " + inputType + " ret = " + inputVar + ";\n");
+		sb.append("  pthread_mutex_unlock(&" + mutex + ");\n");
+		sb.append("  return ret;\n");
+		sb.append("}\n");
+
+		DiagramType dt = (DiagramType) type();
+		for (Map.Entry<String, Variable> e: dt.allInputVariables().entrySet()) {
+			String varName = e.getKey().replace(".", "_");
+			String functionName = nameC() + "_set_" + varName;
+			String type = e.getValue().type().nameC();
+			sb.append("void " + functionName + "(" + type + " p) {\n");
+			sb.append("  pthread_mutex_lock(&" + mutex + ");\n");
+			sb.append("  " + inputVar + "." + e.getKey() + " = p;\n");
+			sb.append("  pthread_mutex_unlock(&" + mutex + ");\n");
+			sb.append("}\n");
+		}
+
+		sb.append("\n");
+	}
+
+
+	public void Program.genConfThreads(StringBuilder sb) {
+		for (ConfBlock b: configuration().getConfBlocks()) {
+			b.genConfThread(sb);
+		}
+	}
+
+	public void ConfBlock.genConfThread(StringBuilder sb) {
+		sb.append("void *bloqqi_run_" + nameC() + "(void *args) {\n");
+		sb.append("  const int T = 1000000/" + getFreq() + ";\n");
+		sb.append("  " + type().nameC() + "_VARS vars = {};\n");
+		sb.append("  useconds_t extra = 0;\n");
+		sb.append("  while(true) {\n");
+		sb.append("    useconds_t start = useconds();\n");
+		sb.append("    vars.input = " + nameC() + "_get_input();\n");
+		sb.append("    bloqqi_" + type().nameC() + "(&vars);\n");
+
+		for (VarPort p: getOutVarPorts()) {
+			for (ConfConnection c: p.outgoing()) {
+				String targetBlock = c.getTarget().getBlockUse();
+				String targetVar = c.getTarget().getVariableUse().replace(".", "_");
+				String setFunction = targetBlock + "_set_" + targetVar;
+				String outVar = "vars.output." + p.name();
+				sb.append("    " + setFunction + "(" + outVar + ");\n");
+			}
+		}
+
+		sb.append("    useconds_t end = useconds();\n");
+		sb.append("    extra = my_sleep(start, end, extra, T);\n");
+		sb.append("  }\n");
+		sb.append("  return NULL;\n");
+		sb.append("}\n");
+	}
+
+	public void Program.genConfStartThreads(StringBuilder sb) {
+		sb.append("void bloqqi_start_threads() {\n");
+		sb.append("  pthread_t threads[" + configuration().getNumConfBlock() + "];\n");
+		int i = 0;
+		for (ConfBlock b: configuration().getConfBlocks()) {
+			sb.append("  assert(!pthread_create(&threads[" + i + "], NULL, ");
+			sb.append("bloqqi_run_" + b.nameC() + ", NULL));\n");
+			i++;
+		}
+		sb.append("}\n\n");
+	}
+
+	public void Program.genConfMain(StringBuilder sb) {
+		sb.append("int main() {\n");
+		sb.append("  bloqqi_start_threads();\n");
+		sb.append("  sleep(-1);\n");
+		sb.append("  return 0;\n");
+		sb.append("}\n");
+	}
+}

@@ -1,0 +1,44 @@
+Declaration declaration =
+    CONFIGURATION LBRA
+        conf_blocks.b
+        conf_connections.c
+    RBRA {: return new Configuration(b, c); :}
+    ;
+
+List conf_blocks =
+      conf_block.b SCOL               {: return new List().add(b); :}
+    | conf_blocks.l conf_block.b SCOL {: return l.add(b); :}
+    ;
+
+Block conf_block =
+    name COL type.t AT NUM.n
+    {: return new ConfBlock(new Modifiers(), t, name, Integer.valueOf(n)); :}
+    ;
+
+List conf_connections =
+      conf_connection.c SCOL                    {: return new List().add(c); :}
+    | conf_connections.l conf_connection.c SCOL {: return l.add(c); :}
+    ;
+
+ConfConnection conf_connection =
+      CONNECT LPAR
+      conf_use.source COMMA conf_use.target
+      RPAR                          {: return new ConfConnection(source, target); :}
+    ;
+
+
+ConfUse conf_use =
+    ID.b DOT conf_var_use.v
+    {:
+        StringBuilder sb = new StringBuilder();
+        for (Object o: v) {
+            sb.append(o);
+        }
+        return new ConfUse(b, sb.toString());
+    :}
+    ;
+
+List conf_var_use =
+	ID.id                           {: return new List().add(new SimpleVarUse(id)); :}
+	| conf_var_use.l DOT ID.id      {: return l.add(new SimpleVarUse("." + id)); :}
+	;

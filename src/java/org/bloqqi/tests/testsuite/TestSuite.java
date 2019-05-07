@@ -31,7 +31,7 @@ abstract public class TestSuite {
 		return dt;
 	}
 
-	
+
 	/**
 	 * Parse a program and return the corresponding AST.
 	 * The test will fail if the program contains semantic errors.
@@ -41,7 +41,7 @@ abstract public class TestSuite {
 		assertEquals("Program contains errors", "", getErrors(p));
 		return p;
 	}
-	
+
 	/**
 	 * Parse a program given a filename and return the corresponding AST.
 	 * The test will fail if the program contains semantic errors.
@@ -60,10 +60,10 @@ abstract public class TestSuite {
 		return p;
 	}
 
-	
+
 	/**
 	 * Parse a program given a filename and compare the errors
-	 * with expected errors that are read from an error file. 
+	 * with expected errors that are read from an error file.
 	 */
 	protected static void checkErrors(String filename) {
 		Program p = parseProgramFile(filename + ".dia");
@@ -71,7 +71,7 @@ abstract public class TestSuite {
 		String actualErrors = getErrors(p);
 		assertEquals(expectedErrors.trim(), actualErrors.trim());
 	}
-	
+
 	protected static void checkSyntaxErrors(String filename) {
 		String actualSyntaxError = "";
 		try {
@@ -82,14 +82,14 @@ abstract public class TestSuite {
 		String expectedSyntaxError = readTestFile(filename + ".err");
 		assertEquals(expectedSyntaxError.trim(), actualSyntaxError.trim());
 	}
-	
+
 	/**
 	 * Parse a program given a filename and return the corresponding AST.
 	 */
 	protected static Program parseProgramFile(String filename) {
 		return parseProgramFile(new File(TEST_FILES_PATH, filename));
 	}
-	
+
 	/**
 	 * Parse a program given a filename and return the corresponding AST.
 	 */
@@ -103,9 +103,9 @@ abstract public class TestSuite {
 		}
 	}
 
-	
+
 	/**
-	 * Parse a program and return the corresponding AST. 
+	 * Parse a program and return the corresponding AST.
 	 */
 	protected static Program parseProgram(String program) {
 		Reader r = new StringReader(program);
@@ -127,7 +127,7 @@ abstract public class TestSuite {
 			if (os.size() > 0) {
 				fail("Parser recovery:\n" + os.toString());
 			}
-			
+
 			CompilationUnit cu = parse(reader);
 			if (os.size() > 0) {
 				// The parser should not recover from anything, such errors
@@ -146,7 +146,7 @@ abstract public class TestSuite {
 			System.setErr(err);
 		}
 	}
-	
+
 	protected static String getErrors(Program p) {
 		StringBuilder sb = new StringBuilder();
 		for (CompilationUnit cu: p.getCompilationUnits()) {
@@ -156,10 +156,10 @@ abstract public class TestSuite {
 		}
 		return sb.toString();
 	}
-	
+
 	protected static String getCodeGenerationErrors(Program p) {
 		StringBuilder sb = new StringBuilder();
-		for (ErrorMessage e: p.codeGenerationErrors()) {
+		for (ErrorMessage e: p.mainDiagramErrors()) {
 			sb.append(e + "\n");
 		}
 		for (CompilationUnit cu: p.getCompilationUnits()) {
@@ -169,7 +169,7 @@ abstract public class TestSuite {
 		}
 		return sb.toString();
 	}
-	
+
 	//-----------------------------------------------------------
 	//
 	// Helper methods
@@ -198,7 +198,7 @@ abstract public class TestSuite {
 		}
 		return sb.toString();
 	}
-	
+
 	protected static void writeToFile(String filename, String content) {
 		try (Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(filename), "utf-8"))) {
@@ -207,7 +207,7 @@ abstract public class TestSuite {
 			fail(e.getMessage());
 		}
 	}
-	
+
 	protected static String execute(java.util.List<String> cmd) throws IOException, InterruptedException {
 		return execute(cmd, DEFAULT_EXECUTION_TIMEOUT);
 	}
@@ -215,7 +215,7 @@ abstract public class TestSuite {
 		ProcessBuilder pb = new ProcessBuilder(cmd);
 		Process process = pb.start();
 		process.getOutputStream().close();
-		
+
 		if (!process.waitFor(timeoutMillis, TimeUnit.MILLISECONDS)) {
 			process.destroy();
 			fail("Command " + cmd + " could not complete within " + timeoutMillis + " ms");
@@ -227,7 +227,7 @@ abstract public class TestSuite {
 
 		return inputStreamToString(process.getInputStream());
 	}
-	
+
 	protected static String inputStreamToString(InputStream is) {
 		StringBuilder sb = new StringBuilder();
 		try {
@@ -241,12 +241,12 @@ abstract public class TestSuite {
 		}
 		return sb.toString();
 	}
-	
+
 	private static CompilationUnit parse(Reader reader) throws IOException,
 			beaver.Parser.Exception {
 		BloqqiScanner scanner = new BloqqiScanner(reader);
 		BloqqiParser parser = new BloqqiParser();
 		return (CompilationUnit) parser.parse(scanner);
 	}
-	
+
 }

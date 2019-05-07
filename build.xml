@@ -21,7 +21,7 @@
 				</tokenfilter>
 			</filterchain>
 	</loadresource>
-	
+
 	<!-- Define Ant tasks -->
 	<taskdef name="jastadd" classname="org.jastadd.JastAddTask" classpath="${tools}/jastadd2.jar"/>
 	<taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="${tools}/JFlex.jar"/>
@@ -84,6 +84,7 @@
 				<file name="BloqqiBase.parser"/>
 				<file name="Function.parser"/>
 				<file name="StateMachine.parser"/>
+				<file name="Configuration.parser"/>
 			</filelist>
 		</concat>
 
@@ -115,7 +116,7 @@
 		</delete>
 	</target>
 
-	
+
 	<target name="test" depends="build">
 		<mkdir dir="${test-reports.dir}"/>
 		<junit>
@@ -147,7 +148,7 @@
 			</manifest>
 		</jar>
 	</target>
-	
+
 	<target name="doc" depends="build" description="generate documentation">
 		<mkdir dir="${docdir}"/>
 		<javadoc

@@ -10,6 +10,9 @@ aspect PrintAST {
 		s += lastDiagramType().name();
 		return s;
 	}
+	eq ConfBlock.printASTInfo() = name() + ", " + type()
+		+ ", in=" + ((DiagramType) type()).allInputVariables()
+		+ ", out=" + ((DiagramType) type()).allOutputVariables();
 	eq Port.printASTInfo() = "in=" + ingoingConnections() + ", out=" + outgoingConnections();
 	eq DotVarUse.printASTInfo() = toString() + ", " + decl();
 	eq Parameter.printASTInfo() = uses().toString();
@@ -17,7 +20,11 @@ aspect PrintAST {
 	eq RecommendationBlock.printASTInfo() = interceptingAnchors() + ", " + conflictingRecommendations().toString();
 	eq TypeUse.printASTInfo() = toString() + ", " + decl();
 	eq Variable.printASTInfo() = name();
-	 
+	eq ConfUse.printASTInfo() = toString() + ", " + blockDecl() + ", " + varPortDecl();
+	eq VarPort.printASTInfo() = name() + ", in=" + incoming() + ", out=" + outgoing();
+	eq ConfConnection.printASTInfo() = toString();
+	//eq ConfDotUse.printASTInfo() = "" + decl();
+
 	public void ASTNode.printAST() {
 		printAST("", 0);
 	}
@@ -70,5 +77,11 @@ aspect PrintAST {
 			sb.append("  ");
 		}
 		return sb.toString();
+	}
+
+	protected void ConfBlock.printAST(String prefix, int i) {
+		super.printAST(prefix, i);
+		getInVarPorts().printAST("InVarPorts", i+1);
+		getOutVarPorts().printAST("OutVarPorts", i+1);
 	}
 }

@@ -68,6 +68,7 @@ NUM = [0-9]+
     "source"        { return sym(Terminals.SOURCE); }
     "wiring"        { return sym(Terminals.WIRING); }
     "recommendation" { return sym(Terminals.RECOMMENDATION); }
+    "configuration" { return sym(Terminals.CONFIGURATION); }
     "default"       { return sym(Terminals.DEFAULT); }
     "before"        { return sym(Terminals.BEFORE); }
     "replaceable"   { return sym(Terminals.REPLACEABLE); }
@@ -115,6 +116,7 @@ NUM = [0-9]+
     "."             { return sym(Terminals.DOT); }
     ","             { return sym(Terminals.COMMA); }
     "=>"            { return sym(Terminals.ARROW); }
+    "@"             { return sym(Terminals.AT); }
 
     // ID
     {ID}            { return sym(Terminals.ID); }
