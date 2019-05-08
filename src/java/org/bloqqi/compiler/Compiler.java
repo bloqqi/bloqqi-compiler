@@ -355,7 +355,12 @@ public class Compiler {
 		boolean errors = false;
 
 		// Configurations don't need a main diagram type
-		if (!optionGenerateC.getValue().equals("configuration")) {
+		if (optionGenerateC.getValue().equals("configuration")) {
+			if (p.configurations().size() != 1) {
+				System.out.println("Error! You need exactly one run configuration when compiling with --c=configuration");
+				errors = true;
+			}
+		} else {
 			if (!p.mainDiagramErrors().isEmpty()) {
 				System.out.println("Code generation errors:");
 				for (ErrorMessage e: p.mainDiagramErrors()) {
