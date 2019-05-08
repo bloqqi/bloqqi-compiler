@@ -1,0 +1,24 @@
+aspect PrettyPrintConfiguration {
+	public void Configuration.prettyPrint(StringBuilder sb) {
+		sb.append("configuration {\n");
+		for (ConfBlock b: getConfBlocks()) {
+			sb.append("  " + b + ";\n");
+		}
+		for (ConfConnection c: getConfConnections()) {
+			sb.append("  " + c + ";\n");
+		}
+		sb.append("}\n");
+	}
+
+	public String ConfBlock.toString() {
+		return getName() + ": " + getType() + " @ " + getFreq();
+	}
+
+	public String ConfConnection.toString() {
+		return "connect(" + getSource() + ", " + getTarget() + ")";
+	}
+
+	public String ConfUse.toString() {
+		return getBlockUse() + "." + getVariableUse();
+	}
+}

@@ -1,0 +1,29 @@
+external PrintStrInt(in1: String, in2: Int);
+configuration {
+  a: A @ 1;
+  b: B @ 10;
+  connect(a.out, b.in);
+  connect(b.out1, a.in1);
+  connect(b.out2, a.in2);
+}
+diagramtype Main {
+}
+diagramtype A {
+  input in1: Int;
+  input in2: Int;
+  output out: Int;
+  Add_1;
+  p: PrintStrInt;
+  connect(in1, Add_1.in1);
+  connect(in2, Add_1.in2);
+  connect(Add_1.out, out);
+  connect("A.out=", p.in1);
+  connect(Add_1.out, p.in2);
+}
+diagramtype B {
+  input in: Int;
+  output out1: Int;
+  output out2: Int;
+  connect(in, out1);
+  connect(1, out2);
+}
