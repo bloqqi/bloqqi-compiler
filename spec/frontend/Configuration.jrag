@@ -1,4 +1,17 @@
-aspect Configuration {
+aspect Configurations {
+	coll Set<Configuration> Program.configurations() [new HashSet<>()];
+	Configuration contributes this to Program.configurations();
+
+	syn Configuration Program.configuration()
+		= configurations().isEmpty() ? null : configurations().iterator().next();
+
+	coll Set<DiagramType> Configuration.diagramTypes() [new HashSet<>()] root Configuration;
+	ConfBlock contributes ((DiagramType) type())
+		when type().isDiagramType()
+		to Configuration.diagramTypes();
+}
+
+aspect NameAnalysis {
 	syn ConfBlock ConfUse.blockDecl() = confLookup(getBlockUse());
 	syn VarPort ConfUse.varPortDecl()
 		= blockDecl() != null
@@ -28,19 +41,9 @@ aspect Configuration {
 		}
 		return null;
 	}
+}
 
-	coll Set<Configuration> Program.configurations() [new HashSet<>()];
-	Configuration contributes this to Program.configurations();
-
-	syn Configuration Program.configuration()
-		= configurations().isEmpty() ? null : configurations().iterator().next();
-
-	coll Set<DiagramType> Configuration.diagramTypes() [new HashSet<>()] root Configuration;
-	ConfBlock contributes ((DiagramType) type())
-		when type().isDiagramType()
-		to Configuration.diagramTypes();
-
-
+aspect Variables {
 	syn Map<String, Variable> DiagramType.allInputVariables() {
 		Map<String, Variable> map = new TreeMap<>();
 		computeAllIOVariables(map, "", true);
@@ -68,8 +71,9 @@ aspect Configuration {
 			}
 		}
 	}
+}
 
-
+aspect VarPorts {
 	syn lazy List<VarPort> ConfBlock.getInVarPortList() {
 		List<VarPort> list = new List<VarPort>();
 		if (type().isDiagramType()) {
@@ -92,6 +96,11 @@ aspect Configuration {
 		return list;
 	}
 
+	eq VarPort.findMember(String name) = null;
+	eq VarPort.name() = getID();
+	eq VarPort.type() = getVariable().type();
+	eq VarPort.declaredParameter() = null;
+
 	coll Set<ConfConnection> VarPort.incoming()
 		[new HashSet<>()] root Configuration;
 	ConfConnection contributes this
@@ -105,14 +114,9 @@ aspect Configuration {
 		when getSource().varPortDecl() != null
 			&& getTarget().varPortDecl() != null
 		to VarPort.outgoing() for getSource().varPortDecl();
-
-	eq VarPort.findMember(String name) = null;
-	eq VarPort.name() = getID();
-	eq VarPort.type() = getVariable().type();
-	eq VarPort.declaredParameter() = null;
 }
 
-aspect ConfigurationErrors {
+aspect Errors {
 	ConfUse contributes error("Block not found: " + getBlockUse())
 		when blockDecl() == null
 		to CompilationUnit.errors();
