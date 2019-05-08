@@ -10,9 +10,15 @@ aspect PrintAST {
 		s += lastDiagramType().name();
 		return s;
 	}
-	eq ConfBlock.printASTInfo() = name() + ", " + type()
-		+ ", in=" + ((DiagramType) type()).allInputVariables()
-		+ ", out=" + ((DiagramType) type()).allOutputVariables();
+	eq ConfBlock.printASTInfo() {
+		String s = name() + ", " + type();
+		if (type().isDiagramType()) {
+			DiagramType dt = ((DiagramType) type());
+			s += ", in=" + dt.allInputVariables();
+			s += ", out=" + dt.allOutputVariables();
+		}
+		return s;
+	}
 	eq Port.printASTInfo() = "in=" + ingoingConnections() + ", out=" + outgoingConnections();
 	eq DotVarUse.printASTInfo() = toString() + ", " + decl();
 	eq Parameter.printASTInfo() = uses().toString();

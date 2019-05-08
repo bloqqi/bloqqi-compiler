@@ -113,9 +113,51 @@ aspect Configuration {
 }
 
 aspect ConfigurationErrors {
-	ConfUse contributes error("The declaration of " + toString() + " was not found")
+	ConfUse contributes error("Block not found: " + getBlockUse())
 		when blockDecl() == null
 		to CompilationUnit.errors();
+	ConfUse contributes error("Variable not found: " + toString())
+		when blockDecl() != null && varPortDecl() == null
+		to CompilationUnit.errors();
+
+
+	ConfBlock contributes nta getInVarPortList() to CompilationUnit.errors();
+	inh ConfBlock VarPort.confBlock();
+	eq ConfBlock.getChild().confBlock() = this;
+	VarPort contributes confBlock().error("Input variable " + name()
+			+ " of block " + confBlock().name() + " has no incoming connection")
+		when incoming().size() == 0
+		to CompilationUnit.errors();
+	VarPort contributes confBlock().error("Input variable " + name()
+			+ " of block " + confBlock().name() + " has more than one incoming connection")
+		when incoming().size() > 1
+		to CompilationUnit.errors();
+
+	inh boolean ConfUse.isSource();
+	eq ConfConnection.getSource().isSource() = true;
+	eq ConfConnection.getTarget().isSource() = false;
+	ConfUse contributes error("Input variables cannot be source of a connection: " + toString())
+		when isSource() && varPortDecl() != null && varPortDecl().getVariable().isInputVariable()
+		to CompilationUnit.errors();
+	ConfUse contributes error("Output variables cannot be target of a connection: " + toString())
+		when !isSource() && varPortDecl() != null && varPortDecl().getVariable().isOutputVariable()
+		to CompilationUnit.errors();
+
+	ConfConnection contributes error("Incompatible types for " + getSource() + " and " + getTarget())
+		when !hasCompatibleTypes()
+		to CompilationUnit.errors();
+
+	syn boolean ConfConnection.hasCompatibleTypes() {
+		VarPort source = getSource().varPortDecl();
+		VarPort target = getTarget().varPortDecl();
+		if (source == null || target == null) {
+			return true;
+		} else {
+			TypeDecl sourceType = source.getVariable().type();
+			TypeDecl targetType = target.getVariable().type();
+			return sourceType.compatibleWith(targetType);
+		}
+	}
 }
 
 aspect PrettyPrint {

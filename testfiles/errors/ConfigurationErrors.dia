@@ -1,0 +1,32 @@
+configuration {
+	a: A @ 1;
+	b: B @ 10;
+	c: C @ 100;
+	connect(a.out, b.in);
+	connect(b.out2, a.in2);
+	connect(d.out, e.in);
+	connect(a.out2, b.in2);
+	connect(a.in1, b.out1);
+	connect(b.out1, a.in2);
+	connect(b.out3, a.in3);
+}
+
+diagramtype A {
+	input in1: Int;
+	input in2: Int;
+	input in3: Real;
+	output out: Int;
+	Add_1;
+	connect(in1, Add_1.in1);
+	connect(in2, Add_1.in2);
+	connect(Add_1, out);
+}
+
+diagramtype B {
+	input in: Int;
+	output out1: Int;
+	output out2: Int;
+	output out3: Bool;
+	connect(in, out1);
+	connect(1, out2);
+}

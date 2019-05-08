@@ -4,4 +4,3 @@ VarPort : VarDecl ::= <ID> <Variable:Variable>;
 ConfConnection ::= Source:ConfUse Target:ConfUse;
 
 ConfUse ::= <BlockUse> <VariableUse>;
-//ConfDotUse : ConfUse ::= ConfUse <ID>;

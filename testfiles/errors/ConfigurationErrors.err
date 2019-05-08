@@ -1,0 +1,10 @@
+Line 2, column 2: Input variable in1 of block a has no incoming connection
+Line 2, column 2: Input variable in2 of block a has more than one incoming connection
+Line 4, column 5: Type not found: C
+Line 7, column 10: Block not found: d
+Line 7, column 17: Block not found: e
+Line 8, column 10: Variable not found: a.out2
+Line 8, column 18: Variable not found: b.in2
+Line 9, column 10: Input variables cannot be source of a connection: a.in1
+Line 9, column 17: Output variables cannot be target of a connection: b.out1
+Line 11, column 2: Incompatible types for b.out3 and a.in3
