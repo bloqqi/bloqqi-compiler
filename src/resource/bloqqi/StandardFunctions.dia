@@ -37,7 +37,7 @@ function Mul(Int in1, Int in2 => Int out)
   out = in1 * in2;
 }
 
-function Neg(Int in => Int out) 
+function Neg(Int in => Int out)
 {
   out = 0-in;
 }
@@ -79,7 +79,7 @@ function RMul(Real in1, Real in2 => Real out)
   out = in1 * in2;
 }
 
-function RNeg(Real in => Real out) 
+function RNeg(Real in => Real out)
 {
   out = 0-in;
 }
@@ -116,7 +116,7 @@ function Not(Bool in => Bool out)
   else
   {
     out = true;
-  } 
+  }
 }
 
 function Move(Bool in1 => Bool out)
@@ -159,6 +159,11 @@ function Lt(Int in1, Int in2 => Bool out)
   out = in1 < in2;
 }
 
+// Comparison double
+function RGt(Real in1, Real in2 => Bool out)
+{
+  out = in1 > in2;
+}
 
 //
 // Selectors
@@ -190,6 +195,18 @@ function SelBool(Bool sel, Bool in1, Bool in2 => Bool out)
 }
 
 function SelInt(Bool sel, Int in1, Int in2 => Int out)
+{
+  if (sel)
+  {
+    out = in1;
+  }
+  else
+  {
+    out = in2;
+  }
+}
+
+function SelReal(Bool sel, Real in1, Real in2 => Real out)
 {
   if (sel)
   {
