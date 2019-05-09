@@ -1,3 +1,6 @@
+external E(in: Int => out: Int);
+external E2(in: Int);
+
 diagramtype Main {
   output out: Int;
   f: F;
@@ -15,4 +18,6 @@ function F(Int in => Int out)
   x6: Int = Main(10);
   x7: Int = G(10);
   x8: Int = Max(10, 20);
+  x9: Int = E(10);
+  x10: Int = E2(10);
 }

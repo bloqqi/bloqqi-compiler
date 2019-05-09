@@ -172,6 +172,11 @@ aspect FunctionErrors {
 		when decl() != null && !decl().isFunction() && !decl().isExternalFunction()
 		to CompilationUnit.errors();
 
+	FunctionCallFExpr contributes error("Can only call external functions with an output parameter (" + getID() + ")")
+		when decl() != null && decl().isExternalFunction()
+			&& !((ExternalFunction) decl()).hasOutParameter()
+		to CompilationUnit.errors();
+
 	FunctionCallFExpr contributes error("Cannot find function " + getID())
 		when decl() == null
 		to CompilationUnit.errors();
