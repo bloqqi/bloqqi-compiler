@@ -168,8 +168,8 @@ aspect FunctionErrors {
 			&& function().getNumInParameter() != getNumFExpr()
 		to CompilationUnit.errors();
 
-	FunctionCallFExpr contributes error("Only functions are allowed to be called (" + getID() + ")")
-		when decl() != null && !decl().isFunction()
+	FunctionCallFExpr contributes error("Only functions and external functions are allowed to be called (" + getID() + ")")
+		when decl() != null && !decl().isFunction() && !decl().isExternalFunction()
 		to CompilationUnit.errors();
 
 	FunctionCallFExpr contributes error("Cannot find function " + getID())

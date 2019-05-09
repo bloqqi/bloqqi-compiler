@@ -160,9 +160,15 @@ aspect GenerateCFunction {
 		for (FExpr e: getFExprs()) {
 			joiner.add(e.generateC());
 		}
-		Function f = (Function) decl();
-		String outName = f.getOutParameter(0).nameC();
-		return decl().nameC() + "(" + joiner + ")." + outName;
+		String outName = "";
+		if (decl().isFunction()) {
+			Function f = (Function) decl();
+			outName = f.getOutParameter(0).nameC();
+			return decl().nameC() + "(" + joiner + ")." + outName;
+		} else if (decl().isExternalFunction()) {
+			return decl().nameC() + "(" + joiner + ")";
+		}
+		return "";
 	}
 
 }
