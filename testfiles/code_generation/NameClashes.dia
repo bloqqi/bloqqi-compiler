@@ -30,3 +30,21 @@ diagramtype NameClash4() {
 	connect(1, int);
 }
 
+diagramtype NameClash5(=> out: Int) {
+	d: D;
+	connect(d, out);
+}
+diagramtype D(=> D: Int) {
+	connect(1, D);
+}
+
+diagramtype NameClash6() {
+	E: E;
+	connect(1, E);
+}
+diagramtype E(E: Int) {
+	F: F;
+	connect(E, F);
+}
+diagramtype F(F: Int) {
+}

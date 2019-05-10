@@ -724,6 +724,7 @@ aspect CNames {
 		return field;
 	}
 	syn String VarDecl.nameC() = nameCFiltered();
+	eq Parameter.nameC() = ASTNode.filterCName(name());
 	eq Variable.nameC() = prefixCVarName() + "->" + cNameDeclaration();
 	eq WiringInParameter.nameC() = "<undefined>";
 	eq WiringOutParameter.nameC() = "<undefined>";
