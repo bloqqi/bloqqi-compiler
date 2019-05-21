@@ -4,6 +4,10 @@ aspect StateMachinesGenStructs {
 	protected final static String ASTNode.STATEMACHINE_CURRENT_STATE
 		= ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_CURRENT_STATE_NAME;
 
+	protected final static String ASTNode.STATEMACHINE_COVERAGE_STATE = "_coverage_state_";
+	protected final static String ASTNode.STATEMACHINE_COVERAGE_TRANS = "_coverage_transition_";
+
+
 	eq StateMachine.returnTypeC() = allOutParameters().size() > 0 ? nameC() + "_RES" : "void";
 
 	/** Generate struct for return value */
@@ -50,6 +54,7 @@ aspect StateMachinesGenStructs {
 		sb.append("  case " + nameC() + "_" + ASTNode.STATEMACHINE_UNINITIALIZED_STATE + ":\n");
 		String startState = getStateList().getChild(0).getID();
 		sb.append("    " + ASTNode.STATEMACHINE_CURRENT_STATE + " = " + nameC() + "_" + startState + ";\n");
+		sb.append("    " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_STATE + startState + "++;\n");
 		sb.append("    break;\n");
 
 		for (State s: getStates()) {
@@ -58,8 +63,11 @@ aspect StateMachinesGenStructs {
 			for (Transition t: s.transitions()) {
 				sb.append("    ");
 				sb.append(first ? "if" : "else if");
-				sb.append(" (" + t.getFExpr().generateC() + ") ");
-				sb.append(ASTNode.STATEMACHINE_CURRENT_STATE + " = " + nameC() + "_" + t.getToID() + ";\n");
+				sb.append(" (" + t.getFExpr().generateC() + ") {\n");
+				sb.append("      " + ASTNode.STATEMACHINE_CURRENT_STATE + " = " + nameC() + "_" + t.getToID() + ";\n");
+				sb.append("      " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_STATE + s.getID() + "++;\n");
+				sb.append("      " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_TRANS + t.index() + "++;\n");
+				sb.append("    }\n");
 				first = false;
 			}
 			sb.append("    break;\n");
@@ -121,8 +129,53 @@ aspect StateMachinesGenStructs {
 			sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
 		}
 		sb.append("  enum " + nameC() + "_ENUM " + ASTNode.STATEMACHINE_CURRENT_STATE_NAME + ";\n");
+		sb.append(genVariableStructsCCoverage());
+
 		sb.append("} " + stateStructName() + ";\n");
 
 		structs.put(this, sb.toString());
+	}
+
+	private String StateMachine.genVariableStructsCCoverage() {
+		StringBuilder sb = new StringBuilder();
+		for (State s: getStates()) {
+			sb.append("  int " + ASTNode.STATEMACHINE_COVERAGE_STATE + s.getID() + ";\n");
+		}
+		for (Transition t: getTransitions()) {
+			sb.append("  int " + ASTNode.STATEMACHINE_COVERAGE_TRANS + t.index() + ";\n");
+		}
+		return sb.toString();
+	}
+	inh int Transition.index();
+	eq StateMachine.getTransition(int i).index() = i + 1;
+
+
+	public void Program.generateCoverageFunctions(StringBuilder sb) {
+		sb.append("void bloqqi_print_coverage(Main_VARS *vars) {\n");
+		mainDiagramType().generateCoverageFunctions(sb, "");
+		sb.append("}\n");
+	}
+	public void TypeDecl.generateCoverageFunctions(StringBuilder sb, String enclosingPath) {
+	}
+	public void DiagramType.generateCoverageFunctions(StringBuilder sb, String enclosingPath) {
+		for (Block b: blocks()) {
+			String enc = enclosingPath + b.nameC() + ".";
+			b.type().generateCoverageFunctions(sb, enc);
+		}
+	}
+	public void StateMachine.generateCoverageFunctions(StringBuilder sb, String enclosingPath) {
+		String smName = enclosingPath.substring(0, enclosingPath.length()-1);
+		sb.append("  printf(\"" + smName + ":\\n\");\n");
+		for (State s: getStates()) {
+			String v = "vars->" + ASTNode.STATE_FIELD + "."
+				+ enclosingPath + ASTNode.STATEMACHINE_COVERAGE_STATE + s.getID();
+			sb.append("  printf(\"%4d: " + s.getID() + "\\n\", " + v + ");\n");
+		}
+
+		for (Transition t: getTransitions()) {
+			String v = "vars->" + ASTNode.STATE_FIELD + "."
+				+ enclosingPath + ASTNode.STATEMACHINE_COVERAGE_TRANS + t.index();
+			sb.append("  printf(\"%4d: " + t.toString() + "\\n\", " + v + ");\n");
+		}
 	}
 }

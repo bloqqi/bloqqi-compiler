@@ -43,7 +43,10 @@ aspect StateMachinePrettyPrint {
 	}
 
 	public void Transition.prettyPrint(StringBuilder sb) {
-		sb.append("  " + getFromID() + " => " + getToID());
-		sb.append(": " + getFExpr().toString() + ";\n");
+		sb.append("  " + toString() + ";\n");
+	}
+
+	public String Transition.toString() {
+		return getFromID() + " => " + getToID() + ": " + getFExpr().toString();
 	}
 }

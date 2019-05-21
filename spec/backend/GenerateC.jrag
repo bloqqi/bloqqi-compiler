@@ -153,6 +153,7 @@ aspect GenerateC {
 			sb.append("char *bloqqi_all_vars_to_json(Main_VARS *vars);\n");
 			sb.append("char *bloqqi_io_vars_to_json(Main_VARS *vars);\n");
 			sb.append("void bloqqi_set_input_variable(Main_VARS *vars, const char *path, const char *value);\n");
+			sb.append("void bloqqi_print_coverage(Main_VARS *vars);\n");
 		}
 		genDecls(sb);
 		sb.append("\n");
@@ -193,6 +194,7 @@ aspect GenerateC {
 				codeTarget == CodeGenerationTarget.WITHOUT_DRIVER) {
 			genStateToJSON(sb);
 			genSetInputVariable(sb);
+			generateCoverageFunctions(sb);
 		}
 	}
 
