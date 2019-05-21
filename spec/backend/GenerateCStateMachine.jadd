@@ -54,7 +54,6 @@ aspect StateMachinesGenStructs {
 		sb.append("  case " + nameC() + "_" + ASTNode.STATEMACHINE_UNINITIALIZED_STATE + ":\n");
 		String startState = getStateList().getChild(0).getID();
 		sb.append("    " + ASTNode.STATEMACHINE_CURRENT_STATE + " = " + nameC() + "_" + startState + ";\n");
-		sb.append("    " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_STATE + startState + "++;\n");
 		sb.append("    break;\n");
 
 		for (State s: getStates()) {
@@ -65,7 +64,6 @@ aspect StateMachinesGenStructs {
 				sb.append(first ? "if" : "else if");
 				sb.append(" (" + t.getFExpr().generateC() + ") {\n");
 				sb.append("      " + ASTNode.STATEMACHINE_CURRENT_STATE + " = " + nameC() + "_" + t.getToID() + ";\n");
-				sb.append("      " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_STATE + s.getID() + "++;\n");
 				sb.append("      " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_TRANS + t.index() + "++;\n");
 				sb.append("    }\n");
 				first = false;
@@ -95,6 +93,7 @@ aspect StateMachinesGenStructs {
 				sb.append("    ");
 				asg.generateC(sb);
 			}
+			sb.append("      " + ASTNode.STATE_VAR + "->" + ASTNode.STATEMACHINE_COVERAGE_STATE + s.getID() + "++;\n");
 			sb.append("    break;\n");
 		}
 		sb.append("  case " + nameC() + "_" + ASTNode.STATEMACHINE_UNINITIALIZED_STATE + ":\n");
