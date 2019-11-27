@@ -36,7 +36,7 @@
 			srcdir="${basedir}"
 			destdir="${bindir}"
 			includes="src/**/*.java"
-			classpath=".:${tools}/beaver-rt.jar:${junitjar}"
+			classpath=".:${tools}/beaver-rt.jar:${junitjar}:${tools}/gson-2.6.2.jar"
 			fork="true"
 			includeAntRuntime="false"
 			memoryMaximumSize="128M"
@@ -143,6 +143,7 @@
 			<fileset dir="${resourcedir}" includes="**" />
 			<fileset dir="${gendir}" includes="**/*.java" />
 			<zipfileset includes="**/*.class" src="${tools}/beaver-rt.jar"/>
+			<zipfileset includes="**/*.class" src="${tools}/gson-2.6.2.jar"/>
 			<manifest>
 				<attribute name="Main-Class" value="org.bloqqi.compiler.Compiler" />
 			</manifest>
