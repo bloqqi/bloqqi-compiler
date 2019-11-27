@@ -1,4 +1,5 @@
 package org.bloqqi.compiler;
+
 import org.bloqqi.compiler.ast.*;
 import org.bloqqi.compiler.ast.BloqqiScanner.ScannerError;
 import org.bloqqi.compiler.options.CommandLine;
@@ -27,6 +28,7 @@ public class Compiler {
 	protected FlagOption optionFile;
 	protected EnumOption optionGenerateC;
 	protected FlagOption optionFMI;
+	protected StringOption optionDist;
 	protected StringOption optionOutputFile;
 	protected FlagOption optionDot;
 	protected FlagOption optionRec;
@@ -77,6 +79,7 @@ public class Compiler {
 				Arrays.asList("with-driver", "without-driver", "minimal", "configuration"),
 				"with-driver"));
 		optionFMI = addOption(new FlagOption("fmi", "generate C for FMI"));
+		optionDist = addOption(new StringOption("dist", "specify config and generate C for distributed execution"));
 		optionOutputFile = addOption(new StringOption("o", "output file"));
 		optionDot = addOption(new FlagOption("dot", "generate DOT visualisation file"));
 		optionRec = addOption(new FlagOption("rec", "display recommendations"));
@@ -94,9 +97,10 @@ public class Compiler {
 		commandLine.parse(args);
 
 		if (optionOutputFile.isSet()) {
-			if (!optionGenerateC.isSet() && !optionFMI.isSet()) {
+			if (!optionGenerateC.isSet() && !optionFMI.isSet() && !optionDist.isSet()) {
 				throw new CommandLineException("Option " + optionOutputFile
-					+ " can currently only be set together with option " + optionGenerateC + " or " + optionFMI);
+					+ " can currently only be set together with option " + optionGenerateC
+					+ ", " + optionFMI + ", or " + optionDist);
 			} else if (!optionOutputFile.getValue().endsWith(".c")) {
 				throw new CommandLineException("The value for option " + optionOutputFile
 					+ " should end with the file extension .c");
@@ -110,14 +114,14 @@ public class Compiler {
 			} catch (IOException e) { /* ignore */ }
 		}
 
-		if (optionFMI.isSet() && !optionOutputFile.isSet()) {
+		if ((optionFMI.isSet() || optionDist.isSet()) && !optionOutputFile.isSet()) {
 			throw new CommandLineException("Output file (" + optionOutputFile
-				+ ") needs to be specified when using option " + optionFMI);
+				+ ") needs to be specified when using option " + optionFMI + " or " + optionDist);
 		}
 
-		if (optionFMI.isSet() && optionGenerateC.isSet()) {
-			throw new CommandLineException("The options " + optionFMI
-				+ " and " + optionGenerateC + " cannot be used together.");
+		if ((optionFMI.isSet()?1:0) + (optionGenerateC.isSet()?1:0) + (optionDist.isSet()?1:0) > 1) {
+			throw new CommandLineException("Only one of the options " + optionFMI
+				+ ", " + optionGenerateC + ", " + optionDist + " can be selected.");
 		}
 
 		if (optionHelp.isSet() || commandLine.getArguments().isEmpty()) {
@@ -231,14 +235,21 @@ public class Compiler {
 			errors = true;
 		}
 
+		DistributedCGenerator distC = new DistributedCGenerator(p, optionDist.getValue());
+		if (optionDist.isSet()) {
+			errors |= !distC.readAndCheckConfig();
+		}
+
 		if (!errors && p.getNumCompilationUnit() > 0) {
-			if (optionGenerateC.isSet() || optionFMI.isSet()) {
+			if (optionGenerateC.isSet() || optionFMI.isSet() || optionDist.isSet()) {
 				if (hasCodeGenerationErrors(p)) {
 					System.exit(1);
 				} else if (optionGenerateC.isSet()) {
 					generateC(p);
 				} else if (optionFMI.isSet()) {
 					generateCForFMI(p);
+				} else if (optionDist.isSet()) {
+					distC.generate();
 				}
 			} else if (optionDot.isSet()) {
 				writeToDOT(p, commandLine.getArguments().get(0));
@@ -287,6 +298,7 @@ public class Compiler {
 				&& !optionPrettyPrint.isSet()
 				&& !optionGenerateC.isSet()
 				&& !optionFMI.isSet()
+				&& !optionDist.isSet()
 				&& !optionFeatureDiagram.isSet();
 	}
 
@@ -313,7 +325,6 @@ public class Compiler {
 			return new CodeGenerationData();
 		}
 	}
-
 
 	protected void generateC(Program p) {
 		CodeGenerationTarget target = getCodeGenerationTarget();
@@ -360,14 +371,12 @@ public class Compiler {
 				System.out.println("Error! You need exactly one run configuration when compiling with --c=configuration");
 				errors = true;
 			}
-		} else {
-			if (!p.mainDiagramErrors().isEmpty()) {
-				System.out.println("Code generation errors:");
-				for (ErrorMessage e: p.mainDiagramErrors()) {
-					System.out.println("- " + e);
-				}
-				errors = true;
+		} else if (!optionDist.isSet() && !p.mainDiagramErrors().isEmpty()) {
+			System.out.println("Code generation errors:");
+			for (ErrorMessage e: p.mainDiagramErrors()) {
+				System.out.println("- " + e);
 			}
+			errors = true;
 		}
 		for (CompilationUnit cu: p.getCompilationUnits()) {
 			if (!cu.codeGenerationErrors().isEmpty()) {
