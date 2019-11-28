@@ -27,11 +27,11 @@ public class CodeGeneration extends DynamicTestSuite {
 	private final static String DIRECTORY_PATH = "code_generation/";
 	private final static String PRINT_FUNCTION_PATH
 		= "src/java/org/bloqqi/tests/codegen/PrintFunction.c";
-	
+
 	public CodeGeneration(String filename) {
 		super(filename);
 	}
-	
+
 	@Test
 	public void test() throws IOException, InterruptedException {
 		String file = DIRECTORY_PATH + filename;
@@ -40,17 +40,17 @@ public class CodeGeneration extends DynamicTestSuite {
 		String executableFile = TEST_FILES_PATH + file + ".executable";
 		String outFile = TEST_FILES_PATH + file + ".out";
 		String expectedFile = TEST_FILES_PATH + file + ".expected";
-		
+
 		Program p = parseValidProgramFile(file + ".dia");
 		assertEquals("Program in file " + file + " contains code generation errors",
 				"",
 				getCodeGenerationErrors(p));
-		
+
 		// Generate C code
 		String cCode = "#define ITERATIONS " + ITERATIONS + "\n";
 		cCode += p.generateC(CodeGenerationTarget.TESTING);
 		writeToFile(cFile, cCode);
-		
+
 		// Compile C code
 		List<String> cmd = new ArrayList<>();
 		cmd.add("gcc");
@@ -69,9 +69,9 @@ public class CodeGeneration extends DynamicTestSuite {
 		cmd.add("-o");
 		cmd.add(executableFile);
 		execute(cmd);
-		
+
 		// Run program
-		String out = execute(Arrays.asList(executableFile), 200);
+		String out = execute(Arrays.asList(executableFile), 500);
 		writeToFile(outFile, out);
 		String expected = "";
 		if (new File(expectedFile).exists()) {
@@ -79,7 +79,7 @@ public class CodeGeneration extends DynamicTestSuite {
 		}
 		assertEquals(expected, out);
 	}
-	
+
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> getFiles() {
 		return getFiles(DIRECTORY_PATH);
