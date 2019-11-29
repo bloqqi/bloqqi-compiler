@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -13,13 +14,14 @@ import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.compiler.ast.DiagramType;
 import org.bloqqi.compiler.ast.TypeDecl;
 import org.bloqqi.compiler.ast.Variable;
-
+import org.bloqqi.compiler.ast.CodeGenerationData;
+import org.bloqqi.compiler.ast.CodeGenerationTarget;
 
 public class DistributedCGenerator {
 	private final Program program;
 	private final String jsonFile;
 
-	private Config conf;
+	private DistConfig conf;
 	private DiagramType diagramType;
 
 	public DistributedCGenerator(Program program, String jsonFile) {
@@ -34,7 +36,7 @@ public class DistributedCGenerator {
 		try {
 			String json = new String(Files.readAllBytes(Paths.get(jsonFile)));
 			Gson gson = new Gson();
-			Config conf = gson.fromJson(json, Config.class);
+			DistConfig conf = gson.fromJson(json, DistConfig.class);
 
 			Set<String> structuralErrors = conf.structuralAnalysis();
 			if (!structuralErrors.isEmpty()) {
@@ -72,11 +74,13 @@ public class DistributedCGenerator {
 		}
 	}
 
-	public void generate() {
-		System.out.println("Let's generate code!");
+	public void generate(String outputFile) {
+		File cFile = new File(outputFile);
+		String cCode = program.generateCDist(conf);
+		Compiler.writeToFile(cFile, cCode);
 	}
 
-	public static class Config {
+	public static class DistConfig {
 		private String type;
 		private double frequency;
 		private List<ConfInput> inputs;

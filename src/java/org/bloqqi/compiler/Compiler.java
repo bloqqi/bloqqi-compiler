@@ -249,7 +249,7 @@ public class Compiler {
 				} else if (optionFMI.isSet()) {
 					generateCForFMI(p);
 				} else if (optionDist.isSet()) {
-					distC.generate();
+					distC.generate(optionOutputFile.getValue());
 				}
 			} else if (optionDot.isSet()) {
 				writeToDOT(p, commandLine.getArguments().get(0));
@@ -302,18 +302,18 @@ public class Compiler {
 				&& !optionFeatureDiagram.isSet();
 	}
 
-	protected CodeGenerationTarget getCodeGenerationTarget() {
+	protected CodeGenerationTarget getCodeGenerationTarget(Program p) {
 		switch (optionGenerateC.getValue()) {
 			case "with-driver":
-				return CodeGenerationTarget.WITH_DRIVER;
+				return new CodeTargetWithDriver(p);
 			case "without-driver":
-				return CodeGenerationTarget.WITHOUT_DRIVER;
+				return new CodeTargetWithoutDriver(p);
 			case "minimal":
-				return CodeGenerationTarget.MINIMAL;
+				return new CodeTargetMinimal(p);
 			case "configuration":
-				return CodeGenerationTarget.CONFIGURATION;
+				return new CodeTargetConfiguration(p);
 		}
-		return CodeGenerationTarget.WITH_DRIVER;
+		return new CodeTargetWithDriver(p);
 	}
 
 	protected CodeGenerationData getCodeGenerationData() {
@@ -327,8 +327,7 @@ public class Compiler {
 	}
 
 	protected void generateC(Program p) {
-		CodeGenerationTarget target = getCodeGenerationTarget();
-		CodeGenerationData data = getCodeGenerationData();
+		CodeGenerationTarget target = getCodeGenerationTarget(p);
 
 		if (optionOutputFile.isSet()) {
 			File cFile = new File(optionOutputFile.getValue());
@@ -339,11 +338,11 @@ public class Compiler {
 
 			StringBuilder sbHeader = new StringBuilder();
 			StringBuilder sbC = new StringBuilder();
-			p.generateCSeparateFiles(headerFilename, sbHeader, sbC, target, data);
+			p.generateCSeparateFiles(headerFilename, sbHeader, sbC, target);
 			writeToFile(headerFile, sbHeader.toString());
 			writeToFile(cFile, sbC.toString());
 		} else {
-			System.out.println(p.generateC(target, data));
+			System.out.println(p.generateC(target));
 		}
 	}
 
@@ -351,7 +350,7 @@ public class Compiler {
 		CodeGenerationData data = getCodeGenerationData();
 
 		File cFile = new File(optionOutputFile.getValue());
-		writeToFile(cFile, p.generateC(CodeGenerationTarget.FMI, data));
+		writeToFile(cFile, p.generateC(new CodeTargetFMI(p, data)));
 
 		String xmlFilename;
 		xmlFilename = cFile.getName().substring(0, cFile.getName().lastIndexOf('.'));
@@ -440,11 +439,11 @@ public class Compiler {
 	}
 
 
-	protected static void writeToFile(String filename, String str) {
+	public static void writeToFile(String filename, String str) {
 		writeToFile(new File(filename), str);
 	}
 
-	protected static void writeToFile(File file, String str) {
+	public static void writeToFile(File file, String str) {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(file);

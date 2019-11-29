@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.bloqqi.compiler.ast.CodeGenerationTarget;
+import org.bloqqi.compiler.ast.CodeTargetTesting;
 import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.tests.testsuite.DynamicTestSuite;
 
@@ -48,7 +48,7 @@ public class CodeGeneration extends DynamicTestSuite {
 
 		// Generate C code
 		String cCode = "#define ITERATIONS " + ITERATIONS + "\n";
-		cCode += p.generateC(CodeGenerationTarget.TESTING);
+		cCode += p.generateC(new CodeTargetTesting(p));
 		writeToFile(cFile, cCode);
 
 		// Compile C code

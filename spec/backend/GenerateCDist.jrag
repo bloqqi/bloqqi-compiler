@@ -1,0 +1,17 @@
+import static org.bloqqi.compiler.DistributedCGenerator.DistConfig;
+
+aspect GenerateCDist {
+	public String Program.generateCDist(DistConfig conf) {
+		StringBuilder sb = new StringBuilder();
+		generateCDist(sb, conf);
+		return sb.toString();
+	}
+
+	public void Program.generateCDist(StringBuilder sb, DistConfig conf) {
+		sb.append(ASTNode.GENERATED_C_INFO + "\n");
+		/*generateCPre(sb, codeTarget);
+		generateCDeclarations(sb, codeTarget);
+		generateCDefinitions(sb, codeTarget);
+		generateCPost(sb, codeTarget, data);*/
+	}
+}
