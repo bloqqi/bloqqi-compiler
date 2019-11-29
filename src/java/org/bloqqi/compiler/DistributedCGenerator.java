@@ -14,8 +14,7 @@ import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.compiler.ast.DiagramType;
 import org.bloqqi.compiler.ast.TypeDecl;
 import org.bloqqi.compiler.ast.Variable;
-import org.bloqqi.compiler.ast.CodeGenerationData;
-import org.bloqqi.compiler.ast.CodeGenerationTarget;
+import org.bloqqi.compiler.ast.CodeTargetDist;
 
 public class DistributedCGenerator {
 	private final Program program;
@@ -36,7 +35,7 @@ public class DistributedCGenerator {
 		try {
 			String json = new String(Files.readAllBytes(Paths.get(jsonFile)));
 			Gson gson = new Gson();
-			DistConfig conf = gson.fromJson(json, DistConfig.class);
+			conf = gson.fromJson(json, DistConfig.class);
 
 			Set<String> structuralErrors = conf.structuralAnalysis();
 			if (!structuralErrors.isEmpty()) {
@@ -75,9 +74,8 @@ public class DistributedCGenerator {
 	}
 
 	public void generate(String outputFile) {
-		File cFile = new File(outputFile);
-		String cCode = program.generateCDist(conf);
-		Compiler.writeToFile(cFile, cCode);
+		String cCode = program.generateC(new CodeTargetDist(program, conf));
+		Compiler.writeToFile(new File(outputFile), cCode);
 	}
 
 	public static class DistConfig {

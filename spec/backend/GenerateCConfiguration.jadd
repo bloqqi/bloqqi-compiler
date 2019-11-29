@@ -1,19 +1,35 @@
 aspect GenerateCConfiguration {
-	public void Program.genConfWrapperDeclarationsC(StringBuilder sb) {
-		for (DiagramType dt: configuration().diagramTypes()) {
-			sb.append("void bloqqi_" + dt.nameC() +"(" + dt.nameC() + "_VARS *vars);\n");
+	public class CodeTargetConfiguration extends CodeGenerationTarget {
+		public CodeTargetConfiguration(Program p) {
+			super(p);
 		}
-	}
 
-	public void Program.genConfWrapperDefinitionsC(StringBuilder sb) {
-		for (DiagramType dt: configuration().diagramTypes()) {
-			genWrapperDefinitionC(sb, dt, "bloqqi_" + dt.nameC());
+		@Override
+		public void generateCPre(StringBuilder sb) {
+			sb.append(Utils.readResource("/c/CCodePreConfiguration.c")).append("\n");
 		}
-	}
 
-	public void Program.genConfWrapperStructsC(StringBuilder sb) {
-		for (DiagramType dt: configuration().diagramTypes()) {
-			genWrapperStructC(sb, dt);
+		@Override
+		public void genStructsC(StringBuilder sb) {
+			for (DiagramType dt: p.configuration().diagramTypes()) {
+				p.genWrapperStructC(sb, dt, dt.nameC());
+			}
+		}
+
+		@Override
+		public void genDeclarationsC(StringBuilder sb) {
+			for (DiagramType dt: p.configuration().diagramTypes()) {
+				sb.append("void bloqqi_" + dt.nameC() +"(" + dt.nameC() + "_VARS *vars);\n");
+			}
+		}
+
+		@Override
+		public void generateCPost(StringBuilder sb) {
+			for (DiagramType dt: p.configuration().diagramTypes()) {
+				p.genWrapperDefinitionC(sb, dt, "bloqqi_" + dt.nameC(), dt.nameC());
+			}
+
+			p.genCForConfiguration(sb);
 		}
 	}
 

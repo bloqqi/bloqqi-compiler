@@ -15,43 +15,17 @@ aspect CodeGenerationTarget {
 		public void generateCPre(StringBuilder sb) {
 			sb.append(Utils.readResource("/c/CCodePre.c")).append("\n");
 		}
-		public void genWrapperStructC(StringBuilder sb) {
+		public void genStructsC(StringBuilder sb) {
 			p.genMainWrapperStructC(sb);
 		}
-		public void genWrapperDeclarationsC(StringBuilder sb) {
+		public void genDeclarationsC(StringBuilder sb) {
 			sb.append("void bloqqi_main(Main_VARS *vars);\n");
 		}
-		public void genWrapperDefinitionC(StringBuilder sb) {
-			p.genMainWrapperDefinitionC(sb);
-		}
 		public void generateCPost(StringBuilder sb) {
-			// do nothing
-		}
-		public void genDeclarationsCExtra(StringBuilder sb) {
-			// do nothing
+			p.genMainWrapperDefinitionC(sb);
 		}
 	}
 
-	public class CodeTargetConfiguration extends CodeGenerationTarget {
-		public CodeTargetConfiguration(Program p) {
-			super(p);
-		}
-		public void generateCPre(StringBuilder sb) {
-			sb.append(Utils.readResource("/c/CCodePreConfiguration.c")).append("\n");
-		}
-		public void genWrapperStructC(StringBuilder sb) {
-			p.genConfWrapperStructsC(sb);
-		}
-		public void genWrapperDeclarationsC(StringBuilder sb) {
-			p.genConfWrapperDeclarationsC(sb);
-		}
-		public void genWrapperDefinitionC(StringBuilder sb) {
-			p.genConfWrapperDefinitionsC(sb);
-		}
-		public void generateCPost(StringBuilder sb) {
-			p.genCForConfiguration(sb);
-		}
-	}
 	public class CodeTargetFMI extends CodeGenerationTarget {
 		private CodeGenerationData data;
 		public CodeTargetFMI(Program p, CodeGenerationData data) {
@@ -62,6 +36,7 @@ aspect CodeGenerationTarget {
 			// override and do nothing
 		}
 		public void generateCPost(StringBuilder sb) {
+			super.generateCPost(sb);
 			p.genCForFMI(sb, data);
 		}
 	}
@@ -70,30 +45,34 @@ aspect CodeGenerationTarget {
 			super(p);
 		}
 		public void generateCPre(StringBuilder sb) {
-			/* do nothing */
+			// override and do nothing
 		}
 	}
 	public class CodeTargetWithDriver extends CodeGenerationTarget {
 		public CodeTargetWithDriver(Program p) {
 			super(p);
 		}
+		public void genDeclarationsC(StringBuilder sb) {
+			super.genDeclarationsC(sb);
+			p.genDeclarationsCExtra(sb);
+		}
 		public void generateCPost(StringBuilder sb) {
+			super.generateCPost(sb);
 			sb.append(Utils.readResource("/c/CCodePost.c")).append("\n");
 			p.generateCPostExtra(sb);
-		}
-		public void genDeclarationsCExtra(StringBuilder sb) {
-			p.genDeclarationsCExtra(sb);
 		}
 	}
 	public class CodeTargetWithoutDriver extends CodeGenerationTarget {
 		public CodeTargetWithoutDriver(Program p) {
 			super(p);
 		}
-		public void generateCPost(StringBuilder sb) {
-			p.generateCPostExtra(sb);
-		}
-		public void genDeclarationsCExtra(StringBuilder sb) {
+		public void genDeclarationsC(StringBuilder sb) {
+			super.genDeclarationsC(sb);
 			p.genDeclarationsCExtra(sb);
+		}
+		public void generateCPost(StringBuilder sb) {
+			super.generateCPost(sb);
+			p.generateCPostExtra(sb);
 		}
 	}
 	public class CodeTargetTesting extends CodeGenerationTarget {
@@ -101,6 +80,7 @@ aspect CodeGenerationTarget {
 			super(p);
 		}
 		public void generateCPost(StringBuilder sb) {
+			super.generateCPost(sb);
 			sb.append(Utils.readResource("/c/CCodePostTesting.c")).append("\n");
 		}
 	}
@@ -195,17 +175,14 @@ aspect GenerateC {
 		sb.append("/* Structs representing variables (state, input, output) */\n");
 		genVariableStructsC(sb);
 		sb.append("\n");
-		codeTarget.genWrapperStructC(sb);
+		codeTarget.genStructsC(sb);
 
 		sb.append("/* Structs representing return values */\n");
 		genStructs(sb);
 		sb.append("\n");
 
 		sb.append("/* Function declarations */\n");
-		codeTarget.genWrapperDeclarationsC(sb);
-
-		codeTarget.genDeclarationsCExtra(sb);
-
+		codeTarget.genDeclarationsC(sb);
 		genDecls(sb);
 		sb.append("\n");
 	}
@@ -227,8 +204,6 @@ aspect GenerateC {
 			cu.genFunctionDefinitionsC(sb);
 		}
 		sb.append("\n");
-
-		codeTarget.genWrapperDefinitionC(sb);
 	}
 
 	public void Program.generateCPostExtra(StringBuilder sb) {
@@ -358,11 +333,11 @@ aspect FunctionDeclarations {
  */
 aspect FunctionDefinitions {
 	public void Program.genMainWrapperDefinitionC(StringBuilder sb) {
-		genWrapperDefinitionC(sb, mainDiagramType(), "bloqqi_main");
+		genWrapperDefinitionC(sb, mainDiagramType(), "bloqqi_main", mainDiagramType().nameC());
 	}
 
-	public void Program.genWrapperDefinitionC(StringBuilder sb, DiagramType dt, String functionName) {
-		sb.append("void " + functionName + "(" + dt.nameC() + "_VARS *vars) {\n");
+	public void Program.genWrapperDefinitionC(StringBuilder sb, DiagramType dt, String functionName, String typeName) {
+		sb.append("void " + functionName + "(" + typeName + "_VARS *vars) {\n");
 		String pars = "";
 		if (dt.containsStateVariablesTransitive()) {
 			pars += "&vars->" + ASTNode.STATE_FIELD;
@@ -641,10 +616,10 @@ aspect VariableStructs {
 	}
 
 	public void Program.genMainWrapperStructC(StringBuilder sb) {
-		genWrapperStructC(sb, mainDiagramType());
+		genWrapperStructC(sb, mainDiagramType(), mainDiagramType().nameC());
 	}
 
-	public void Program.genWrapperStructC(StringBuilder sb, DiagramType dt) {
+	public void Program.genWrapperStructC(StringBuilder sb, DiagramType dt, String typeName) {
 		sb.append("typedef struct {\n");
 		boolean needsDummyField = true;
 		if (dt.containsStateVariablesTransitive()) {
@@ -662,7 +637,7 @@ aspect VariableStructs {
 		if (needsDummyField) {
 			sb.append("  bool DUMMY_FIELD; // generated since empty structs are not allowed\n");
 		}
-		sb.append("} " + dt.nameC() + "_VARS;\n");
+		sb.append("} " + typeName + "_VARS;\n");
 	}
 }
 

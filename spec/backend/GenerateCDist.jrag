@@ -1,17 +1,35 @@
 import static org.bloqqi.compiler.DistributedCGenerator.DistConfig;
 
 aspect GenerateCDist {
-	public String Program.generateCDist(DistConfig conf) {
-		StringBuilder sb = new StringBuilder();
-		generateCDist(sb, conf);
-		return sb.toString();
-	}
+	public class CodeTargetDist extends CodeGenerationTarget {
+		private DistConfig conf;
 
-	public void Program.generateCDist(StringBuilder sb, DistConfig conf) {
-		sb.append(ASTNode.GENERATED_C_INFO + "\n");
-		/*generateCPre(sb, codeTarget);
-		generateCDeclarations(sb, codeTarget);
-		generateCDefinitions(sb, codeTarget);
-		generateCPost(sb, codeTarget, data);*/
+		public CodeTargetDist(Program p, DistConfig conf) {
+			super(p);
+			this.conf = conf;
+		}
+
+		private DiagramType diagramType() {
+			return conf.getDiagramType();
+		}
+
+		@Override
+		public void generateCPre(StringBuilder sb) {
+		}
+
+		@Override
+		public void genStructsC(StringBuilder sb) {
+			p.genWrapperStructC(sb, diagramType(), "bloqqi");
+		}
+
+		@Override
+		public void genDeclarationsC(StringBuilder sb) {
+			sb.append("void bloqqi_main(bloqqi_VARS *vars);\n");
+		}
+
+		@Override
+		public void generateCPost(StringBuilder sb) {
+			p.genWrapperDefinitionC(sb, diagramType(), "bloqqi_main", "bloqqi");
+		}
 	}
 }
