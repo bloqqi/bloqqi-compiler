@@ -68,23 +68,6 @@ aspect GenerateCDist {
 		}
 	}
 
-/*
-void handle_input(char *topic, void *payload) {
-	if (strcmp(topic, "b/out1") == 0) {
-		int n = 0;
-		if (sscanf(payload, "%d", &n) == 1) {
-			vars.input.in1 = n;
-		}
-	} else if (strcmp(topic, "b/out2") == 0) {
-		int n = 0;
-		if (sscanf(payload, "%d", &n) == 1) {
-			vars.input.in2 = n;
-		}
-	}
-}
-*/
-
-
 	public void DiagramType.genDistInputFunctions(StringBuilder sb) {
 		String inputType = inputStructName();
 		String inputVar = "input_var";
@@ -129,18 +112,7 @@ void handle_input(char *topic, void *payload) {
 			String signal = "\"" + out.getSignal() + "\"";
 			String variable = "vars.output." + out.getOutput();
 			sb.append("    send_message(client, " + signal + ", " + variable + ");\n");
-			//send_message(client, "a/out", vars.output.out);
-
 		}
-		/*for (VarPort p: getOutVarPorts()) {
-			for (ConfConnection c: p.outgoing()) {
-				String targetBlock = c.getTarget().getBlockUse();
-				String targetVar = c.getTarget().getVariableUse().replace(".", "_");
-				String setFunction = targetBlock + "_set_" + targetVar;
-				String outVar = "vars.output." + p.name();
-				sb.append("    " + setFunction + "(" + outVar + ");\n");
-			}
-		}*/
 
 		sb.append("    useconds_t end = useconds();\n");
 		sb.append("    extra = my_sleep(start, end, extra, T);\n");
