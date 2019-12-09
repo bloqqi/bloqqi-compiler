@@ -74,8 +74,8 @@ public class DistributedCGenerator {
 	}
 
 	public void generate(String outputFile) {
-		String cCode = program.generateC(new CodeTargetDist(program, conf));
-		Compiler.writeToFile(new File(outputFile), cCode);
+		CodeTargetDist target = new CodeTargetDist(program, conf);
+		Compiler.generateCSeparateFiles(program, outputFile, target);
 	}
 
 	public static class DistConfig {

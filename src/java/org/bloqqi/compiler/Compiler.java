@@ -330,17 +330,7 @@ public class Compiler {
 		CodeGenerationTarget target = getCodeGenerationTarget(p);
 
 		if (optionOutputFile.isSet()) {
-			File cFile = new File(optionOutputFile.getValue());
-			String headerFilename;
-			headerFilename = cFile.getName().substring(0, cFile.getName().lastIndexOf('.'));
-			headerFilename = headerFilename + ".h";
-			File headerFile = new File(cFile.getParent(), headerFilename);
-
-			StringBuilder sbHeader = new StringBuilder();
-			StringBuilder sbC = new StringBuilder();
-			p.generateCSeparateFiles(headerFilename, sbHeader, sbC, target);
-			writeToFile(headerFile, sbHeader.toString());
-			writeToFile(cFile, sbC.toString());
+			Compiler.generateCSeparateFiles(p, optionOutputFile.getValue(), target);
 		} else {
 			System.out.println(p.generateC(target));
 		}
@@ -455,6 +445,21 @@ public class Compiler {
 		} finally {
 			if (fw != null) { try { fw.close(); } catch (Exception e) {} }
 		}
+	}
+
+	public static void generateCSeparateFiles(Program p, String outputFile,
+			CodeGenerationTarget target) {
+		File cFile = new File(outputFile);
+		String headerFilename;
+		headerFilename = cFile.getName().substring(0, cFile.getName().lastIndexOf('.'));
+		headerFilename = headerFilename + ".h";
+		File headerFile = new File(cFile.getParent(), headerFilename);
+
+		StringBuilder sbHeader = new StringBuilder();
+		StringBuilder sbC = new StringBuilder();
+		p.generateCSeparateFiles(headerFile.getName(), sbHeader, sbC, target);
+		writeToFile(headerFile, sbHeader.toString());
+		writeToFile(cFile, sbC.toString());
 	}
 
 	private static void writeToDOT(Program p, String filename) {
