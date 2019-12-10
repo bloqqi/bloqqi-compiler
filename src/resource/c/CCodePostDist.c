@@ -65,15 +65,12 @@ int message_recieved(void *context, char *topicName, int topicLen, MQTTAsync_mes
   return 1;
 }
 
-void send_message(MQTTAsync client, const char *topic, int value) {
+void send_message(MQTTAsync client, const char *topic, char *payload) {
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
   int rc;
 
   opts.context = client;
-
-  char payload[100];
-  sprintf(payload, "%d", value);
   pubmsg.payload = payload;
   pubmsg.payloadlen = (int)strlen(payload) + 1;
   pubmsg.qos = 0;
@@ -83,6 +80,18 @@ void send_message(MQTTAsync client, const char *topic, int value) {
     printf("Failed to start send_message, return code %d\n", rc);
     //exit(EXIT_FAILURE);
   }
+}
+
+void send_message_int(MQTTAsync client, const char *topic, int value) {
+  char payload[20];
+  sprintf(payload, "%d", value);
+  send_message(client, topic, payload);
+}
+
+void send_message_double(MQTTAsync client, const char *topic, double value) {
+  char payload[20];
+  sprintf(payload, "%lf", value);
+  send_message(client, topic, payload);
 }
 
 static useconds_t useconds() {

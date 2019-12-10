@@ -51,11 +51,22 @@ aspect GenerateCDist {
 			/** Generate handle_input */
 			sb.append("void handle_input(char *topic, void *payload) {\n");
 			for (ConfInput in: conf.getInputs()) {
+				TypeDecl type = in.getVariable().type();
+
 				String setFunction = "set_input_" + in.getInput().replace(".", "_");
+				String varDecl = "";
+				String format = "";
+				if (type.isInteger() || type.isBool()) {
+					varDecl = "int n = 0";
+					format = "%d";
+				} else if (type.isReal()) {
+					varDecl = "double n = 0.0";
+					format = "%lf";
+				}
 
 				sb.append("  if(strcmp(topic, \"" + in.getSignal() + "\") == 0) {\n");
-				sb.append("    int n = 0;\n");
-				sb.append("    if (sscanf(payload, \"%d\", &n) == 1) {\n");
+				sb.append("    " + varDecl +";\n");
+				sb.append("    if (sscanf(payload, \"" + format +"\", &n) == 1) {\n");
 				sb.append("      " + setFunction + "(n);\n");
 				sb.append("    }\n");
 				sb.append("  }\n");
@@ -109,9 +120,18 @@ aspect GenerateCDist {
 		sb.append("    bloqqi_main(&vars);\n");
 
 		for (ConfOutput out: conf.getOutputs()) {
+			TypeDecl type = out.getVariable().type();
+
 			String signal = "\"" + out.getSignal() + "\"";
-			String variable = "vars.output." + out.getOutput();
-			sb.append("    send_message(client, " + signal + ", " + variable + ");\n");
+			String path = "vars.output." + out.getOutput();
+			String suffix = "";
+			if (type.isInteger() || type.isBool()) {
+				suffix = "int";
+			} else if (type.isReal()) {
+				suffix = "double";
+			}
+
+			sb.append("    send_message_" + suffix +"(client, " + signal + ", " + path + ");\n");
 		}
 
 		sb.append("    useconds_t end = useconds();\n");

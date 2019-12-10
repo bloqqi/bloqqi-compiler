@@ -108,6 +108,7 @@ public class DistributedCGenerator {
 			return errors;
 		}
 
+		/** The structural analysis is run before semantic analysis */
 		public Set<String> semanticAnalysis(DiagramType dt) {
 			this.diagramType = dt;
 			Set<String> errors = new TreeSet<>();
@@ -196,8 +197,14 @@ public class DistributedCGenerator {
 			Variable v = dt.allInputVariables().get(input);
 			if (v == null) {
 				errors.add("Couldn't find input variable '" + input + "'");
+				return;
 			} else {
 				variable = v;
+			}
+
+			if (!v.type().isReal() && !v.type().isInteger() && !v.type().isBool()) {
+				errors.add("Type error for input: " + toString() + ". Unsupported type '" + v.type()
+					+ "'. Supported types are: Real, Int, Bool.");
 			}
 		}
 
@@ -223,8 +230,14 @@ public class DistributedCGenerator {
 			Variable v = dt.allOutputVariables().get(output);
 			if (v == null) {
 				errors.add("Couldn't find output variable '" + output + "'");
+				return;
 			} else {
 				variable = v;
+			}
+
+			if (!v.type().isReal() && !v.type().isInteger() && !v.type().isBool()) {
+				errors.add("Type error for output: " + toString() + ". Unsupported type '" + v.type()
+					+ "'. Supported types are: Real, Int, Bool.");
 			}
 		}
 
