@@ -1,7 +1,17 @@
 void on_connect_failure(void* context, MQTTAsync_failureData* response);
 void bloqqi_run_main(MQTTAsync client);
 
+// Don't start the Bloqqi program until we are connected to the Broker
+volatile int disconnected = 1;
+pthread_mutex_t disconnected_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t disconnected_cond = PTHREAD_COND_INITIALIZER;
+
 void on_connect(void* context, MQTTAsync_successData* response) {
+  pthread_mutex_lock(&disconnected_lock);
+  disconnected = 0;
+  pthread_cond_signal(&disconnected_cond);
+  pthread_mutex_unlock(&disconnected_lock);
+
   printf("Connected to broker\n");
 
   MQTTAsync client = (MQTTAsync)context;
@@ -45,6 +55,10 @@ void on_connect_failure(void* context, MQTTAsync_failureData* response) {
 
 
 void connection_lost(void *context, char *cause) {
+  pthread_mutex_lock(&disconnected_lock);
+  disconnected = 1;
+  pthread_mutex_unlock(&disconnected_lock);
+
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
@@ -122,15 +136,32 @@ useconds_t my_sleep(
 
 
 int main(int argc, char* argv[]) {
+  char *address;
+  if (argc == 1) {
+    address = ADDRESS;
+  } else if (argc == 2) {
+    address = argv[1];
+  } else {
+    printf("Too may arguments given\n");
+    return 1;
+  }
+
   MQTTAsync client;
   MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
-  MQTTAsync_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+  MQTTAsync_create(&client, address, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
   MQTTAsync_setCallbacks(client, client, connection_lost, message_recieved, NULL);
 
+  printf("Connecting to broker '%s'\n", address);
   reconnect(client, conn_opts);
 
-  usleep(1000000L);
 
+  pthread_mutex_lock(&disconnected_lock);
+  while(disconnected) {
+    pthread_cond_wait(&disconnected_cond, &disconnected_lock);
+  }
+  pthread_mutex_unlock(&disconnected_lock);
+
+  printf("Starting Bloqqi program\n");
   bloqqi_run_main(client);
 }

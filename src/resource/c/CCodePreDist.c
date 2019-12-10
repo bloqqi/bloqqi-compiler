@@ -7,6 +7,6 @@
 #include <pthread.h>
 #include "MQTTAsync.h"
 
-#define ADDRESS     "tcp://localhost:1883"
+#define ADDRESS     "localhost:1883"
 #define QOS         1
 #define TIMEOUT     10000L

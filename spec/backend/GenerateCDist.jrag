@@ -119,6 +119,11 @@ aspect GenerateCDist {
 		sb.append("    vars.input = get_input();\n");
 		sb.append("    bloqqi_main(&vars);\n");
 
+		sb.append("    pthread_mutex_lock(&disconnected_lock);\n");
+		sb.append("    int send_messages = !disconnected;\n");
+		sb.append("    pthread_mutex_unlock(&disconnected_lock);\n");
+
+		sb.append("    if (send_messages) {\n");
 		for (ConfOutput out: conf.getOutputs()) {
 			TypeDecl type = out.getVariable().type();
 
@@ -131,8 +136,9 @@ aspect GenerateCDist {
 				suffix = "double";
 			}
 
-			sb.append("    send_message_" + suffix +"(client, " + signal + ", " + path + ");\n");
+			sb.append("      send_message_" + suffix +"(client, " + signal + ", " + path + ");\n");
 		}
+		sb.append("    }\n");
 
 		sb.append("    useconds_t end = useconds();\n");
 		sb.append("    extra = my_sleep(start, end, extra, T);\n");
