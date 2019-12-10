@@ -50,6 +50,7 @@ aspect GenerateCDist {
 
 			/** Generate handle_input */
 			sb.append("void handle_input(char *topic, void *payload) {\n");
+			sb.append("  useconds_t time = useconds();\n");
 			for (ConfInput in: conf.getInputs()) {
 				TypeDecl type = in.getVariable().type();
 
@@ -67,7 +68,7 @@ aspect GenerateCDist {
 				sb.append("  if(strcmp(topic, \"" + in.getSignal() + "\") == 0) {\n");
 				sb.append("    " + varDecl +";\n");
 				sb.append("    if (sscanf(payload, \"" + format +"\", &n) == 1) {\n");
-				sb.append("      " + setFunction + "(n);\n");
+				sb.append("      " + setFunction + "(n, time);\n");
 				sb.append("    }\n");
 				sb.append("  }\n");
 			}
@@ -76,6 +77,11 @@ aspect GenerateCDist {
 			sb.append(Utils.readResource("/c/CCodePostDist.c")).append("\n");
 
 			diagramType().genDistMain(sb, conf);
+		}
+
+		@Override
+		public boolean lastUpdatedFieldOnInputs() {
+			return true;
 		}
 	}
 
@@ -98,9 +104,10 @@ aspect GenerateCDist {
 			String varName = e.getKey().replace(".", "_");
 			String functionName = "set_input_" + varName;
 			String type = e.getValue().type().nameC();
-			sb.append("void " + functionName + "(" + type + " p) {\n");
+			sb.append("void " + functionName + "(" + type + " p, useconds_t time) {\n");
 			sb.append("  pthread_mutex_lock(&" + mutex + ");\n");
 			sb.append("  " + inputVar + "." + e.getKey() + " = p;\n");
+			sb.append("  " + inputVar + "." + e.getKey() + "_last_updated_ = time;\n");
 			sb.append("  pthread_mutex_unlock(&" + mutex + ");\n");
 			sb.append("}\n");
 		}
@@ -117,6 +124,17 @@ aspect GenerateCDist {
 		sb.append("  while(true) {\n");
 		sb.append("    useconds_t start = useconds();\n");
 		sb.append("    vars.input = get_input();\n");
+
+		for (ConfInput in: conf.getInputs()) {
+			if (in.getTtl() > 0) {
+				String path = "vars.input." + in.getInput();
+				String ttl = "start-" + (Math.round(in.getTtl()*1000000));
+				sb.append("    if (" + path + "_last_updated_ < " + ttl + ") {\n");
+				sb.append("      " + path + " = " + in.getDefault() + ";\n");
+				sb.append("    }\n");
+			}
+		}
+
 		sb.append("    bloqqi_main(&vars);\n");
 
 		sb.append("    pthread_mutex_lock(&disconnected_lock);\n");

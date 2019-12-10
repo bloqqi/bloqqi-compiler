@@ -24,6 +24,10 @@ aspect CodeGenerationTarget {
 		public void generateCPost(StringBuilder sb) {
 			p.genMainWrapperDefinitionC(sb);
 		}
+		/** Generate an extra field on inputs for storing when the value was last updated */
+		public boolean lastUpdatedFieldOnInputs() {
+			return false;
+		}
 	}
 
 	public class CodeTargetFMI extends CodeGenerationTarget {
@@ -166,6 +170,9 @@ aspect GenerateC {
 	public void Program.generateCDeclarations(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		sb.append("/* Typedefs */\n");
 		sb.append("#include <stdbool.h>\n");
+		if (codeTarget.lastUpdatedFieldOnInputs()) {
+			sb.append("#include <unistd.h>\n");  // needed for type useconds_t
+		}
 		sb.append("typedef double Real;\n");
 		sb.append("typedef int Int;\n");
 		sb.append("typedef bool Bool;\n");
@@ -173,7 +180,7 @@ aspect GenerateC {
 		sb.append("\n");
 
 		sb.append("/* Structs representing variables (state, input, output) */\n");
-		genVariableStructsC(sb);
+		genVariableStructsC(sb, codeTarget);
 		sb.append("\n");
 		codeTarget.genStructsC(sb);
 
@@ -517,10 +524,10 @@ aspect VariableStructs {
 	syn String TypeDecl.outputStructName() = "<undefined>";
 	eq DiagramType.outputStructName() = nameC() + "_OUTPUT";
 
-	public void Program.genVariableStructsC(StringBuilder sb) {
+	public void Program.genVariableStructsC(StringBuilder sb, CodeGenerationTarget codeTarget) {
 		// Create structs for all diagram types
 		Map<TypeDecl, String> structs = new HashMap<>();
-		genVariableStructsC(structs);
+		genVariableStructsC(structs, codeTarget);
 
 		// Toplogical sort over types based on type reachability
 		java.util.List<TypeDecl> list = Utils.topologicalSort(
@@ -550,13 +557,13 @@ aspect VariableStructs {
 		}
 	}
 
-	public void ASTNode.genVariableStructsC(Map<TypeDecl, String> structs) {
+	public void ASTNode.genVariableStructsC(Map<TypeDecl, String> structs, CodeGenerationTarget codeTarget) {
 		for(ASTNode child: astChildren()) {
-			child.genVariableStructsC(structs);
+			child.genVariableStructsC(structs, codeTarget);
 		}
 	}
 
-	public void DiagramType.genVariableStructsC(Map<TypeDecl, String> structs) {
+	public void DiagramType.genVariableStructsC(Map<TypeDecl, String> structs, CodeGenerationTarget codeTarget) {
 		StringBuilder sb = new StringBuilder();
 
 		// Generate struct for state variables
@@ -581,6 +588,9 @@ aspect VariableStructs {
 			for (Variable v: variables()) {
 				if (v.isInputVariable()) {
 					sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
+					if (codeTarget.lastUpdatedFieldOnInputs()) {
+						sb.append("  useconds_t " + v.cNameDeclaration() + "_last_updated_;\n");
+					}
 				}
 			}
 			for (Block b: blocks()) {
@@ -612,7 +622,7 @@ aspect VariableStructs {
 		}
 
 		// Include anonymous diagramtypes too
-		super.genVariableStructsC(structs);
+		super.genVariableStructsC(structs, codeTarget);
 	}
 
 	public void Program.genMainWrapperStructC(StringBuilder sb) {

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 import org.bloqqi.compiler.ast.Program;
 import org.bloqqi.compiler.ast.DiagramType;
@@ -182,14 +183,26 @@ public class DistributedCGenerator {
 
 	public static class ConfInput extends ConfVariable {
 		private String input;
+		@SerializedName("default")
+		private String defaultValue;
+		private double ttl;
 
 		public String getInput() {
 			return input;
+		}
+		public String getDefault() {
+			return defaultValue;
+		}
+		public double getTtl() {
+			return ttl;
 		}
 
 		private void structuralAnalysis(Set<String> errors) {
 			if (input == null || signal == null) {
 				errors.add("Inputs need to have both an 'input' and 'signal' field");
+			}
+			if (ttl > 0 && defaultValue == null) {
+				errors.add("When input field 'ttl' > 0, then field 'default' is required");
 			}
 		}
 

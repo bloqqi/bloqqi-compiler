@@ -108,12 +108,6 @@ void send_message_double(MQTTAsync client, const char *topic, double value) {
   send_message(client, topic, payload);
 }
 
-static useconds_t useconds() {
-  struct timeval v;
-  gettimeofday(&v, NULL);
-  return v.tv_sec*1000000 + v.tv_usec;
-}
-
 useconds_t my_sleep(
     useconds_t start,
     useconds_t end,
@@ -142,7 +136,7 @@ int main(int argc, char* argv[]) {
   } else if (argc == 2) {
     address = argv[1];
   } else {
-    printf("Too may arguments given\n");
+    printf("Too many arguments given\n");
     return 1;
   }
 
@@ -155,9 +149,9 @@ int main(int argc, char* argv[]) {
   printf("Connecting to broker '%s'\n", address);
   reconnect(client, conn_opts);
 
-
+  // Wait until we are connected to the broker
   pthread_mutex_lock(&disconnected_lock);
-  while(disconnected) {
+  while (disconnected) {
     pthread_cond_wait(&disconnected_cond, &disconnected_lock);
   }
   pthread_mutex_unlock(&disconnected_lock);

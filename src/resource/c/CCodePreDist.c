@@ -10,3 +10,9 @@
 #define ADDRESS     "localhost:1883"
 #define QOS         1
 #define TIMEOUT     10000L
+
+static useconds_t useconds() {
+  struct timeval v;
+  gettimeofday(&v, NULL);
+  return v.tv_sec*1000000 + v.tv_usec;
+}

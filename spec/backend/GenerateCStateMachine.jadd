@@ -111,7 +111,7 @@ aspect StateMachinesGenStructs {
 		= clazz == StateVariable.class || clazz == Variable.class;
 	eq StateMachine.stateStructName() = nameC() + "_STATE";
 
-	public void StateMachine.genVariableStructsC(Map<TypeDecl, String> structs) {
+	public void StateMachine.genVariableStructsC(Map<TypeDecl, String> structs, CodeGenerationTarget codeTarget) {
 		StringBuilder sb = new StringBuilder();
 
 		/** Generate enum for state */

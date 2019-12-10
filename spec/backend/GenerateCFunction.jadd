@@ -87,22 +87,17 @@ aspect GenerateCFunction {
 	public void IfStmt.generateC(StringBuilder sb) {
 		sb.append("if (" + getFExpr().generateC() + ") {\n");
 		getBlockStmt().generateC(sb);
+		if (hasElse()) {
+			for (int i = 0; i < indentLevel(); i++) {
+				sb.append("  ");
+			}
+			sb.append("} else {\n");
+			getElse().generateC(sb);
+		}
 		for (int i = 0; i < indentLevel(); i++) {
 			sb.append("  ");
 		}
 		sb.append("}\n");
-		if (hasElse())
-		{
-			for (int i = 0; i < indentLevel(); i++) {
-				sb.append("  ");
-			}
-			sb.append("else {\n");
-			getElse().generateC(sb);
-			for (int i = 0; i < indentLevel(); i++) {
-				sb.append("  ");
-			}
-			sb.append("}\n");
-		}
 	}
 	public void ReturnStmt.generateC(StringBuilder sb) {
 		sb.append("return " + ASTNode.RESULT_VAR + ";\n");
