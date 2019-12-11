@@ -8,10 +8,6 @@
 #include <pthread.h>
 #include "MQTTAsync.h"
 
-#define ADDRESS     "localhost:1883"
-#define QOS         1
-#define TIMEOUT     10000L
-
 static uint64_t useconds() {
   struct timeval v;
   gettimeofday(&v, NULL);

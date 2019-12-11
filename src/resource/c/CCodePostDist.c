@@ -132,7 +132,7 @@ uint64_t my_sleep(
 int main(int argc, char* argv[]) {
   char *address;
   if (argc == 1) {
-    address = ADDRESS;
+    address = "localhost:1883";
   } else if (argc == 2) {
     address = argv[1];
   } else {
