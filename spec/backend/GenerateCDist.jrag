@@ -137,11 +137,7 @@ aspect GenerateCDist {
 
 		sb.append("    bloqqi_main(&vars);\n");
 
-		sb.append("    pthread_mutex_lock(&disconnected_lock);\n");
-		sb.append("    int send_messages = !disconnected;\n");
-		sb.append("    pthread_mutex_unlock(&disconnected_lock);\n");
-
-		sb.append("    if (send_messages) {\n");
+		sb.append("    if (!is_disconnected()) {\n");
 		for (ConfOutput out: conf.getOutputs()) {
 			TypeDecl type = out.getVariable().type();
 

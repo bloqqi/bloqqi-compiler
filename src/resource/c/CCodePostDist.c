@@ -6,11 +6,28 @@ volatile int disconnected = 1;
 pthread_mutex_t disconnected_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t disconnected_cond = PTHREAD_COND_INITIALIZER;
 
-void on_connect(void* context, MQTTAsync_successData* response) {
+void set_disconnected(int value) {
   pthread_mutex_lock(&disconnected_lock);
-  disconnected = 0;
+  disconnected = value;
   pthread_cond_signal(&disconnected_cond);
   pthread_mutex_unlock(&disconnected_lock);
+}
+int is_disconnected() {
+  pthread_mutex_lock(&disconnected_lock);
+  int ret = disconnected;
+  pthread_mutex_unlock(&disconnected_lock);
+  return ret;
+}
+void wait_until_connected() {
+  pthread_mutex_lock(&disconnected_lock);
+  while (disconnected) {
+    pthread_cond_wait(&disconnected_cond, &disconnected_lock);
+  }
+  pthread_mutex_unlock(&disconnected_lock);
+}
+
+void on_connect(void* context, MQTTAsync_successData* response) {
+  set_disconnected(0);
 
   printf("Connected to broker\n");
 
@@ -55,9 +72,7 @@ void on_connect_failure(void* context, MQTTAsync_failureData* response) {
 
 
 void connection_lost(void *context, char *cause) {
-  pthread_mutex_lock(&disconnected_lock);
-  disconnected = 1;
-  pthread_mutex_unlock(&disconnected_lock);
+  set_disconnected(1);
 
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
@@ -150,11 +165,7 @@ int main(int argc, char* argv[]) {
   reconnect(client, conn_opts);
 
   // Wait until we are connected to the broker
-  pthread_mutex_lock(&disconnected_lock);
-  while (disconnected) {
-    pthread_cond_wait(&disconnected_cond, &disconnected_lock);
-  }
-  pthread_mutex_unlock(&disconnected_lock);
+  wait_until_connected();
 
   printf("Starting Bloqqi program\n");
   bloqqi_run_main(client);
