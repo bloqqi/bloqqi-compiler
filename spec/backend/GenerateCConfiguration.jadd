@@ -87,9 +87,9 @@ aspect GenerateCConfiguration {
 		sb.append("void *bloqqi_run_" + nameC() + "(void *args) {\n");
 		sb.append("  const int T = 1000000/" + getFreq() + ";\n");
 		sb.append("  " + type().nameC() + "_VARS vars = {};\n");
-		sb.append("  useconds_t extra = 0;\n");
+		sb.append("  uint64_t extra = 0;\n");
 		sb.append("  while(true) {\n");
-		sb.append("    useconds_t start = useconds();\n");
+		sb.append("    uint64_t start = useconds();\n");
 		sb.append("    vars.input = " + nameC() + "_get_input();\n");
 		sb.append("    bloqqi_" + type().nameC() + "(&vars);\n");
 
@@ -103,7 +103,7 @@ aspect GenerateCConfiguration {
 			}
 		}
 
-		sb.append("    useconds_t end = useconds();\n");
+		sb.append("    uint64_t end = useconds();\n");
 		sb.append("    extra = my_sleep(start, end, extra, T);\n");
 		sb.append("  }\n");
 		sb.append("  return NULL;\n");

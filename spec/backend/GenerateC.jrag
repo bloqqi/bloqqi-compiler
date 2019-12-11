@@ -171,7 +171,7 @@ aspect GenerateC {
 		sb.append("/* Typedefs */\n");
 		sb.append("#include <stdbool.h>\n");
 		if (codeTarget.lastUpdatedFieldOnInputs()) {
-			sb.append("#include <unistd.h>\n");  // needed for type useconds_t
+			sb.append("#include <stdint.h>\n");  // needed for type uint64_t
 		}
 		sb.append("typedef double Real;\n");
 		sb.append("typedef int Int;\n");
@@ -589,7 +589,7 @@ aspect VariableStructs {
 				if (v.isInputVariable()) {
 					sb.append("  " + v.type().nameC() + " " + v.cNameDeclaration() + ";\n");
 					if (codeTarget.lastUpdatedFieldOnInputs()) {
-						sb.append("  useconds_t " + v.cNameDeclaration() + "_last_updated_;\n");
+						sb.append("  uint64_t " + v.cNameDeclaration() + "_last_updated_;\n");
 					}
 				}
 			}

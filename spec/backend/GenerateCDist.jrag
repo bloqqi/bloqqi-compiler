@@ -50,7 +50,7 @@ aspect GenerateCDist {
 
 			/** Generate handle_input */
 			sb.append("void handle_input(char *topic, void *payload) {\n");
-			sb.append("  useconds_t time = useconds();\n");
+			sb.append("  uint64_t time = useconds();\n");
 			for (ConfInput in: conf.getInputs()) {
 				TypeDecl type = in.getVariable().type();
 
@@ -104,7 +104,7 @@ aspect GenerateCDist {
 			String varName = e.getKey().replace(".", "_");
 			String functionName = "set_input_" + varName;
 			String type = e.getValue().type().nameC();
-			sb.append("void " + functionName + "(" + type + " p, useconds_t time) {\n");
+			sb.append("void " + functionName + "(" + type + " p, uint64_t time) {\n");
 			sb.append("  pthread_mutex_lock(&" + mutex + ");\n");
 			sb.append("  " + inputVar + "." + e.getKey() + " = p;\n");
 			sb.append("  " + inputVar + "." + e.getKey() + "_last_updated_ = time;\n");
@@ -120,9 +120,9 @@ aspect GenerateCDist {
 		sb.append("void bloqqi_run_main(MQTTAsync client) {\n");
 		sb.append("  const int T = 1000000/" + conf.getFrequency() + ";\n");
 		sb.append("  bloqqi_VARS vars = {};\n");
-		sb.append("  useconds_t extra = 0;\n");
+		sb.append("  uint64_t extra = 0;\n");
 		sb.append("  while(true) {\n");
-		sb.append("    useconds_t start = useconds();\n");
+		sb.append("    uint64_t start = useconds();\n");
 		sb.append("    vars.input = get_input();\n");
 
 		for (ConfInput in: conf.getInputs()) {
@@ -158,7 +158,7 @@ aspect GenerateCDist {
 		}
 		sb.append("    }\n");
 
-		sb.append("    useconds_t end = useconds();\n");
+		sb.append("    uint64_t end = useconds();\n");
 		sb.append("    extra = my_sleep(start, end, extra, T);\n");
 		sb.append("  }\n");
 		sb.append("}\n");
