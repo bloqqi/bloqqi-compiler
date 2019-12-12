@@ -1,6 +1,9 @@
 void on_connect_failure(void* context, MQTTAsync_failureData* response);
 void bloqqi_run_main(MQTTAsync client);
 
+const char *username = NULL;
+const char *password = NULL;
+
 // Don't start the Bloqqi program until we are connected to the Broker
 volatile int disconnected = 1;
 pthread_mutex_t disconnected_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -47,12 +50,21 @@ void on_connect(void* context, MQTTAsync_successData* response) {
   }
 }
 
-void reconnect(MQTTAsync client, MQTTAsync_connectOptions conn_opts) {
+MQTTAsync_connectOptions get_connect_options(MQTTAsync client) {
+  MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
   conn_opts.keepAliveInterval = 20;
   conn_opts.cleansession = 1;
   conn_opts.onSuccess = on_connect;
   conn_opts.onFailure = on_connect_failure;
   conn_opts.context = client;
+  conn_opts.username = username;
+  conn_opts.password = password;
+  return conn_opts;
+}
+
+
+void reconnect(MQTTAsync client) {
+  MQTTAsync_connectOptions conn_opts = get_connect_options(client);
   int rc;
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
     printf("Failed to start connect, return code %d\n. Retrying...", rc);
@@ -60,14 +72,30 @@ void reconnect(MQTTAsync client, MQTTAsync_connectOptions conn_opts) {
 }
 
 void on_connect_failure(void* context, MQTTAsync_failureData* response) {
-  printf("Connect failed, rc %d\n", response ? response->code : 0);
-
   MQTTAsync client = (MQTTAsync)context;
-  MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
-  usleep(1000000L);
-  printf("Reconnecting\n");
-  reconnect(client, conn_opts);
+  printf("Connection failed, rc %d\n", response ? response->code : 0);
+  if (response && response->code >= 1 && response->code <= 5) {
+    if (response->code == 1) {
+      printf("Connection refused: unacceptable protocol version\n");
+    } else if (response->code == 2) {
+      printf("Connection refused: identifier rejected\n");
+    } else if (response->code == 3) {
+      printf("Connection refused: server unavailable\n");
+    } else if (response->code == 4) {
+      printf("Connection refused: bad username or password\n");
+    } else if (response->code == 5) {
+      printf("Connection refused: not authorized\n");
+    }
+  }
+
+  if (response && response->code < 0) {
+    printf("Reconnecting\n");
+    usleep(1000000L);
+    reconnect(client);
+  } else {
+    exit(EXIT_FAILURE);
+  }
 }
 
 
@@ -75,13 +103,12 @@ void connection_lost(void *context, char *cause) {
   set_disconnected(1);
 
   MQTTAsync client = (MQTTAsync)context;
-  MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
   printf("\nConnection lost\n");
   printf("     cause: %s\n", cause);
 
   printf("Reconnecting\n");
-  reconnect(client, conn_opts);
+  reconnect(client);
 }
 
 
@@ -150,19 +177,26 @@ int main(int argc, char* argv[]) {
     address = "localhost:1883";
   } else if (argc == 2) {
     address = argv[1];
+  } else if (argc == 4) {
+    address = argv[1];
+    username = argv[2];
+    password = argv[3];
   } else {
     printf("Too many arguments given\n");
     return 1;
   }
 
   MQTTAsync client;
-  MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
   MQTTAsync_create(&client, address, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
   MQTTAsync_setCallbacks(client, client, connection_lost, message_recieved, NULL);
 
-  printf("Connecting to broker '%s'\n", address);
-  reconnect(client, conn_opts);
+  if (username == NULL) {
+    printf("Connecting to broker '%s'\n", address);
+  } else {
+    printf("Connecting to broker '%s' with username '%s'\n", address, username);
+  }
+  reconnect(client);
 
   // Wait until we are connected to the broker
   wait_until_connected();
