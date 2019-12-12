@@ -36,7 +36,6 @@ void on_connect(void* context, MQTTAsync_successData* response) {
 
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-
   //opts.onSuccess = onSubscribe;
   //opts.onFailure = onSubscribeFailure;
   opts.context = client;
@@ -99,20 +98,19 @@ void on_connect_failure(void* context, MQTTAsync_failureData* response) {
 }
 
 
-void connection_lost(void *context, char *cause) {
-  set_disconnected(1);
-
+void on_connection_lost(void *context, char *cause) {
   MQTTAsync client = (MQTTAsync)context;
+
+  set_disconnected(1);
 
   printf("\nConnection lost\n");
   printf("     cause: %s\n", cause);
-
   printf("Reconnecting\n");
   reconnect(client);
 }
 
 
-int message_recieved(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
+int on_message_recieved(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
   handle_input(topicName, message->payload);
 
   MQTTAsync_freeMessage(&message);
@@ -134,7 +132,6 @@ void send_message(MQTTAsync client, const char *topic, char *payload) {
 
   if ((rc = MQTTAsync_sendMessage(client, topic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
     printf("Failed to start send_message, return code %d\n", rc);
-    //exit(EXIT_FAILURE);
   }
 }
 
@@ -189,7 +186,7 @@ int main(int argc, char* argv[]) {
   MQTTAsync client;
 
   MQTTAsync_create(&client, address, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-  MQTTAsync_setCallbacks(client, client, connection_lost, message_recieved, NULL);
+  MQTTAsync_setCallbacks(client, client, on_connection_lost, on_message_recieved, NULL);
 
   if (username == NULL) {
     printf("Connecting to broker '%s'\n", address);
