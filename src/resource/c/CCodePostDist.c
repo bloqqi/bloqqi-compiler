@@ -5,32 +5,32 @@ const char *username = NULL;
 const char *password = NULL;
 
 // Don't start the Bloqqi program until we are connected to the Broker
-volatile int disconnected = 1;
-pthread_mutex_t disconnected_lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t disconnected_cond = PTHREAD_COND_INITIALIZER;
+volatile bool connected = false;
+pthread_mutex_t connected_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t connected_cond = PTHREAD_COND_INITIALIZER;
 
-void set_disconnected(int value) {
-  pthread_mutex_lock(&disconnected_lock);
-  disconnected = value;
-  pthread_cond_signal(&disconnected_cond);
-  pthread_mutex_unlock(&disconnected_lock);
+void set_connected(bool value) {
+  pthread_mutex_lock(&connected_lock);
+  connected = value;
+  pthread_cond_signal(&connected_cond);
+  pthread_mutex_unlock(&connected_lock);
 }
-int is_disconnected() {
-  pthread_mutex_lock(&disconnected_lock);
-  int ret = disconnected;
-  pthread_mutex_unlock(&disconnected_lock);
+bool is_connected() {
+  pthread_mutex_lock(&connected_lock);
+  bool ret = connected;
+  pthread_mutex_unlock(&connected_lock);
   return ret;
 }
 void wait_until_connected() {
-  pthread_mutex_lock(&disconnected_lock);
-  while (disconnected) {
-    pthread_cond_wait(&disconnected_cond, &disconnected_lock);
+  pthread_mutex_lock(&connected_lock);
+  while (!connected) {
+    pthread_cond_wait(&connected_cond, &connected_lock);
   }
-  pthread_mutex_unlock(&disconnected_lock);
+  pthread_mutex_unlock(&connected_lock);
 }
 
 void on_connect(void* context, MQTTAsync_successData* response) {
-  set_disconnected(0);
+  set_connected(true);
 
   printf("Connected to broker\n");
 
@@ -101,7 +101,7 @@ void on_connect_failure(void* context, MQTTAsync_failureData* response) {
 void on_connection_lost(void *context, char *cause) {
   MQTTAsync client = (MQTTAsync)context;
 
-  set_disconnected(1);
+  set_connected(false);
 
   printf("\nConnection lost\n");
   printf("     cause: %s\n", cause);

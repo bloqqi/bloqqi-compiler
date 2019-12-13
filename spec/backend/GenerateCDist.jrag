@@ -137,7 +137,7 @@ aspect GenerateCDist {
 
 		sb.append("    bloqqi_main(&vars);\n");
 
-		sb.append("    if (!is_disconnected()) {\n");
+		sb.append("    if (is_connected()) {\n");
 		for (ConfOutput out: conf.getOutputs()) {
 			TypeDecl type = out.getVariable().type();
 
