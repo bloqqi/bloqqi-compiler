@@ -92,7 +92,11 @@ aspect GenerateCDist {
 
 	public void DiagramType.genDistPublishParameters(StringBuilder sb, DistConfig conf) {
 		/** Generate publish_parameters_on_connect */
-		sb.append("void publish_parameters_on_connect(MQTTAsync client) {\n");
+		sb.append("void *publish_parameters_on_connect(void *arg) {\n");
+		sb.append("  MQTTAsync client = *((MQTTAsync *) arg);\n");
+		sb.append("  free(arg);\n");
+		sb.append("  usleep(500000L);\n");
+		sb.append("  uint64_t time = useconds();\n");
 		sb.append("  " + inputStructName() + " input = get_input();\n");
 		for (ConfInput in: conf.getInputs()) {
 			if (in.isParameter()) {
@@ -100,10 +104,15 @@ aspect GenerateCDist {
 				String signal = "\"" + in.getSignal() + "\"";
 				String path = "input." + in.getInput();
 				String suffix = distGetSendSuffix(type);
-				sb.append("  send_message_" + suffix);
+				String ttl = "time-1000000";
+				// Don't publish parameter if we get value from the topic when connecting
+				sb.append("  if (" + path + "_last_updated_ < " + ttl + ") {\n");
+				sb.append("    send_message_" + suffix);
 				sb.append("(client, " + signal + ", " + path + ", true);\n");
+				sb.append("  }\n");
 			}
 		}
+		sb.append("  return NULL;\n");
 		sb.append("}\n");
 	}
 

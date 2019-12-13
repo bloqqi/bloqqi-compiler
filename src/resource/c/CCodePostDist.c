@@ -35,8 +35,6 @@ void on_connect(void* context, MQTTAsync_successData* response) {
   set_connected(true);
   printf("Connected to broker\n");
 
-  publish_parameters_on_connect(client);
-
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   //opts.onSuccess = onSubscribe;
   //opts.onFailure = onSubscribeFailure;
@@ -48,6 +46,14 @@ void on_connect(void* context, MQTTAsync_successData* response) {
       exit(EXIT_FAILURE);
     }
   }
+
+  // Publish parameter values only if they are not already retained.
+  // Thus, we need to wait a bit before we know if they are retained
+  // (if we get values on the corresponding topics).
+  pthread_t thread;
+  MQTTAsync *thread_arg = malloc(sizeof(MQTTAsync));
+  *thread_arg = client;
+  pthread_create(&thread, NULL, publish_parameters_on_connect, thread_arg);
 }
 
 MQTTAsync_connectOptions get_connect_options(MQTTAsync client) {
@@ -171,6 +177,9 @@ int main(int argc, char* argv[]) {
 
   // Wait until we are connected to the broker
   wait_until_connected();
+
+  // Sleep a bit (0.2s) to get all parameters
+  usleep(200000L);
 
   printf("Starting Bloqqi program\n");
   bloqqi_run_main(client);
