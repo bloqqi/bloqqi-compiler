@@ -98,12 +98,20 @@ public class DistributedCGenerator {
 			}
 			if (inputs != null) {
 				for (ConfInput in: inputs) {
-					in.structuralAnalysis(errors);
+					if (in == null) {
+						errors.add("Empty input (an extra comma?)");
+					} else {
+						in.structuralAnalysis(errors);
+					}
 				}
 			}
 			if (outputs != null) {
 				for (ConfOutput out: outputs) {
-					out.structuralAnalysis(errors);
+					if (out == null) {
+						errors.add("Empty output (an extra comma?)");
+					} else {
+						out.structuralAnalysis(errors);
+					}
 				}
 			}
 			return errors;
@@ -186,6 +194,7 @@ public class DistributedCGenerator {
 		@SerializedName("default")
 		private String defaultValue;
 		private double ttl;
+		private boolean parameter;
 
 		public String getInput() {
 			return input;
@@ -196,13 +205,22 @@ public class DistributedCGenerator {
 		public double getTtl() {
 			return ttl;
 		}
+		public boolean isParameter() {
+			return parameter;
+		}
 
 		private void structuralAnalysis(Set<String> errors) {
 			if (input == null || signal == null) {
 				errors.add("Inputs need to have both an 'input' and 'signal' field");
 			}
 			if (ttl > 0 && defaultValue == null) {
-				errors.add("When input field 'ttl' > 0, then field 'default' is required");
+				errors.add("Inputs with 'ttl' > 0 require field 'default'");
+			}
+			if (parameter && defaultValue == null) {
+				errors.add("Inputs with 'parameter' = true require field 'default'");
+			}
+			if (parameter && ttl > 0) {
+				errors.add("Inputs with 'parameter' = true cannot have 'ttl'");
 			}
 		}
 

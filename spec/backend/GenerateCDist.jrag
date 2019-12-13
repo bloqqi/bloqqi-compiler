@@ -46,33 +46,10 @@ aspect GenerateCDist {
 		@Override
 		public void generateCPost(StringBuilder sb) {
 			p.genWrapperDefinitionC(sb, diagramType(), "bloqqi_main", "bloqqi");
-			diagramType().genDistInputFunctions(sb);
 
-			/** Generate handle_input */
-			sb.append("void handle_input(char *topic, void *payload) {\n");
-			sb.append("  uint64_t time = useconds();\n");
-			for (ConfInput in: conf.getInputs()) {
-				TypeDecl type = in.getVariable().type();
-
-				String setFunction = "set_input_" + in.getInput().replace(".", "_");
-				String varDecl = "";
-				String format = "";
-				if (type.isInteger() || type.isBool()) {
-					varDecl = "int n = 0";
-					format = "%d";
-				} else if (type.isReal()) {
-					varDecl = "double n = 0.0";
-					format = "%lf";
-				}
-
-				sb.append("  if(strcmp(topic, \"" + in.getSignal() + "\") == 0) {\n");
-				sb.append("    " + varDecl +";\n");
-				sb.append("    if (sscanf(payload, \"" + format +"\", &n) == 1) {\n");
-				sb.append("      " + setFunction + "(n, time);\n");
-				sb.append("    }\n");
-				sb.append("  }\n");
-			}
-			sb.append("}\n");
+			diagramType().genDistInputFunctions(sb, conf);
+			diagramType().genDistHandleInput(sb, conf);
+			diagramType().genDistPublishParameters(sb, conf);
 
 			sb.append(Utils.readResource("/c/CCodePostDist.c")).append("\n");
 
@@ -85,7 +62,52 @@ aspect GenerateCDist {
 		}
 	}
 
-	public void DiagramType.genDistInputFunctions(StringBuilder sb) {
+	public void DiagramType.genDistHandleInput(StringBuilder sb, DistConfig conf) {
+		/** Generate handle_input */
+		sb.append("void handle_input(char *topic, void *payload) {\n");
+		sb.append("  uint64_t time = useconds();\n");
+		for (ConfInput in: conf.getInputs()) {
+			TypeDecl type = in.getVariable().type();
+
+			String setFunction = "set_input_" + in.getInput().replace(".", "_");
+			String varDecl = "";
+			String format = "";
+			if (type.isInteger() || type.isBool()) {
+				varDecl = "int n = 0";
+				format = "%d";
+			} else if (type.isReal()) {
+				varDecl = "double n = 0.0";
+				format = "%lf";
+			}
+
+			sb.append("  if(strcmp(topic, \"" + in.getSignal() + "\") == 0) {\n");
+			sb.append("    " + varDecl +";\n");
+			sb.append("    if (sscanf(payload, \"" + format +"\", &n) == 1) {\n");
+			sb.append("      " + setFunction + "(n, time);\n");
+			sb.append("    }\n");
+			sb.append("  }\n");
+		}
+		sb.append("}\n");
+	}
+
+	public void DiagramType.genDistPublishParameters(StringBuilder sb, DistConfig conf) {
+		/** Generate publish_parameters_on_connect */
+		sb.append("void publish_parameters_on_connect(MQTTAsync client) {\n");
+		sb.append("  " + inputStructName() + " input = get_input();\n");
+		for (ConfInput in: conf.getInputs()) {
+			if (in.isParameter()) {
+				TypeDecl type = in.getVariable().type();
+				String signal = "\"" + in.getSignal() + "\"";
+				String path = "input." + in.getInput();
+				String suffix = distGetSendSuffix(type);
+				sb.append("  send_message_" + suffix);
+				sb.append("(client, " + signal + ", " + path + ", true);\n");
+			}
+		}
+		sb.append("}\n");
+	}
+
+	public void DiagramType.genDistInputFunctions(StringBuilder sb, DistConfig conf) {
 		String inputType = inputStructName();
 		String inputVar = "input_var";
 		String mutex = "input_var_lock";
@@ -93,6 +115,19 @@ aspect GenerateCDist {
 		sb.append(inputType + " " + inputVar + ";\n");
 		sb.append("pthread_mutex_t " + mutex + " = PTHREAD_MUTEX_INITIALIZER;\n");
 
+		// init_input
+		sb.append("void init_input() {\n");
+		sb.append("  pthread_mutex_lock(&" + mutex + ");\n");
+		for (ConfInput in: conf.getInputs()) {
+			if (in.getDefault() != null) {
+				String path = inputVar + "." + in.getInput();
+				sb.append("  " + path + " = " + in.getDefault() + ";\n");
+			}
+		}
+		sb.append("  pthread_mutex_unlock(&" + mutex + ");\n");
+		sb.append("}\n");
+
+		// get_input
 		sb.append(inputType + " get_input() {\n");
 		sb.append("  pthread_mutex_lock(&" + mutex + ");\n");
 		sb.append("  " + inputType + " ret = " + inputVar + ";\n");
@@ -100,6 +135,7 @@ aspect GenerateCDist {
 		sb.append("  return ret;\n");
 		sb.append("}\n");
 
+		// set_input_X functions
 		for (Map.Entry<String, Variable> e: allInputVariables().entrySet()) {
 			String varName = e.getKey().replace(".", "_");
 			String functionName = "set_input_" + varName;
@@ -140,17 +176,11 @@ aspect GenerateCDist {
 		sb.append("    if (is_connected()) {\n");
 		for (ConfOutput out: conf.getOutputs()) {
 			TypeDecl type = out.getVariable().type();
-
 			String signal = "\"" + out.getSignal() + "\"";
 			String path = "vars.output." + out.getOutput();
-			String suffix = "";
-			if (type.isInteger() || type.isBool()) {
-				suffix = "int";
-			} else if (type.isReal()) {
-				suffix = "double";
-			}
-
-			sb.append("      send_message_" + suffix +"(client, " + signal + ", " + path + ");\n");
+			String suffix = distGetSendSuffix(type);
+			sb.append("      send_message_" + suffix);
+			sb.append("(client, " + signal + ", " + path + ", false);\n");
 		}
 		sb.append("    }\n");
 
@@ -158,5 +188,15 @@ aspect GenerateCDist {
 		sb.append("    extra = my_sleep(start, end, extra, T);\n");
 		sb.append("  }\n");
 		sb.append("}\n");
+	}
+
+	public String DiagramType.distGetSendSuffix(TypeDecl type) {
+		String suffix = "";
+		if (type.isInteger() || type.isBool()) {
+			suffix = "int";
+		} else if (type.isReal()) {
+			suffix = "double";
+		}
+		return suffix;
 	}
 }

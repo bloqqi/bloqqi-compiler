@@ -30,16 +30,17 @@ void wait_until_connected() {
 }
 
 void on_connect(void* context, MQTTAsync_successData* response) {
-  set_connected(true);
+  MQTTAsync client = (MQTTAsync)context;
 
+  set_connected(true);
   printf("Connected to broker\n");
 
-  MQTTAsync client = (MQTTAsync)context;
+  publish_parameters_on_connect(client);
+
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   //opts.onSuccess = onSubscribe;
   //opts.onFailure = onSubscribeFailure;
   opts.context = client;
-
   for (int i = 0; i < sizeof(SIGNALS)/sizeof(char *); i++) {
     int rc = MQTTAsync_subscribe(client, SIGNALS[i], 1, &opts);
     if (rc != MQTTASYNC_SUCCESS) {
@@ -119,34 +120,6 @@ int on_message_recieved(void *context, char *topicName, int topicLen, MQTTAsync_
   return 1;
 }
 
-void send_message(MQTTAsync client, const char *topic, char *payload) {
-  MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-  MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
-  int rc;
-
-  opts.context = client;
-  pubmsg.payload = payload;
-  pubmsg.payloadlen = (int)strlen(payload) + 1;
-  pubmsg.qos = 0;
-  pubmsg.retained = 0;
-
-  if ((rc = MQTTAsync_sendMessage(client, topic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
-    printf("Failed to start send_message, return code %d\n", rc);
-  }
-}
-
-void send_message_int(MQTTAsync client, const char *topic, int value) {
-  char payload[20];
-  sprintf(payload, "%d", value);
-  send_message(client, topic, payload);
-}
-
-void send_message_double(MQTTAsync client, const char *topic, double value) {
-  char payload[20];
-  sprintf(payload, "%lf", value);
-  send_message(client, topic, payload);
-}
-
 uint64_t my_sleep(
     uint64_t start,
     uint64_t end,
@@ -183,8 +156,9 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  MQTTAsync client;
+  init_input();
 
+  MQTTAsync client;
   MQTTAsync_create(&client, address, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
   MQTTAsync_setCallbacks(client, client, on_connection_lost, on_message_recieved, NULL);
 
