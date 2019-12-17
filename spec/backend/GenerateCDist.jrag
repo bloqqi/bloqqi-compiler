@@ -64,7 +64,7 @@ aspect GenerateCDist {
 
 	public void DiagramType.genDistHandleInput(StringBuilder sb, DistConfig conf) {
 		/** Generate handle_input */
-		sb.append("void handle_input(char *topic, void *payload) {\n");
+		sb.append("void handle_input(char *topic, int topicLen, void *payload) {\n");
 		sb.append("  uint64_t time = useconds();\n");
 		for (ConfInput in: conf.getInputs()) {
 			TypeDecl type = in.getVariable().type();
@@ -80,7 +80,7 @@ aspect GenerateCDist {
 				format = "%lf";
 			}
 
-			sb.append("  if(strcmp(topic, \"" + in.getSignal() + "\") == 0) {\n");
+			sb.append("  if(strncmp(topic, \"" + in.getSignal() + "\", topicLen) == 0) {\n");
 			sb.append("    " + varDecl +";\n");
 			sb.append("    if (sscanf(payload, \"" + format +"\", &n) == 1) {\n");
 			sb.append("      " + setFunction + "(n, time);\n");
