@@ -1,3 +1,6 @@
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -40,4 +43,56 @@ void send_message_double(MQTTAsync client, const char *topic, double value, bool
   char payload[20];
   sprintf(payload, "%lf", value);
   send_message(client, topic, payload, retain);
+}
+
+// Function adapted:
+// from https://wiki.sei.cmu.edu/confluence/display/c/ERR34-C.+Detect+errors+when+converting+a+string+to+a+number
+bool read_int(const char *s, int *ip) {
+  char *end;
+  errno = 0;
+
+  const long sl = strtol(s, &end, 10);
+  bool ok = false;
+
+  if (end == s) {
+    fprintf(stderr, "Input error: '%s' not a decimal number\n", s);
+  } else if (*end != '\0') {
+    fprintf(stderr, "Input warning: '%s' extra characters at end of input '%s'\n", s, end);
+    ok = true;
+  } else if ((sl == LONG_MIN || sl == LONG_MAX) && errno == ERANGE) {
+    fprintf(stderr, "Input error: '%s' out of range of type long\n", s);
+  } else if (sl > INT_MAX) {
+    fprintf(stderr, "Input error: '%ld' greater than INT_MAX\n", sl);
+  } else if (sl < INT_MIN) {
+    fprintf(stderr, "Input error: '%ld' less than INT_MIN\n", sl);
+  } else {
+    ok = true;
+  }
+  if (ok) {
+    *ip = (int) sl;
+  }
+  return ok;
+}
+
+bool read_double(const char *s, double *dp) {
+  char *end;
+  errno = 0;
+
+  const double d = strtod(s, &end);
+  bool ok = false;
+
+  if (end == s) {
+    fprintf(stderr, "Input error: '%s' not a floating point number\n", s);
+  } else if (*end != '\0') {
+    fprintf(stderr, "Input warning '%s' extra characters at end of input '%s'\n", s, end);
+    ok = true;
+  } else if ((d == -HUGE_VAL || d == HUGE_VAL) && errno == ERANGE) {
+    fprintf(stderr, "Input error: '%s' out of range of type double\n", s);
+  } else {
+    ok = true;
+  }
+  if (ok) {
+    *dp = d;
+  }
+  return ok;
 }

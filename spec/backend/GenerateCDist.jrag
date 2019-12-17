@@ -64,25 +64,32 @@ aspect GenerateCDist {
 
 	public void DiagramType.genDistHandleInput(StringBuilder sb, DistConfig conf) {
 		/** Generate handle_input */
-		sb.append("void handle_input(char *topic, int topicLen, void *payload) {\n");
+		sb.append("void handle_input(char *topic, int topicLen, MQTTAsync_message *message) {\n");
 		sb.append("  uint64_t time = useconds();\n");
+		sb.append("  // Make sure that the payload is null-terminated\n");
+		sb.append("  int size = message->payloadlen > 100 ? 100 : message->payloadlen;\n");
+		sb.append("  char buf[size+1];\n");
+		sb.append("  strncpy(buf, message->payload, size);\n");
+		sb.append("  buf[size] = 0;\n");
+
 		for (ConfInput in: conf.getInputs()) {
 			TypeDecl type = in.getVariable().type();
 
 			String setFunction = "set_input_" + in.getInput().replace(".", "_");
 			String varDecl = "";
 			String format = "";
+			String suffix = "";
 			if (type.isInteger() || type.isBool()) {
 				varDecl = "int n = 0";
-				format = "%d";
+				suffix = "int";
 			} else if (type.isReal()) {
 				varDecl = "double n = 0.0";
-				format = "%lf";
+				suffix = "double";
 			}
 
 			sb.append("  if(strncmp(topic, \"" + in.getSignal() + "\", topicLen) == 0) {\n");
 			sb.append("    " + varDecl +";\n");
-			sb.append("    if (sscanf(payload, \"" + format +"\", &n) == 1) {\n");
+			sb.append("    if (read_" + suffix + "(buf, &n)) {\n");
 			sb.append("      " + setFunction + "(n, time);\n");
 			sb.append("    }\n");
 			sb.append("  }\n");

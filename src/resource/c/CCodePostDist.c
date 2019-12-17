@@ -118,7 +118,7 @@ void on_connection_lost(void *context, char *cause) {
 
 
 int on_message_recieved(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
-  handle_input(topicName, topicLen, message->payload);
+  handle_input(topicName, topicLen, message);
 
   MQTTAsync_freeMessage(&message);
   MQTTAsync_free(topicName);
