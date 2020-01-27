@@ -49,7 +49,7 @@ aspect GenerateCDist {
 
 			diagramType().genDistInputFunctions(sb, conf);
 			diagramType().genDistHandleInput(sb, conf);
-			diagramType().genDistPublishParameters(sb, conf);
+			diagramType().genDistPublishTunableParameters(sb, conf);
 
 			sb.append(Utils.readResource("/c/CCodePostDist.c")).append("\n");
 
@@ -97,22 +97,22 @@ aspect GenerateCDist {
 		sb.append("}\n");
 	}
 
-	public void DiagramType.genDistPublishParameters(StringBuilder sb, DistConfig conf) {
-		/** Generate publish_parameters_on_connect */
-		sb.append("void *publish_parameters_on_connect(void *arg) {\n");
+	public void DiagramType.genDistPublishTunableParameters(StringBuilder sb, DistConfig conf) {
+		/** Generate publish_tunable_parameters_on_connect */
+		sb.append("void *publish_tunable_parameters_on_connect(void *arg) {\n");
 		sb.append("  MQTTAsync client = *((MQTTAsync *) arg);\n");
 		sb.append("  free(arg);\n");
 		sb.append("  usleep(500000L);\n");
 		sb.append("  uint64_t time = useconds();\n");
 		sb.append("  " + inputStructName() + " input = get_input();\n");
 		for (ConfInput in: conf.getInputs()) {
-			if (in.isParameter()) {
+			if (in.isTunableParameter()) {
 				TypeDecl type = in.getVariable().type();
 				String signal = "\"" + in.getSignal() + "\"";
 				String path = "input." + in.getInput();
 				String suffix = distGetSendSuffix(type);
 				String ttl = "time-1000000";
-				// Don't publish parameter if we get value from the topic when connecting
+				// Don't publish tunable parameter if we get value from the topic when connecting
 				sb.append("  if (" + path + "_last_updated_ < " + ttl + ") {\n");
 				sb.append("    send_message_" + suffix);
 				sb.append("(client, " + signal + ", " + path + ", true);\n");

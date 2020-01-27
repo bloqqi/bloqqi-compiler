@@ -194,7 +194,7 @@ public class DistributedCGenerator {
 		@SerializedName("default")
 		private String defaultValue;
 		private double ttl;
-		private boolean parameter;
+		private boolean tunableParameter;
 
 		public String getInput() {
 			return input;
@@ -205,8 +205,8 @@ public class DistributedCGenerator {
 		public double getTtl() {
 			return ttl;
 		}
-		public boolean isParameter() {
-			return parameter;
+		public boolean isTunableParameter() {
+			return tunableParameter;
 		}
 
 		private void structuralAnalysis(Set<String> errors) {
@@ -216,11 +216,11 @@ public class DistributedCGenerator {
 			if (ttl > 0 && defaultValue == null) {
 				errors.add("Inputs with 'ttl' > 0 require field 'default'");
 			}
-			if (parameter && defaultValue == null) {
-				errors.add("Inputs with 'parameter' = true require field 'default'");
+			if (tunableParameter && defaultValue == null) {
+				errors.add("Inputs with 'tunableParameter' = true require field 'default'");
 			}
-			if (parameter && ttl > 0) {
-				errors.add("Inputs with 'parameter' = true cannot have 'ttl'");
+			if (tunableParameter && ttl > 0) {
+				errors.add("Inputs with 'tunableParameter' = true cannot have 'ttl'");
 			}
 		}
 
