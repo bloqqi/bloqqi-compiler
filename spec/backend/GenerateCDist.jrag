@@ -170,7 +170,7 @@ aspect GenerateCDist {
 
 	public void DiagramType.genDistMain(StringBuilder sb, DistConfig conf) {
 		sb.append("void bloqqi_run_main(MQTTAsync client) {\n");
-		sb.append("  const int T = 1000000/" + conf.getFrequency() + ";\n");
+		sb.append("  const int T = " + conf.getSamplingPeriodMicro() + ";\n");
 		sb.append("  bloqqi_VARS vars = {};\n");
 		sb.append("  uint64_t extra = 0;\n");
 		sb.append("  while(true) {\n");
@@ -178,9 +178,9 @@ aspect GenerateCDist {
 		sb.append("    vars.input = get_input();\n");
 
 		for (ConfInput in: conf.getInputs()) {
-			if (in.getTtl() > 0) {
+			if (in.getTtlMicro() > 0) {
 				String path = "vars.input." + in.getInput();
-				String ttl = "start-" + (Math.round(in.getTtl()*1000000));
+				String ttl = "start-" + (Math.round(in.getTtlMicro()));
 				sb.append("    if (" + path + "_last_updated_ < " + ttl + ") {\n");
 				sb.append("      " + path + " = " + in.getDefault() + ";\n");
 				sb.append("    }\n");

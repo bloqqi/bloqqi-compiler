@@ -3,6 +3,8 @@ package org.bloqqi.compiler;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.IOException;
 import java.io.File;
 import java.nio.file.Files;
@@ -79,22 +81,43 @@ public class DistributedCGenerator {
 		Compiler.generateCSeparateFiles(program, outputFile, target);
 	}
 
+	public static int parseTime(String s, String field, Set<String> errors) {
+		Pattern p = Pattern.compile("(\\d+)\\s*(ms|s)");
+		Matcher m = p.matcher(s.trim());
+		if(!m.matches()) {
+			errors.add("Wrong format for '" + field + "'. Format: integer followed by 's' or 'ms'");
+			return -1;
+		} else {
+			int factor = 1;
+			if (m.group(2).equals("s")) {
+				factor = 1_000_000;
+			} else if (m.group(2).equals("ms")) {
+				factor = 1_000;
+			}
+			int micro = Integer.valueOf(m.group(1)) * factor;
+			return micro;
+		}
+	}
+
 	public static class DistConfig {
 		private String type;
-		private double frequency;
+		private String samplingPeriod;
 		private List<ConfInput> inputs;
 		private List<ConfOutput> outputs;
 
-		// Computed during semantic analysis
+		// Computed during analysis
 		private transient DiagramType diagramType;
+		private transient int samplingPeriodMicro;
 
 		public Set<String> structuralAnalysis() {
 			Set<String> errors = new TreeSet<>();
 			if (type == null) {
 				errors.add("Missing field 'type'");
 			}
-			if (frequency <= 0) {
-				errors.add("Field 'frequency' needs to be > 0");
+			if (samplingPeriod == null) {
+				errors.add("Missing field 'samplingPeriod'");
+			} else {
+				samplingPeriodMicro = parseTime(samplingPeriod, "samplingPeriod", errors);
 			}
 			if (inputs != null) {
 				for (ConfInput in: inputs) {
@@ -151,8 +174,8 @@ public class DistributedCGenerator {
 		public String getType() {
 			return type;
 		}
-		public double getFrequency() {
-			return frequency;
+		public int getSamplingPeriodMicro() {
+			return samplingPeriodMicro;
 		}
 		public List<ConfInput> getInputs() {
 			return inputs;
@@ -168,7 +191,7 @@ public class DistributedCGenerator {
 		public String toString() {
 			return
 				"type: " + type + "\n" +
-				"frequency: " + frequency + "\n" +
+				"samplingPeriod: " + samplingPeriod + "\n" +
 				"inputs: " + inputs + "\n" +
 				"outputs: " + outputs + "\n";
 		}
@@ -193,8 +216,11 @@ public class DistributedCGenerator {
 		private String input;
 		@SerializedName("default")
 		private String defaultValue;
-		private double ttl;
+		private String ttl;
 		private boolean tunableParameter;
+
+		// Computed during analysis
+		private transient int ttlMicro = 0;
 
 		public String getInput() {
 			return input;
@@ -202,8 +228,8 @@ public class DistributedCGenerator {
 		public String getDefault() {
 			return defaultValue;
 		}
-		public double getTtl() {
-			return ttl;
+		public int getTtlMicro() {
+			return ttlMicro;
 		}
 		public boolean isTunableParameter() {
 			return tunableParameter;
@@ -213,13 +239,16 @@ public class DistributedCGenerator {
 			if (input == null || signal == null) {
 				errors.add("Inputs need to have both an 'input' and 'signal' field");
 			}
-			if (ttl > 0 && defaultValue == null) {
-				errors.add("Inputs with 'ttl' > 0 require field 'default'");
+			if (ttl != null) {
+				ttlMicro = parseTime(ttl, "ttl", errors);
+				if (defaultValue == null) {
+					errors.add("Inputs with 'ttl' require field 'default'");
+				}
 			}
 			if (tunableParameter && defaultValue == null) {
 				errors.add("Inputs with 'tunableParameter' = true require field 'default'");
 			}
-			if (tunableParameter && ttl > 0) {
+			if (tunableParameter && ttl != null) {
 				errors.add("Inputs with 'tunableParameter' = true cannot have 'ttl'");
 			}
 		}
