@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="tools/beaver.jar"/>
 	<classpathentry kind="lib" path="tools/junit-4.11-SNAPSHOT.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="tools/gson-2.6.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
