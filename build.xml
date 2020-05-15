@@ -23,7 +23,6 @@
 	</loadresource>
 
 	<!-- Define Ant tasks -->
-	<taskdef name="jastadd" classname="org.jastadd.JastAddTask" classpath="${tools}/jastadd2.jar"/>
 	<taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="${tools}/JFlex.jar"/>
 	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${tools}/beaver.jar"/>
 
@@ -51,25 +50,35 @@
 	<!-- generate compiler source files -->
 	<target name="gen" depends="scanner,parser">
 		<!-- create AST node types and weave aspect modules -->
-		<echo message = "Running JastAdd"/>
-		<jastadd package="${package}" rewrite="cnta" safeLazy="true" beaver="true" visitcheck="false"
-				lazyMaps="true" outdir="${gendir}" cache="all" lineColumnNumbers="true">
-			<fileset dir=".">
-				<include name="spec/grammar/*.ast"/>
-				<include name="spec/frontend/*.ast"/>
-				<include name="spec/frontend/*.jadd"/>
-				<include name="spec/frontend/*.jrag"/>
-				<include name="spec/backend/*.ast"/>
-				<include name="spec/backend/*.jadd"/>
-				<include name="spec/backend/*.jrag"/>
-				<include name="spec/graphical-editor/*.ast"/>
-				<include name="spec/graphical-editor/*.jrag"/>
-				<include name="spec/graphical-editor/*.jadd"/>
-				<include name="spec/extensions/jastadd/*.ast"/>
-				<include name="spec/extensions/jastadd/*.jrag"/>
-				<include name="spec/extensions/jastadd/*.jadd"/>
-			</fileset>
-		</jastadd>
+		<echo message = "Running JastAdd" />
+		<fileset dir="." id="jastadd-files">
+			<include name="spec/grammar/*.ast"/>
+			<include name="spec/frontend/*.ast"/>
+			<include name="spec/frontend/*.jadd"/>
+			<include name="spec/frontend/*.jrag"/>
+			<include name="spec/backend/*.ast"/>
+			<include name="spec/backend/*.jadd"/>
+			<include name="spec/backend/*.jrag"/>
+			<include name="spec/graphical-editor/*.ast"/>
+			<include name="spec/graphical-editor/*.jrag"/>
+			<include name="spec/graphical-editor/*.jadd"/>
+			<include name="spec/extensions/jastadd/*.ast"/>
+			<include name="spec/extensions/jastadd/*.jrag"/>
+			<include name="spec/extensions/jastadd/*.jadd"/>
+		</fileset>
+		<pathconvert pathsep=" " property="jastadd-files" refid="jastadd-files"/>
+		<java jar="${tools}/jastadd2.jar" fork="yes" maxmemory="128m">
+			<arg value="--package=${package}" />
+			<arg value="--rewrite=cnta" />
+			<arg value="--safeLazy" />
+			<arg value="--beaver" />
+			<arg value="--visitcheck=false" />
+			<arg value="--lazyMaps=true" />
+			<arg value="--o=${gendir}" />
+			<arg value="--cache=all" />
+			<arg value="--lineColumnNumbers" />
+			<arg line="${jastadd-files}" />
+		</java>
 	</target>
 
 	<target name="scanner">
