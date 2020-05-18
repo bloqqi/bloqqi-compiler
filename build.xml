@@ -53,13 +53,10 @@
 		<echo message = "Running JastAdd" />
 		<fileset dir="." id="jastadd-files">
 			<include name="spec/grammar/*.ast"/>
-			<include name="spec/frontend/*.ast"/>
 			<include name="spec/frontend/*.jadd"/>
 			<include name="spec/frontend/*.jrag"/>
-			<include name="spec/backend/*.ast"/>
 			<include name="spec/backend/*.jadd"/>
 			<include name="spec/backend/*.jrag"/>
-			<include name="spec/graphical-editor/*.ast"/>
 			<include name="spec/graphical-editor/*.jrag"/>
 			<include name="spec/graphical-editor/*.jadd"/>
 			<include name="spec/extensions/jastadd/*.ast"/>
