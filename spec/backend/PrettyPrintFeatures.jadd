@@ -1,0 +1,28 @@
+aspect PrettyPrintFeatures {
+	public void Features.prettyPrint(StringBuilder sb) {
+		sb.append("features " + getTypeUse() + " {\n");
+		for (FeatureStmt f: getFeatureStmts()) {
+			sb.append("  ");
+			f.prettyPrint(sb);
+			sb.append(";\n");
+		}
+		sb.append("}\n");
+	}
+
+	public abstract void FeatureStmt.prettyPrint(StringBuilder sb);
+	public void FeatureBlockStmt.prettyPrint(StringBuilder sb) {
+		sb.append(getName());
+		sb.append(": ");
+		sb.append(getTypeUse());
+	}
+	public void FeatureXorStmt.prettyPrint(StringBuilder sb) {
+		sb.append(getFirst());
+		sb.append(" xor ");
+		sb.append(getSecond());
+	}
+	public void FeatureBeforeStmt.prettyPrint(StringBuilder sb) {
+		sb.append(getBefore());
+		sb.append(" before ");
+		sb.append(getAfter());
+	}
+}
