@@ -91,6 +91,7 @@
 				<file name="Function.parser"/>
 				<file name="StateMachine.parser"/>
 				<file name="Configuration.parser"/>
+				<file name="Features.parser"/>
 			</filelist>
 		</concat>
 

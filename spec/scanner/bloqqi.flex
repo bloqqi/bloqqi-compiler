@@ -85,6 +85,8 @@ NUM = [0-9]+
     "import"        { return sym(Terminals.IMPORT); }
     "statemachine"  { return sym(Terminals.STATEMACHINE); }
     "public"        { return sym(Terminals.PUBLIC); }
+    "features"      { return sym(Terminals.FEATURES); }
+    "xor"           { return sym(Terminals.XOR); }
 
     // Operators
     "&&"            { return sym(Terminals.AND); }

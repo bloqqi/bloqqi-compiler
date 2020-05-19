@@ -1,0 +1,21 @@
+Declaration declaration =
+    FEATURES type_use.t LBRA
+        feature_stmts.s
+    RBRA {: return new Features(t, s); :}
+    ;
+
+List feature_stmts =
+	/* empty */            {: return new List(); :}
+	| feature_stmt_list.l  {: return l; :}
+	;
+
+List feature_stmt_list =
+	feature_stmt.f SCOL      {: return new List().add(f); :}
+	| feature_stmt_list.l feature_stmt.f SCOL {: return l.add(f); :}
+	;
+
+FeatureStmt feature_stmt =
+	name.n COL type_use.t {: return new FeatureBlockStmt(n, t); :}
+	| simple_var_use.v1 XOR simple_var_use.v2 {: return new FeatureXorStmt(v1, v2); :}
+	| simple_var_use.v1 BEFORE simple_var_use.v2 {: return new FeatureBeforeStmt(v1, v2); :}
+	;

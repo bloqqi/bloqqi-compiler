@@ -1,0 +1,6 @@
+/** Features */
+Features : Declaration ::= TypeUse FeatureStmt*;
+abstract FeatureStmt;
+FeatureBlockStmt : FeatureStmt ::= Name TypeUse;
+FeatureXorStmt : FeatureStmt ::= First:SimpleVarUse Second:SimpleVarUse;
+FeatureBeforeStmt : FeatureStmt ::= Before:SimpleVarUse After:SimpleVarUse;
