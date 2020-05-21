@@ -5,21 +5,34 @@ Declaration declaration =
     ;
 
 List feature_stmts =
-	/* empty */            {: return new List(); :}
-	| feature_stmt_list.l  {: return l; :}
-	;
+    /* empty */            {: return new List(); :}
+    | feature_stmt_list.l  {: return l; :}
+    ;
 
 List feature_stmt_list =
-	feature_stmt.f SCOL      {: return new List().add(f); :}
-	| feature_stmt_list.l feature_stmt.f SCOL {: return l.add(f); :}
-	;
+    feature_stmt.f SCOL      {: return new List().add(f); :}
+    | feature_stmt_list.l feature_stmt.f SCOL {: return l.add(f); :}
+    ;
 
 FeatureStmt feature_stmt =
-	ID.id COL type_use.t {: return new FeatureDeclStmt(id, t); :}
-	| feature_use.f1 XOR feature_use.f2 {: return new FeatureXorStmt(f1, f2); :}
-	| feature_use.f1 BEFORE feature_use.f2 {: return new FeatureBeforeStmt(f1, f2); :}
-	;
+    ID.id COL type_use.t {: return new FeatureDeclStmt(id, t); :}
+    | feature_id.f1 XOR feature_id.f2 {: return new FeatureXorStmt(f1, f2); :}
+    | feature_id.f1 BEFORE feature_id.f2 {: return new FeatureBeforeStmt(f1, f2); :}
+    ;
 
+FeatureIdUse feature_id =
+    ID.id     {: return new FeatureIdUse(id); :}
+    ;
+
+List feature_uses =
+    /* empty */          {: return new List(); :}
+    | feature_use_list.l {: return l; :}
+    ;
+
+List feature_use_list =
+    feature_use.f SCOL                      {: return new List().add(f); :}
+    | feature_use_list.l feature_use.f SCOL {: return l.add(f); :}
+    ;
 FeatureUse feature_use =
-    ID.id     {: return new FeatureUse(id); :}
+    FEATURE feature_id.f {: return new FeatureUse(f); :}
     ;

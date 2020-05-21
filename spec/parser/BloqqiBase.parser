@@ -297,12 +297,14 @@ AnonymousDiagramType anon_dt =
 AnonymousDiagramType anon_dt_body =
     diagram_type_parameters.dt
     LBRA
+        feature_uses.f
         vars.v?
         block_list.b?
         flow_decls.fd?
     RBRA
     {:
         AnonymousDiagramType adt = new AnonymousDiagramType();
+        adt.setFeatureUseList(f);
         adt.setLocalInParameterList(dt.getLocalInParameterList());
         adt.setLocalOutParameterList(dt.getLocalOutParameterList());
         adt.setID("<anonymous>");

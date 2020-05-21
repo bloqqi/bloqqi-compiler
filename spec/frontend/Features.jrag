@@ -14,8 +14,8 @@ aspect Features {
 }
 
 aspect NameAnalysisFeatures {
-	syn FeatureDeclStmt FeatureUse.decl() = lookupFeature(getID());
-	inh FeatureDeclStmt FeatureUse.lookupFeature(String name);
+	syn FeatureDeclStmt FeatureIdUse.decl() = lookupFeature(getID());
+	inh FeatureDeclStmt FeatureIdUse.lookupFeature(String name);
 	eq Features.getFeatureStmt().lookupFeature(String name)
 		= getTypeUse().type().lookupFeature(name);
 
@@ -64,8 +64,19 @@ aspect BeforeFeaturesAnalysis {
 	}
 }
 
+aspect FeatureUse {
+	eq DiagramType.getFeatureUse().lookupFeature(String name) = null;
+	eq AnonymousDiagramType.getFeatureUse().lookupFeature(String name) {
+		/* Lookup features in first super type */
+		for (DiagramType dt: directSuperTypes()) {
+			return dt.lookupFeature(name);
+		}
+		return null;
+	}
+}
+
 aspect ErrorsFeatures {
-	FeatureUse contributes
+	FeatureIdUse contributes
 		error("Feature " + getID() + " not found")
 		when decl() == null
 		to CompilationUnit.errors();

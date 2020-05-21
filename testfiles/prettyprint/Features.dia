@@ -6,6 +6,12 @@ diagramtype PD extends P {
 }
 diagramtype PTrack extends P {
 }
+diagramtype Main {
+  pid: P {
+    feature Derivative;
+    feature Integral;
+  };
+}
 features P {
   PTrack: PTrack;
   Integral xor PTrack;

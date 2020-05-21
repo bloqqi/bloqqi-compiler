@@ -37,7 +37,7 @@ aspect PrettyPrint {
 	public void DiagramType.prettyPrint(StringBuilder sb) {
 		sb.append(getModifiers().prettyPrint());
 		sb.append("diagramtype " + getID());
-	
+
 		prettyPrintParameters(sb);
 
 		if (getNumSuperType() > 0) {
@@ -73,9 +73,12 @@ aspect PrettyPrint {
 	}
 	public void DiagramType.prettyPrintBody(StringBuilder sb) {
 		sb.append("{\n");
+		for (FeatureUse f: getFeatureUses()) {
+			sb.append(f.indent() + f.prettyPrint() + ";\n");
+		}
 		for (Variable v : getLocalVariables()) {
 			sb.append(v.indent() + v.prettyPrint() + ";\n");
-		} 
+		}
 		for (Block b : getLocalBlocks()) {
 			sb.append(b.indent() + b.prettyPrint() + ";\n");
 		}
@@ -91,7 +94,7 @@ aspect PrettyPrint {
 		}
 		prettyPrintBody(sb);
 	}
-	
+
 	public void Recommendation.prettyPrint(StringBuilder sb) {
 		sb.append("recommendation " + getDeclaredForType() + " {\n");
 		for (RecommendationElement re: getRecommendationElements()) {
@@ -116,8 +119,8 @@ aspect PrettyPrint {
 	public void RecommendationExtendsSuper.prettyPrint(StringBuilder sb) {
 		sb.append("recommendation " + getDeclaredForType() + " extends super;\n");
 	}
-	
-	
+
+
 	public void ExternalFunction.prettyPrint(StringBuilder sb) {
 		sb.append("external " + getID() + "(");
 		sb.append(getInParameterList().toString(", "));
@@ -212,7 +215,7 @@ aspect PrettyPrint {
 		s += getTarget().prettyPrint() + ", " + getSource().prettyPrint();
 		return s;
 	}
-	
+
 	public void Wiring.prettyPrint(StringBuilder sb) {
 		sb.append("wiring " + getTypeUse() + "[");
 		sb.append(getWiringParameters().toString(", "));
@@ -243,7 +246,7 @@ aspect PrettyPrint {
 	}
 	public String InlinedName.prettyPrint() {
 		return getOuter().prettyPrint() + INLINE_SEP + getInner().name();
-	}	
+	}
 
 	public abstract String Expr.prettyPrint();
 	public String Literal.prettyPrint() {
@@ -329,15 +332,15 @@ aspect PrettyPrint {
 	public String DotVarUse.toString() {
 		return getVarUse() + "." + getID();
 	}
-	
+
 	public String Port.toString() {
 		return "Port(" + getParameter() + ")";
 	}
-	
+
 	public String StructField.toString() {
 		return getID() + ": " + getTypeUse();
 	}
-	
+
 	public String IdName.toString() {
 		return getID();
 	}
@@ -350,7 +353,7 @@ aspect PrettyPrint {
 	}
 
 	public String TypeUse.toString() {
-		return getID(); 
+		return getID();
 	}
 
 	public String DiagramType.toString() { return getID(); }

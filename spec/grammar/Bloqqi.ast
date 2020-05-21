@@ -1,4 +1,4 @@
-Program ::= CompilationUnit* [StandardLibrary:CompilationUnit];  
+Program ::= CompilationUnit* [StandardLibrary:CompilationUnit];
 CompilationUnit ::= <PackageName> ImportDecl* Declaration*;
 ImportDecl ::= <PackageName> TypeUse;
 
@@ -9,8 +9,9 @@ abstract VarDecl;
 abstract Declaration;
 abstract TypeDecl : Declaration;
 abstract UserDefType : TypeDecl ::= [DocString] <ID>;
-DiagramType : UserDefType ::= 
+DiagramType : UserDefType ::=
 	Modifiers
+	FeatureUse*
 	LocalInParameter:InParameter* LocalOutParameter:OutParameter* SuperType:TypeUse*
 	LocalVariable:Variable* LocalBlock:Block* FlowDecl* Annotation*
 	[LocalWiring:Wiring]
@@ -49,7 +50,7 @@ Block : VarDecl ::=
 	Modifiers
 	Type
 	Name
-	/InPort:Port*/ 
+	/InPort:Port*/
 	/OutPort:Port*/;
 RedeclareBlock : Block;
 WiredBlock : Block ::= WiredBlockParameter*;

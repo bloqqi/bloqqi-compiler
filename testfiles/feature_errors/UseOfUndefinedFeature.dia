@@ -1,0 +1,13 @@
+diagramtype A { }
+diagramtype F extends A { }
+
+diagramtype Main {
+  a: A {
+    feature f;
+    feature g;
+  };
+}
+
+features A {
+  f: F;
+}

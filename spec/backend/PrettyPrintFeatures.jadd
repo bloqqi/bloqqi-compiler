@@ -26,7 +26,11 @@ aspect PrettyPrintFeatures {
 		sb.append(getAfter());
 	}
 
-	public String FeatureUse.toString() {
+	public String FeatureIdUse.toString() {
 		return getID();
+	}
+
+	public String FeatureUse.prettyPrint() {
+		return "feature " + getFeatureIdUse();
 	}
 }

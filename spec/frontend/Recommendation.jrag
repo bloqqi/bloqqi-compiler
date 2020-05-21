@@ -16,30 +16,30 @@ aspect Recommendation {
 		return program().unknownDiagramType();
 	}
 	eq DiagramType.recommendedElements().declaredForDiagramType() = this;
-	
+
 	eq Recommendation.getRecommendationElement(int i).lookup(String name)
 		= getRecommendationElement(i).declaredForDiagramType().lookup(name);
-	eq DiagramType.recommendedElements().lookup(String name) 
+	eq DiagramType.recommendedElements().lookup(String name)
 		= lookup(name);
 
 	// diagramType() is the enclosing diagram type
 	eq Recommendation.getRecommendationElement(int i).diagramType()
 		= getRecommendationElement(i).declaredForDiagramType();
 	eq DiagramType.recommendedElements().diagramType() = this;
-	
+
 	eq RecommendationBlock.getBlock().isAlreadyLocallyDeclared()
 		= diagramType().localBlockLookup(name()) != null;
 
-	syn nta DiagramType Program.unknownDiagramType() 
+	syn nta DiagramType Program.unknownDiagramType()
 		= new DiagramType(new Opt(), "<UnknownDiagramType>", new Modifiers(),
-			new List(), new List(), new List(), new List(), 
+			new List(), new List(), new List(), new List(), new List(),
 			new List(), new List(), new List(), new Opt());
 	eq Program.unknownDiagramType().isAlreadyLocallyDeclared() = false;
 	inh boolean DiagramType.isUnknownDiagramType();
 	eq Program.unknownDiagramType().isUnknownDiagramType() = true;
 	eq Program.getChild().isUnknownDiagramType() = false;
-	
-	coll Set<RecommendationElement> DiagramType.locallyRecommendedElements() 
+
+	coll Set<RecommendationElement> DiagramType.locallyRecommendedElements()
 		[new LinkedHashSet<RecommendationElement>()];
 	RecommendationElement contributes this
 		when !diagramType().isUnknownDiagramType()
@@ -97,7 +97,7 @@ aspect Recommendation {
 		set.add(this);
 		return set;
 	}
-	
+
 	syn Set<InParameter> TypeDecl.addedInParameters(TypeDecl superType) = Collections.emptySet();
 	eq DiagramType.addedInParameters(TypeDecl superType) {
 		if (!superType.isDiagramType() || !isSubTypeOf(superType)) {
@@ -121,13 +121,13 @@ aspect Recommendation {
 aspect RecommendationExtendsSuper {
 	syn boolean DiagramType.recommendationExtendsSuper()
 		= !recommendationExtendsSuperAsSet().isEmpty();
-	
+
 	coll Collection<RecommendationExtendsSuper> DiagramType.recommendationExtendsSuperAsSet()
 		[new HashSet<RecommendationExtendsSuper>()];
 	RecommendationExtendsSuper contributes this
 		to DiagramType.recommendationExtendsSuperAsSet()
 		for declaredForDiagramType();
-	
+
 	syn DiagramType RecommendationExtendsSuper.declaredForDiagramType() {
 		if (getDeclaredForType().type().isDiagramType()) {
 			return (DiagramType) getDeclaredForType().type();
@@ -138,7 +138,7 @@ aspect RecommendationExtendsSuper {
 
 aspect GroupRecommendations {
 	/**
-	 * Group together recommendations as the following: 
+	 * Group together recommendations as the following:
 	 *   recommendation {
 	 *     D.T block;
 	 *     D.S block;
@@ -151,7 +151,7 @@ aspect GroupRecommendations {
 	eq RecommendationGroup.findMember(String name) = null;
 	eq RecommendationGroup.type() = program().unknownType();
 	eq RecommendationGroup.declaredParameter() = null;
-	
+
 	syn List<RecommendationGroup> DiagramType.getRecommendationGroupList() {
 		List<RecommendationGroup> list = new List<>();
 		Set<String> names = new HashSet<>();
@@ -163,10 +163,10 @@ aspect GroupRecommendations {
 		}
 		return list;
 	}
-	
+
 	inh DiagramType RecommendationGroup.diagramType();
 	eq DiagramType.getRecommendationGroup().diagramType() = this;
-	
+
 	syn lazy Collection<RecommendationBlock> RecommendationGroup.recommendedBlocks() {
 		Collection<RecommendationBlock> col = new ArrayList<>();
 		for (RecommendationBlock rc: diagramType().recommendedBlocks()) {
@@ -176,9 +176,9 @@ aspect GroupRecommendations {
 		}
 		return col;
 	}
-	syn lazy RecommendationGroup RecommendationBlock.recommendationGroup() 
+	syn lazy RecommendationGroup RecommendationBlock.recommendationGroup()
 		= diagramType().lookupRecommendationGroup(name());
-	
+
 	syn RecommendationGroup DiagramType.lookupRecommendationGroup(String name) {
 		for (RecommendationGroup rg: getRecommendationGroups()) {
 			if (rg.name().equals(name)) {
@@ -187,7 +187,7 @@ aspect GroupRecommendations {
 		}
 		return null;
 	}
-	
+
 	syn RecommendationBlock RecommendationGroup.superType() {
 		RecommendationBlock superType = null;
 		for (RecommendationBlock rb: recommendedBlocks()) {
@@ -197,17 +197,17 @@ aspect GroupRecommendations {
 		}
 		return superType;
 	}
-	
+
 	syn boolean RecommendationBlock.blockNameIsAlreadyDeclared() = false;
 }
 
 aspect BeforeRecommendations {
 	eq RecommendationBefore.getChild().lookup(String name)
 		= diagramType().lookupRecommendationGroup(name);
-	
+
 	syn boolean RecommendationBefore.hasValidBlockNames()
 		= getBeforeVarUse().decl() != null && getAfterVarUse().decl() != null;
-	
+
 	syn lazy Set<RecommendationGroup> RecommendationGroup.groupsAfter() {
 		Set<RecommendationGroup> set = new HashSet<>();
 		for (RecommendationBefore rb: diagramType().recommendedBefore()) {
@@ -217,8 +217,8 @@ aspect BeforeRecommendations {
 		}
 		return set;
 	}
-	
-	syn lazy Set<RecommendationGroup> RecommendationGroup.groupsAfterTransitive() 
+
+	syn lazy Set<RecommendationGroup> RecommendationGroup.groupsAfterTransitive()
 		circular [new HashSet<RecommendationGroup>()]
 	{
 		Set<RecommendationGroup> set = new HashSet<>();
@@ -226,11 +226,11 @@ aspect BeforeRecommendations {
 		for (RecommendationGroup g: groupsAfter()) {
 			set.addAll(g.groupsAfterTransitive());
 		}
-		return set; 
+		return set;
 	}
 
 	syn lazy boolean RecommendationBlock.isOrdered(RecommendationBlock other)
-		= recommendationGroup().groupsAfterTransitive().contains(other.recommendationGroup()) 
+		= recommendationGroup().groupsAfterTransitive().contains(other.recommendationGroup())
 			|| other.recommendationGroup().groupsAfterTransitive().contains(recommendationGroup());
 }
 
@@ -282,17 +282,17 @@ aspect RecommendationOrder {
 				return rg.groupsAfter();
 			}
 		};
-		
+
 		Comparator<RecommendationGroup> tieOrdering;
 		tieOrdering = new Comparator<RecommendationGroup>() {
 			public int compare(RecommendationGroup rg1, RecommendationGroup rg2) {
 				return rg1.name().compareTo(rg2.name());
 			}
 		};
-		
+
 		return Utils.topologicalSort(recommendationGroups, succFunc, tieOrdering);
 	}
-	
+
 	public String RecommendationGroup.toString() {
 		return name();
 	}
@@ -311,7 +311,7 @@ aspect RecommendationDefaults {
 		}
 		return false;
 	}
-	
+
 	syn DiagramType RecommendationGroup.defaultType() {
 		TypeDecl defaultType = superType().blockType();
 		if (!hasMultipleDefaults()) {
@@ -324,7 +324,7 @@ aspect RecommendationDefaults {
 		}
 		return defaultType.isDiagramType() ? (DiagramType) defaultType : null;
 	}
-	
+
 	syn boolean RecommendationBlock.defaultIsValidSubType()
 		= getDefault().type().isSubTypeOf(recommendationGroup().superType().blockType());
 }
@@ -337,18 +337,18 @@ aspect RecommendationErrors {
 	syn boolean RecommendationGroup.hasErrors()
 		= superType() == null || !superType().blockType().isDiagramType();
 	syn boolean RecommendationReplaceable.hasErrors() = false;
-	
-	Recommendation contributes 
+
+	Recommendation contributes
 		error(getDeclaredForType() + " does not refer to a diagram type")
-		when getDeclaredForType().decl() != null 
+		when getDeclaredForType().decl() != null
 				&& !getDeclaredForType().type().isDiagramType()
 		to CompilationUnit.errors();
-	
-	RecommendationBlock contributes 
+
+	RecommendationBlock contributes
 		error("Order conflicts in recommendations, " + name() + " is not ordered with " + conflictingRecommendationsNames())
 		when !conflictingRecommendations().isEmpty()
 		to CompilationUnit.errors();
-	
+
 	DiagramType contributes error(circularBeforeErrorMessage())
 		when !circularBeforeErrorMessage().isEmpty()
 		to CompilationUnit.errors();
@@ -385,7 +385,7 @@ aspect RecommendationErrors {
 		if (sb.length() == 0) {
 			return "";
 		} else {
-			return "Diagram type " + name() 
+			return "Diagram type " + name()
 				+ " contains circularity in before statements. "
 				+ "Blocks involved:" + sb.toString();
 		}

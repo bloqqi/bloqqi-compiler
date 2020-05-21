@@ -29,7 +29,7 @@ aspect PrintAST {
 	eq ConfUse.printASTInfo() = toString() + ", " + blockDecl() + ", " + varPortDecl();
 	eq VarPort.printASTInfo() = name() + ", in=" + incoming() + ", out=" + outgoing();
 	eq ConfConnection.printASTInfo() = toString();
-	eq FeatureUse.printASTInfo() = "" + decl();
+	eq FeatureIdUse.printASTInfo() = "" + decl();
 
 
 	//eq ConfDotUse.printASTInfo() = "" + decl();
