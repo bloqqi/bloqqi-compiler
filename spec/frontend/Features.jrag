@@ -39,6 +39,31 @@ aspect NameAnalysisFeatures {
 		= lookupFeature(getID()) != this;
 }
 
+aspect BeforeFeaturesAnalysis {
+	coll Set<FeatureDeclStmt> FeatureDeclStmt.before()
+		[new LinkedHashSet<FeatureDeclStmt>()] root Program;
+	FeatureBeforeStmt contributes getBefore().decl()
+		when getBefore().decl() != null && getAfter().decl() != null
+		to FeatureDeclStmt.before() for getAfter().decl();
+
+
+	coll Set<FeatureDeclStmt> FeatureDeclStmt.after()
+		[new LinkedHashSet<FeatureDeclStmt>()] root Program;
+	FeatureBeforeStmt contributes getAfter().decl()
+		when getBefore().decl() != null && getAfter().decl() != null
+		to FeatureDeclStmt.after() for getBefore().decl();
+
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.afterTransitive()
+		circular [new HashSet<FeatureDeclStmt>()] {
+		Set<FeatureDeclStmt> set = new HashSet<>();
+		set.addAll(after());
+		for (FeatureDeclStmt f: after()) {
+			set.addAll(f.afterTransitive());
+		}
+		return set;
+	}
+}
+
 aspect ErrorsFeatures {
 	FeatureUse contributes
 		error("Feature " + getID() + " not found")
@@ -48,5 +73,10 @@ aspect ErrorsFeatures {
 	FeatureDeclStmt contributes
 		error("Feature name " + getID() + " already declared")
 		when !diagramType().isUnknownDiagramType() && isAlreadyDeclared()
+		to CompilationUnit.errors();
+
+	FeatureDeclStmt contributes
+		error("Feature " + getID() + " is included in a circular before chain")
+		when afterTransitive().contains(this)
 		to CompilationUnit.errors();
 }

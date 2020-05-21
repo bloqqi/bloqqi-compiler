@@ -1,0 +1,20 @@
+diagramtype A { }
+diagramtype F extends A { }
+
+features A {
+  f1: F;
+
+  g1: F;
+  g2: F;
+  g3: F;
+}
+
+features A {
+  f1 before f1;
+}
+
+features A {
+  g1 before g2;
+  g2 before g3;
+  g3 before g1;
+}
