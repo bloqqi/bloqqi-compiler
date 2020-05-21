@@ -10,8 +10,8 @@ aspect PrettyPrintFeatures {
 	}
 
 	public abstract void FeatureStmt.prettyPrint(StringBuilder sb);
-	public void FeatureBlockStmt.prettyPrint(StringBuilder sb) {
-		sb.append(getName());
+	public void FeatureDeclStmt.prettyPrint(StringBuilder sb) {
+		sb.append(getID());
 		sb.append(": ");
 		sb.append(getTypeUse());
 	}
@@ -24,5 +24,9 @@ aspect PrettyPrintFeatures {
 		sb.append(getBefore());
 		sb.append(" before ");
 		sb.append(getAfter());
+	}
+
+	public String FeatureUse.toString() {
+		return getID();
 	}
 }

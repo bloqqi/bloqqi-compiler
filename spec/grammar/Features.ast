@@ -1,6 +1,7 @@
 /** Features */
 Features : Declaration ::= TypeUse FeatureStmt*;
 abstract FeatureStmt;
-FeatureBlockStmt : FeatureStmt ::= Name TypeUse;
-FeatureXorStmt : FeatureStmt ::= First:SimpleVarUse Second:SimpleVarUse;
-FeatureBeforeStmt : FeatureStmt ::= Before:SimpleVarUse After:SimpleVarUse;
+FeatureDeclStmt : FeatureStmt ::= <ID> TypeUse;
+FeatureXorStmt : FeatureStmt ::= First:FeatureUse Second:FeatureUse;
+FeatureBeforeStmt : FeatureStmt ::= Before:FeatureUse After:FeatureUse;
+FeatureUse ::= <ID>;

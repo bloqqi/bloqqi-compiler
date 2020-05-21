@@ -1,0 +1,42 @@
+aspect NameAnalysisFeatures {
+	eq Features.getFeatureStmt(int i).diagramType() {
+		if (getTypeUse().type().isDiagramType()) {
+			return (DiagramType) getTypeUse().type();
+		}
+		return program().unknownDiagramType();
+	}
+
+	coll Set<FeatureStmt> DiagramType.featureStmts()
+		[new LinkedHashSet<FeatureStmt>()];
+	FeatureStmt contributes this
+		when !diagramType().isUnknownDiagramType()
+		to DiagramType.featureStmts() for diagramType();
+
+
+
+	syn FeatureDeclStmt FeatureUse.decl() = lookupFeature(getID());
+	inh FeatureDeclStmt FeatureUse.lookupFeature(String name);
+	eq Features.getFeatureStmt().lookupFeature(String name)
+		= getTypeUse().type().lookupFeature(name);
+
+	syn FeatureDeclStmt TypeDecl.lookupFeature(String name) = null;
+	eq DiagramType.lookupFeature(String name) {
+		for (FeatureStmt fs: featureStmts()) {
+			FeatureDeclStmt f = fs.declares(name);
+			if (f != null) {
+				return f;
+			}
+		}
+		return null;
+	}
+	syn FeatureDeclStmt FeatureStmt.declares(String name) = null;
+	eq FeatureDeclStmt.declares(String name)
+		= name.equals(getID()) ? this : null;
+}
+
+aspect ErrorsFeatures {
+	FeatureUse contributes
+		error("Feature " + getID() + " not found")
+		when decl() == null
+		to CompilationUnit.errors();
+}
