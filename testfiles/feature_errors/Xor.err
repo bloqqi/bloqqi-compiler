@@ -1,0 +1,2 @@
+Line 6, column 5: Feature f1 cannot be used together with: [f3]
+Line 7, column 5: Feature f3 cannot be used together with: [f1]

@@ -54,11 +54,41 @@ aspect BeforeFeaturesAnalysis {
 		to FeatureDeclStmt.after() for getBefore().decl();
 
 	syn Set<FeatureDeclStmt> FeatureDeclStmt.afterTransitive()
-		circular [new HashSet<FeatureDeclStmt>()] {
+			circular [new HashSet<FeatureDeclStmt>()] {
 		Set<FeatureDeclStmt> set = new HashSet<>();
 		set.addAll(after());
 		for (FeatureDeclStmt f: after()) {
 			set.addAll(f.afterTransitive());
+		}
+		return set;
+	}
+}
+
+aspect Xor {
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.xorFeatures() {
+		Set<FeatureDeclStmt> set = new HashSet<>();
+		for (FeatureStmt f: diagramType().featureStmts()) {
+			if (f instanceof FeatureXorStmt) {
+				FeatureXorStmt xor = (FeatureXorStmt) f;
+				FeatureDeclStmt first = xor.getFirst().decl();
+				FeatureDeclStmt second = xor.getSecond().decl();
+				if (first == this && second != null) {
+					set.add(second);
+				} else if (first != null && second == this) {
+					set.add(first);
+				}
+			}
+		}
+		return set;
+	}
+
+	// Is xor transitive?
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.xorFeaturesTransitive()
+			circular [new HashSet<FeatureDeclStmt>()] {
+		Set<FeatureDeclStmt> set = new HashSet<>();
+		set.addAll(xorFeatures());
+		for (FeatureDeclStmt f: xorFeatures()) {
+			set.addAll(f.xorFeaturesTransitive());
 		}
 		return set;
 	}
@@ -72,6 +102,28 @@ aspect FeatureUse {
 			return dt.lookupFeature(name);
 		}
 		return null;
+	}
+
+	syn Set<FeatureDeclStmt> DiagramType.features() {
+		Set<FeatureDeclStmt> set = new HashSet<>();
+		for (FeatureUse use: getFeatureUses()) {
+			if (use.getFeatureIdUse().decl() != null) {
+				set.add(use.getFeatureIdUse().decl());
+			}
+		}
+		return set;
+	}
+
+	syn Set<FeatureDeclStmt> FeatureUse.xorFeaturesUsed() {
+		FeatureDeclStmt decl = getFeatureIdUse().decl();
+		if (decl == null) {
+			return Collections.emptySet();
+		} else {
+			Set<FeatureDeclStmt> set = new HashSet<>(decl.xorFeaturesTransitive());
+			set.remove(decl);
+			set.retainAll(diagramType().features());
+			return set;
+		}
 	}
 }
 
@@ -95,5 +147,11 @@ aspect ErrorsFeatures {
 		error("The type " + getTypeUse() + " is not a subtype of " + diagramType().name())
 		when !diagramType().isUnknownDiagramType()
 			&& !getTypeUse().type().isSubTypeOf(diagramType())
+		to CompilationUnit.errors();
+
+	FeatureUse contributes
+		error("Feature " + toString() + " cannot be used together with: "
+			+ xorFeaturesUsed())
+		when !xorFeaturesUsed().isEmpty()
 		to CompilationUnit.errors();
 }
