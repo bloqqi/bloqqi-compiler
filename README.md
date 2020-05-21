@@ -5,6 +5,11 @@ Clone the repository and test the Bloqqi compiler:
     $ git clone git@bitbucket.org:bloqqi/bloqqi-compiler.git
     $ cd bloqqi-compiler/
     $ ant test
+    <All tests should pass (code generation tests excluded)>
+
+Run all tests, including code generation tests (requires the command ``gcc``):
+
+    $ ant test-all
     <All tests should pass>
 
 Run the Bloqqi compiler on the example program TwoCounters:

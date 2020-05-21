@@ -123,8 +123,15 @@
 		</delete>
 	</target>
 
-
-	<target name="test" depends="build">
+	<target name="test">
+		<antcall target="run-tests" />
+	</target>
+	<target name="test-all">
+		<antcall target="run-tests">
+			<param name="codegen-tests" value="true"/>
+		</antcall>
+	</target>
+	<target name="run-tests" depends="build">
 		<mkdir dir="${test-reports.dir}"/>
 		<junit>
 			<classpath>
@@ -135,7 +142,7 @@
 			<batchtest todir="${test-reports.dir}">
 				<fileset dir="src/java">
 					<include name="org/bloqqi/tests/*.java" />
-					<include name="org/bloqqi/tests/codegen/*.java" />
+					<include name="org/bloqqi/tests/codegen/*.java" if ="${codegen-tests}" />
 				</fileset>
 			</batchtest>
 
