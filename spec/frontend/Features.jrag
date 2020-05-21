@@ -1,4 +1,4 @@
-aspect NameAnalysisFeatures {
+aspect Features {
 	eq Features.getFeatureStmt(int i).diagramType() {
 		if (getTypeUse().type().isDiagramType()) {
 			return (DiagramType) getTypeUse().type();
@@ -11,9 +11,9 @@ aspect NameAnalysisFeatures {
 	FeatureStmt contributes this
 		when !diagramType().isUnknownDiagramType()
 		to DiagramType.featureStmts() for diagramType();
+}
 
-
-
+aspect NameAnalysisFeatures {
 	syn FeatureDeclStmt FeatureUse.decl() = lookupFeature(getID());
 	inh FeatureDeclStmt FeatureUse.lookupFeature(String name);
 	eq Features.getFeatureStmt().lookupFeature(String name)
@@ -32,11 +32,21 @@ aspect NameAnalysisFeatures {
 	syn FeatureDeclStmt FeatureStmt.declares(String name) = null;
 	eq FeatureDeclStmt.declares(String name)
 		= name.equals(getID()) ? this : null;
+
+
+	inh FeatureDeclStmt FeatureDeclStmt.lookupFeature(String name);
+	syn boolean FeatureDeclStmt.isAlreadyDeclared()
+		= lookupFeature(getID()) != this;
 }
 
 aspect ErrorsFeatures {
 	FeatureUse contributes
 		error("Feature " + getID() + " not found")
 		when decl() == null
+		to CompilationUnit.errors();
+
+	FeatureDeclStmt contributes
+		error("Feature name " + getID() + " already declared")
+		when !diagramType().isUnknownDiagramType() && isAlreadyDeclared()
 		to CompilationUnit.errors();
 }

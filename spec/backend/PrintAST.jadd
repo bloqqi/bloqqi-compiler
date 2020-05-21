@@ -29,6 +29,9 @@ aspect PrintAST {
 	eq ConfUse.printASTInfo() = toString() + ", " + blockDecl() + ", " + varPortDecl();
 	eq VarPort.printASTInfo() = name() + ", in=" + incoming() + ", out=" + outgoing();
 	eq ConfConnection.printASTInfo() = toString();
+	eq FeatureUse.printASTInfo() = "" + decl();
+
+
 	//eq ConfDotUse.printASTInfo() = "" + decl();
 
 	public void ASTNode.printAST() {
@@ -66,6 +69,10 @@ aspect PrintAST {
 		getBlocks().printAST("Blocks", i+1);
 		getConnections().printAST("Connections", i+1);
 		recommendedElements().printAST("recommendedElements()", i+1);
+		System.out.println(getIndent(i) + "featureStmts()");
+		for (FeatureStmt stmt: featureStmts()) {
+			stmt.printAST("", i+2);
+		}
 	}
 	protected void Block.printAST(String prefix, int i) {
 		super.printAST(prefix, i);
