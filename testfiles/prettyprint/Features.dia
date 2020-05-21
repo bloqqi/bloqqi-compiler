@@ -1,0 +1,21 @@
+diagramtype P {
+}
+diagramtype PI extends P {
+}
+diagramtype PD extends P {
+}
+diagramtype PTrack extends P {
+}
+features P {
+  PTrack: PTrack;
+  Integral xor PTrack;
+}
+features P {
+  Derivative: PD;
+  Integral: PI;
+}
+features P {
+  Derivative before Integral;
+  Derivative before PTrack;
+}
+
