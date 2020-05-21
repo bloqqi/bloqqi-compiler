@@ -1,0 +1,6 @@
+diagramtype A { }
+diagramtype F { }
+
+features A {
+  f: F;
+}

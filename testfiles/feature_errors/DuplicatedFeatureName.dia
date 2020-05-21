@@ -1,5 +1,5 @@
 diagramtype A { }
-diagramtype F { }
+diagramtype F extends A { }
 
 features A {
   f: F;

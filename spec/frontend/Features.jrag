@@ -79,4 +79,10 @@ aspect ErrorsFeatures {
 		error("Feature " + getID() + " is included in a circular before chain")
 		when afterTransitive().contains(this)
 		to CompilationUnit.errors();
+
+	FeatureDeclStmt contributes
+		error("The type " + getTypeUse() + " is not a subtype of " + diagramType().name())
+		when !diagramType().isUnknownDiagramType()
+			&& !getTypeUse().type().isSubTypeOf(diagramType())
+		to CompilationUnit.errors();
 }
