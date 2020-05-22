@@ -104,8 +104,9 @@ aspect FeatureUse {
 		return null;
 	}
 
+	/** All features, ordered by lexical order */
 	syn Set<FeatureDeclStmt> DiagramType.features() {
-		Set<FeatureDeclStmt> set = new HashSet<>();
+		Set<FeatureDeclStmt> set = new LinkedHashSet<>();
 		for (FeatureUse use: getFeatureUses()) {
 			if (use.getFeatureIdUse().decl() != null) {
 				set.add(use.getFeatureIdUse().decl());
@@ -119,9 +120,28 @@ aspect FeatureUse {
 		if (decl == null) {
 			return Collections.emptySet();
 		} else {
-			Set<FeatureDeclStmt> set = new HashSet<>(decl.xorFeaturesTransitive());
+			Set<FeatureDeclStmt> set = new LinkedHashSet<>(decl.xorFeaturesTransitive());
 			set.remove(decl);
 			set.retainAll(diagramType().features());
+			return set;
+		}
+	}
+
+	syn Set<FeatureDeclStmt> FeatureUse.featuresIncorectlyBefore() {
+		FeatureDeclStmt decl = getFeatureIdUse().decl();
+		if (decl == null) {
+			return Collections.emptySet();
+		} else {
+			Set<FeatureDeclStmt> set = new LinkedHashSet<>();
+			for (FeatureDeclStmt f: diagramType().features()) {
+				// Only look at features before this feature
+				if (f == decl) {
+					break;
+				}
+				if (decl.afterTransitive().contains(f)) {
+					set.add(f);
+				}
+			}
 			return set;
 		}
 	}
@@ -153,5 +173,11 @@ aspect ErrorsFeatures {
 		error("Feature " + toString() + " cannot be used together with: "
 			+ xorFeaturesUsed())
 		when !xorFeaturesUsed().isEmpty()
+		to CompilationUnit.errors();
+
+	FeatureUse contributes
+		error("Feature " + toString() + " should be before features: "+
+			featuresIncorectlyBefore())
+		when !featuresIncorectlyBefore().isEmpty()
 		to CompilationUnit.errors();
 }

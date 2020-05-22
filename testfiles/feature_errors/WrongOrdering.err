@@ -1,0 +1,2 @@
+Line 7, column 5: Feature f2 should be before features: [f3]
+Line 8, column 5: Feature f1 should be before features: [f3, f2]
