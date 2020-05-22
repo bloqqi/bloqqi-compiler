@@ -1,0 +1,3 @@
+Line 24, column 3: Feature f needs to be ordered with: [g1, g2]
+Line 25, column 3: Feature g1 needs to be ordered with: [f]
+Line 26, column 3: Feature g2 needs to be ordered with: [f]

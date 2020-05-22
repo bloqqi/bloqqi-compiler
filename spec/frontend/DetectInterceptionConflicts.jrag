@@ -1,13 +1,18 @@
 aspect DetectInterceptionConflicts {
-	syn Collection<InterceptionConflict> DiagramType.interceptionConflicts() {
+	syn Collection<InterceptionConflict> DiagramType.interceptionConflicts()
+		= interceptionConflicts(directSuperTypes(), superTypesLinearized());
+
+	syn Collection<InterceptionConflict> DiagramType.interceptionConflicts(
+			LinkedHashSet<DiagramType> directSuperTypes,
+			LinkedHashSet<DiagramType> superTypesLinearized) {
 		Map<Anchor, InterceptionConflict> map = new HashMap<Anchor, InterceptionConflict>();
-		for (DiagramType dt: superTypesLinearized()) {
+		for (DiagramType dt: superTypesLinearized) {
 			for (FlowDecl fd: dt.getFlowDecls()) {
 				if (fd instanceof Interception) {
 					Interception i = (Interception) fd;
 					Anchor anchor = i.getIntercepted().anchor();
-					
-					InterceptionConflict ic = map.get(anchor); 
+
+					InterceptionConflict ic = map.get(anchor);
 					if (ic == null) {
 						ic = new InterceptionConflict(anchor);
 						map.put(anchor, ic);
@@ -16,7 +21,7 @@ aspect DetectInterceptionConflicts {
 				}
 			}
 		}
-		
+
 		Collection<InterceptionConflict> col = map.values();
 		Iterator<InterceptionConflict> itr = col.iterator();
 		while (itr.hasNext()) {
@@ -24,20 +29,22 @@ aspect DetectInterceptionConflicts {
 			if (ic.interceptionSize() <= 1) {
 				itr.remove();
 			} else {
-				computeConflictingDiagramTypes(ic);
+				computeConflictingDiagramTypes(directSuperTypes, ic);
 				if (!ic.hasConflicts()) {
 					itr.remove();
 				}
 			}
 		}
-		
+
 		return col;
 	}
-	
-	private void DiagramType.computeConflictingDiagramTypes(InterceptionConflict ic) {
-		Map<DiagramType, LinkedHashSet<DiagramType>> linear 
+
+	private void DiagramType.computeConflictingDiagramTypes(
+			Set<DiagramType> directSuperTypes,
+			InterceptionConflict ic) {
+		Map<DiagramType, LinkedHashSet<DiagramType>> linear
 			= new HashMap<DiagramType, LinkedHashSet<DiagramType>>();
-		for (DiagramType dt: directSuperTypes()) {
+		for (DiagramType dt: directSuperTypes) {
 			LinkedHashSet<DiagramType> list = new LinkedHashSet<DiagramType>();
 			for (DiagramType superDt: dt.superTypesLinearized()) {
 				if (ic.hasConflictFor(superDt)) {
@@ -48,7 +55,7 @@ aspect DetectInterceptionConflicts {
 				linear.put(dt, list);
 			}
 		}
-		ArrayList<DiagramType> remove = new ArrayList<DiagramType>();	
+		ArrayList<DiagramType> remove = new ArrayList<DiagramType>();
 		for (Map.Entry<DiagramType, LinkedHashSet<DiagramType>> e: linear.entrySet()) {
 			boolean isSubSequenceOfAllOther = true;
 			for (LinkedHashSet<DiagramType> other: linear.values()) {
@@ -70,7 +77,7 @@ aspect DetectInterceptionConflicts {
 			}
 		}
 	}
-	private boolean DiagramType.isSubSequence(LinkedHashSet<DiagramType> first, 
+	private boolean DiagramType.isSubSequence(LinkedHashSet<DiagramType> first,
 			LinkedHashSet<DiagramType> second) {
 		boolean isSubSequence = true;
 		Iterator<DiagramType> itrFirst = first.iterator();
@@ -86,7 +93,7 @@ aspect DetectInterceptionConflicts {
 		}
 		return isSubSequence;
 	}
-	
+
 	public class InterceptionConflict {
 		private final Anchor anchor;
 		private ArrayList<Interception> interceptions;
@@ -103,14 +110,14 @@ aspect DetectInterceptionConflicts {
 				}
 			);
 		}
-		
+
 		protected void addInterception(Interception i) {
 			interceptions.add(i);
 		}
 		protected int interceptionSize() {
 			return interceptions.size();
 		}
-		
+
 		protected boolean hasConflictFor(DiagramType dt) {
 			for (Interception i: interceptions) {
 				if (i.diagramType() == dt) {
@@ -120,12 +127,12 @@ aspect DetectInterceptionConflicts {
 			return false;
 		}
 		protected void addConflictingDiagramType(DiagramType dt) {
-			conflictingDiagramTypes.add(dt);;
+			conflictingDiagramTypes.add(dt);
 		}
 		protected boolean hasConflicts() {
 			return !conflictingDiagramTypes.isEmpty();
 		}
-		
+
 		public Anchor getAnchor() {
 			return anchor;
 		}
@@ -133,7 +140,7 @@ aspect DetectInterceptionConflicts {
 		public Collection<DiagramType> getConflictingDiagramTypes() {
 			return conflictingDiagramTypes;
 		}
-		
+
 		public int hashCode() {
 			return anchor.hashCode();
 		}

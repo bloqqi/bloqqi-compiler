@@ -47,18 +47,27 @@ aspect FeatureDecl {
 }
 
 aspect BeforeFeaturesAnalysis {
-	coll Set<FeatureDeclStmt> FeatureDeclStmt.before()
-		[new LinkedHashSet<FeatureDeclStmt>()] root Program;
-	FeatureBeforeStmt contributes getBefore().decl()
-		when getBefore().decl() != null && getAfter().decl() != null
-		to FeatureDeclStmt.before() for getAfter().decl();
-
-
+	/*
+	BUGGY - WHY????:
 	coll Set<FeatureDeclStmt> FeatureDeclStmt.after()
 		[new LinkedHashSet<FeatureDeclStmt>()] root Program;
 	FeatureBeforeStmt contributes getAfter().decl()
 		when getBefore().decl() != null && getAfter().decl() != null
 		to FeatureDeclStmt.after() for getBefore().decl();
+	*/
+
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.after() {
+		Set<FeatureDeclStmt> set = new HashSet<>();
+		for (FeatureStmt f: diagramType().featureStmts()) {
+			if (f instanceof FeatureBeforeStmt) {
+				FeatureBeforeStmt b = (FeatureBeforeStmt) f;
+				if (b.getBefore().decl() == this && b.getAfter().decl() != null) {
+					set.add(b.getAfter().decl());
+				}
+			}
+		}
+		return set;
+	}
 
 	syn Set<FeatureDeclStmt> FeatureDeclStmt.afterTransitive()
 			circular [new HashSet<FeatureDeclStmt>()] {
@@ -68,6 +77,77 @@ aspect BeforeFeaturesAnalysis {
 			set.addAll(f.afterTransitive());
 		}
 		return set;
+	}
+}
+
+aspect NeedsOrdering {
+	syn Collection<InterceptionConflict> DiagramType.featureConflicts() {
+		LinkedHashSet<DiagramType> direct = new LinkedHashSet<>();
+		for (FeatureStmt fs: featureStmts()) {
+			if (fs instanceof FeatureDeclStmt) {
+				FeatureDeclStmt f = (FeatureDeclStmt) fs;
+				if (f.isOK()) {
+					direct.add((DiagramType) f.getTypeUse().type());
+				}
+			}
+		}
+
+		LinkedHashSet<DiagramType> superTypesLinearized = new LinkedHashSet<>();
+		for (DiagramType superType: direct) {
+			superTypesLinearized.addAll(superType.superTypesLinearized());
+		}
+
+		return interceptionConflicts(direct, superTypesLinearized);
+	}
+
+	syn Map<DiagramType, Collection<FeatureDeclStmt>> DiagramType.typeToFeatureMap() {
+		Map<DiagramType, Collection<FeatureDeclStmt>> map = new HashMap<>();
+		for (FeatureStmt fs: featureStmts()) {
+			if (fs instanceof FeatureDeclStmt) {
+				FeatureDeclStmt f = (FeatureDeclStmt) fs;
+				if (f.isOK()) {
+					DiagramType dt = (DiagramType) f.getTypeUse().type();
+					Collection<FeatureDeclStmt> list = map.get(dt);
+					if (list == null) {
+						list = new ArrayList<>();
+						map.put(dt, list);
+					}
+					list.add(f);
+				}
+			}
+		}
+		return map;
+	}
+
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.needsOrdering() {
+		if (isOK()) {
+			Set<FeatureDeclStmt> set = new LinkedHashSet<>();
+			DiagramType dt = (DiagramType) getTypeUse().type();
+			for (InterceptionConflict c: diagramType().featureConflicts()) {
+				if (c.hasConflictFor(dt)) {
+					addConflicts(set, c);
+				}
+			}
+			return set;
+		} else {
+			return Collections.emptySet();
+		}
+	}
+	private void FeatureDeclStmt.addConflicts(
+			Set<FeatureDeclStmt> set,
+			InterceptionConflict c) {
+		DiagramType dt = (DiagramType) getTypeUse().type();
+		for (DiagramType conflict: c.getConflictingDiagramTypes()) {
+			if (conflict != dt) {
+				for (FeatureDeclStmt f: diagramType().typeToFeatureMap().get(conflict)) {
+					if (!afterTransitive().contains(f)
+							&& !f.afterTransitive().contains(this)
+							&& !xorFeaturesTransitive().contains(f)) {
+						set.add(f);
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -179,6 +259,11 @@ aspect ErrorsFeatures {
 	FeatureDeclStmt contributes
 		error("Feature " + getID() + " is included in a circular before chain")
 		when afterTransitive().contains(this)
+		to CompilationUnit.errors();
+
+	FeatureDeclStmt contributes
+		error("Feature " + getID() + " needs to be ordered with: " + needsOrdering())
+		when !needsOrdering().isEmpty()
 		to CompilationUnit.errors();
 
 	FeatureDeclStmt contributes
