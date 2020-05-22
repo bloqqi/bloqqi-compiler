@@ -1,0 +1,28 @@
+diagramtype A(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype F(in: Int => out: Int) {
+  Add_1: Add;
+  connect(1, Add_1.in2);
+  connect(in, Add_1.in1);
+  connect(Add_1.out, out);
+}
+diagramtype G(in: Int => out: Int) {
+  Mul_1: Mul;
+  connect(2, Mul_1.in2);
+  connect(in, Mul_1.in1);
+  connect(Mul_1.out, out);
+}
+diagramtype Main() {
+  a: Main$a;
+}
+diagramtype Main$a(in: Int => out: Int) {
+  Add_1: Add;
+  Mul_1: Mul;
+  connect(1, Add_1.in2);
+  connect(2, Mul_1.in2);
+  connect(in, Add_1.in1);
+  connect(Add_1.out, Mul_1.in1);
+  connect(Mul_1.out, out);
+}
+

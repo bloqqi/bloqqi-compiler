@@ -1,0 +1,31 @@
+diagramtype A(in: Int => out: Int) {
+  connect(in, out);
+}
+
+diagramtype F extends A {
+  Add_1;
+  intercept out with Add_1.in1, Add_1.out;
+  connect(1, Add_1.in2);
+}
+
+diagramtype G extends A {
+  Mul_1;
+  intercept out with Mul_1.in1, Mul_1.out;
+  connect(2, Mul_1.in2);
+}
+
+diagramtype Main {
+  a: A {
+    feature f;
+    feature g;
+  };
+}
+
+features A {
+  f: F;
+}
+
+features A {
+  g: G;
+  f before g;
+}

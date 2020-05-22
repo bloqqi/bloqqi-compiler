@@ -26,14 +26,21 @@ aspect SuperAndSubTypes {
 			}
 			return linkedSet;
 		} else {
-			return super.directSuperTypes();
+			LinkedHashSet<DiagramType> set = new LinkedHashSet<>();
+			set.addAll(super.directSuperTypes());
+			for (FeatureUse f: getFeatureUses()) {
+				if (f.isOK()) {
+					set.add((DiagramType) f.getFeatureIdUse().decl().getTypeUse().type());
+				}
+			}
+			return set;
 		}
 	}
 	inh boolean AnonymousDiagramType.hasImplicitSuperType();
 	eq AnonymousTypeImplicitSuper.getChild().hasImplicitSuperType() = true;
 	eq Program.getChild().hasImplicitSuperType() = false;
 
-	syn lazy LinkedHashSet<DiagramType> TypeDecl.superTypesLinearized() 
+	syn lazy LinkedHashSet<DiagramType> TypeDecl.superTypesLinearized()
 		= new LinkedHashSet<DiagramType>();
 	eq DiagramType.superTypesLinearized() {
 		LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
@@ -45,7 +52,7 @@ aspect SuperAndSubTypes {
 		linkedSet.add(this);
 		return linkedSet;
 	}
-	
+
 	syn lazy LinkedHashSet<DiagramType> DiagramType.superTypesLinearizedReversed() {
 		LinkedHashSet<DiagramType> linkedSet = new LinkedHashSet<>();
 		DiagramType[] superTypes = superTypesLinearized().toArray(new DiagramType[0]);
@@ -65,7 +72,7 @@ aspect SuperAndSubTypes {
 		return false;
 	}
 
-	
+
 	coll Collection<DiagramType> TypeDecl.namedSubTypes()
 		[new HashSet<DiagramType>()]
 		with add;
@@ -106,7 +113,7 @@ aspect Inheritance {
 		return list;
 	}
 	syn List<InheritedInParameter> DiagramType.inParameters() = getInParameterList();
-	
+
 	syn List<InheritedOutParameter> DiagramType.getOutParameterList() {
 		List<InheritedOutParameter> list = new List<>();
 		for (DiagramType superType: superTypesLinearized()) {
@@ -123,7 +130,7 @@ aspect Inheritance {
 		return list;
 	}
 	syn List<InheritedOutParameter> DiagramType.outParameters() = getOutParameterList();
-	
+
 	syn List<InheritedVariable> DiagramType.variables() = getVariableList();
 	syn List<InheritedVariable> DiagramType.getVariableList() {
 		List<InheritedVariable> list = new List<>();
@@ -149,7 +156,7 @@ aspect Inheritance {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * Returns all connections taking into account inheritance and interception.
 	 * The resulting connections are fully qualified: connect(a, b) => connect(T1:a, T2:b)
@@ -158,7 +165,7 @@ aspect Inheritance {
 	syn List<InheritedConnection> DiagramType.connections() = getConnectionList();
 	syn List<InheritedConnection> DiagramType.getConnectionList() {
 		List<InheritedConnection> list = new List<>();
-		
+
 		// Add connections
 		for (DiagramType superType: superTypesLinearized()) {
 			for (FlowDecl fd: superType.getFlowDecls()) {
@@ -177,7 +184,7 @@ aspect Inheritance {
 				}
 			}
 		}
-		
+
 		// Add interceptions
 		for (DiagramType superType: superTypesLinearized()) {
 			for (FlowDecl fd: superType.getFlowDecls()) {
@@ -192,7 +199,7 @@ aspect Inheritance {
 				}
 			}
 		}
-		
+
 		// Add inlining
 		for (Block block: declaredBlocksTransitive()) {
 			if (block.shouldBeInlined()) {
@@ -202,11 +209,11 @@ aspect Inheritance {
 
 		return list;
 	}
-	
+
 	public void DiagramType.addInlinedConnections(List<InheritedConnection> list, Block block) {
 		DiagramType dt = (DiagramType) block.type();
 		String fullBlockName = block.diagramType().name() + DECLARED_IN_SEP + block.name() + ".";
-		
+
 		// Add connections from the type of the block
 		ArrayList<InheritedConnection> newConnections = new ArrayList<>();
 		for (InheritedConnection c: dt.connections()) {
@@ -218,7 +225,7 @@ aspect Inheritance {
 					block)
 			);
 		}
-		
+
 		// Store input and output parameters in maps for fast access
 		Map<String, InParameter> inParameters = new HashMap<>();
 		for (InheritedInParameter in: dt.getInParameters()) {
@@ -230,7 +237,7 @@ aspect Inheritance {
 			String name = block.name() + INLINE_SEP + out.name();
 			outParameters.put(name, out.getDeclaredOutParameter());
 		}
-		
+
 		// Replace connections to the input ports on the block
 		Map<Parameter, InheritedConnection> toInParameter = new LinkedHashMap<>();
 		MultiMap<Parameter, InheritedConnection> fromInParameter = new MultiMap<>();
@@ -271,7 +278,7 @@ aspect Inheritance {
 				newConnections.remove(conn);
 			}
 		}
-		
+
 		// Replace connections from the output ports on the block
 		Map<Parameter, InheritedConnection> toOutParameter = new LinkedHashMap<>();
 		MultiMap<Parameter, InheritedConnection> fromOutParameter = new MultiMap<>();
@@ -280,7 +287,7 @@ aspect Inheritance {
 			if (outParameter != null) {
 				toOutParameter.put(outParameter, c);
 			}
-			
+
 		}
 		for (InheritedConnection c: list) {
 			if (c.getSource().toString().startsWith(fullBlockName)) {
@@ -317,7 +324,7 @@ aspect Inheritance {
 		// Add all new connections
 		list.addAll(newConnections);
 	}
-	
+
 	syn java.util.List<Literal> DiagramType.literals() {
 		ArrayList<Literal> list = new ArrayList<>();
 		for (Connection c: connections()) {
@@ -327,7 +334,7 @@ aspect Inheritance {
 		}
 		return list;
 	}
-	
+
 	public Expr Expr.copyWithInlinedName(String name) {
 		Expr e = treeCopy();
 		e.addInlinedBlockName(name);
@@ -341,14 +348,14 @@ aspect Inheritance {
 	public void SimpleVarUse.addInlinedBlockName(String name) {
 		setID(name + INLINE_SEP + getID());
 	}
-	
+
 	public void FlowDecl.doInterception(DiagramType contextDt, List<InheritedConnection> list) {
 	}
 	public void ConnectionInterception.doInterception(DiagramType contextDt, List<InheritedConnection> list) {
 		VarUse intercepted = getIntercepted().copyFullQualification(contextDt);
 		VarUse source = getSource().copyFullQualification(contextDt);
 		VarUse target = getTarget().copyFullQualification(contextDt);
-		
+
 		for (Connection c: list) {
 			if (c.getTarget().toString().equals(intercepted.toString())) {
 				list.removeChild(c);
@@ -368,7 +375,7 @@ aspect Inheritance {
 			}
 		}
 	}
-	
+
 	public void SourceInterception.doInterception(DiagramType contextDt, List<InheritedConnection> list) {
 		VarUse intercepted = getIntercepted().copyFullQualification(contextDt);
 		VarUse source = getSource().copyFullQualification(contextDt);
@@ -403,7 +410,7 @@ aspect Inheritance {
 			list.add(c);
 		}
 	}
-	
+
 	syn DiagramType Node.declaredInDiagramType();
 	eq Block.declaredInDiagramType() = diagramType();
 	eq InheritedBlock.declaredInDiagramType() = getDeclaredBlock().diagramType();
@@ -416,11 +423,11 @@ aspect Inheritance {
 	eq Literal.declaredInDiagramType() = enclosingConnection().declaredInDiagramType();
 	syn DiagramType Connection.declaredInDiagramType() = diagramType();
 	eq InheritedConnection.declaredInDiagramType() = getDeclaredFlowDecl().diagramType();
-	
+
 	inh Connection Literal.enclosingConnection();
 	eq Connection.getSource().enclosingConnection() = this;
 	eq DocString.getDoc().enclosingConnection() = null;
-	
+
 	syn boolean Node.isInherited();
 	eq Block.isInherited() = declaredInDiagramType() != diagramType();
 	eq InlinedBlock.isInherited() = false;
@@ -433,7 +440,7 @@ aspect Inheritance {
 
 	syn FlowDecl Connection.declaredFlowDecl() = this;
 	eq InheritedConnection.declaredFlowDecl() = getDeclaredFlowDecl();
-	
+
 	syn Block Block.declaredBlock() = this;
 	eq InheritedBlock.declaredBlock() = getDeclaredBlock();
 
@@ -442,7 +449,7 @@ aspect Inheritance {
 
 	syn boolean Connection.isIntercept() = false;
 	eq InterceptConnection.isIntercept() = true;
-	
+
 	syn boolean Node.isNameAmbiguous();
 	eq Block.isNameAmbiguous() = isNameAmbiguous(name());
 	eq Parameter.isNameAmbiguous() = false;
@@ -515,10 +522,10 @@ aspect Factories {
 	/**
 	 * Copy expressions in dataflow statements and add type qualification,
 	 * that is, adds in which diagram type the block is declared in.
-	 * For example, connect(t1, t2) => connect(A:t1, B:t2), 
+	 * For example, connect(t1, t2) => connect(A:t1, B:t2),
 	 * if t1 is declared in block A and t2 is declared in B.
 	 * If a block has been redeclared, then the diagram type that contains
-	 * the most specific block is used (ie., the "latest" redeclare). 
+	 * the most specific block is used (ie., the "latest" redeclare).
 	 */
 	public Expr Expr.copyFullQualification(DiagramType contextDt) {
 		return treeCopy();
@@ -568,15 +575,15 @@ aspect InheritanceErrors {
 	Interception contributes error(getIntercepted().prettyPrint() + " is already intercepted in this type")
 		when isAlreadyIntercepted()
 		to CompilationUnit.errors();
-	
+
 	DiagramType contributes error(checkDuplicatedNames())
 		when !checkDuplicatedNames().isEmpty()
 		to CompilationUnit.errors();
-		
+
 	SimpleVarUse contributes error("The access " + toString() + " is ambiguous, please qualify with supertype if possible")
 		when isAmbiguous()
 		to CompilationUnit.errors();
-		
+
 	DiagramType contributes error("The type " + name() + " extends a type that is not a diagram type")
 		when !superTypesReferToDiagramTypes()
 		to CompilationUnit.errors();
@@ -591,8 +598,8 @@ aspect InheritanceErrorsHelperAttributes {
 		}
 		return true;
 	}
-	
-	syn boolean Interception.isAlreadyIntercepted() 
+
+	syn boolean Interception.isAlreadyIntercepted()
 		= isAlreadyIntercepted(getIntercepted().toString());
 	inh boolean Interception.isAlreadyIntercepted(String intercepted);
 	eq DiagramType.getFlowDecl(int index).isAlreadyIntercepted(String intercepted) {

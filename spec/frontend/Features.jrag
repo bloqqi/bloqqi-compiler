@@ -39,6 +39,13 @@ aspect NameAnalysisFeatures {
 		= lookupFeature(getID()) != this;
 }
 
+aspect FeatureDecl {
+	syn boolean FeatureDeclStmt.isOK()
+		= getTypeUse().type().isSubTypeOf(diagramType())
+			&& !afterTransitive().contains(this)
+			&& !isAlreadyDeclared();
+}
+
 aspect BeforeFeaturesAnalysis {
 	coll Set<FeatureDeclStmt> FeatureDeclStmt.before()
 		[new LinkedHashSet<FeatureDeclStmt>()] root Program;
@@ -97,9 +104,13 @@ aspect Xor {
 aspect FeatureUse {
 	eq DiagramType.getFeatureUse().lookupFeature(String name) = null;
 	eq AnonymousDiagramType.getFeatureUse().lookupFeature(String name) {
-		/* Lookup features in first super type */
-		for (DiagramType dt: directSuperTypes()) {
-			return dt.lookupFeature(name);
+		// Lookup features in first super type.
+		// Don't use directSuperTypes() here since we will add
+		// super types to that attribute (circular definition).
+		for (TypeUse t: getSuperTypes()) {
+			if (t.type().isDiagramType()) {
+				return ((DiagramType) t.type()).lookupFeature(name);
+			}
 		}
 		return null;
 	}
@@ -134,7 +145,8 @@ aspect FeatureUse {
 		} else {
 			Set<FeatureDeclStmt> set = new LinkedHashSet<>();
 			for (FeatureDeclStmt f: diagramType().features()) {
-				// Only look at features before this feature
+				// Only look at features before this feature,
+				// thus break if we get to this feature
 				if (f == decl) {
 					break;
 				}
@@ -145,6 +157,12 @@ aspect FeatureUse {
 			return set;
 		}
 	}
+
+	syn boolean FeatureUse.isOK() =
+		getFeatureIdUse().decl() != null &&
+		getFeatureIdUse().decl().isOK() &&
+		xorFeaturesUsed().isEmpty() &&
+		featuresIncorectlyBefore().isEmpty();
 }
 
 aspect ErrorsFeatures {
