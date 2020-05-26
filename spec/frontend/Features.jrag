@@ -142,7 +142,7 @@ aspect NeedsOrdering {
 				for (FeatureDeclStmt f: diagramType().typeToFeatureMap().get(conflict)) {
 					if (!afterTransitive().contains(f)
 							&& !f.afterTransitive().contains(this)
-							&& !xorFeaturesTransitive().contains(f)) {
+							&& !excludesFeaturesTransitive().contains(f)) {
 						set.add(f);
 					}
 				}
@@ -151,14 +151,14 @@ aspect NeedsOrdering {
 	}
 }
 
-aspect Xor {
-	syn Set<FeatureDeclStmt> FeatureDeclStmt.xorFeatures() {
+aspect Excludes {
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.excludesFeatures() {
 		Set<FeatureDeclStmt> set = new HashSet<>();
 		for (FeatureStmt f: diagramType().featureStmts()) {
-			if (f instanceof FeatureXorStmt) {
-				FeatureXorStmt xor = (FeatureXorStmt) f;
-				FeatureDeclStmt first = xor.getFirst().decl();
-				FeatureDeclStmt second = xor.getSecond().decl();
+			if (f instanceof FeatureExcludesStmt) {
+				FeatureExcludesStmt excl = (FeatureExcludesStmt) f;
+				FeatureDeclStmt first = excl.getFirst().decl();
+				FeatureDeclStmt second = excl.getSecond().decl();
 				if (first == this && second != null) {
 					set.add(second);
 				} else if (first != null && second == this) {
@@ -169,13 +169,13 @@ aspect Xor {
 		return set;
 	}
 
-	// Is xor transitive?
-	syn Set<FeatureDeclStmt> FeatureDeclStmt.xorFeaturesTransitive()
+	// Is excludes transitive?
+	syn Set<FeatureDeclStmt> FeatureDeclStmt.excludesFeaturesTransitive()
 			circular [new HashSet<FeatureDeclStmt>()] {
 		Set<FeatureDeclStmt> set = new HashSet<>();
-		set.addAll(xorFeatures());
-		for (FeatureDeclStmt f: xorFeatures()) {
-			set.addAll(f.xorFeaturesTransitive());
+		set.addAll(excludesFeatures());
+		for (FeatureDeclStmt f: excludesFeatures()) {
+			set.addAll(f.excludesFeaturesTransitive());
 		}
 		return set;
 	}
@@ -206,12 +206,12 @@ aspect FeatureUse {
 		return set;
 	}
 
-	syn Set<FeatureDeclStmt> FeatureUse.xorFeaturesUsed() {
+	syn Set<FeatureDeclStmt> FeatureUse.excludesFeaturesUsed() {
 		FeatureDeclStmt decl = getFeatureIdUse().decl();
 		if (decl == null) {
 			return Collections.emptySet();
 		} else {
-			Set<FeatureDeclStmt> set = new LinkedHashSet<>(decl.xorFeaturesTransitive());
+			Set<FeatureDeclStmt> set = new LinkedHashSet<>(decl.excludesFeaturesTransitive());
 			set.remove(decl);
 			set.retainAll(diagramType().features());
 			return set;
@@ -241,7 +241,7 @@ aspect FeatureUse {
 	syn boolean FeatureUse.isOK() =
 		getFeatureIdUse().decl() != null &&
 		getFeatureIdUse().decl().isOK() &&
-		xorFeaturesUsed().isEmpty() &&
+		excludesFeaturesUsed().isEmpty() &&
 		featuresIncorectlyBefore().isEmpty();
 }
 
@@ -274,8 +274,8 @@ aspect ErrorsFeatures {
 
 	FeatureUse contributes
 		error("Feature " + toString() + " cannot be used together with: "
-			+ xorFeaturesUsed())
-		when !xorFeaturesUsed().isEmpty()
+			+ excludesFeaturesUsed())
+		when !excludesFeaturesUsed().isEmpty()
 		to CompilationUnit.errors();
 
 	FeatureUse contributes

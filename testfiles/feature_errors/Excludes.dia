@@ -12,6 +12,6 @@ features A {
   f1: F;
   f2: F;
   f3: F;
-  f1 xor f2;
-  f2 xor f3;
+  f1 excludes f2;
+  f2 excludes f3;
 }

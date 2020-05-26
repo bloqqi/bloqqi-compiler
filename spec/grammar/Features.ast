@@ -2,7 +2,7 @@
 Features : Declaration ::= TypeUse FeatureStmt*;
 abstract FeatureStmt;
 FeatureDeclStmt : FeatureStmt ::= <ID> TypeUse;
-FeatureXorStmt : FeatureStmt ::= First:FeatureIdUse Second:FeatureIdUse;
+FeatureExcludesStmt : FeatureStmt ::= First:FeatureIdUse Second:FeatureIdUse;
 FeatureBeforeStmt : FeatureStmt ::= Before:FeatureIdUse After:FeatureIdUse;
 FeatureIdUse ::= <ID>;
 

@@ -87,7 +87,7 @@ NUM = [0-9]+
     "public"        { return sym(Terminals.PUBLIC); }
     "features"      { return sym(Terminals.FEATURES); }
     "feature"       { return sym(Terminals.FEATURE); }
-    "xor"           { return sym(Terminals.XOR); }
+    "excludes"      { return sym(Terminals.EXCLUDES); }
 
     // Operators
     "&&"            { return sym(Terminals.AND); }

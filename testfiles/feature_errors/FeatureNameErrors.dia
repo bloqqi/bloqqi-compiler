@@ -4,5 +4,5 @@ diagramtype F extends A { }
 features A {
   f: F;
   f before g;
-  f xor g;
+  f excludes g;
 }

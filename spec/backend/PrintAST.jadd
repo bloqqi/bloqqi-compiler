@@ -30,7 +30,7 @@ aspect PrintAST {
 	eq VarPort.printASTInfo() = name() + ", in=" + incoming() + ", out=" + outgoing();
 	eq ConfConnection.printASTInfo() = toString();
 	eq FeatureIdUse.printASTInfo() = "" + decl();
-	eq FeatureDeclStmt.printASTInfo() = "xor: " + xorFeaturesTransitive();
+	eq FeatureDeclStmt.printASTInfo() = "excludes: " + excludesFeaturesTransitive();
 
 	//eq ConfDotUse.printASTInfo() = "" + decl();
 

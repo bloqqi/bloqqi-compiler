@@ -24,6 +24,6 @@ features A {
   f: F;
   g1: G1;
   g2: G2;
-  g1 xor g2;
+  g1 excludes g2;
 }
 

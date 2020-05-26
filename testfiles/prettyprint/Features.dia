@@ -14,7 +14,7 @@ diagramtype Main {
 }
 features P {
   PTrack: PTrack;
-  Integral xor PTrack;
+  Integral excludes PTrack;
 }
 features P {
   Derivative: PD;

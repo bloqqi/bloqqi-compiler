@@ -15,9 +15,9 @@ aspect PrettyPrintFeatures {
 		sb.append(": ");
 		sb.append(getTypeUse());
 	}
-	public void FeatureXorStmt.prettyPrint(StringBuilder sb) {
+	public void FeatureExcludesStmt.prettyPrint(StringBuilder sb) {
 		sb.append(getFirst());
-		sb.append(" xor ");
+		sb.append(" excludes ");
 		sb.append(getSecond());
 	}
 	public void FeatureBeforeStmt.prettyPrint(StringBuilder sb) {
