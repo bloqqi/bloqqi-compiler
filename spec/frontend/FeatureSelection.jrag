@@ -1,0 +1,121 @@
+aspect FeatureSelection {
+
+	public FeatureSelection DiagramType.featureSelection() {
+		return new FeatureSelection(this);
+	}
+
+	public class FeatureSelection {
+		private final DiagramType diagramType;
+		private final SortedMap<String, FeatureSelectionOptional> optionals;
+
+		public FeatureSelection(DiagramType diagramType) {
+			this.diagramType = diagramType;
+
+			optionals = new TreeMap<String, FeatureSelectionOptional>();
+			for (FeatureDeclStmt f: diagramType.featureDecls()) {
+				if (f.isOK()) {
+					optionals.put(f.getID(), new FeatureSelectionOptional(this, f));
+				}
+			}
+		}
+
+		public SortedSet<FeatureSelectionOptional> getOptionalFeatures() {
+			return Collections.unmodifiableSortedSet(new TreeSet(optionals.values()));
+		}
+
+		protected void unselect(Set<String> features) {
+			for (String f: features) {
+				FeatureSelectionOptional opt = optionals.get(f);
+				if (opt != null) {
+					opt.setSelected(false);
+				}
+			}
+		}
+
+		public Block newAnonymousBlock(String blockName) {
+			Block block = new Block();
+			block.setModifiers(new Modifiers());
+			block.setName(new IdName(blockName));
+			block.setType(new AnonymousType(newAnonymousDiagramType()));
+			return block;
+		}
+
+		protected AnonymousDiagramType newAnonymousDiagramType() {
+			AnonymousDiagramType newAdt = new AnonymousDiagramType();
+			newAdt.setID("<anonymous>");
+			newAdt.setModifiers(new Modifiers());
+			newAdt.addSuperType(new TypeUse(diagramType.name()));
+			addFeatures(newAdt);
+			return newAdt;
+		}
+
+		private void addFeatures(DiagramType newDt) {
+			for (FeatureSelectionOptional opt: computeSortedOptionals()) {
+				if (opt.isSelected()) {
+					newDt.addFeatureUse(opt.newFeatureUse());
+				}
+			}
+		}
+
+		private Collection<FeatureSelectionOptional> computeSortedOptionals() {
+			return Utils.topologicalSort(
+				optionals.values(),
+				// Successor relation:
+				(opt) -> {
+					Set<FeatureSelectionOptional> set = new HashSet<>();
+					for (FeatureDeclStmt fd: opt.getFeatureDecl().after()) {
+						set.add(optionals.get(fd.getID()));
+					}
+					return set;
+				},
+				// Tie breaking:
+				(opt1, opt2) -> opt1.getName().compareTo(opt2.getName())
+			);
+		}
+	}
+
+	public class FeatureSelectionOptional
+			implements Comparable<FeatureSelectionOptional> {
+		private final FeatureSelection selection;
+		private final FeatureDeclStmt featureDecl;
+		private boolean isSelected;
+
+		public FeatureSelectionOptional(FeatureSelection selection,
+				FeatureDeclStmt featureDecl) {
+			this.selection = selection;
+			this.featureDecl = featureDecl;
+			this.isSelected = false;
+		}
+
+		public String getName() {
+			return featureDecl.getID();
+		}
+
+		public boolean isSelected() {
+			return isSelected;
+		}
+
+		public FeatureDeclStmt getFeatureDecl() {
+			return featureDecl;
+		}
+
+		public void setSelected(boolean selected) {
+			if (selected) {
+				Set<String> excludes = new HashSet<String>();
+				for (FeatureDeclStmt f: featureDecl.excludesFeaturesTransitive()) {
+					excludes.add(f.getID());
+				}
+				selection.unselect(excludes);
+			}
+			this.isSelected = selected;
+		}
+
+		public FeatureUse newFeatureUse() {
+			return new FeatureUse(new FeatureIdUse(getName()));
+		}
+
+		public int compareTo(FeatureSelectionOptional other) {
+			return getName().compareTo(other.getName());
+		}
+	}
+}

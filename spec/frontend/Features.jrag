@@ -21,22 +21,27 @@ aspect NameAnalysisFeatures {
 
 	syn FeatureDeclStmt TypeDecl.lookupFeature(String name) = null;
 	eq DiagramType.lookupFeature(String name) {
-		for (FeatureStmt fs: featureStmts()) {
-			FeatureDeclStmt f = fs.declares(name);
-			if (f != null) {
+		for (FeatureDeclStmt f: featureDecls()) {
+			if (f.getID().equals(name)) {
 				return f;
 			}
 		}
 		return null;
 	}
-	syn FeatureDeclStmt FeatureStmt.declares(String name) = null;
-	eq FeatureDeclStmt.declares(String name)
-		= name.equals(getID()) ? this : null;
-
 
 	inh FeatureDeclStmt FeatureDeclStmt.lookupFeature(String name);
 	syn boolean FeatureDeclStmt.isAlreadyDeclared()
 		= lookupFeature(getID()) != this;
+
+	syn Set<FeatureDeclStmt> DiagramType.featureDecls() {
+		Set<FeatureDeclStmt> set = new LinkedHashSet<>();
+		for (FeatureStmt fs: featureStmts()) {
+			if (fs instanceof FeatureDeclStmt) {
+				set.add((FeatureDeclStmt) fs);
+			}
+		}
+		return set;
+	}
 }
 
 aspect FeatureDecl {
@@ -83,12 +88,9 @@ aspect BeforeFeaturesAnalysis {
 aspect NeedsOrdering {
 	syn Collection<InterceptionConflict> DiagramType.featureConflicts() {
 		LinkedHashSet<DiagramType> direct = new LinkedHashSet<>();
-		for (FeatureStmt fs: featureStmts()) {
-			if (fs instanceof FeatureDeclStmt) {
-				FeatureDeclStmt f = (FeatureDeclStmt) fs;
-				if (f.isOK()) {
-					direct.add((DiagramType) f.getTypeUse().type());
-				}
+		for (FeatureDeclStmt f: featureDecls()) {
+			if (f.isOK()) {
+				direct.add((DiagramType) f.getTypeUse().type());
 			}
 		}
 
@@ -102,18 +104,15 @@ aspect NeedsOrdering {
 
 	syn Map<DiagramType, Collection<FeatureDeclStmt>> DiagramType.typeToFeatureMap() {
 		Map<DiagramType, Collection<FeatureDeclStmt>> map = new HashMap<>();
-		for (FeatureStmt fs: featureStmts()) {
-			if (fs instanceof FeatureDeclStmt) {
-				FeatureDeclStmt f = (FeatureDeclStmt) fs;
-				if (f.isOK()) {
-					DiagramType dt = (DiagramType) f.getTypeUse().type();
-					Collection<FeatureDeclStmt> list = map.get(dt);
-					if (list == null) {
-						list = new ArrayList<>();
-						map.put(dt, list);
-					}
-					list.add(f);
+		for (FeatureDeclStmt f: featureDecls()) {
+			if (f.isOK()) {
+				DiagramType dt = (DiagramType) f.getTypeUse().type();
+				Collection<FeatureDeclStmt> list = map.get(dt);
+				if (list == null) {
+					list = new ArrayList<>();
+					map.put(dt, list);
 				}
+				list.add(f);
 			}
 		}
 		return map;
