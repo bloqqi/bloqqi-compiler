@@ -1,6 +1,11 @@
 package org.bloqqi.tests;
 
 
+import java.util.SortedSet;
+import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -60,9 +65,18 @@ public class FeatureTests extends TestSuite {
 
 		DiagramType dt = parseValidDiagramType(str);
 		FeatureSelection selection = dt.featureSelection();
-		for (FeatureSelectionOptional opt: selection.getOptionalFeatures()) {
-			opt.setSelected(true);
-		}
+
+		SortedSet<FeatureSelectionOptional> opts = selection.getOptionalFeatures();
+		assertEquals(2, opts.size());
+		Iterator<FeatureSelectionOptional> itr = opts.iterator();
+		FeatureSelectionOptional f = itr.next();
+		FeatureSelectionOptional g = itr.next();
+
+		assertTrue(f.setSelected(true).isEmpty());
+		assertEquals(
+			Stream.of(f).collect(Collectors.toSet()),
+			g.setSelected(true)
+		);
 
 		Program p = dt.program();
 		DiagramType main = (DiagramType) dt.lookupType("Main");
