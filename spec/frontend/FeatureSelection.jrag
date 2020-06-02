@@ -110,15 +110,19 @@ aspect FeatureSelection {
 			return featureDecl;
 		}
 
+		private Set<String> getExcludedFeatureNames() {
+			Set<String> excludes = new HashSet<String>();
+			for (FeatureDeclStmt f: featureDecl.excludesFeaturesTransitive()) {
+				excludes.add(f.getID());
+			}
+			return excludes;
+		}
+
 		public Set<FeatureSelectionOptional> setSelected(boolean selected) {
 			Set<FeatureSelectionOptional> unselected;
 			if (selected) {
-				Set<String> excludes = new HashSet<String>();
-				for (FeatureDeclStmt f: featureDecl.excludesFeaturesTransitive()) {
-					excludes.add(f.getID());
-				}
 				unselected = getUnselectedFeaturesIfSelected();
-				selection.unselect(excludes);
+				selection.unselect(getExcludedFeatureNames());
 			} else {
 				unselected = Collections.emptySet();
 			}
@@ -127,11 +131,7 @@ aspect FeatureSelection {
 		}
 
 		public Set<FeatureSelectionOptional> getUnselectedFeaturesIfSelected() {
-			Set<String> excludes = new HashSet<String>();
-			for (FeatureDeclStmt f: featureDecl.excludesFeaturesTransitive()) {
-					excludes.add(f.getID());
-			}
-			return selection.getSelectedFeatures(excludes);
+			return selection.getSelectedFeatures(getExcludedFeatureNames());
 		}
 
 		public FeatureUse newFeatureUse() {

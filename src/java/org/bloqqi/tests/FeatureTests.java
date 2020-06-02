@@ -75,6 +75,10 @@ public class FeatureTests extends TestSuite {
 		assertTrue(f.setSelected(true).isEmpty());
 		assertEquals(
 			Stream.of(f).collect(Collectors.toSet()),
+			g.getUnselectedFeaturesIfSelected()
+		);
+		assertEquals(
+			Stream.of(f).collect(Collectors.toSet()),
 			g.setSelected(true)
 		);
 
