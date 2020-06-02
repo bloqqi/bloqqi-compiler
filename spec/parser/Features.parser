@@ -15,7 +15,7 @@ List feature_stmt_list =
     ;
 
 FeatureStmt feature_stmt =
-    ID.id COL type_use.t {: return new FeatureDeclStmt(id, t); :}
+    OPTIONAL? ID.id COL type_use.t {: return new FeatureDeclStmt(id, t); :}
     | feature_id.f1 EXCLUDES feature_id.f2 {: return new FeatureExcludesStmt(f1, f2); :}
     | feature_id.f1 BEFORE feature_id.f2 {: return new FeatureBeforeStmt(f1, f2); :}
     ;

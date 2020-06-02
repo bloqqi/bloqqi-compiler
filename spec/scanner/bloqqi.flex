@@ -88,6 +88,7 @@ NUM = [0-9]+
     "features"      { return sym(Terminals.FEATURES); }
     "feature"       { return sym(Terminals.FEATURE); }
     "excludes"      { return sym(Terminals.EXCLUDES); }
+    "optional"      { return sym(Terminals.OPTIONAL); }
 
     // Operators
     "&&"            { return sym(Terminals.AND); }
