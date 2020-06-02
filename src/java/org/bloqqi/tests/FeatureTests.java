@@ -142,4 +142,59 @@ public class FeatureTests extends TestSuite {
 			"}\n";
 		assertEquals(expectedMain, main.prettyPrint());
 	}
+
+	@Test
+	public void featureReSelection() {
+		String str =
+			"diagramtype A { } " +
+			"diagramtype F extends A { } " +
+			"diagramtype G extends A { } " +
+			"features A {" +
+			"  f: F;" +
+			"  g: G;" +
+			"}" +
+			"diagramtype Main { }";
+
+		DiagramType dt = parseValidDiagramType(str);
+		FeatureSelection selection = dt.featureSelection();
+		for (FeatureSelectionOptional opt: selection.getOptionalFeatures()) {
+			opt.setSelected(true);
+		}
+
+		Program p = dt.program();
+		DiagramType main = (DiagramType) dt.lookupType("Main");
+		Block block = selection.newAnonymousBlock("a");
+		main.addLocalBlock(block);
+		p.flushAllAttributes();
+
+		// No errors
+		assertEquals("[]", dt.compUnit().errors().toString());
+
+		// Expected anonymous type
+		String expectedMain =
+			"diagramtype Main {\n" +
+			"  a: A {\n" +
+			"    feature f;\n" +
+			"    feature g;\n" +
+			"  };\n" +
+			"}\n";
+		assertEquals(expectedMain, main.prettyPrint());
+
+		// Re-select features
+		FeatureSelection selection2 = dt.featureSelection(block.anonymousDiagramType());
+		selection2.getOptionalFeatures().iterator().next().setSelected(false);
+		block.setType(selection2.newAnonymousBlock("").getType());
+		p.flushAllAttributes();
+
+		// No errors
+		assertEquals("[]", dt.compUnit().errors().toString());
+
+		expectedMain =
+			"diagramtype Main {\n" +
+			"  a: A {\n" +
+			"    feature g;\n" +
+			"  };\n" +
+			"}\n";
+		assertEquals(expectedMain, main.prettyPrint());
+	}
 }

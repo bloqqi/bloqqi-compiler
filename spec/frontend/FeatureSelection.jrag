@@ -4,6 +4,12 @@ aspect FeatureSelection {
 		return new FeatureSelection(this);
 	}
 
+	public FeatureSelection DiagramType.featureSelection(DiagramType subType) {
+		FeatureSelection selection = new FeatureSelection(this);
+		selection.match(subType);
+		return selection;
+	}
+
 	public class FeatureSelection {
 		private final DiagramType diagramType;
 		private final SortedMap<String, FeatureSelectionOptional> optionals;
@@ -82,6 +88,15 @@ aspect FeatureSelection {
 				// Tie breaking:
 				(opt1, opt2) -> opt1.getName().compareTo(opt2.getName())
 			);
+		}
+
+		public void match(DiagramType dt) {
+			for (FeatureDeclStmt featureUsed: dt.features()) {
+				FeatureSelectionOptional f = optionals.get(featureUsed.getID());
+				if (f != null) {
+					f.setSelected(true);
+				}
+			}
 		}
 	}
 
