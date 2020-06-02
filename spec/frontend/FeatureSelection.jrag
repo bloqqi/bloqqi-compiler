@@ -23,16 +23,24 @@ aspect FeatureSelection {
 			return Collections.unmodifiableSortedSet(new TreeSet(optionals.values()));
 		}
 
-		protected Set<FeatureSelectionOptional> unselect(Set<String> features) {
-			Set<FeatureSelectionOptional> unselected = new HashSet<>();
+		protected void unselect(Set<String> features) {
 			for (String f: features) {
 				FeatureSelectionOptional opt = optionals.get(f);
 				if (opt != null && opt.isSelected()) {
 					opt.setSelected(false);
-					unselected.add(opt);
 				}
 			}
-			return unselected;
+		}
+
+		protected Set<FeatureSelectionOptional> getSelectedFeatures(Set<String> features) {
+			Set<FeatureSelectionOptional> set = new TreeSet<>();
+			for (String f: features) {
+				FeatureSelectionOptional opt = optionals.get(f);
+				if (opt != null && opt.isSelected()) {
+					set.add(opt);
+				}
+			}
+			return set;
 		}
 
 		public Block newAnonymousBlock(String blockName) {
@@ -103,16 +111,27 @@ aspect FeatureSelection {
 		}
 
 		public Set<FeatureSelectionOptional> setSelected(boolean selected) {
-			Set<FeatureSelectionOptional> unselected = Collections.emptySet();
+			Set<FeatureSelectionOptional> unselected;
 			if (selected) {
 				Set<String> excludes = new HashSet<String>();
 				for (FeatureDeclStmt f: featureDecl.excludesFeaturesTransitive()) {
 					excludes.add(f.getID());
 				}
-				unselected = selection.unselect(excludes);
+				unselected = getUnselectedFeaturesIfSelected();
+				selection.unselect(excludes);
+			} else {
+				unselected = Collections.emptySet();
 			}
 			this.isSelected = selected;
 			return unselected;
+		}
+
+		public Set<FeatureSelectionOptional> getUnselectedFeaturesIfSelected() {
+			Set<String> excludes = new HashSet<String>();
+			for (FeatureDeclStmt f: featureDecl.excludesFeaturesTransitive()) {
+					excludes.add(f.getID());
+			}
+			return selection.getSelectedFeatures(excludes);
 		}
 
 		public FeatureUse newFeatureUse() {
