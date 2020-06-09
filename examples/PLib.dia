@@ -1,0 +1,204 @@
+diagramtype P(SP: Real, PV: Real, K: Real => Out: Real) {
+  e: RSub;
+  PPart: RMul;
+  connect(e.out, PPart.in1);
+  connect(K, PPart.in2);
+  connect(SP, e.in1);
+  connect(PV, e.in2);
+  connect(PPart.out, Out);
+}
+annotation(
+  K = (55, 43, 44, 20),
+  Out = (187, 4, 44, 20),
+  PPart = (131, 7, 32, 30),
+  PV = (4, 28, 44, 20),
+  SP = (4, 4, 44, 20),
+  e = (76, 7, 24, 30)
+)
+diagramtype IPart(e: Real, K: Real, Ti: Real, Track: Bool, TrackValue: Real, PDPart: Real => IPart: Real) {
+  var iPart: Real;
+  input h: Real;
+  RAdd_1;
+  SelReal_1;
+  RSub_1;
+  RMul_1;
+  RMul_2;
+  RDiv_1;
+  connect(iPart, RAdd_1.in2);
+  connect(RAdd_1.out, SelReal_1.in1);
+  connect(Track, SelReal_1.sel);
+  connect(SelReal_1.out, IPart);
+  connect(SelReal_1.out, iPart);
+  connect(TrackValue, RSub_1.in1);
+  connect(PDPart, RSub_1.in2);
+  connect(RSub_1.out, SelReal_1.in2);
+  connect(e, RMul_1.in1);
+  connect(RMul_1.out, RAdd_1.in1);
+  connect(K, RMul_2.in1);
+  connect(h, RMul_2.in2);
+  connect(RMul_2.out, RDiv_1.in1);
+  connect(Ti, RDiv_1.in2);
+  connect(RDiv_1.out, RMul_1.in2);
+}
+annotation(
+  IPart = (670, 75, 60, 20),
+  K = (10, 32, 60, 20),
+  PDPart = (254, 111, 60, 20),
+  RAdd_1 = (370, 49, 60, 28),
+  RDiv_1 = (196, 26, 60, 28),
+  RMul_1 = (284, 12, 60, 28),
+  RMul_2 = (96, 34, 60, 28),
+  RSub_1 = (378, 97, 60, 28),
+  SelReal_1 = (556, 75, 60, 42),
+  Ti = (102, 67, 60, 20),
+  Track = (436, 8, 60, 20),
+  TrackValue = (253, 84, 77, 20),
+  e = (10, 8, 60, 20),
+  h = (9, 57, 60, 20),
+  iPart = (174, 205, 60, 20)
+)
+diagramtype DPart(K: Real, PV: Real, Td: Real, N: Real => DPart: Real) {
+  var currentD: Real;
+  var prevPV: Real;
+  input h: Real;
+  RMul_1;
+  RAdd_1;
+  RDiv_1;
+  RMul_2;
+  RSub_1;
+  RMul_3;
+  RMul_4;
+  RDiv_2;
+  RSub_2;
+  RMul_5;
+  connect(PV, prevPV);
+  connect(N, RMul_1.in1);
+  connect(h, RMul_1.in2);
+  connect(Td, RAdd_1.in1);
+  connect(RMul_1.out, RAdd_1.in2);
+  connect(Td, RDiv_1.in1);
+  connect(RAdd_1.out, RDiv_1.in2);
+  connect(RDiv_1.out, RMul_2.in2);
+  connect(currentD, RMul_2.in1);
+  connect(RMul_2.out, RSub_1.in1);
+  connect(Td, RMul_3.in1);
+  connect(K, RMul_3.in2);
+  connect(N, RMul_4.in2);
+  connect(RMul_3.out, RMul_4.in1);
+  connect(RMul_4.out, RDiv_2.in1);
+  connect(RAdd_1.out, RDiv_2.in2);
+  connect(PV, RSub_2.in1);
+  connect(prevPV, RSub_2.in2);
+  connect(RSub_1.out, DPart);
+  connect(RSub_1.out, currentD);
+  connect(RDiv_2.out, RMul_5.in1);
+  connect(RSub_2.out, RMul_5.in2);
+  connect(RMul_5.out, RSub_1.in2);
+}
+annotation(
+  DPart = (669, 47, 60, 20),
+  K = (26, 250, 60, 20),
+  N = (27, 283, 60, 20),
+  PV = (405, 281, 60, 20),
+  RAdd_1 = (268, 91, 60, 28),
+  RDiv_1 = (355, 63, 60, 28),
+  RDiv_2 = (395, 185, 60, 28),
+  RMul_1 = (174, 140, 60, 28),
+  RMul_2 = (448, 49, 60, 28),
+  RMul_3 = (167, 239, 60, 28),
+  RMul_4 = (289, 253, 60, 28),
+  RMul_5 = (529, 130, 60, 28),
+  RSub_1 = (561, 49, 60, 28),
+  RSub_2 = (504, 219, 60, 28),
+  Td = (22, 72, 60, 20),
+  currentD = (424, 6, 106, 20),
+  h = (147, 207, 60, 20),
+  prevPV = (494, 281, 108, 20)
+)
+diagramtype Rid(in: Real => out: Real) {
+  connect(in, out);
+}
+annotation(
+  out = (129, 10, 60, 20)
+)
+diagramtype PI(Track: Bool, TrackValue: Real, Ti: Real) extends P {
+  IPart: IPart;
+  Rid: Rid;
+  RAdd_1;
+  connect(e.out, IPart.e);
+  connect(Ti, IPart.Ti);
+  connect(Track, IPart.Track);
+  connect(TrackValue, IPart.TrackValue);
+  connect(IPart.IPart, RAdd_1.in1);
+  intercept Out with Rid.in, RAdd_1.out;
+  connect(Rid.out, IPart.PDPart);
+  connect(Rid.out, RAdd_1.in2);
+  connect(K, IPart.K);
+}
+annotation(
+  IPart = (244, 38, 38, 87),
+  P::K = (4, 51, 44, 20),
+  P::Out = (363, 108, 44, 20),
+  P::PPart = (87, 124, 36, 30),
+  P::PV = (4, 28, 44, 20),
+  P::SP = (4, 4, 44, 20),
+  P::e = (81, 7, 28, 30),
+  RAdd_1 = (301, 110, 32, 30),
+  Rid = (152, 124, 64, 20),
+  Ti = (151, 64, 60, 20),
+  Track = (151, 81, 60, 20),
+  TrackValue = (151, 101, 70, 20)
+)
+diagramtype PD(Td: Real, N: Real) extends P {
+  DPart: DPart;
+  RAdd_1;
+  connect(Td, DPart.Td);
+  connect(PV, DPart.PV);
+  connect(DPart.DPart, RAdd_1.in2);
+  intercept Out with RAdd_1.in1, RAdd_1.out;
+  connect(N, DPart.N);
+  connect(K, DPart.K);
+}
+annotation(
+  DPart = (162, 55, 38, 57),
+  N = (4, 102, 42, 20),
+  P::K = (80, 43, 44, 20),
+  P::Out = (315, 5, 44, 20),
+  P::PPart = (162, 6, 42, 30),
+  P::PV = (4, 58, 44, 20),
+  P::SP = (4, 4, 44, 20),
+  P::e = (101, 7, 34, 30),
+  RAdd_1 = (244, 6, 36, 28),
+  Td = (4, 80, 42, 20)
+)
+diagramtype PTrack(Track: Bool, TrackValue: Real) extends P {
+  SelReal_1;
+  connect(Track, SelReal_1.sel);
+  intercept Out with SelReal_1.in2, SelReal_1.out;
+  connect(TrackValue, SelReal_1.in1);
+}
+annotation(
+  P::K = (79, 74, 44, 20),
+  P::Out = (372, 8, 44, 20),
+  P::PPart = (162, 38, 42, 30),
+  P::PV = (3, 59, 44, 20),
+  P::SP = (3, 37, 44, 20),
+  P::e = (100, 38, 34, 30),
+  SelReal_1 = (298, 10, 44, 46),
+  Track = (213, 3, 68, 20),
+  TrackValue = (213, 22, 68, 20)
+)
+features P {
+  Derivative: PD;
+  Integral: PI;
+  PTrack: PTrack;
+  PTrack excludes Integral;
+  Derivative before Integral;
+  Derivative before PTrack;
+}
+diagramtype Main {
+  pid: P {
+    feature Derivative;
+    feature Integral;
+  };
+}
