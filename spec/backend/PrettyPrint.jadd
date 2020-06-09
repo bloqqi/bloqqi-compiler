@@ -137,8 +137,10 @@ aspect PrettyPrint {
 	}
 	public String AnonymousType.prettyPrint() {
 		StringBuilder sb = new StringBuilder();
-		TypeUse t = getAnonymousDiagramType().getSuperType(0);
-		sb.append(t.toString()).append(" ");
+		if (getAnonymousDiagramType().getNumSuperType() == 1) {
+			TypeUse t = getAnonymousDiagramType().getSuperType(0);
+			sb.append(t.toString()).append(" ");
+		}
 		getAnonymousDiagramType().prettyPrint(sb);
 		return sb.toString();
 	}

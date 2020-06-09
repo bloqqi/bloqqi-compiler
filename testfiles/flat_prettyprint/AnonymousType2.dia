@@ -1,0 +1,16 @@
+diagramtype A(in: Int => out: Int) {
+  block: (in: Int => out: Int) {
+    connect(in, out);
+  };
+  connect(in, block.in);
+  connect(block.out, out);
+}
+
+diagramtype B(in2: Int) extends A {
+  redeclare block: super (in2: Int) {
+    Add_1;
+    intercept out with Add_1.in1, Add_1.out;
+    connect(in2, Add_1.in2);
+  };
+  connect(in2, block.in2);
+}

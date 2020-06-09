@@ -292,6 +292,7 @@ AnonymousDiagramType anon_dt =
         a.addSuperType(t);
         return a;
     :}
+    | anon_dt_body.a                {: return a; :}
     ;
 
 AnonymousDiagramType anon_dt_body =

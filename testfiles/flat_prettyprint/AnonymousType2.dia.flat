@@ -1,0 +1,21 @@
+diagramtype A(in: Int => out: Int) {
+  block: A$block;
+  connect(in, block.in);
+  connect(block.out, out);
+}
+diagramtype A$block(in: Int => out: Int) {
+  connect(in, out);
+}
+diagramtype B(in: Int, in2: Int => out: Int) {
+  block: B$block;
+  connect(in, block.in);
+  connect(block.out, out);
+  connect(in2, block.in2);
+}
+diagramtype B$block(in: Int, in2: Int => out: Int) {
+  Add_1: Add;
+  connect(in2, Add_1.in2);
+  connect(in, Add_1.in1);
+  connect(Add_1.out, out);
+}
+
