@@ -180,7 +180,7 @@ aspect Excludes {
 	}
 
 	// Require subtypes to be excluded
-	syn Set<String> FeatureDeclStmt.subtypeFeaturesNotExcluded() {
+	syn Set<String> FeatureDeclStmt.supertypeFeaturesNotExcluded() {
 		Set<String> features = new TreeSet<>();
 		for (FeatureDeclStmt f: diagramType().featureDecls()) {
 			if (f != this
@@ -302,8 +302,8 @@ aspect ErrorsFeatures {
 		to CompilationUnit.errors();
 
 	FeatureDeclStmt contributes
-		error("Feature " + getID() + " is a subtype of " + subtypeFeaturesNotExcluded()
-			+ " - add an exclude statement for them")
-		when !subtypeFeaturesNotExcluded().isEmpty()
+		error("Feature " + getID() + " is a subtype of features " + supertypeFeaturesNotExcluded()
+			+ " and is missing exclude statements")
+		when !supertypeFeaturesNotExcluded().isEmpty()
 		to CompilationUnit.errors();
 }

@@ -1,1 +1,1 @@
-Line 7, column 3: Feature g is a subtype of [f] - add an exclude statement for them
+Line 7, column 3: Feature g is a subtype of features [f] and is missing exclude statements
