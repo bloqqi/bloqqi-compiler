@@ -178,6 +178,20 @@ aspect Excludes {
 		}
 		return set;
 	}
+
+	// Require subtypes to be excluded
+	syn Set<String> FeatureDeclStmt.subtypeFeaturesNotExcluded() {
+		Set<String> features = new TreeSet<>();
+		for (FeatureDeclStmt f: diagramType().featureDecls()) {
+			if (f != this
+					&& getTypeUse().type() != f.getTypeUse().type() // used in test cases
+					&& getTypeUse().type().isSubTypeOf(f.getTypeUse().type())
+					&& !excludesFeaturesTransitive().contains(f)) {
+				features.add(f.getID());
+			}
+		}
+		return features;
+	}
 }
 
 aspect FeatureUse {
@@ -244,6 +258,10 @@ aspect FeatureUse {
 		featuresIncorectlyBefore().isEmpty();
 }
 
+aspect SuperTypeFeatures {
+
+}
+
 aspect ErrorsFeatures {
 	FeatureIdUse contributes
 		error("Feature " + getID() + " not found")
@@ -281,5 +299,11 @@ aspect ErrorsFeatures {
 		error("Feature " + toString() + " should be before features: "+
 			featuresIncorectlyBefore())
 		when !featuresIncorectlyBefore().isEmpty()
+		to CompilationUnit.errors();
+
+	FeatureDeclStmt contributes
+		error("Feature " + getID() + " is a subtype of " + subtypeFeaturesNotExcluded()
+			+ " - add an exclude statement for them")
+		when !subtypeFeaturesNotExcluded().isEmpty()
 		to CompilationUnit.errors();
 }
