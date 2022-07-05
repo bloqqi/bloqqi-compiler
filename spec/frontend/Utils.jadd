@@ -43,8 +43,12 @@ aspect ASTUtils {
 	}
 
 	public void ASTNode.copyColumnLineFrom(ASTNode other) {
-		setStart(other.getStartLine(), other.getStartColumn());
-		setEnd(other.getEndLine(), other.getEndColumn());
+		copyColumnLineFrom(other, other);
+	}
+
+	public void ASTNode.copyColumnLineFrom(ASTNode start, ASTNode end) {
+		setStart(start.getStartLine(), start.getStartColumn());
+		setEnd(end.getEndLine(), end.getEndColumn());
 	}
 }
 

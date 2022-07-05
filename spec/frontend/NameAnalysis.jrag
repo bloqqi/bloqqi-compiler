@@ -313,7 +313,9 @@ aspect RewriteSimplifiedForm {
 				} else {
 					p = b.getInPort(0);
 				}
-				return new DotVarUse(newSimpleVarUse(), p.name());
+				DotVarUse dot = new DotVarUse(newSimpleVarUse(), p.name());
+				dot.copyColumnLineFrom(this);
+				return dot;
 			} else {
 				return newSimpleVarUse();
 			}
@@ -329,6 +331,7 @@ aspect RewriteSimplifiedForm {
 				&& !vd.diagramType().isAnonymousType()
 				&& !isAmbiguous()) {
 			TypeUse typeUse = new TypeUse(vd.diagramType().name());
+			typeUse.copyColumnLineFrom(this);
 			u = new TypedSimpleVarUse(typeUse, getID());
 		} else {
 			u = new SimpleVarUse(getID());
