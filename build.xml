@@ -70,7 +70,6 @@
 			<arg value="--safeLazy" />
 			<arg value="--beaver" />
 			<arg value="--visitcheck=false" />
-			<arg value="--lazyMaps=true" />
 			<arg value="--o=${gendir}" />
 			<arg value="--cache=all" />
 			<arg value="--lineColumnNumbers" />
