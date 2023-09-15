@@ -56,6 +56,11 @@ public class CodeGeneration extends DynamicTestSuite {
 		cmd.add("gcc");
 		cmd.add("-std=c99");
 		cmd.add("-pedantic");
+
+		// Ignore warning:
+		// "a function declaration without a prototype is deprecated in all versions of C"
+		cmd.add("-Wno-strict-prototypes");
+
 		cmd.add("-Werror");
 		cmd.add(cFile);
 		cmd.add(PRINT_FUNCTION_PATH);
