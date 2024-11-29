@@ -41,15 +41,12 @@ public class Compiler {
 	protected Collection<String> filenames;
 	protected Collection<String> types;
 
-	// Enable DrAST debugging
-	public static Object DrAST_root_node;
-
 	protected <OptionType extends Option<?>> OptionType addOption(OptionType option) {
 		options.add(option);
 		return option;
 	}
 
-	public Compiler(String args[]) throws CommandLineException {
+	public Compiler(String args[]) throws CommandLineException, CompilerFailureException {
 		options = new ArrayList<>();
 		addOptions();
 
@@ -62,7 +59,6 @@ public class Compiler {
 		} else {
 			program = parseTypes();
 		}
-		DrAST_root_node = program;
 
 		printProgramInformation(program);
 	}
@@ -137,7 +133,7 @@ public class Compiler {
 		}
 	}
 
-	private Program parseFiles() {
+	private Program parseFiles() throws CompilerFailureException {
 		Program p = new Program();
 		p.setStandardLibrary(loadStandardLibrary());
 		for (String file: filenames) {
@@ -146,7 +142,7 @@ public class Compiler {
 		return p;
 	}
 
-	private Program parseTypes() throws CommandLineException {
+	private Program parseTypes() throws CommandLineException, CompilerFailureException {
 		Program p = new Program();
 		p.setStandardLibrary(loadStandardLibrary());
 
@@ -187,7 +183,7 @@ public class Compiler {
 		return p;
 	}
 
-	protected void printProgramInformation(Program p) {
+	protected void printProgramInformation(Program p) throws CompilerFailureException {
 		if (optionPrintAst.isSet()) {
 			p.printAST();
 		}
@@ -243,7 +239,7 @@ public class Compiler {
 		if (!errors && p.getNumCompilationUnit() > 0) {
 			if (optionGenerateC.isSet() || optionFMI.isSet() || optionDist.isSet()) {
 				if (hasCodeGenerationErrors(p)) {
-					System.exit(1);
+					throw new CompilerFailureException();
 				} else if (optionGenerateC.isSet()) {
 					generateC(p);
 				} else if (optionFMI.isSet()) {
@@ -259,7 +255,7 @@ public class Compiler {
 		}
 
 		if (errors) {
-			System.exit(1);
+			throw new CompilerFailureException();
 		}
 	}
 
@@ -286,7 +282,7 @@ public class Compiler {
 			try {
 				System.out.println(dt.specialize().asDotDiagram());
 			} catch (Exception e) {
-				System.out.println("Error! Feature diagram for " + dt.name() + " is recursive.");
+				System.err.println("Error! Feature diagram for " + dt.name() + " is recursive.");
 				System.exit(1);
 			}
 		}
@@ -379,28 +375,27 @@ public class Compiler {
 		return errors;
 	}
 
-	private CompilationUnit loadStandardLibrary() {
+	private CompilationUnit loadStandardLibrary() throws CompilerFailureException {
 		try {
 			return Program.loadStandardLibrary();
 		} catch (Exception e) {
 			System.err.println("Could not read standard functions");
-			System.exit(1);
+			throw new CompilerFailureException();
 		}
-		return null;
 	}
 
-	private CompilationUnit parseFile(String file) {
+	private static CompilationUnit parseFile(String file) throws CompilerFailureException {
 		FileReader reader = null;
 		try {
 			reader = new FileReader(file);
 		} catch (FileNotFoundException e) {
 			System.err.println(e.getMessage());
-			System.exit(1);
+			throw new CompilerFailureException();
 		}
 		return parse(reader, file);
 	}
 
-	private CompilationUnit parse(Reader reader, String file) {
+	private static CompilationUnit parse(Reader reader, String file) throws CompilerFailureException {
 		BloqqiScanner scanner = new BloqqiScanner(reader);
 		BloqqiParser parser = new BloqqiParser();
 
@@ -408,17 +403,16 @@ public class Compiler {
 			return (CompilationUnit) parser.parse(scanner);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
-			System.exit(1);
+			throw new CompilerFailureException();
 		} catch (Parser.Exception e) {
 			System.err.println("Parse error in file " + file);
 			System.err.println(e.getMessage());
-			System.exit(1);
+			throw new CompilerFailureException();
 		} catch (ScannerError e) {
 			System.err.println("Scanner error in file " + file);
 			System.err.println(e.getMessage());
-			System.exit(1);
+			throw new CompilerFailureException();
 		}
-		return null;
 	}
 
 	private void showUsageAndExit() {
@@ -470,13 +464,32 @@ public class Compiler {
 		}
 	}
 
+	public static Object CodeProber_parse(String[] args) throws Exception {
+		Program p = new Program();
+		p.setStandardLibrary(Program.loadStandardLibrary());
+		for (String file: args) {
+			p.addCompilationUnit(parseFile(file));
+		}
+		return p;
+	}
+
 	public static void main(String[] args) {
 		try {
 			new Compiler(args);
 		} catch (CommandLineException e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
+		} catch (CompilerFailureException e) {
+			System.exit(1);
 		}
+	}
+
+	/**
+	 * Exception class to represent that the compiler failed.
+	 * The class was introduced to move the call to System.exit(1) to the main method,
+	 * so that System.exit is not invoked when CodeProber is used.
+	 **/
+	static class CompilerFailureException extends Exception {
 	}
 }
 
