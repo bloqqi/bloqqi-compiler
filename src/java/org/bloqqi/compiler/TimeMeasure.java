@@ -97,19 +97,6 @@ class TimeJITMeasure extends TimeMeasure {
 			System.out.println("Pre-run " + i + ": " + time + "ms");
 		}
 		
-		// Disable JIT
-		java.lang.Compiler.disable();
-		
-		// Drain JIT work
-		for (int i = 0; i < 2; i++) {
-			work.preWork();
-			work.doWork();
-			System.gc();
-		}
-
-		// Enable JIT 
-		java.lang.Compiler.enable();
-		
 		// Run measurements
 		ArrayList<Long> times = new ArrayList<Long>(N);
 		for (int i = 0; i < N; i++) {
