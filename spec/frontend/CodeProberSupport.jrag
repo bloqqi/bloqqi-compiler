@@ -1,7 +1,13 @@
-aspect PastaSupport {
+aspect CodeProberSupport {
+	syn boolean ASTNode.cpr_isInsideExternalFile() = isInsideExternalFile();
+	eq Program.cpr_isInsideExternalFile() = false;
+	inh boolean ASTNode.isInsideExternalFile();
+	eq Program.getChild().isInsideExternalFile() = true;
+	eq Program.getCompilationUnit(int index).isInsideExternalFile() = index < getNumCompilationUnit() - 1;
+
 	syn boolean CompilationUnit.cpr_isTALRoot() = true;
 	syn ASTNode Program.pastaVisibleNextAfterRoot() {
-		final int numCUs = getNumCompilationUnit();
+		int numCUs = getNumCompilationUnit();
 		return numCUs == 0 ? null : getCompilationUnit(numCUs - 1);
 	}
 }
