@@ -1,0 +1,7 @@
+aspect PastaSupport {
+	syn boolean CompilationUnit.cpr_isTALRoot() = true;
+	syn ASTNode Program.pastaVisibleNextAfterRoot() {
+		final int numCUs = getNumCompilationUnit();
+		return numCUs == 0 ? null : getCompilationUnit(numCUs - 1);
+	}
+}
