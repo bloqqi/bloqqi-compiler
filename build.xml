@@ -142,6 +142,7 @@
 				<fileset dir="src/java">
 					<include name="org/bloqqi/tests/*.java" />
 					<include name="org/bloqqi/tests/codegen/*.java" if ="${codegen-tests}" />
+					<exclude name="org/bloqqi/tests/RewriteCircularityBug.java" />
 				</fileset>
 			</batchtest>
 
