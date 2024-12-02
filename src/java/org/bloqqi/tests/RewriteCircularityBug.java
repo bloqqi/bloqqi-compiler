@@ -2,13 +2,14 @@ package org.bloqqi.tests;
 
 import org.bloqqi.compiler.Compiler;
 import org.bloqqi.compiler.ast.ASTNode;
+import org.junit.Test;
 
 public class RewriteCircularityBug {
 	/**
 	 * Compiler bug related to rewrites found by Anton's testing tool.
 	 */
 
-	private static ASTNode<?> reparse() throws Exception {
+	private ASTNode<?> parse() throws Exception {
 		final String[] args = new String[]{
 				"testfiles/code_generation/AbstractDiagramType.dia",
 				"testfiles/code_generation/Features.dia",
@@ -16,7 +17,9 @@ public class RewriteCircularityBug {
 		return (ASTNode<?>) Compiler.CodeProber_parse(args);
 	}
 
-	public static void main(String[] args) throws Exception {
+	// This bug isn't fixed yet. Expect an NPE.
+	@Test(expected = java.lang.NullPointerException.class)
+	public void rewriteBug() throws Exception {
 		/**
 		 * The following code will throw an exception.
 		 * Output:
@@ -49,15 +52,19 @@ public class RewriteCircularityBug {
 		 * With circularity check enabled, then it's enough to only have Features.dia in this test,
 		 * and adjusting the second child index below from 1 to 0, i.e., { 0, 0, 1, 4, 8, 1, 0 }.
 		 * No other test cases throw an circularity exception with this flag enabled.
-		 *
-		 * This test can't be a normal JUnit test with the provided JastAdd version,
-		 * because an exception is thrown during circular evaluation and the state isn't restored
-		 * (static values I assume).
 		 */
-		ASTNode<?> node = reparse();
-		for (int idx : new int[]{ 0, 1, 1, 4, 8, 1, 0 }) {
-			System.out.println("Stepping child " + idx + "/" + node.getNumChild() + " in " + node.getClass().getSimpleName());
-			node = node.getChild(idx);
+		ASTNode<?> node = null;
+		try {
+			node = parse();
+			for (int idx : new int[]{ 0, 1, 1, 4, 8, 1, 0 }) {
+				// Some debugging info:
+				// System.out.println("Stepping child " + idx + "/" + node.getNumChild() + " in " + node.getClass().getSimpleName());
+				node = node.getChild(idx);
+			}
+		} finally {
+			// Explicitly clear the circular attribute state in JastAdd after an exception is thrown.
+			// This is a bug in JastAdd - Anton has fixed it (which release?).
+			node.state().reset();
 		}
 	}
 }

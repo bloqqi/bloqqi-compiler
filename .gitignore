@@ -5,6 +5,7 @@ a.out
 .svn
 .*.swp
 
+/.metadata/
 /.settings
 /*.dia
 /*.c
