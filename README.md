@@ -2,7 +2,7 @@
 
 Clone the repository and test the Bloqqi compiler:
 
-    $ git clone git@bitbucket.org:bloqqi/bloqqi-compiler.git
+    $ git clone git@github.com:bloqqi/bloqqi-compiler.git
     $ cd bloqqi-compiler/
     $ ant test
     <All tests should pass (code generation tests excluded)>
