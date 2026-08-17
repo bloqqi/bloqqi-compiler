@@ -133,7 +133,7 @@ aspect GenerateCFunction {
 		if (precedence() <= getFExpr().precedence()) {
 			sb.append("(");
 		}
-		sb.append(getFExpr().toString());
+		sb.append(getFExpr().generateC());
 		if (precedence() <= getFExpr().precedence()) {
 			sb.append(")");
 		}

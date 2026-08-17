@@ -1,0 +1,130 @@
+external PrintStrInt(str: String, in: Int);
+external PrintStrBool(str: String, in: Bool);
+
+// Code generation for the statements and expressions that can be used in a
+// function. The other function tests only parse and pretty print the
+// functions, so this is where the generated C code is executed.
+//
+// The expected value of each function is written above it, so that the
+// expected output can be checked without running the compiler. The order of
+// the lines in the output follows the data flow, not the declaration order,
+// which is why each value is printed with the name of the function.
+
+// Operator precedence, without parentheses
+// Arith(3, 4) = 3 + 4*2 - 1 = 10
+function Arith(a: Int, b: Int => out: Int) {
+  out = a + b * 2 - 1;
+}
+
+// DivMod(7, 2) = 7/2 + 7%2 = 3 + 1 = 4
+function DivMod(a: Int, b: Int => out: Int) {
+  out = a / b + a % b;
+}
+
+// Unary operators applied to an output parameter, which is a field of the
+// result struct in the generated C code. Regression test: the operand was
+// written as it is written in the program, so the generated C code became
+//   _result.out = !out;
+// which does not compile:
+//   error: 'out' undeclared (first use in this function)
+// Negate(true) = false
+function Negate(a: Bool => out: Bool) {
+  out = a;
+  out = !out;
+}
+
+// Minus(5) = -5
+function Minus(a: Int => out: Int) {
+  out = a;
+  out = -out;
+}
+
+// Comparison and logical operators
+// Logic(1, 5) = (1 < 5 && 5 < 10) || 1 == 0 = true
+function Logic(a: Int, b: Int => out: Bool) {
+  out = a < b && b < 10 || a == 0;
+}
+
+// If statement
+// Abs(-5) = 5, the input is the negative value from Minus
+function Abs(a: Int => out: Int) {
+  if (a < 0) {
+    out = -a;
+  } else {
+    out = a;
+  }
+}
+
+// While statement and local declaration
+// Sum(5) = 0 + 1 + 2 + 3 + 4 = 10
+function Sum(n: Int => out: Int) {
+  out = 0;
+  Int i = 0;
+  while (i < n) {
+    out = out + i;
+    i = i + 1;
+  }
+}
+
+// Calling another function
+// SumAbs(-5, 4) = 5 + 4 = 9
+function SumAbs(a: Int, b: Int => out: Int) {
+  out = Abs(a) + Abs(b);
+}
+
+diagramtype Main {
+  arith: Arith;
+  divMod: DivMod;
+  negate: Negate;
+  minus: Minus;
+  logic: Logic;
+  abs: Abs;
+  sum: Sum;
+  sumAbs: SumAbs;
+
+  pArith: PrintStrInt;
+  pDivMod: PrintStrInt;
+  pNegate: PrintStrBool;
+  pMinus: PrintStrInt;
+  pLogic: PrintStrBool;
+  pAbs: PrintStrInt;
+  pSum: PrintStrInt;
+  pSumAbs: PrintStrInt;
+
+  connect(3, arith.a);
+  connect(4, arith.b);
+  connect("arith:  ", pArith.str);
+  connect(arith.out, pArith.in);
+
+  connect(7, divMod.a);
+  connect(2, divMod.b);
+  connect("divMod: ", pDivMod.str);
+  connect(divMod.out, pDivMod.in);
+
+  connect(true, negate.a);
+  connect("negate: ", pNegate.str);
+  connect(negate.out, pNegate.in);
+
+  connect(5, minus.a);
+  connect("minus:  ", pMinus.str);
+  connect(minus.out, pMinus.in);
+
+  connect(1, logic.a);
+  connect(5, logic.b);
+  connect("logic:  ", pLogic.str);
+  connect(logic.out, pLogic.in);
+
+  // Abs is applied to the negative value from Minus
+  connect(minus.out, abs.a);
+  connect("abs:    ", pAbs.str);
+  connect(abs.out, pAbs.in);
+
+  connect(5, sum.n);
+  connect("sum:    ", pSum.str);
+  connect(sum.out, pSum.in);
+
+  connect(minus.out, sumAbs.a);
+  connect(4, sumAbs.b);
+  connect("sumAbs: ", pSumAbs.str);
+  connect(sumAbs.out, pSumAbs.in);
+}
