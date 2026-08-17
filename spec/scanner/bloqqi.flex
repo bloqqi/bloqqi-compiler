@@ -36,7 +36,7 @@ import org.bloqqi.compiler.ast.BloqqiParser.Terminals;
 
 WhiteSpace = [ ] | \t | \f | \n | \r | \r\n
 TraditionalComment   = "/*" [^*] ~"*/" | "/*" "*"+ "/"
-EndOfLineComment = "//" [^\n|\r|\r\n]*
+EndOfLineComment = "//" [^\n\r]*
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 ID = [a-zA-Z$][a-zA-Z0-9$_]*
