@@ -1,0 +1,31 @@
+external Print(in: Int);
+
+// Regression test for a code generation bug: this program was accepted by
+// the compiler, but the generated C code did not compile, because the state
+// struct of Wrap was written before the state struct of the state machine
+// that Wrap contains:
+//
+//   typedef struct {
+//     S_STATE s;      // S_STATE is written further down
+//   } Wrap_STATE;
+//
+//   error: unknown type name 'S_STATE'
+statemachine S(Int in => Int out) {
+  A { out = 0; }
+  B { out = 1; }
+  A => B: in > 0;
+  B => A: in > 0;
+}
+
+diagramtype Wrap(in: Int => out: Int) {
+  s: S;
+  connect(in, s.in);
+  connect(s.out, out);
+}
+
+diagramtype Main {
+  w: Wrap;
+  pr: Print;
+  connect(1, w.in);
+  connect(w.out, pr.in);
+}

@@ -85,7 +85,9 @@ aspect TypeAnalysis {
 		Set<TypeDecl> set = new HashSet<>();
 		for (DiagramType superType: superTypesLinearized()) {
 			for (Block b: superType.getLocalBlocks()) {
-				if (b.type().isDiagramType()) {
+				// A state machine is not a diagram type, but it can be the type
+				// of a block, and its state is part of the state of this type.
+				if (b.type().isDiagramType() || b.type().isStateMachine()) {
 					set.add(b.type());
 					set.addAll(b.type().reachable());
 				}
