@@ -749,7 +749,11 @@ aspect CNames {
 		if (isOutputVariable()) field = ASTNode.OUTPUT_FIELD;
 		return field;
 	}
-	syn String VarDecl.nameC() = nameCFiltered();
+	syn String VarDecl.nameC() = filterCNameDecls(name());
+	// Two supertypes may declare blocks with the same name.
+	eq Block.nameC() = isNameAmbiguous()
+		? filterCNameDecls(declaredInDiagramType().name() + "$" + name())
+		: filterCNameDecls(name());
 	eq Parameter.nameC() = ASTNode.filterCName(name());
 	eq Variable.nameC() = prefixCVarName() + "->" + cNameDeclaration();
 	eq WiringInParameter.nameC() = "<undefined>";
@@ -765,8 +769,8 @@ aspect CNames {
 	syn boolean Program.isCNameDeclared(String name)
 		= declaredCNames().contains(name);
 
-	syn String VarDecl.nameCFiltered() {
-		String name = ASTNode.filterCName(name());
+	public String VarDecl.filterCNameDecls(String name) {
+		name = ASTNode.filterCName(name);
 		if (program().isCNameDeclared(name)) {
 			name = "_" + name;
 		}

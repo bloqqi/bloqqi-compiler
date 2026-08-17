@@ -1,0 +1,36 @@
+external Print(in: Int);
+
+// Regression test for a code generation bug: this program was accepted by
+// the compiler, but the two blocks named 'op' were emitted as one and the
+// same C variable, so the generated C code did not compile:
+//   error: redefinition of 'op'
+//
+// Two supertypes may declare blocks with the same name. This is legal and
+// the blocks are disambiguated in the source with the declaring type
+// (Base1::op). The two blocks end up in the same C scope, so the generated
+// C code must keep them apart. The constants differ so that the printed
+// values reveal it if the two blocks are collapsed into one.
+diagramtype Base1(=> out1: Int) {
+  op: Add;
+  connect(1, op.in1);
+  connect(2, op.in2);
+  connect(op.out, out1);
+}
+
+diagramtype Base2(=> out2: Int) {
+  op: Add;
+  connect(10, op.in1);
+  connect(20, op.in2);
+  connect(op.out, out2);
+}
+
+diagramtype Derived extends Base1, Base2 {
+}
+
+diagramtype Main {
+  derived: Derived;
+  print1: Print;
+  print2: Print;
+  connect(derived.out1, print1.in);
+  connect(derived.out2, print2.in);
+}
