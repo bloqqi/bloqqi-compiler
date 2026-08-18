@@ -43,7 +43,9 @@ aspect GenerateCFunction {
 		sb.append(functionSignature() + " {\n");
 
 		if(getNumOutParameter() > 0) {
-			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + ";\n");
+			// Initialized, since an output parameter does not have to be
+			// assigned in the function
+			sb.append("  " + returnTypeC() + " " + ASTNode.RESULT_VAR + " = {0};\n");
 		}
 
 		getBlockStmt().generateC(sb);

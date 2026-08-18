@@ -367,7 +367,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Bool in1, Bool in2, Bool in3, Bool in4) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  _result.out = (in1 || in2) && in3 || in4;\n" +
                           "  return _result;\n" +
 						  "}\n";
@@ -387,7 +387,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Bool in1, Bool in2) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  if (in1 > in2) {\n" +
                           "    return _result;\n" +
 						  "  }\n" +
@@ -407,7 +407,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Bool in1, Bool in2) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  _result.out = !(!(in1 || in2));\n" +
                           "  return _result;\n" +
 						  "}\n";
@@ -427,7 +427,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Bool in1, Bool in2) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  while (in1 > in2) {\n" +
                           "    in2 = in2 + 1;\n" +
 						  "  }\n" +
@@ -448,7 +448,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Int in1) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  Int var1 = 3;\n" +
 						  "  _result.out = in1 + var1;\n" +
                           "  return _result;\n" +
@@ -468,7 +468,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Int in1) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  Int var1 = in1 * in1 + 3;\n" +
 						  "  _result.out = in1 + var1;\n" +
                           "  return _result;\n" +
@@ -487,7 +487,7 @@ public class FunctionTestsCode extends TestSuite{
 		StringBuilder sb = new StringBuilder();
 		f.genFunctionDefinitionsC(sb);
 		String expected = "parfunc_RES parfunc(Real in1) {\n" +
-						  "  parfunc_RES _result;\n" +
+						  "  parfunc_RES _result = {0};\n" +
 						  "  Real var1 = in1 * in1 + 3.2;\n" +
 						  "  _result.out = in1 + var1;\n" +
                           "  return _result;\n" +
