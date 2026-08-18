@@ -1,14 +1,10 @@
 external PrintStrInt(str: String, in: Int);
 external PrintStrBool(str: String, in: Bool);
 
-// Code generation for the statements and expressions that can be used in a
-// function. The other function tests only parse and pretty print the
-// functions, so this is where the generated C code is executed.
-//
 // The expected value of each function is written above it, so that the
-// expected output can be checked without running the compiler. The order of
-// the lines in the output follows the data flow, not the declaration order,
-// which is why each value is printed with the name of the function.
+// expected output can be checked without running the compiler. Each value is
+// printed together with the name of the function, since the order of the
+// lines in the output follows the data flow.
 
 // Operator precedence, without parentheses
 // Arith(3, 4) = 3 + 4*2 - 1 = 10
@@ -46,7 +42,7 @@ function Logic(a: Int, b: Int => out: Bool) {
 }
 
 // If statement
-// Abs(-5) = 5, the input is the negative value from Minus
+// Abs(-5) = 5
 function Abs(a: Int => out: Int) {
   if (a < 0) {
     out = -a;
@@ -72,6 +68,23 @@ function SumAbs(a: Int, b: Int => out: Int) {
   out = Abs(a) + Abs(b);
 }
 
+// Calling a function whose parameter type differs from its return type
+// IsPositive(3) = true, IsPositive(-5) = false
+function IsPositive(a: Int => out: Bool) {
+  out = a > 0;
+}
+
+// CountPositive(3, -5) = 1, only the first argument is positive
+function CountPositive(a: Int, b: Int => out: Int) {
+  out = 0;
+  if (IsPositive(a)) {
+    out = out + 1;
+  }
+  if (IsPositive(b)) {
+    out = out + 1;
+  }
+}
+
 diagramtype Main {
   arith: Arith;
   divMod: DivMod;
@@ -81,6 +94,7 @@ diagramtype Main {
   abs: Abs;
   sum: Sum;
   sumAbs: SumAbs;
+  count: CountPositive;
 
   pArith: PrintStrInt;
   pDivMod: PrintStrInt;
@@ -90,6 +104,7 @@ diagramtype Main {
   pAbs: PrintStrInt;
   pSum: PrintStrInt;
   pSumAbs: PrintStrInt;
+  pCount: PrintStrInt;
 
   connect(3, arith.a);
   connect(4, arith.b);
@@ -114,8 +129,7 @@ diagramtype Main {
   connect("logic:  ", pLogic.str);
   connect(logic.out, pLogic.in);
 
-  // Abs is applied to the negative value from Minus
-  connect(minus.out, abs.a);
+  connect(-5, abs.a);
   connect("abs:    ", pAbs.str);
   connect(abs.out, pAbs.in);
 
@@ -123,8 +137,13 @@ diagramtype Main {
   connect("sum:    ", pSum.str);
   connect(sum.out, pSum.in);
 
-  connect(minus.out, sumAbs.a);
+  connect(-5, sumAbs.a);
   connect(4, sumAbs.b);
   connect("sumAbs: ", pSumAbs.str);
   connect(sumAbs.out, pSumAbs.in);
+
+  connect(3, count.a);
+  connect(-5, count.b);
+  connect("count:  ", pCount.str);
+  connect(count.out, pCount.in);
 }

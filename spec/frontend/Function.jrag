@@ -122,8 +122,8 @@ aspect FunctionTypeAnalysis {
 			return program().unknownType();
 		}
 		Function f = function();
-		if (i < f.getNumOutParameter()) {
-			return f.getOutParameter(i).type();
+		if (i < f.getNumInParameter()) {
+			return f.getInParameter(i).type();
 		} else {
 			return program().unknownType();
 		}

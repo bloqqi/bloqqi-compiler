@@ -3,6 +3,7 @@ Line 14, column 14: Type error. Expected type: Bool, got type: Int
 Line 15, column 17: Type error. Expected type: Int, got type: Bool
 Line 16, column 13: Mismatch between the number of arguments and parameters in the call to Neg
 Line 16, column 28: Mismatch between the number of arguments and parameters in the call to Mod
+Line 17, column 31: Type error. Expected type: Int, got type: Bool
 Line 18, column 13: Only functions and external functions are allowed to be called (Main)
 Line 19, column 13: Cannot find function G
 Line 20, column 13: Only functions with exactly one output parameter can be called (Max)
