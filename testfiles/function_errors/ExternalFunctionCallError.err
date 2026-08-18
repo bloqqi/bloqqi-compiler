@@ -1,0 +1,7 @@
+Line 12, column 14: Type error. Expected type: Int, got type: Bool
+Line 13, column 13: Type error. Expected type: Bool, got type: Int
+Line 14, column 12: Mismatch between the number of arguments and parameters in the call to E2
+Line 15, column 18: Type error. Expected type: Int, got type: Bool
+Line 16, column 12: Mismatch between the number of arguments and parameters in the call to E
+Line 17, column 16: Type error. Expected type: Bool, got type: Int
+Line 18, column 12: Only functions and external functions are allowed to be called (D)

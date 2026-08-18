@@ -1,0 +1,6 @@
+/* Implementation of the external function Triple in Function.dia */
+typedef int Int;
+
+Int Triple(Int a) {
+  return a * 3;
+}

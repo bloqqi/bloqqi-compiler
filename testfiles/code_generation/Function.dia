@@ -1,6 +1,9 @@
 external PrintStrInt(str: String, in: Int);
 external PrintStrBool(str: String, in: Bool);
 
+// Implemented in Function.external
+external Triple(a: Int => out: Int);
+
 // The expected value of each function is written above it, so that the
 // expected output can be checked without running the compiler. Each value is
 // printed together with the name of the function, since the order of the
@@ -85,6 +88,12 @@ function CountPositive(a: Int, b: Int => out: Int) {
   }
 }
 
+// Calling an external function, which returns its value directly
+// CallExternal(4) = 3*4 + 1 = 13
+function CallExternal(a: Int => out: Int) {
+  out = Triple(a) + 1;
+}
+
 diagramtype Main {
   arith: Arith;
   divMod: DivMod;
@@ -95,6 +104,7 @@ diagramtype Main {
   sum: Sum;
   sumAbs: SumAbs;
   count: CountPositive;
+  callExt: CallExternal;
 
   pArith: PrintStrInt;
   pDivMod: PrintStrInt;
@@ -105,6 +115,7 @@ diagramtype Main {
   pSum: PrintStrInt;
   pSumAbs: PrintStrInt;
   pCount: PrintStrInt;
+  pCallExt: PrintStrInt;
 
   connect(3, arith.a);
   connect(4, arith.b);
@@ -146,4 +157,8 @@ diagramtype Main {
   connect(-5, count.b);
   connect("count:  ", pCount.str);
   connect(count.out, pCount.in);
+
+  connect(4, callExt.a);
+  connect("callExt: ", pCallExt.str);
+  connect(callExt.out, pCallExt.in);
 }

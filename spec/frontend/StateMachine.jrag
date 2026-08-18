@@ -65,17 +65,11 @@ aspect StateMachineNameAnalysis {
 }
 
 aspect StateMachinePorts {
-	protected List<Port> StateMachine.createInPortList() {
-		return createPortList(getInParameters());
-	}
+	eq StateMachine.numInParameters() = getNumInParameter();
+	eq StateMachine.inParameter(int i) = getInParameter(i);
 
-	protected List<Port> StateMachine.createOutPortList() {
-		List<Port> ports = new List<>();
-		for (OutParameter out: allOutParameters()) {
-			ports.add(new Port(out));
-		}
-		return ports;
-	}
+	eq StateMachine.numOutParameters() = allOutParameters().size();
+	eq StateMachine.outParameter(int i) = allOutParameters().get(i);
 }
 
 aspect StateMachineErrors {

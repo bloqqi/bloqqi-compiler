@@ -102,41 +102,39 @@ aspect Ports {
 	syn lazy List<Port> Block.getOutPortList()
 		= type().createOutPortList();
 
-
 	protected List<Port> TypeDecl.createInPortList() {
-		return new List<>();
-	}
-	protected List<Port> TypeDecl.createPortList(List<? extends Parameter> parameters) {
 		List<Port> list = new List<>();
-		for (Parameter p: parameters) {
-			list.add(new Port(p));
+		for (int i = 0; i < numInParameters(); i++) {
+			list.add(new Port(inParameter(i)));
 		}
 		return list;
 	}
-	protected List<Port> DiagramType.createInPortList() {
-		return createPortList(getInParameters());
-	}
-	protected List<Port> ExternalFunction.createInPortList() {
-		return createPortList(getInParameters());
-	}
-	protected List<Port> Function.createInPortList() {
-		return createPortList(getInParameters());
+	protected List<Port> TypeDecl.createOutPortList() {
+		List<Port> list = new List<>();
+		for (int i = 0; i < numOutParameters(); i++) {
+			list.add(new Port(outParameter(i)));
+		}
+		return list;
 	}
 
-	protected List<Port> TypeDecl.createOutPortList() {
-		return new List<>();
-	}
-	protected List<Port> DiagramType.createOutPortList() {
-		return createPortList(getOutParameters());
-	}
-	protected List<Port> ExternalFunction.createOutPortList() {
-		List<Port> list = new List<>();
-		if (hasOutParameter()) {
-			list.add(new Port(getOutParameter()));
-		}
-		return list;
-	}
-	protected List<Port> Function.createOutPortList() {
-		return createPortList(getOutParameters());
-	}
+	// The input and output parameters of a type
+	syn int TypeDecl.numInParameters() = 0;
+	eq DiagramType.numInParameters() = getNumInParameter();
+	eq ExternalFunction.numInParameters() = getNumInParameter();
+	eq Function.numInParameters() = getNumInParameter();
+
+	syn Parameter TypeDecl.inParameter(int i) = null;
+	eq DiagramType.inParameter(int i) = getInParameter(i);
+	eq ExternalFunction.inParameter(int i) = getInParameter(i);
+	eq Function.inParameter(int i) = getInParameter(i);
+
+	syn int TypeDecl.numOutParameters() = 0;
+	eq DiagramType.numOutParameters() = getNumOutParameter();
+	eq ExternalFunction.numOutParameters() = hasOutParameter() ? 1 : 0;
+	eq Function.numOutParameters() = getNumOutParameter();
+
+	syn Parameter TypeDecl.outParameter(int i) = null;
+	eq DiagramType.outParameter(int i) = getOutParameter(i);
+	eq ExternalFunction.outParameter(int i) = getOutParameter();
+	eq Function.outParameter(int i) = getOutParameter(i);
 }

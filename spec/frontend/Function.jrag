@@ -65,14 +65,11 @@ aspect FunctionTypeAnalysis {
 	syn TypeDecl FExpr.fType();
 	eq IdFExpr.fType() = decl() != null ? decl().fType() : program().unknownType();
 	eq FunctionCallFExpr.fType() {
-		if (!isBoundToFunction()) {
+		if (decl() == null || !decl().isCallable()) {
 			return program().unknownType();
 		}
-		Function f = function();
-		if (f.getNumOutParameter() != 1) {
-			return program().unknownType();
-		}
-		return f.getOutParameter(0).type();
+		return decl().numOutParameters() == 1
+			? decl().outParameter(0).type() : program().unknownType();
 	}
 
 	eq IntLiteralFExpr.fType() = program().intType();
@@ -86,10 +83,9 @@ aspect FunctionTypeAnalysis {
 		}
 	}
 
-	syn boolean FunctionCallFExpr.isBoundToFunction()
-		= decl() != null && decl().isFunction();
-	syn Function FunctionCallFExpr.function() =
-		isBoundToFunction() ? (Function) decl() : null;
+	syn boolean TypeDecl.isCallable() = false;
+	eq Function.isCallable() = true;
+	eq ExternalFunction.isCallable() = true;
 
 	eq BoolLiteralFExpr.fType() = program().boolType();
 	eq BoolBinFExpr.fType() = program().boolType();
@@ -118,15 +114,11 @@ aspect FunctionTypeAnalysis {
 	eq WhileStmt.getFExpr().fExpectedType() = program().boolType();
 
 	eq FunctionCallFExpr.getFExpr(int i).fExpectedType() {
-		if (!isBoundToFunction()) {
+		if (decl() == null || !decl().isCallable()) {
 			return program().unknownType();
 		}
-		Function f = function();
-		if (i < f.getNumInParameter()) {
-			return f.getInParameter(i).type();
-		} else {
-			return program().unknownType();
-		}
+		return i < decl().numInParameters()
+			? decl().inParameter(i).type() : program().unknownType();
 	}
 }
 
@@ -164,12 +156,12 @@ aspect FunctionErrors {
 		to CompilationUnit.errors();
 
 	FunctionCallFExpr contributes error("Mismatch between the number of arguments and parameters in the call to " + getID() )
-		when isBoundToFunction()
-			&& function().getNumInParameter() != getNumFExpr()
+		when decl() != null && decl().isCallable()
+			&& decl().numInParameters() != getNumFExpr()
 		to CompilationUnit.errors();
 
 	FunctionCallFExpr contributes error("Only functions and external functions are allowed to be called (" + getID() + ")")
-		when decl() != null && !decl().isFunction() && !decl().isExternalFunction()
+		when decl() != null && !decl().isCallable()
 		to CompilationUnit.errors();
 
 	FunctionCallFExpr contributes error("Can only call external functions with an output parameter (" + getID() + ")")
@@ -182,6 +174,7 @@ aspect FunctionErrors {
 		to CompilationUnit.errors();
 
 	FunctionCallFExpr contributes error("Only functions with exactly one output parameter can be called (" + getID() + ")")
-		when isBoundToFunction() && function().getNumOutParameter() != 1
+		when decl() != null && decl().isFunction()
+			&& decl().numOutParameters() != 1
 		to CompilationUnit.errors();
 }
